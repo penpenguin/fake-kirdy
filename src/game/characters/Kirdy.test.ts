@@ -10,6 +10,11 @@ const stubFactory = vi.hoisted(() => {
     setVelocityX: vi.fn().mockReturnThis(),
     setVelocityY: vi.fn().mockReturnThis(),
     setVelocity: vi.fn().mockReturnThis(),
+    setCollisionCategory: vi.fn().mockReturnThis(),
+    setCollidesWith: vi.fn().mockReturnThis(),
+    setOnCollide: vi.fn().mockReturnThis(),
+    setOnCollideEnd: vi.fn().mockReturnThis(),
+    setData: vi.fn().mockReturnThis(),
     anims: {
       play: vi.fn().mockReturnThis(),
       isPlaying: false,

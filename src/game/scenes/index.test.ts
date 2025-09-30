@@ -79,11 +79,41 @@ vi.mock('phaser', () => {
   };
 });
 
+const physicsSystemStubs = vi.hoisted(() => {
+  const registerPlayer = vi.fn();
+  const registerTerrain = vi.fn();
+  const registerEnemy = vi.fn();
+  const registerPlayerAttack = vi.fn();
+  const destroyProjectile = vi.fn();
+  const mock = vi.fn(() => ({
+    registerPlayer,
+    registerTerrain,
+    registerEnemy,
+    registerPlayerAttack,
+    destroyProjectile,
+  }));
+
+  return {
+    registerPlayer,
+    registerTerrain,
+    registerEnemy,
+    registerPlayerAttack,
+    destroyProjectile,
+    mock,
+  };
+});
+
+vi.mock('../physics/PhysicsSystem', () => ({
+  PhysicsSystem: physicsSystemStubs.mock,
+}));
+
 import { BootScene, GameScene, MenuScene, PauseScene, SceneKeys, coreScenes } from './index';
 
 describe('Scene registration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    physicsSystemStubs.mock.mockClear();
+    physicsSystemStubs.registerPlayer.mockClear();
   });
 
   it('exposes stable scene keys for coordination', () => {

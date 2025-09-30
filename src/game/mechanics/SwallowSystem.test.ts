@@ -34,6 +34,10 @@ describe('SwallowSystem', () => {
   let playSound: ReturnType<typeof vi.fn>;
   let addSprite: ReturnType<typeof vi.fn>;
   let delayedCall: ReturnType<typeof vi.fn>;
+  let physicsSystem: {
+    registerPlayerAttack: ReturnType<typeof vi.fn>;
+    destroyProjectile: ReturnType<typeof vi.fn>;
+  };
   let kirdy: {
     sprite: {
       x: number;
@@ -62,6 +66,10 @@ describe('SwallowSystem', () => {
   beforeEach(() => {
     playSound = vi.fn();
     delayedCall = vi.fn();
+    physicsSystem = {
+      registerPlayerAttack: vi.fn(),
+      destroyProjectile: vi.fn(),
+    };
 
     starProjectile = {
       setVelocityX: vi.fn().mockReturnThis(),
@@ -120,7 +128,7 @@ describe('SwallowSystem', () => {
   it('swallows the captured enemy and records ability metadata', () => {
     target.getData.mockReturnValueOnce('fire');
 
-    const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any);
+    const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any, physicsSystem as any);
 
     system.update(
       buildActions({
@@ -141,7 +149,7 @@ describe('SwallowSystem', () => {
   it('does nothing when swallow is triggered without mouth content', () => {
     kirdy.getMouthContent.mockReturnValue(undefined);
 
-    const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any);
+    const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any, physicsSystem as any);
 
     system.update(
       buildActions({
@@ -154,7 +162,7 @@ describe('SwallowSystem', () => {
   });
 
   it('spits a star projectile forward using the captured enemy', () => {
-    const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any);
+    const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any, physicsSystem as any);
 
     system.update(
       buildActions({
@@ -169,6 +177,7 @@ describe('SwallowSystem', () => {
     expect(starProjectile.setOnCollide).toHaveBeenCalledWith(expect.any(Function));
     expect(starProjectile.once).toHaveBeenCalledWith('destroy', expect.any(Function));
     expect(delayedCall).toHaveBeenCalled();
+    expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(starProjectile, { damage: 2 });
     expect(target.destroy).toHaveBeenCalled();
     expect(inhaleSystem.releaseCapturedTarget).toHaveBeenCalled();
   });
@@ -176,7 +185,7 @@ describe('SwallowSystem', () => {
   it('flips projectile direction when Kirdy faces left', () => {
     kirdy.sprite.flipX = true;
 
-    const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any);
+    const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any, physicsSystem as any);
 
     system.update(
       buildActions({
@@ -190,7 +199,7 @@ describe('SwallowSystem', () => {
   it('does not spit when no enemy is captured', () => {
     kirdy.getMouthContent.mockReturnValue(undefined);
 
-    const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any);
+    const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any, physicsSystem as any);
 
     system.update(
       buildActions({

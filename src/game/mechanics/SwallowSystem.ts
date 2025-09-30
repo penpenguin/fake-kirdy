@@ -1,6 +1,7 @@
 import type Phaser from 'phaser';
 import type { Kirdy } from '../characters/Kirdy';
 import type { ActionStateMap, InhaleSystem } from './InhaleSystem';
+import type { PhysicsSystem } from '../physics/PhysicsSystem';
 
 export interface SwallowedPayload {
   abilityType?: string;
@@ -8,6 +9,7 @@ export interface SwallowedPayload {
 
 const STAR_PROJECTILE_SPEED = 350;
 const STAR_PROJECTILE_LIFETIME_MS = 1200;
+const STAR_PROJECTILE_DAMAGE = 2;
 
 export class SwallowSystem {
   private swallowedPayload?: SwallowedPayload;
@@ -16,6 +18,7 @@ export class SwallowSystem {
     private readonly scene: Phaser.Scene,
     private readonly kirdy: Kirdy,
     private readonly inhaleSystem: InhaleSystem,
+    private readonly physicsSystem?: PhysicsSystem,
   ) {}
 
   update(actions: ActionStateMap) {
@@ -71,14 +74,23 @@ export class SwallowSystem {
       const velocityX = facingLeft ? -STAR_PROJECTILE_SPEED : STAR_PROJECTILE_SPEED;
       projectile.setVelocityX?.(velocityX);
       projectile.setOnCollide?.(() => {
-        projectile.destroy?.();
+        if (this.physicsSystem) {
+          this.physicsSystem.destroyProjectile(projectile);
+        } else {
+          projectile.destroy?.();
+        }
       });
       projectile.once?.('destroy', () => {
         this.scene.events?.emit?.('star-projectile-destroyed', projectile);
       });
       this.scene.time?.delayedCall?.(STAR_PROJECTILE_LIFETIME_MS, () => {
-        projectile.destroy?.();
+        if (this.physicsSystem) {
+          this.physicsSystem.destroyProjectile(projectile);
+        } else {
+          projectile.destroy?.();
+        }
       });
+      this.physicsSystem?.registerPlayerAttack(projectile, { damage: STAR_PROJECTILE_DAMAGE });
     }
 
     target.setData?.('inMouth', false);

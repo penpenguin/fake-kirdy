@@ -139,6 +139,24 @@ vi.mock('../enemies', () => ({
   createDrontoDurt: createDrontoDurtMock,
 }));
 
+const physicsRegisterPlayerMock = vi.hoisted(() => vi.fn());
+const physicsRegisterEnemyMock = vi.hoisted(() => vi.fn());
+const physicsDestroyProjectileMock = vi.hoisted(() => vi.fn());
+
+const PhysicsSystemMock = vi.hoisted(() =>
+  vi.fn(() => ({
+    registerPlayer: physicsRegisterPlayerMock,
+    registerTerrain: vi.fn(),
+    registerEnemy: physicsRegisterEnemyMock,
+    registerPlayerAttack: vi.fn(),
+    destroyProjectile: physicsDestroyProjectileMock,
+  })),
+);
+
+vi.mock('../physics/PhysicsSystem', () => ({
+  PhysicsSystem: PhysicsSystemMock,
+}));
+
 import { GameScene } from './index';
 
 describe('GameScene player integration', () => {
@@ -149,6 +167,10 @@ describe('GameScene player integration', () => {
     enemyUpdateMock.mockReset();
     createWabbleBeeMock.mockClear();
     createDrontoDurtMock.mockClear();
+    physicsRegisterPlayerMock.mockClear();
+    physicsRegisterEnemyMock.mockClear();
+    physicsDestroyProjectileMock.mockClear();
+    PhysicsSystemMock.mockClear();
   });
 
   function createSnapshot(overrides?: Partial<ReturnType<typeof playerInputUpdateMock>>) {
@@ -186,6 +208,8 @@ describe('GameScene player integration', () => {
     expect((scene as any).playerInput).toBeDefined();
     expect(stubs.keyboard.once).toHaveBeenCalledWith('keydown-ESC', expect.any(Function));
     expect(stubs.events.once).toHaveBeenCalledWith('shutdown', expect.any(Function));
+    expect(PhysicsSystemMock).toHaveBeenCalledWith(scene);
+    expect(physicsRegisterPlayerMock).toHaveBeenCalledWith(kirdyInstance);
   });
 
   it('spawns a Wabble Bee enemy and adds it to the update loop and inhale targets', () => {
@@ -217,6 +241,7 @@ describe('GameScene player integration', () => {
       getPlayerPosition: expect.any(Function),
     }));
     expect(inhaleSystemAddTargetMock).toHaveBeenCalledWith(enemyMock.sprite);
+    expect(physicsRegisterEnemyMock).toHaveBeenCalledWith(enemyMock);
 
     scene.update(0, 16);
     expect(enemyMock.update).toHaveBeenCalledWith(16);
@@ -275,6 +300,7 @@ describe('GameScene player integration', () => {
       getPlayerPosition: expect.any(Function),
     }));
     expect(inhaleSystemAddTargetMock).toHaveBeenCalledWith(dronto.sprite);
+    expect(physicsRegisterEnemyMock).toHaveBeenCalledWith(dronto);
   });
 
   it('limits active enemies to three and resumes spawning when a slot frees up', () => {
@@ -480,7 +506,8 @@ describe('GameScene player integration', () => {
 
     expect(InhaleSystemMock).toHaveBeenCalledWith(scene, kirdyInstance);
     const inhaleInstance = InhaleSystemMock.mock.results[0]?.value;
-    expect(SwallowSystemMock).toHaveBeenCalledWith(scene, kirdyInstance, inhaleInstance);
+    const physicsInstance = PhysicsSystemMock.mock.results[0]?.value;
+    expect(SwallowSystemMock).toHaveBeenCalledWith(scene, kirdyInstance, inhaleInstance, physicsInstance);
 
     scene.update(32, 16);
 
@@ -503,7 +530,8 @@ describe('GameScene player integration', () => {
 
     scene.create();
 
-    expect(AbilitySystemMock).toHaveBeenCalledWith(scene, kirdyInstance);
+    const createdPhysics = PhysicsSystemMock.mock.results[0]?.value;
+    expect(AbilitySystemMock).toHaveBeenCalledWith(scene, kirdyInstance, createdPhysics);
 
     scene.update(16, 16);
 

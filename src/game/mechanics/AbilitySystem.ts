@@ -2,6 +2,7 @@ import type Phaser from 'phaser';
 import type { Kirdy } from '../characters/Kirdy';
 import type { ActionStateMap } from './InhaleSystem';
 import type { SwallowedPayload } from './SwallowSystem';
+import type { PhysicsSystem } from '../physics/PhysicsSystem';
 
 export const ABILITY_TYPES = ['fire', 'ice', 'sword'] as const;
 export type AbilityType = (typeof ABILITY_TYPES)[number];
@@ -9,6 +10,7 @@ export type AbilityType = (typeof ABILITY_TYPES)[number];
 type AbilityContext = {
   scene: Phaser.Scene;
   kirdy: Kirdy;
+  physicsSystem?: PhysicsSystem;
 };
 
 type AbilityDefinition = {
@@ -23,6 +25,7 @@ const FIRE_PROJECTILE_LIFETIME = 700;
 const ICE_PROJECTILE_SPEED = 300;
 const ICE_PROJECTILE_LIFETIME = 900;
 const SWORD_SLASH_LIFETIME = 200;
+const ABILITY_PROJECTILE_DAMAGE = 2;
 
 const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
   fire: {
@@ -35,8 +38,8 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
       kirdy.sprite.clearTint?.();
       kirdy.sprite.setTexture?.('kirdy');
     },
-    performAttack: ({ scene, kirdy }) => {
-      const projectile = spawnProjectile(scene, kirdy, 'fire-attack');
+    performAttack: ({ scene, kirdy, physicsSystem }) => {
+      const projectile = spawnProjectile({ scene, kirdy }, 'fire-attack');
       if (!projectile) {
         return;
       }
@@ -50,8 +53,13 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
         scene.events?.emit?.('ability-attack-destroyed', { abilityType: 'fire', projectile });
       });
       scene.time?.delayedCall?.(FIRE_PROJECTILE_LIFETIME, () => {
-        projectile.destroy?.();
+        if (physicsSystem) {
+          physicsSystem.destroyProjectile(projectile);
+        } else {
+          projectile.destroy?.();
+        }
       });
+      physicsSystem?.registerPlayerAttack(projectile, { damage: ABILITY_PROJECTILE_DAMAGE });
       scene.sound?.play?.('ability-fire-attack');
     },
   },
@@ -65,8 +73,8 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
       kirdy.sprite.clearTint?.();
       kirdy.sprite.setTexture?.('kirdy');
     },
-    performAttack: ({ scene, kirdy }) => {
-      const projectile = spawnProjectile(scene, kirdy, 'ice-attack');
+    performAttack: ({ scene, kirdy, physicsSystem }) => {
+      const projectile = spawnProjectile({ scene, kirdy }, 'ice-attack');
       if (!projectile) {
         return;
       }
@@ -80,8 +88,13 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
         scene.events?.emit?.('ability-attack-destroyed', { abilityType: 'ice', projectile });
       });
       scene.time?.delayedCall?.(ICE_PROJECTILE_LIFETIME, () => {
-        projectile.destroy?.();
+        if (physicsSystem) {
+          physicsSystem.destroyProjectile(projectile);
+        } else {
+          projectile.destroy?.();
+        }
       });
+      physicsSystem?.registerPlayerAttack(projectile, { damage: ABILITY_PROJECTILE_DAMAGE });
       scene.sound?.play?.('ability-ice-attack');
     },
   },
@@ -95,8 +108,8 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
       kirdy.sprite.clearTint?.();
       kirdy.sprite.setTexture?.('kirdy');
     },
-    performAttack: ({ scene, kirdy }) => {
-      const slash = spawnSlash(scene, kirdy, 'sword-slash');
+    performAttack: ({ scene, kirdy, physicsSystem }) => {
+      const slash = spawnSlash({ scene, kirdy }, 'sword-slash');
       if (!slash) {
         return;
       }
@@ -105,8 +118,13 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
         scene.events?.emit?.('ability-attack-destroyed', { abilityType: 'sword', projectile: slash });
       });
       scene.time?.delayedCall?.(SWORD_SLASH_LIFETIME, () => {
-        slash.destroy?.();
+        if (physicsSystem) {
+          physicsSystem.destroyProjectile(slash);
+        } else {
+          slash.destroy?.();
+        }
       });
+      physicsSystem?.registerPlayerAttack(slash, { damage: ABILITY_PROJECTILE_DAMAGE });
       scene.sound?.play?.('ability-sword-attack');
     },
   },
@@ -115,7 +133,11 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
 export class AbilitySystem {
   private currentAbility?: AbilityDefinition;
 
-  constructor(private readonly scene: Phaser.Scene, private readonly kirdy: Kirdy) {}
+  constructor(
+    private readonly scene: Phaser.Scene,
+    private readonly kirdy: Kirdy,
+    private readonly physicsSystem?: PhysicsSystem,
+  ) {}
 
   update(actions: ActionStateMap) {
     if (!this.currentAbility) {
@@ -130,7 +152,7 @@ export class AbilitySystem {
     }
 
     if (actions.spit?.justPressed) {
-      this.currentAbility.performAttack?.({ scene: this.scene, kirdy: this.kirdy });
+      this.currentAbility.performAttack?.({ scene: this.scene, kirdy: this.kirdy, physicsSystem: this.physicsSystem });
       this.kirdy.sprite.anims?.play?.(`kirdy-${this.currentAbility.type}-attack`, true);
     }
   }
@@ -147,14 +169,14 @@ export class AbilitySystem {
     }
 
     if (this.currentAbility?.type === abilityType) {
-      definition.onAcquire?.({ scene: this.scene, kirdy: this.kirdy });
+      definition.onAcquire?.({ scene: this.scene, kirdy: this.kirdy, physicsSystem: this.physicsSystem });
       this.kirdy.sprite.setData?.('equippedAbility', abilityType);
       return;
     }
 
     this.clearAbility();
     this.currentAbility = definition;
-    definition.onAcquire?.({ scene: this.scene, kirdy: this.kirdy });
+    definition.onAcquire?.({ scene: this.scene, kirdy: this.kirdy, physicsSystem: this.physicsSystem });
     this.kirdy.sprite.setData?.('equippedAbility', abilityType);
   }
 
@@ -167,19 +189,21 @@ export class AbilitySystem {
       return;
     }
 
-    this.currentAbility.onRemove?.({ scene: this.scene, kirdy: this.kirdy });
+    this.currentAbility.onRemove?.({ scene: this.scene, kirdy: this.kirdy, physicsSystem: this.physicsSystem });
     this.kirdy.sprite.setData?.('equippedAbility', undefined);
     this.currentAbility = undefined;
   }
 }
 
-function spawnProjectile(scene: Phaser.Scene, kirdy: Kirdy, texture: string) {
+function spawnProjectile(context: { scene: Phaser.Scene; kirdy: Kirdy }, texture: string) {
+  const { scene, kirdy } = context;
   const spawnX = kirdy.sprite.x ?? 0;
   const spawnY = kirdy.sprite.y ?? 0;
   return scene.matter?.add?.sprite?.(spawnX, spawnY, texture);
 }
 
-function spawnSlash(scene: Phaser.Scene, kirdy: Kirdy, texture: string) {
+function spawnSlash(context: { scene: Phaser.Scene; kirdy: Kirdy }, texture: string) {
+  const { scene, kirdy } = context;
   const spawnX = kirdy.sprite.x ?? 0;
   const spawnY = kirdy.sprite.y ?? 0;
   const slash = scene.matter?.add?.sprite?.(spawnX, spawnY, texture);

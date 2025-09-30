@@ -17,6 +17,7 @@ import {
   type WabbleBeeOptions,
   type DrontoDurtOptions,
 } from '../enemies';
+import { PhysicsSystem } from '../physics/PhysicsSystem';
 
 export const SceneKeys = {
   Boot: 'BootScene',
@@ -90,21 +91,26 @@ export class GameScene extends Phaser.Scene {
   private readonly enemySpawnCooldownMs = 1200;
   private enemySpawnCooldownRemaining = 0;
   private static readonly PLAYER_SPAWN = { x: 160, y: 360 } as const;
+  private physicsSystem?: PhysicsSystem;
 
   constructor() {
     super(buildConfig(SceneKeys.Game));
   }
 
   create() {
+    this.physicsSystem = new PhysicsSystem(this);
     const pauseHandler = () => this.pauseGame();
     this.input?.keyboard?.once?.('keydown-ESC', pauseHandler);
 
     this.kirdy = createKirdy(this, GameScene.PLAYER_SPAWN);
+    if (this.kirdy) {
+      this.physicsSystem?.registerPlayer(this.kirdy);
+    }
     this.playerInput = new PlayerInputManager(this);
     if (this.kirdy) {
       this.inhaleSystem = new InhaleSystem(this, this.kirdy);
-      this.swallowSystem = new SwallowSystem(this, this.kirdy, this.inhaleSystem);
-      this.abilitySystem = new AbilitySystem(this, this.kirdy);
+      this.swallowSystem = new SwallowSystem(this, this.kirdy, this.inhaleSystem, this.physicsSystem);
+      this.abilitySystem = new AbilitySystem(this, this.kirdy, this.physicsSystem);
     }
 
     this.events?.once?.('shutdown', () => {
@@ -115,6 +121,7 @@ export class GameScene extends Phaser.Scene {
       this.swallowSystem = undefined;
       this.abilitySystem = undefined;
       this.enemies = [];
+      this.physicsSystem = undefined;
     });
   }
 
@@ -189,6 +196,7 @@ export class GameScene extends Phaser.Scene {
     this.enemies.push(enemy);
     this.inhaleSystem?.addInhalableTarget(enemy.sprite);
     this.beginEnemySpawnCooldown();
+    this.physicsSystem?.registerEnemy(enemy);
     return enemy;
   }
 

@@ -37,6 +37,10 @@ describe('AbilitySystem', () => {
   let playSound: ReturnType<typeof vi.fn>;
   let eventsEmit: ReturnType<typeof vi.fn>;
   let projectile: ProjectileStub;
+  let physicsSystem: {
+    registerPlayerAttack: ReturnType<typeof vi.fn>;
+    destroyProjectile: ReturnType<typeof vi.fn>;
+  };
   let kirdy: {
     sprite: {
       x: number;
@@ -65,6 +69,10 @@ describe('AbilitySystem', () => {
     delayedCall = vi.fn();
     playSound = vi.fn();
     eventsEmit = vi.fn();
+    physicsSystem = {
+      registerPlayerAttack: vi.fn(),
+      destroyProjectile: vi.fn(),
+    };
 
     scene = {
       matter: { add: { sprite: addSprite } },
@@ -94,7 +102,7 @@ describe('AbilitySystem', () => {
   });
 
   it('applies appearance changes when an ability is copied', () => {
-    const system = new AbilitySystem(scene, kirdy as any);
+    const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
 
     system.applySwallowedPayload({ abilityType: 'fire' });
 
@@ -105,7 +113,7 @@ describe('AbilitySystem', () => {
   });
 
   it('replaces an existing ability when a new one is copied', () => {
-    const system = new AbilitySystem(scene, kirdy as any);
+    const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
 
     system.applySwallowedPayload({ abilityType: 'fire' });
     system.applySwallowedPayload({ abilityType: 'ice' });
@@ -116,7 +124,7 @@ describe('AbilitySystem', () => {
   });
 
   it('fires a flame projectile when Fire ability attacks', () => {
-    const system = new AbilitySystem(scene, kirdy as any);
+    const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
     system.applySwallowedPayload({ abilityType: 'fire' });
 
     system.update(
@@ -129,10 +137,11 @@ describe('AbilitySystem', () => {
     expect(projectile.setVelocityX).toHaveBeenCalledWith(420);
     expect(projectile.setIgnoreGravity).toHaveBeenCalledWith(true);
     expect(scene.time?.delayedCall).toHaveBeenCalled();
+    expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(projectile, { damage: 2 });
   });
 
   it('launches ice shards in the faced direction', () => {
-    const system = new AbilitySystem(scene, kirdy as any);
+    const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
     system.applySwallowedPayload({ abilityType: 'ice' });
 
     const iceProjectile = {
@@ -157,10 +166,11 @@ describe('AbilitySystem', () => {
 
     expect(addSprite).toHaveBeenCalledWith(128, 256, 'ice-attack');
     expect(iceProjectile.setVelocityX).toHaveBeenCalledWith(-300);
+    expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(iceProjectile as any, { damage: 2 });
   });
 
   it('triggers a sword slash sensor instead of projectile', () => {
-    const system = new AbilitySystem(scene, kirdy as any);
+    const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
     system.applySwallowedPayload({ abilityType: 'sword' });
 
     const slashStub = {
@@ -184,10 +194,11 @@ describe('AbilitySystem', () => {
     expect(addSprite).toHaveBeenCalledWith(128, 256, 'sword-slash');
     expect(slashStub.setSensor).toHaveBeenCalledWith(true);
     expect(slashStub.setVelocityX).not.toHaveBeenCalled();
+    expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(slashStub as any, { damage: 2 });
   });
 
   it('discards the active ability when the discard action is triggered', () => {
-    const system = new AbilitySystem(scene, kirdy as any);
+    const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
     system.applySwallowedPayload({ abilityType: 'fire' });
 
     system.update(
@@ -203,7 +214,7 @@ describe('AbilitySystem', () => {
   });
 
   it('does nothing when an unknown ability type is provided', () => {
-    const system = new AbilitySystem(scene, kirdy as any);
+    const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
 
     system.applySwallowedPayload({ abilityType: 'unknown' as any });
 
