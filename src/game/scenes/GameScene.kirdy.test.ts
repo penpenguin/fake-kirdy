@@ -90,6 +90,19 @@ vi.mock('../mechanics/SwallowSystem', () => ({
   SwallowSystem: SwallowSystemMock,
 }));
 
+const abilitySystemUpdateMock = vi.hoisted(() => vi.fn());
+const abilitySystemApplyPayloadMock = vi.hoisted(() => vi.fn());
+const AbilitySystemMock = vi.hoisted(() =>
+  vi.fn(() => ({
+    update: abilitySystemUpdateMock,
+    applySwallowedPayload: abilitySystemApplyPayloadMock,
+  })),
+);
+
+vi.mock('../mechanics/AbilitySystem', () => ({
+  AbilitySystem: AbilitySystemMock,
+}));
+
 import { GameScene } from './index';
 
 describe('GameScene player integration', () => {
@@ -184,6 +197,45 @@ describe('GameScene player integration', () => {
 
     expect(inhaleSystemUpdateMock).toHaveBeenCalledWith(snapshot.actions);
     expect(swallowSystemUpdateMock).toHaveBeenCalledWith(snapshot.actions);
+  });
+
+  it('creates the ability system and forwards action updates', () => {
+    const scene = new GameScene();
+    const kirdyInstance = { update: vi.fn() };
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    const snapshot = createSnapshot({
+      actions: {
+        spit: { isDown: true, justPressed: true },
+      },
+    });
+
+    playerInputUpdateMock.mockReturnValue(snapshot);
+
+    scene.create();
+
+    expect(AbilitySystemMock).toHaveBeenCalledWith(scene, kirdyInstance);
+
+    scene.update(16, 16);
+
+    expect(abilitySystemUpdateMock).toHaveBeenCalledWith(snapshot.actions);
+  });
+
+  it('applies swallowed payloads to the ability system', () => {
+    const scene = new GameScene();
+    const kirdyInstance = { update: vi.fn() };
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    const snapshot = createSnapshot();
+    playerInputUpdateMock.mockReturnValue(snapshot);
+
+    const payload = { abilityType: 'fire' };
+    swallowSystemConsumeMock.mockReturnValueOnce(payload);
+
+    scene.create();
+    scene.update(0, 16);
+
+    expect(abilitySystemApplyPayloadMock).toHaveBeenCalledWith(payload);
   });
 
   it('exposes helpers to manage inhalable targets from other systems', () => {

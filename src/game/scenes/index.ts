@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { createKirdy, type Kirdy } from '../characters/Kirdy';
 import { InhaleSystem } from '../mechanics/InhaleSystem';
+import { AbilitySystem } from '../mechanics/AbilitySystem';
 import { SwallowSystem, type SwallowedPayload } from '../mechanics/SwallowSystem';
 import {
   PlayerInputManager,
@@ -73,6 +74,7 @@ export class GameScene extends Phaser.Scene {
   private latestInput?: PlayerInputSnapshot;
   private inhaleSystem?: InhaleSystem;
   private swallowSystem?: SwallowSystem;
+  private abilitySystem?: AbilitySystem;
   private static readonly PLAYER_SPAWN = { x: 160, y: 360 } as const;
 
   constructor() {
@@ -88,6 +90,7 @@ export class GameScene extends Phaser.Scene {
     if (this.kirdy) {
       this.inhaleSystem = new InhaleSystem(this, this.kirdy);
       this.swallowSystem = new SwallowSystem(this, this.kirdy, this.inhaleSystem);
+      this.abilitySystem = new AbilitySystem(this, this.kirdy);
     }
 
     this.events?.once?.('shutdown', () => {
@@ -96,6 +99,7 @@ export class GameScene extends Phaser.Scene {
       this.latestInput = undefined;
       this.inhaleSystem = undefined;
       this.swallowSystem = undefined;
+      this.abilitySystem = undefined;
     });
   }
 
@@ -113,6 +117,13 @@ export class GameScene extends Phaser.Scene {
     this.kirdy?.update?.(time, delta, snapshot.kirdy);
     this.inhaleSystem?.update(snapshot.actions);
     this.swallowSystem?.update(snapshot.actions);
+
+    const payload = this.swallowSystem?.consumeSwallowedPayload();
+    if (payload) {
+      this.abilitySystem?.applySwallowedPayload(payload);
+    }
+
+    this.abilitySystem?.update(snapshot.actions);
   }
 
   getPlayerInputSnapshot(): PlayerInputSnapshot | undefined {
@@ -132,7 +143,12 @@ export class GameScene extends Phaser.Scene {
   }
 
   consumeSwallowedPayload(): SwallowedPayload | undefined {
-    return this.swallowSystem?.consumeSwallowedPayload();
+    const payload = this.swallowSystem?.consumeSwallowedPayload();
+    if (payload) {
+      this.abilitySystem?.applySwallowedPayload(payload);
+    }
+
+    return payload;
   }
 }
 
