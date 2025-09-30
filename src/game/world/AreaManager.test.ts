@@ -105,4 +105,15 @@ describe('AreaManager', () => {
       expect(discovered).toContain(transition.transition.to);
     }
   });
+
+  it('エリアのメタデータを一覧で取得できる', () => {
+    const metadata = manager.getAllAreaMetadata();
+
+    expect(metadata).toEqual(
+      expect.arrayContaining([
+        { id: AREA_IDS.CentralHub, name: 'Central Hub' },
+        { id: AREA_IDS.MirrorCorridor, name: 'Mirror Corridor' },
+      ]),
+    );
+  });
 });

@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const stubs = vi.hoisted(() => {
   const keyboard = {
     once: vi.fn(),
+    on: vi.fn(),
+    off: vi.fn(),
   };
 
   const events = {
@@ -142,17 +144,44 @@ vi.mock('../enemies', () => ({
 const areaManagerGetStateMock = vi.hoisted(() => vi.fn());
 const areaManagerUpdateMock = vi.hoisted(() => vi.fn());
 const areaManagerGetDiscoveredMock = vi.hoisted(() => vi.fn());
+const areaManagerGetExplorationStateMock = vi.hoisted(() => vi.fn());
+const areaManagerGetAllDefinitionsMock = vi.hoisted(() => vi.fn());
 const AreaManagerMock = vi.hoisted(() =>
   vi.fn(() => ({
     getCurrentAreaState: areaManagerGetStateMock,
     updatePlayerPosition: areaManagerUpdateMock,
     getDiscoveredAreas: areaManagerGetDiscoveredMock,
+    getExplorationState: areaManagerGetExplorationStateMock,
+    getAllAreaMetadata: areaManagerGetAllDefinitionsMock,
   })),
 );
 
 vi.mock('../world/AreaManager', () => ({
   AreaManager: AreaManagerMock,
 }));
+
+const mapOverlayShowMock = vi.hoisted(() => vi.fn());
+const mapOverlayHideMock = vi.hoisted(() => vi.fn());
+const mapOverlayUpdateMock = vi.hoisted(() => vi.fn());
+const mapOverlayIsVisibleMock = vi.hoisted(() => vi.fn());
+const mapOverlayDestroyMock = vi.hoisted(() => vi.fn());
+const MapOverlayMock = vi.hoisted(() =>
+  vi.fn(() => ({
+    show: mapOverlayShowMock,
+    hide: mapOverlayHideMock,
+    update: mapOverlayUpdateMock,
+    isVisible: mapOverlayIsVisibleMock,
+    destroy: mapOverlayDestroyMock,
+  })),
+);
+
+vi.mock('../ui/MapOverlay', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../ui/MapOverlay')>();
+  return {
+    ...actual,
+    MapOverlay: MapOverlayMock,
+  };
+});
 
 const physicsRegisterPlayerMock = vi.hoisted(() => vi.fn());
 const physicsRegisterEnemyMock = vi.hoisted(() => vi.fn());
@@ -189,6 +218,11 @@ describe('GameScene player integration', () => {
     physicsDestroyProjectileMock.mockClear();
     PhysicsSystemMock.mockClear();
     AreaManagerMock.mockClear();
+    mapOverlayShowMock.mockClear();
+    mapOverlayHideMock.mockClear();
+    mapOverlayUpdateMock.mockClear();
+    mapOverlayIsVisibleMock.mockClear();
+    mapOverlayDestroyMock.mockClear();
     defaultAreaState = {
       definition: { id: 'central-hub' },
       tileMap: { tileSize: 32, columns: 20, rows: 10 },
@@ -198,6 +232,16 @@ describe('GameScene player integration', () => {
     areaManagerGetStateMock.mockReturnValue(defaultAreaState as any);
     areaManagerUpdateMock.mockReturnValue({ areaChanged: false });
     areaManagerGetDiscoveredMock.mockReturnValue(['central-hub']);
+    areaManagerGetExplorationStateMock.mockReturnValue({
+      visitedTiles: 0,
+      totalTiles: 1,
+      completion: 0,
+    });
+    areaManagerGetAllDefinitionsMock.mockReturnValue([
+      { id: 'central-hub', name: 'Central Hub' },
+      { id: 'mirror-corridor', name: 'Mirror Corridor' },
+    ]);
+    mapOverlayIsVisibleMock.mockReturnValue(false);
   });
 
   function createSnapshot(overrides?: Partial<ReturnType<typeof playerInputUpdateMock>>) {
@@ -304,6 +348,205 @@ describe('GameScene player integration', () => {
     });
     expect(kirdyInstance.sprite.setPosition).toHaveBeenCalledWith(entryPosition.x, entryPosition.y);
     expect(kirdyInstance.sprite.setVelocity).toHaveBeenCalledWith(0, 0);
+  });
+
+  it('toggles the world map overlay and populates summaries when opening', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    areaManagerGetDiscoveredMock.mockReturnValue(['central-hub']);
+    areaManagerGetExplorationStateMock.mockImplementation((areaId: string) => {
+      if (areaId === 'central-hub') {
+        return { visitedTiles: 5, totalTiles: 20, completion: 0.25 };
+      }
+
+      return { visitedTiles: 0, totalTiles: 0, completion: 0 };
+    });
+    areaManagerGetAllDefinitionsMock.mockReturnValue([
+      { id: 'central-hub', name: 'Central Hub' },
+      { id: 'mirror-corridor', name: 'Mirror Corridor' },
+    ]);
+
+    const snapshot = createSnapshot();
+    playerInputUpdateMock.mockReturnValue(snapshot);
+
+    scene.create();
+
+    expect(MapOverlayMock).toHaveBeenCalledWith(scene);
+
+    const mapToggleHandler = stubs.keyboard.on.mock.calls.find(([event]) => event === 'keydown-M')?.[1];
+    expect(mapToggleHandler).toBeInstanceOf(Function);
+
+    mapToggleHandler?.({});
+
+    expect(mapOverlayUpdateMock).toHaveBeenCalledWith([
+      {
+        id: 'central-hub',
+        name: 'Central Hub',
+        discovered: true,
+        isCurrent: true,
+        exploration: { visitedTiles: 5, totalTiles: 20, completion: 0.25 },
+      },
+      {
+        id: 'mirror-corridor',
+        name: 'Mirror Corridor',
+        discovered: false,
+        isCurrent: false,
+        exploration: { visitedTiles: 0, totalTiles: 0, completion: 0 },
+      },
+    ]);
+    expect(mapOverlayShowMock).toHaveBeenCalled();
+    expect(mapOverlayHideMock).not.toHaveBeenCalled();
+    expect(areaManagerGetExplorationStateMock).toHaveBeenCalledWith('central-hub');
+    expect(areaManagerGetExplorationStateMock).not.toHaveBeenCalledWith('mirror-corridor');
+  });
+
+  it('hides the world map overlay when already visible', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    mapOverlayIsVisibleMock.mockReturnValue(true);
+
+    const snapshot = createSnapshot();
+    playerInputUpdateMock.mockReturnValue(snapshot);
+
+    scene.create();
+
+    const mapToggleHandler = stubs.keyboard.on.mock.calls.find(([event]) => event === 'keydown-M')?.[1];
+    expect(mapToggleHandler).toBeInstanceOf(Function);
+
+    mapToggleHandler?.({});
+
+    expect(mapOverlayHideMock).toHaveBeenCalled();
+    expect(mapOverlayShowMock).not.toHaveBeenCalled();
+    expect(mapOverlayUpdateMock).not.toHaveBeenCalled();
+  });
+
+  it('refreshes the world map overlay when the player discovers a new area while it is visible', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub({
+      sprite: {
+        x: defaultAreaState.playerSpawnPosition.x,
+        y: defaultAreaState.playerSpawnPosition.y,
+        body: {
+          position: {
+            x: defaultAreaState.playerSpawnPosition.x,
+            y: defaultAreaState.playerSpawnPosition.y,
+          },
+        },
+        setPosition: vi.fn(),
+        setVelocity: vi.fn(),
+      },
+    });
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    const mirrorCorridorState = {
+      definition: { id: 'mirror-corridor' },
+      tileMap: { tileSize: 32, columns: 20, rows: 5 },
+      pixelBounds: { width: 640, height: 160 },
+      playerSpawnPosition: { x: 96, y: 96 },
+    };
+
+    let currentState = defaultAreaState;
+    const areaStates = {
+      'central-hub': defaultAreaState,
+      'mirror-corridor': mirrorCorridorState,
+    } as const;
+
+    areaManagerGetStateMock.mockImplementation(() => currentState as any);
+
+    let discoveredAreas: string[] = ['central-hub'];
+    areaManagerGetDiscoveredMock.mockImplementation(() => [...discoveredAreas]);
+
+    areaManagerGetExplorationStateMock.mockImplementation((areaId: string) => {
+      if (areaId === 'central-hub') {
+        return { visitedTiles: 8, totalTiles: 20, completion: 0.4 };
+      }
+
+      if (areaId === 'mirror-corridor') {
+        return { visitedTiles: 2, totalTiles: 10, completion: 0.2 };
+      }
+
+      return { visitedTiles: 0, totalTiles: 0, completion: 0 };
+    });
+
+    areaManagerGetAllDefinitionsMock.mockReturnValue([
+      { id: 'central-hub', name: 'Central Hub' },
+      { id: 'mirror-corridor', name: 'Mirror Corridor' },
+    ]);
+
+    areaManagerUpdateMock.mockImplementationOnce(() => {
+      currentState = mirrorCorridorState as any;
+      discoveredAreas = ['central-hub', 'mirror-corridor'];
+      return {
+        areaChanged: true,
+        transition: {
+          from: 'central-hub',
+          to: 'mirror-corridor',
+          via: 'east',
+          entryPosition: mirrorCorridorState.playerSpawnPosition,
+        },
+      };
+    });
+    areaManagerUpdateMock.mockImplementation(() => ({ areaChanged: false }));
+
+    const snapshot = createSnapshot();
+    playerInputUpdateMock.mockReturnValue(snapshot);
+
+    scene.create();
+
+    expect(MapOverlayMock).toHaveBeenCalledWith(scene);
+
+    const mapToggleHandler = stubs.keyboard.on.mock.calls.find(([event]) => event === 'keydown-M')?.[1];
+    expect(mapToggleHandler).toBeInstanceOf(Function);
+
+    mapOverlayIsVisibleMock.mockReturnValue(false);
+    mapToggleHandler?.({});
+
+    expect(mapOverlayUpdateMock).toHaveBeenCalledWith([
+      {
+        id: 'central-hub',
+        name: 'Central Hub',
+        discovered: true,
+        isCurrent: true,
+        exploration: { visitedTiles: 8, totalTiles: 20, completion: 0.4 },
+      },
+      {
+        id: 'mirror-corridor',
+        name: 'Mirror Corridor',
+        discovered: false,
+        isCurrent: false,
+        exploration: { visitedTiles: 0, totalTiles: 0, completion: 0 },
+      },
+    ]);
+
+    mapOverlayUpdateMock.mockClear();
+    mapOverlayIsVisibleMock.mockReturnValue(true);
+
+    const boundsWidth = defaultAreaState.pixelBounds.width;
+    kirdyInstance.sprite.x = boundsWidth + defaultAreaState.tileMap.tileSize;
+    kirdyInstance.sprite.body.position.x = kirdyInstance.sprite.x;
+
+    scene.update(0, 16);
+
+    expect(mapOverlayUpdateMock).toHaveBeenCalledWith([
+      {
+        id: 'central-hub',
+        name: 'Central Hub',
+        discovered: true,
+        isCurrent: false,
+        exploration: { visitedTiles: 8, totalTiles: 20, completion: 0.4 },
+      },
+      {
+        id: 'mirror-corridor',
+        name: 'Mirror Corridor',
+        discovered: true,
+        isCurrent: true,
+        exploration: { visitedTiles: 2, totalTiles: 10, completion: 0.2 },
+      },
+    ]);
   });
 
   it('spawns a Wabble Bee enemy and adds it to the update loop and inhale targets', () => {
@@ -693,6 +936,7 @@ describe('GameScene player integration', () => {
     shutdownHandler?.();
 
     expect(playerInputDestroyMock).toHaveBeenCalled();
+    expect(mapOverlayDestroyMock).toHaveBeenCalled();
   });
 
   it('exposes the latest player input snapshot for other systems', () => {

@@ -29,6 +29,11 @@ export interface AreaExplorationState {
   completion: number; // 0.0 - 1.0
 }
 
+export interface AreaMetadata {
+  id: AreaId;
+  name: string;
+}
+
 interface AreaEntryPoint {
   position: Vector2;
   facing?: AreaTransitionDirection;
@@ -271,6 +276,13 @@ export class AreaManager {
     }
 
     return area;
+  }
+
+  getAllAreaMetadata(): AreaMetadata[] {
+    return Array.from(this.definitions.values()).map((definition) => ({
+      id: definition.id,
+      name: definition.name,
+    }));
   }
 
   private resolveEntryPoint(definition: AreaDefinition, entryDirection?: AreaTransitionDirection): Vector2 {

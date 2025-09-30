@@ -19,6 +19,7 @@ import {
 } from '../enemies';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { AreaManager } from '../world/AreaManager';
+import { MapOverlay, createMapSummaries } from '../ui/MapOverlay';
 
 export const SceneKeys = {
   Boot: 'BootScene',
@@ -94,6 +95,9 @@ export class GameScene extends Phaser.Scene {
   private static readonly PLAYER_SPAWN = { x: 160, y: 360 } as const;
   private physicsSystem?: PhysicsSystem;
   private areaManager?: AreaManager;
+  private mapOverlay?: MapOverlay;
+  private mapToggleHandler?: () => void;
+  private lastAreaSummaryHash?: string;
 
   constructor() {
     super(buildConfig(SceneKeys.Game));
@@ -102,9 +106,14 @@ export class GameScene extends Phaser.Scene {
   create() {
     this.physicsSystem = new PhysicsSystem(this);
     this.areaManager = new AreaManager();
+    this.mapOverlay = new MapOverlay(this);
     const spawn = this.areaManager.getCurrentAreaState().playerSpawnPosition ?? GameScene.PLAYER_SPAWN;
     const pauseHandler = () => this.pauseGame();
     this.input?.keyboard?.once?.('keydown-ESC', pauseHandler);
+    this.mapToggleHandler = () => this.toggleMapOverlay();
+    if (this.mapToggleHandler) {
+      this.input?.keyboard?.on?.('keydown-M', this.mapToggleHandler);
+    }
 
     this.kirdy = createKirdy(this, spawn);
     if (this.kirdy) {
@@ -127,6 +136,12 @@ export class GameScene extends Phaser.Scene {
       this.enemies = [];
       this.physicsSystem = undefined;
       this.areaManager = undefined;
+      if (this.mapToggleHandler) {
+        this.input?.keyboard?.off?.('keydown-M', this.mapToggleHandler);
+        this.mapToggleHandler = undefined;
+      }
+      this.mapOverlay?.destroy();
+      this.mapOverlay = undefined;
     });
   }
 
@@ -246,6 +261,10 @@ export class GameScene extends Phaser.Scene {
     const { entryPosition } = result.transition;
     this.kirdy.sprite.setPosition?.(entryPosition.x, entryPosition.y);
     this.kirdy.sprite.setVelocity?.(0, 0);
+
+    if (this.mapOverlay?.isVisible()) {
+      this.refreshMapOverlay();
+    }
   }
 
   private canSpawnEnemy() {
@@ -368,6 +387,48 @@ export class GameScene extends Phaser.Scene {
       x: sprite.x ?? sprite.body?.position?.x ?? 0,
       y: sprite.y ?? sprite.body?.position?.y ?? 0,
     };
+  }
+
+  private toggleMapOverlay() {
+    if (!this.mapOverlay || !this.areaManager) {
+      return;
+    }
+
+    if (this.mapOverlay.isVisible()) {
+      this.mapOverlay.hide();
+      return;
+    }
+
+    this.refreshMapOverlay();
+    this.mapOverlay.show();
+  }
+
+  private refreshMapOverlay() {
+    if (!this.mapOverlay || !this.areaManager) {
+      return;
+    }
+
+    const metadata = this.areaManager.getAllAreaMetadata();
+    const discovered = this.areaManager.getDiscoveredAreas();
+    const currentAreaId = this.areaManager.getCurrentAreaState().definition.id;
+
+    const summaries = createMapSummaries(metadata, discovered, currentAreaId, (areaId) =>
+      this.areaManager!.getExplorationState(areaId),
+    );
+
+    const hash = JSON.stringify(summaries.map((entry) => ({
+      id: entry.id,
+      discovered: entry.discovered,
+      completion: entry.exploration.completion,
+      isCurrent: entry.isCurrent,
+    })));
+
+    if (hash === this.lastAreaSummaryHash) {
+      return;
+    }
+
+    this.mapOverlay.update(summaries);
+    this.lastAreaSummaryHash = hash;
   }
 }
 
