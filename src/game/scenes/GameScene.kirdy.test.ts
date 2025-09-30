@@ -298,17 +298,28 @@ describe('GameScene player integration', () => {
     const enemy3 = makeEnemy();
     const enemy4 = makeEnemy();
 
+    const advanceCooldown = () => {
+      scene.update(0, 600);
+      scene.update(600, 600);
+    };
+
     createWabbleBeeMock.mockReturnValueOnce(enemy1 as any);
     const result1 = scene.spawnWabbleBee({ x: 0, y: 0 });
     expect(result1).toBe(enemy1);
+
+    advanceCooldown();
 
     createWabbleBeeMock.mockReturnValueOnce(enemy2 as any);
     const result2 = scene.spawnWabbleBee({ x: 16, y: 0 });
     expect(result2).toBe(enemy2);
 
+    advanceCooldown();
+
     createWabbleBeeMock.mockReturnValueOnce(enemy3 as any);
     const result3 = scene.spawnWabbleBee({ x: 32, y: 0 });
     expect(result3).toBe(enemy3);
+
+    advanceCooldown();
 
     createWabbleBeeMock.mockReturnValueOnce(enemy4 as any);
     const blocked = scene.spawnWabbleBee({ x: 48, y: 0 });
@@ -316,10 +327,113 @@ describe('GameScene player integration', () => {
     expect(createWabbleBeeMock).toHaveBeenCalledTimes(3);
 
     enemy1.isDefeated.mockReturnValue(true);
+    scene.update(1200, 16);
+    advanceCooldown();
 
     const reopened = scene.spawnWabbleBee({ x: 64, y: 0 });
     expect(reopened).toBe(enemy4);
     expect(inhaleSystemAddTargetMock).toHaveBeenCalledTimes(4);
+  });
+
+  it('enforces a cooldown between enemy spawns', () => {
+    const scene = new GameScene();
+    createKirdyMock.mockReturnValue({ update: vi.fn(), sprite: { x: 0, y: 0 } });
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const makeEnemy = () => ({
+      sprite: enemySpriteFactory(),
+      update: vi.fn(),
+      takeDamage: vi.fn(),
+      getHP: vi.fn().mockReturnValue(3),
+      isDefeated: vi.fn().mockReturnValue(false),
+      getAbilityType: vi.fn().mockReturnValue('fire'),
+    });
+
+    const firstEnemy = makeEnemy();
+    createWabbleBeeMock.mockReturnValueOnce(firstEnemy as any);
+    const spawned = scene.spawnWabbleBee({ x: 0, y: 0 });
+    expect(spawned).toBeDefined();
+    expect(spawned?.sprite).toBe(firstEnemy.sprite);
+
+    const secondEnemy = makeEnemy();
+    createWabbleBeeMock.mockReturnValueOnce(secondEnemy as any);
+    const blocked = scene.spawnWabbleBee({ x: 32, y: 0 });
+    expect(blocked).toBeUndefined();
+    expect(createWabbleBeeMock).toHaveBeenCalledTimes(1);
+
+    scene.update(100, 600);
+    scene.update(700, 600);
+
+    const allowed = scene.spawnWabbleBee({ x: 64, y: 0 });
+    expect(allowed).toBeDefined();
+    expect(allowed?.sprite).toBe(secondEnemy.sprite);
+    expect(createWabbleBeeMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('disperses extra enemies when more than two cluster near Kirdy', () => {
+    const kirdySprite = { x: 160, y: 360 };
+    const scene = new GameScene();
+    createKirdyMock.mockReturnValue({ update: vi.fn(), sprite: kirdySprite });
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const makeEnemy = () => {
+      const sprite = enemySpriteFactory();
+      sprite.setPosition = vi.fn();
+      return {
+        sprite,
+        update: vi.fn(),
+        takeDamage: vi.fn(),
+        getHP: vi.fn().mockReturnValue(3),
+        isDefeated: vi.fn().mockReturnValue(false),
+        getAbilityType: vi.fn().mockReturnValue('fire'),
+      };
+    };
+
+    const advanceCooldown = () => {
+      scene.update(0, 600);
+      scene.update(600, 600);
+    };
+
+    const enemy1 = makeEnemy();
+    createWabbleBeeMock.mockReturnValueOnce(enemy1 as any);
+    scene.spawnWabbleBee({ x: kirdySprite.x + 4, y: kirdySprite.y + 4 });
+    enemy1.sprite.x = kirdySprite.x + 4;
+    enemy1.sprite.y = kirdySprite.y + 4;
+
+    advanceCooldown();
+
+    const enemy2 = makeEnemy();
+    createWabbleBeeMock.mockReturnValueOnce(enemy2 as any);
+    scene.spawnWabbleBee({ x: kirdySprite.x - 6, y: kirdySprite.y - 2 });
+    enemy2.sprite.x = kirdySprite.x - 6;
+    enemy2.sprite.y = kirdySprite.y - 2;
+
+    advanceCooldown();
+
+    const enemy3 = makeEnemy();
+    createWabbleBeeMock.mockReturnValueOnce(enemy3 as any);
+    scene.spawnWabbleBee({ x: kirdySprite.x + 2, y: kirdySprite.y });
+    enemy3.sprite.x = kirdySprite.x + 2;
+    enemy3.sprite.y = kirdySprite.y;
+
+    scene.update(0, 16);
+
+    const repositioned = [enemy1, enemy2, enemy3]
+      .map((entry) => entry.sprite.setPosition.mock.calls.at(-1))
+      .filter((call): call is [number, number] => Array.isArray(call));
+
+    expect(repositioned.length).toBeGreaterThan(0);
+
+    repositioned.forEach(([newX, newY]) => {
+      const dx = newX - kirdySprite.x;
+      const dy = newY - kirdySprite.y;
+      const distance = Math.hypot(dx, dy);
+      expect(distance).toBeGreaterThanOrEqual(96);
+    });
   });
 
   it('forwards sampled input snapshots to Kirdy on update', () => {
