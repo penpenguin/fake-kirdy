@@ -9,6 +9,14 @@ import {
   type PlayerAction,
   type InputButtonState,
 } from '../input/PlayerInputManager';
+import {
+  createWabbleBee,
+  createDrontoDurt,
+  type Enemy,
+  type EnemySpawn,
+  type WabbleBeeOptions,
+  type DrontoDurtOptions,
+} from '../enemies';
 
 export const SceneKeys = {
   Boot: 'BootScene',
@@ -75,6 +83,8 @@ export class GameScene extends Phaser.Scene {
   private inhaleSystem?: InhaleSystem;
   private swallowSystem?: SwallowSystem;
   private abilitySystem?: AbilitySystem;
+  private enemies: Enemy[] = [];
+  private readonly maxActiveEnemies = 3;
   private static readonly PLAYER_SPAWN = { x: 160, y: 360 } as const;
 
   constructor() {
@@ -100,6 +110,7 @@ export class GameScene extends Phaser.Scene {
       this.inhaleSystem = undefined;
       this.swallowSystem = undefined;
       this.abilitySystem = undefined;
+      this.enemies = [];
     });
   }
 
@@ -124,6 +135,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.abilitySystem?.update(snapshot.actions);
+    this.updateEnemies(delta);
   }
 
   getPlayerInputSnapshot(): PlayerInputSnapshot | undefined {
@@ -149,6 +161,81 @@ export class GameScene extends Phaser.Scene {
     }
 
     return payload;
+  }
+
+  spawnWabbleBee(spawn: EnemySpawn, options: WabbleBeeOptions = {}) {
+    if (!this.canSpawnEnemy()) {
+      return undefined;
+    }
+
+    const enemy = createWabbleBee(this, spawn, this.withBoundPlayerPosition(options));
+    return this.registerEnemy(enemy);
+  }
+
+  spawnDrontoDurt(spawn: EnemySpawn, options: DrontoDurtOptions = {}) {
+    if (!this.canSpawnEnemy()) {
+      return undefined;
+    }
+
+    const enemy = createDrontoDurt(this, spawn, this.withBoundPlayerPosition(options));
+    return this.registerEnemy(enemy);
+  }
+
+  private registerEnemy<T extends Enemy>(enemy: T): T {
+    this.enemies.push(enemy);
+    this.inhaleSystem?.addInhalableTarget(enemy.sprite);
+    return enemy;
+  }
+
+  private updateEnemies(delta: number) {
+    if (this.enemies.length === 0) {
+      return;
+    }
+
+    this.enemies.forEach((enemy) => {
+      if (!enemy.isDefeated()) {
+        enemy.update(delta);
+      }
+    });
+
+    const activeEnemies = this.getActiveEnemies();
+    if (activeEnemies.length !== this.enemies.length) {
+      this.enemies = activeEnemies;
+      this.inhaleSystem?.setInhalableTargets(activeEnemies.map((enemy) => enemy.sprite));
+    }
+  }
+
+  private canSpawnEnemy() {
+    return this.getActiveEnemies().length < this.maxActiveEnemies;
+  }
+
+  private getActiveEnemies() {
+    return this.enemies.filter((enemy) => !enemy.isDefeated());
+  }
+
+  private withBoundPlayerPosition<T extends { getPlayerPosition?: () => { x: number; y: number } | undefined }>(
+    options: T,
+  ): T {
+    if (options.getPlayerPosition) {
+      return options;
+    }
+
+    return {
+      ...options,
+      getPlayerPosition: () => this.getPlayerPosition(),
+    };
+  }
+
+  private getPlayerPosition() {
+    const sprite = this.kirdy?.sprite;
+    if (!sprite) {
+      return undefined;
+    }
+
+    return {
+      x: sprite.x ?? sprite.body?.position?.x ?? 0,
+      y: sprite.y ?? sprite.body?.position?.y ?? 0,
+    };
   }
 }
 

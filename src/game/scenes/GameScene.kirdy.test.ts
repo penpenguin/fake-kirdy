@@ -103,11 +103,52 @@ vi.mock('../mechanics/AbilitySystem', () => ({
   AbilitySystem: AbilitySystemMock,
 }));
 
+const enemyUpdateMock = vi.hoisted(() => vi.fn());
+const enemyIsDefeatedMock = vi.hoisted(() => vi.fn().mockReturnValue(false));
+const enemySpriteFactory = vi.hoisted(() => () => ({
+  setData: vi.fn(),
+  setActive: vi.fn(),
+  setVisible: vi.fn(),
+  destroy: vi.fn(),
+}));
+
+const createWabbleBeeMock = vi.hoisted(() =>
+  vi.fn(() => ({
+    sprite: enemySpriteFactory(),
+    update: enemyUpdateMock,
+    takeDamage: vi.fn(),
+    getHP: vi.fn().mockReturnValue(3),
+    isDefeated: enemyIsDefeatedMock,
+    getAbilityType: vi.fn().mockReturnValue('fire'),
+  })),
+);
+
+const createDrontoDurtMock = vi.hoisted(() =>
+  vi.fn(() => ({
+    sprite: enemySpriteFactory(),
+    update: enemyUpdateMock,
+    takeDamage: vi.fn(),
+    getHP: vi.fn().mockReturnValue(4),
+    isDefeated: enemyIsDefeatedMock,
+    getAbilityType: vi.fn().mockReturnValue('sword'),
+  })),
+);
+
+vi.mock('../enemies', () => ({
+  createWabbleBee: createWabbleBeeMock,
+  createDrontoDurt: createDrontoDurtMock,
+}));
+
 import { GameScene } from './index';
 
 describe('GameScene player integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    enemyIsDefeatedMock.mockReset();
+    enemyIsDefeatedMock.mockReturnValue(false);
+    enemyUpdateMock.mockReset();
+    createWabbleBeeMock.mockClear();
+    createDrontoDurtMock.mockClear();
   });
 
   function createSnapshot(overrides?: Partial<ReturnType<typeof playerInputUpdateMock>>) {
@@ -145,6 +186,140 @@ describe('GameScene player integration', () => {
     expect((scene as any).playerInput).toBeDefined();
     expect(stubs.keyboard.once).toHaveBeenCalledWith('keydown-ESC', expect.any(Function));
     expect(stubs.events.once).toHaveBeenCalledWith('shutdown', expect.any(Function));
+  });
+
+  it('spawns a Wabble Bee enemy and adds it to the update loop and inhale targets', () => {
+    const scene = new GameScene();
+    const updateSpy = vi.fn();
+    const kirdySprite = { x: 160, y: 360 };
+    createKirdyMock.mockReturnValue({ update: updateSpy, sprite: kirdySprite });
+
+    const snapshot = createSnapshot();
+    playerInputUpdateMock.mockReturnValue(snapshot);
+
+    scene.create();
+
+    const enemyMock = {
+      sprite: enemySpriteFactory(),
+      update: vi.fn(),
+      takeDamage: vi.fn(),
+      getHP: vi.fn().mockReturnValue(3),
+      isDefeated: vi.fn().mockReturnValue(false),
+      getAbilityType: vi.fn().mockReturnValue('fire'),
+    };
+
+    createWabbleBeeMock.mockReturnValueOnce(enemyMock as any);
+
+    const enemy = scene.spawnWabbleBee({ x: 100, y: 200 });
+
+    expect(enemy).toBe(enemyMock);
+    expect(createWabbleBeeMock).toHaveBeenCalledWith(scene, { x: 100, y: 200 }, expect.objectContaining({
+      getPlayerPosition: expect.any(Function),
+    }));
+    expect(inhaleSystemAddTargetMock).toHaveBeenCalledWith(enemyMock.sprite);
+
+    scene.update(0, 16);
+    expect(enemyMock.update).toHaveBeenCalledWith(16);
+  });
+
+  it('filters defeated enemies from the update loop', () => {
+    const scene = new GameScene();
+    createKirdyMock.mockReturnValue({ update: vi.fn(), sprite: { x: 0, y: 0 } });
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const updateFn = vi.fn();
+    const isDefeated = vi.fn().mockReturnValueOnce(false).mockReturnValue(true);
+    const enemyMock = {
+      sprite: enemySpriteFactory(),
+      update: updateFn,
+      takeDamage: vi.fn(),
+      getHP: vi.fn().mockReturnValue(1),
+      isDefeated,
+      getAbilityType: vi.fn(),
+    };
+
+    createWabbleBeeMock.mockReturnValueOnce(enemyMock as any);
+
+    scene.spawnWabbleBee({ x: 0, y: 0 });
+
+    scene.update(0, 16);
+    scene.update(16, 16);
+
+    expect(updateFn).toHaveBeenCalledTimes(1);
+  });
+
+  it('spawns a Dronto Durt enemy with player tracking options', () => {
+    const scene = new GameScene();
+    createKirdyMock.mockReturnValue({ update: vi.fn(), sprite: { x: 32, y: 48 } });
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const dronto = {
+      sprite: enemySpriteFactory(),
+      update: vi.fn(),
+      takeDamage: vi.fn(),
+      getHP: vi.fn().mockReturnValue(4),
+      isDefeated: vi.fn().mockReturnValue(false),
+      getAbilityType: vi.fn().mockReturnValue('sword'),
+    };
+
+    createDrontoDurtMock.mockReturnValueOnce(dronto as any);
+
+    const result = scene.spawnDrontoDurt({ x: 200, y: 120 });
+
+    expect(result).toBe(dronto);
+    expect(createDrontoDurtMock).toHaveBeenCalledWith(scene, { x: 200, y: 120 }, expect.objectContaining({
+      getPlayerPosition: expect.any(Function),
+    }));
+    expect(inhaleSystemAddTargetMock).toHaveBeenCalledWith(dronto.sprite);
+  });
+
+  it('limits active enemies to three and resumes spawning when a slot frees up', () => {
+    const scene = new GameScene();
+    createKirdyMock.mockReturnValue({ update: vi.fn(), sprite: { x: 0, y: 0 } });
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const makeEnemy = () => ({
+      sprite: enemySpriteFactory(),
+      update: vi.fn(),
+      takeDamage: vi.fn(),
+      getHP: vi.fn().mockReturnValue(3),
+      isDefeated: vi.fn().mockReturnValue(false),
+      getAbilityType: vi.fn().mockReturnValue('fire'),
+    });
+
+    const enemy1 = makeEnemy();
+    const enemy2 = makeEnemy();
+    const enemy3 = makeEnemy();
+    const enemy4 = makeEnemy();
+
+    createWabbleBeeMock.mockReturnValueOnce(enemy1 as any);
+    const result1 = scene.spawnWabbleBee({ x: 0, y: 0 });
+    expect(result1).toBe(enemy1);
+
+    createWabbleBeeMock.mockReturnValueOnce(enemy2 as any);
+    const result2 = scene.spawnWabbleBee({ x: 16, y: 0 });
+    expect(result2).toBe(enemy2);
+
+    createWabbleBeeMock.mockReturnValueOnce(enemy3 as any);
+    const result3 = scene.spawnWabbleBee({ x: 32, y: 0 });
+    expect(result3).toBe(enemy3);
+
+    createWabbleBeeMock.mockReturnValueOnce(enemy4 as any);
+    const blocked = scene.spawnWabbleBee({ x: 48, y: 0 });
+    expect(blocked).toBeUndefined();
+    expect(createWabbleBeeMock).toHaveBeenCalledTimes(3);
+
+    enemy1.isDefeated.mockReturnValue(true);
+
+    const reopened = scene.spawnWabbleBee({ x: 64, y: 0 });
+    expect(reopened).toBe(enemy4);
+    expect(inhaleSystemAddTargetMock).toHaveBeenCalledTimes(4);
   });
 
   it('forwards sampled input snapshots to Kirdy on update', () => {
