@@ -20,6 +20,12 @@ vi.mock('phaser', () => {
     once: vi.fn(),
   });
 
+  const createKeyboardMock = () => ({
+    once: vi.fn(),
+    on: vi.fn(),
+    addKey: vi.fn(() => ({ isDown: false })),
+  });
+
   const createMatterSpriteMock = () => ({
     setFixedRotation: vi.fn().mockReturnThis(),
     setIgnoreGravity: vi.fn().mockReturnThis(),
@@ -32,18 +38,23 @@ vi.mock('phaser', () => {
     public events = createEventEmitterMock();
     public load = createLoaderMock();
     public input = {
-      keyboard: {
-        once: vi.fn(),
-        createCursorKeys: vi.fn(),
-        on: vi.fn(),
-      },
+      keyboard: createKeyboardMock(),
       on: vi.fn(),
       once: vi.fn(),
     };
     public add = {
       text: vi.fn(),
-      image: vi.fn(),
-      container: vi.fn(),
+      image: vi.fn(() => ({
+        setInteractive: vi.fn().mockReturnThis(),
+        on: vi.fn().mockReturnThis(),
+        off: vi.fn().mockReturnThis(),
+        setScrollFactor: vi.fn().mockReturnThis(),
+      })),
+      container: vi.fn(() => ({
+        add: vi.fn(),
+        setScrollFactor: vi.fn().mockReturnThis(),
+        setDepth: vi.fn().mockReturnThis(),
+      })),
     };
     public matter = {
       add: {

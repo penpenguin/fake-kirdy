@@ -1,5 +1,11 @@
 import Phaser from 'phaser';
 import { createKirdy, type Kirdy } from '../characters/Kirdy';
+import {
+  PlayerInputManager,
+  type PlayerInputSnapshot,
+  type PlayerAction,
+  type InputButtonState,
+} from '../input/PlayerInputManager';
 
 export const SceneKeys = {
   Boot: 'BootScene',
@@ -61,7 +67,8 @@ export class MenuScene extends Phaser.Scene {
 export class GameScene extends Phaser.Scene {
   public static readonly KEY = SceneKeys.Game;
   private kirdy?: Kirdy;
-  private cursorKeys?: Phaser.Types.Input.Keyboard.CursorKeys;
+  private playerInput?: PlayerInputManager;
+  private latestInput?: PlayerInputSnapshot;
   private static readonly PLAYER_SPAWN = { x: 160, y: 360 } as const;
 
   constructor() {
@@ -72,8 +79,14 @@ export class GameScene extends Phaser.Scene {
     const pauseHandler = () => this.pauseGame();
     this.input?.keyboard?.once?.('keydown-ESC', pauseHandler);
 
-    this.cursorKeys = this.input?.keyboard?.createCursorKeys?.();
     this.kirdy = createKirdy(this, GameScene.PLAYER_SPAWN);
+    this.playerInput = new PlayerInputManager(this);
+
+    this.events?.once?.('shutdown', () => {
+      this.playerInput?.destroy();
+      this.playerInput = undefined;
+      this.latestInput = undefined;
+    });
   }
 
   pauseGame() {
@@ -81,16 +94,21 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number) {
-    const spaceDown = this.cursorKeys?.space?.isDown ?? false;
-    const upDown = this.cursorKeys?.up?.isDown ?? false;
-    const inputState = {
-      left: this.cursorKeys?.left?.isDown ?? false,
-      right: this.cursorKeys?.right?.isDown ?? false,
-      jumpPressed: spaceDown || upDown,
-      hoverPressed: spaceDown,
-    };
+    const snapshot = this.playerInput?.update();
+    if (!snapshot) {
+      return;
+    }
 
-    this.kirdy?.update?.(time, delta, inputState);
+    this.latestInput = snapshot;
+    this.kirdy?.update?.(time, delta, snapshot.kirdy);
+  }
+
+  getPlayerInputSnapshot(): PlayerInputSnapshot | undefined {
+    return this.latestInput;
+  }
+
+  getActionState(action: PlayerAction): InputButtonState | undefined {
+    return this.latestInput?.actions[action];
   }
 }
 
