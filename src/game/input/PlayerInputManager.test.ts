@@ -32,6 +32,9 @@ interface SceneStub {
     image: (x: number, y: number, texture: string, frame?: string) => ImageStub;
     container: (x: number, y: number) => ContainerStub;
   };
+  textures?: {
+    exists: (key: string) => boolean;
+  };
 }
 
 type SceneFactoryResult = {
@@ -116,6 +119,9 @@ function createSceneStub(): SceneFactoryResult {
 
         return container;
       },
+    },
+    textures: {
+      exists: vi.fn().mockReturnValue(true),
     },
   };
 
@@ -233,6 +239,16 @@ describe('PlayerInputManager', () => {
     manager.simulateTouch('inhale', false);
     snapshot = manager.update();
     expect(snapshot.actions.inhale.isDown).toBe(false);
+  });
+
+  it('仮想ボタン用テクスチャが未ロードの場合はタッチUIを生成しない', () => {
+    (sceneFactory.scene as any).textures = {
+      exists: vi.fn().mockReturnValue(false),
+    };
+
+    createManager();
+
+    expect(sceneFactory.recordedButtons.length).toBe(0);
   });
 
   it('applies visual feedback when virtual buttons are pressed', () => {

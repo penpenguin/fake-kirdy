@@ -172,6 +172,11 @@ export class PlayerInputManager {
   }
 
   private createTouchControls(scene: Phaser.Scene) {
+    const textures = scene.textures;
+    if (!textures?.exists?.('virtual-controls')) {
+      return;
+    }
+
     const container = scene.add?.container?.(0, 0);
     if (!container) {
       return;
