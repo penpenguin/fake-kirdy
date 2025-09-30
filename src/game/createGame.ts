@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { coreScenes } from './scenes';
 
 export interface CreateGameOptions {
   config?: Partial<Phaser.Types.Core.GameConfig>;
@@ -17,7 +18,7 @@ export function createGame(parent: HTMLElement, options: CreateGameOptions = {})
     parent,
     width: DEFAULT_WIDTH,
     height: DEFAULT_HEIGHT,
-    scene: [],
+    scene: coreScenes,
     physics: {
       default: 'matter',
       matter: {

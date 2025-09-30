@@ -23,6 +23,7 @@ vi.mock('phaser', () => {
   return {
     default: {
       Game: PhaserGameMock,
+      Scene: class {},
       AUTO: 'AUTO',
       Scale: { FIT: 'FIT', CENTER_BOTH: 'CENTER_BOTH' },
       Types: {
@@ -35,6 +36,7 @@ vi.mock('phaser', () => {
 });
 
 import { createGame } from './createGame';
+import { coreScenes } from './scenes';
 
 describe('createGame', () => {
   let container: HTMLDivElement;
@@ -66,5 +68,12 @@ describe('createGame', () => {
     expect(config.width).toBeGreaterThan(0);
     expect(config.height).toBeGreaterThan(0);
     expect(config.scene).toBeDefined();
+  });
+
+  it('registers the core scenes by default', () => {
+    createGame(container);
+
+    const config = (PhaserGameMock as any).lastConfig;
+    expect(config.scene).toEqual(coreScenes);
   });
 });
