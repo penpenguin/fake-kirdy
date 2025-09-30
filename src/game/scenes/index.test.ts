@@ -20,6 +20,13 @@ vi.mock('phaser', () => {
     once: vi.fn(),
   });
 
+  const createMatterSpriteMock = () => ({
+    setFixedRotation: vi.fn().mockReturnThis(),
+    setIgnoreGravity: vi.fn().mockReturnThis(),
+    setFrictionAir: vi.fn().mockReturnThis(),
+    setName: vi.fn().mockReturnThis(),
+  });
+
   class PhaserSceneMock {
     public scene = createScenePluginMock();
     public events = createEventEmitterMock();
@@ -27,6 +34,7 @@ vi.mock('phaser', () => {
     public input = {
       keyboard: {
         once: vi.fn(),
+        createCursorKeys: vi.fn(),
         on: vi.fn(),
       },
       on: vi.fn(),
@@ -36,6 +44,11 @@ vi.mock('phaser', () => {
       text: vi.fn(),
       image: vi.fn(),
       container: vi.fn(),
+    };
+    public matter = {
+      add: {
+        sprite: vi.fn(() => createMatterSpriteMock()),
+      },
     };
 
     constructor(_config?: string | Record<string, unknown>) {}

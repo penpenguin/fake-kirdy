@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { createKirdy, type Kirdy } from '../characters/Kirdy';
 
 export const SceneKeys = {
   Boot: 'BootScene',
@@ -59,6 +60,9 @@ export class MenuScene extends Phaser.Scene {
 
 export class GameScene extends Phaser.Scene {
   public static readonly KEY = SceneKeys.Game;
+  private kirdy?: Kirdy;
+  private cursorKeys?: Phaser.Types.Input.Keyboard.CursorKeys;
+  private static readonly PLAYER_SPAWN = { x: 160, y: 360 } as const;
 
   constructor() {
     super(buildConfig(SceneKeys.Game));
@@ -67,10 +71,26 @@ export class GameScene extends Phaser.Scene {
   create() {
     const pauseHandler = () => this.pauseGame();
     this.input?.keyboard?.once?.('keydown-ESC', pauseHandler);
+
+    this.cursorKeys = this.input?.keyboard?.createCursorKeys?.();
+    this.kirdy = createKirdy(this, GameScene.PLAYER_SPAWN);
   }
 
   pauseGame() {
     this.scene.launch(SceneKeys.Pause);
+  }
+
+  update(time: number, delta: number) {
+    const spaceDown = this.cursorKeys?.space?.isDown ?? false;
+    const upDown = this.cursorKeys?.up?.isDown ?? false;
+    const inputState = {
+      left: this.cursorKeys?.left?.isDown ?? false,
+      right: this.cursorKeys?.right?.isDown ?? false,
+      jumpPressed: spaceDown || upDown,
+      hoverPressed: spaceDown,
+    };
+
+    this.kirdy?.update?.(time, delta, inputState);
   }
 }
 
