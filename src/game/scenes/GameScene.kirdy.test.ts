@@ -139,6 +139,21 @@ vi.mock('../enemies', () => ({
   createDrontoDurt: createDrontoDurtMock,
 }));
 
+const areaManagerGetStateMock = vi.hoisted(() => vi.fn());
+const areaManagerUpdateMock = vi.hoisted(() => vi.fn());
+const areaManagerGetDiscoveredMock = vi.hoisted(() => vi.fn());
+const AreaManagerMock = vi.hoisted(() =>
+  vi.fn(() => ({
+    getCurrentAreaState: areaManagerGetStateMock,
+    updatePlayerPosition: areaManagerUpdateMock,
+    getDiscoveredAreas: areaManagerGetDiscoveredMock,
+  })),
+);
+
+vi.mock('../world/AreaManager', () => ({
+  AreaManager: AreaManagerMock,
+}));
+
 const physicsRegisterPlayerMock = vi.hoisted(() => vi.fn());
 const physicsRegisterEnemyMock = vi.hoisted(() => vi.fn());
 const physicsDestroyProjectileMock = vi.hoisted(() => vi.fn());
@@ -160,6 +175,8 @@ vi.mock('../physics/PhysicsSystem', () => ({
 import { GameScene } from './index';
 
 describe('GameScene player integration', () => {
+  let defaultAreaState: any;
+
   beforeEach(() => {
     vi.clearAllMocks();
     enemyIsDefeatedMock.mockReset();
@@ -171,6 +188,16 @@ describe('GameScene player integration', () => {
     physicsRegisterEnemyMock.mockClear();
     physicsDestroyProjectileMock.mockClear();
     PhysicsSystemMock.mockClear();
+    AreaManagerMock.mockClear();
+    defaultAreaState = {
+      definition: { id: 'central-hub' },
+      tileMap: { tileSize: 32, columns: 20, rows: 10 },
+      pixelBounds: { width: 640, height: 320 },
+      playerSpawnPosition: { x: 320, y: 160 },
+    };
+    areaManagerGetStateMock.mockReturnValue(defaultAreaState as any);
+    areaManagerUpdateMock.mockReturnValue({ areaChanged: false });
+    areaManagerGetDiscoveredMock.mockReturnValue(['central-hub']);
   });
 
   function createSnapshot(overrides?: Partial<ReturnType<typeof playerInputUpdateMock>>) {
@@ -192,9 +219,36 @@ describe('GameScene player integration', () => {
     };
   }
 
+  function makeKirdyStub(overrides: any = {}) {
+    const spriteDefaults = {
+      x: defaultAreaState.playerSpawnPosition.x,
+      y: defaultAreaState.playerSpawnPosition.y,
+      body: {
+        position: {
+          x: defaultAreaState.playerSpawnPosition.x,
+          y: defaultAreaState.playerSpawnPosition.y,
+        },
+      },
+      setPosition: vi.fn(),
+      setVelocity: vi.fn(),
+      setVelocityX: vi.fn(),
+      setVelocityY: vi.fn(),
+      setFlipX: vi.fn(),
+      anims: { play: vi.fn() },
+    };
+
+    const sprite = { ...spriteDefaults, ...(overrides.sprite ?? {}) };
+
+    return {
+      update: vi.fn(),
+      ...overrides,
+      sprite,
+    };
+  }
+
   it('creates a Kirdy instance and player input manager during setup', () => {
     const scene = new GameScene();
-    const kirdyInstance = { update: vi.fn() };
+    const kirdyInstance = makeKirdyStub();
     createKirdyMock.mockReturnValue(kirdyInstance);
 
     const snapshot = createSnapshot();
@@ -202,7 +256,7 @@ describe('GameScene player integration', () => {
 
     scene.create();
 
-    expect(createKirdyMock).toHaveBeenCalledWith(scene, { x: 160, y: 360 });
+    expect(createKirdyMock).toHaveBeenCalledWith(scene, defaultAreaState.playerSpawnPosition);
     expect(PlayerInputManagerMock).toHaveBeenCalledWith(scene);
     expect((scene as any).kirdy).toBe(kirdyInstance);
     expect((scene as any).playerInput).toBeDefined();
@@ -210,13 +264,56 @@ describe('GameScene player integration', () => {
     expect(stubs.events.once).toHaveBeenCalledWith('shutdown', expect.any(Function));
     expect(PhysicsSystemMock).toHaveBeenCalledWith(scene);
     expect(physicsRegisterPlayerMock).toHaveBeenCalledWith(kirdyInstance);
+    expect(AreaManagerMock).toHaveBeenCalled();
+  });
+
+  it('repositions Kirdy when the area manager triggers an area transition', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    const snapshot = createSnapshot();
+    playerInputUpdateMock.mockReturnValue(snapshot);
+
+    const entryPosition = { x: 96, y: 128 };
+    areaManagerUpdateMock.mockReturnValueOnce({
+      areaChanged: true,
+      transition: {
+        from: defaultAreaState.definition.id,
+        to: 'mirror-corridor',
+        via: 'east',
+        entryPosition,
+      },
+    });
+
+    scene.create();
+
+    // move Kirdy beyond bounds to trigger transition
+    kirdyInstance.sprite.x = defaultAreaState.pixelBounds.width + 10;
+    kirdyInstance.sprite.y = defaultAreaState.playerSpawnPosition.y;
+    if (kirdyInstance.sprite.body?.position) {
+      kirdyInstance.sprite.body.position.x = kirdyInstance.sprite.x;
+      kirdyInstance.sprite.body.position.y = kirdyInstance.sprite.y;
+    }
+
+    scene.update(0, 16);
+
+    expect(areaManagerUpdateMock).toHaveBeenCalledWith({
+      x: kirdyInstance.sprite.x,
+      y: kirdyInstance.sprite.y,
+    });
+    expect(kirdyInstance.sprite.setPosition).toHaveBeenCalledWith(entryPosition.x, entryPosition.y);
+    expect(kirdyInstance.sprite.setVelocity).toHaveBeenCalledWith(0, 0);
   });
 
   it('spawns a Wabble Bee enemy and adds it to the update loop and inhale targets', () => {
     const scene = new GameScene();
     const updateSpy = vi.fn();
-    const kirdySprite = { x: 160, y: 360 };
-    createKirdyMock.mockReturnValue({ update: updateSpy, sprite: kirdySprite });
+    const kirdyInstance = makeKirdyStub({
+      update: updateSpy,
+      sprite: { x: 160, y: 360 },
+    });
+    createKirdyMock.mockReturnValue(kirdyInstance);
 
     const snapshot = createSnapshot();
     playerInputUpdateMock.mockReturnValue(snapshot);
@@ -249,7 +346,7 @@ describe('GameScene player integration', () => {
 
   it('filters defeated enemies from the update loop', () => {
     const scene = new GameScene();
-    createKirdyMock.mockReturnValue({ update: vi.fn(), sprite: { x: 0, y: 0 } });
+    createKirdyMock.mockReturnValue(makeKirdyStub({ sprite: { x: 0, y: 0 } }));
     playerInputUpdateMock.mockReturnValue(createSnapshot());
 
     scene.create();
@@ -277,7 +374,7 @@ describe('GameScene player integration', () => {
 
   it('spawns a Dronto Durt enemy with player tracking options', () => {
     const scene = new GameScene();
-    createKirdyMock.mockReturnValue({ update: vi.fn(), sprite: { x: 32, y: 48 } });
+    createKirdyMock.mockReturnValue(makeKirdyStub({ sprite: { x: 32, y: 48 } }));
     playerInputUpdateMock.mockReturnValue(createSnapshot());
 
     scene.create();
@@ -305,7 +402,7 @@ describe('GameScene player integration', () => {
 
   it('limits active enemies to three and resumes spawning when a slot frees up', () => {
     const scene = new GameScene();
-    createKirdyMock.mockReturnValue({ update: vi.fn(), sprite: { x: 0, y: 0 } });
+    createKirdyMock.mockReturnValue(makeKirdyStub({ sprite: { x: 0, y: 0 } }));
     playerInputUpdateMock.mockReturnValue(createSnapshot());
 
     scene.create();
@@ -363,7 +460,7 @@ describe('GameScene player integration', () => {
 
   it('enforces a cooldown between enemy spawns', () => {
     const scene = new GameScene();
-    createKirdyMock.mockReturnValue({ update: vi.fn(), sprite: { x: 0, y: 0 } });
+    createKirdyMock.mockReturnValue(makeKirdyStub({ sprite: { x: 0, y: 0 } }));
     playerInputUpdateMock.mockReturnValue(createSnapshot());
 
     scene.create();
@@ -399,9 +496,18 @@ describe('GameScene player integration', () => {
   });
 
   it('disperses extra enemies when more than two cluster near Kirdy', () => {
-    const kirdySprite = { x: 160, y: 360 };
+    const kirdySprite = {
+      x: 160,
+      y: 360,
+    };
     const scene = new GameScene();
-    createKirdyMock.mockReturnValue({ update: vi.fn(), sprite: kirdySprite });
+    createKirdyMock.mockReturnValue(
+      makeKirdyStub({
+        sprite: {
+          ...kirdySprite,
+        },
+      }),
+    );
     playerInputUpdateMock.mockReturnValue(createSnapshot());
 
     scene.create();
@@ -465,7 +571,7 @@ describe('GameScene player integration', () => {
   it('forwards sampled input snapshots to Kirdy on update', () => {
     const scene = new GameScene();
     const updateSpy = vi.fn();
-    createKirdyMock.mockReturnValue({ update: updateSpy });
+    createKirdyMock.mockReturnValue(makeKirdyStub({ update: updateSpy }));
 
     const snapshot = createSnapshot({
       kirdy: {
@@ -490,7 +596,7 @@ describe('GameScene player integration', () => {
 
   it('creates the inhale and swallow systems and forwards action state updates', () => {
     const scene = new GameScene();
-    const kirdyInstance = { update: vi.fn() };
+    const kirdyInstance = makeKirdyStub();
     createKirdyMock.mockReturnValue(kirdyInstance);
 
     const snapshot = createSnapshot({
@@ -517,7 +623,7 @@ describe('GameScene player integration', () => {
 
   it('creates the ability system and forwards action updates', () => {
     const scene = new GameScene();
-    const kirdyInstance = { update: vi.fn() };
+    const kirdyInstance = makeKirdyStub();
     createKirdyMock.mockReturnValue(kirdyInstance);
 
     const snapshot = createSnapshot({
@@ -540,7 +646,7 @@ describe('GameScene player integration', () => {
 
   it('applies swallowed payloads to the ability system', () => {
     const scene = new GameScene();
-    const kirdyInstance = { update: vi.fn() };
+    const kirdyInstance = makeKirdyStub();
     createKirdyMock.mockReturnValue(kirdyInstance);
 
     const snapshot = createSnapshot();
@@ -557,7 +663,7 @@ describe('GameScene player integration', () => {
 
   it('exposes helpers to manage inhalable targets from other systems', () => {
     const scene = new GameScene();
-    const kirdyInstance = { update: vi.fn() };
+    const kirdyInstance = makeKirdyStub();
     createKirdyMock.mockReturnValue(kirdyInstance);
 
     playerInputUpdateMock.mockReturnValue(createSnapshot());
@@ -576,7 +682,7 @@ describe('GameScene player integration', () => {
 
   it('cleans up the player input manager during shutdown', () => {
     const scene = new GameScene();
-    createKirdyMock.mockReturnValue({ update: vi.fn() });
+    createKirdyMock.mockReturnValue(makeKirdyStub());
     playerInputUpdateMock.mockReturnValue(createSnapshot());
 
     scene.create();
@@ -592,7 +698,7 @@ describe('GameScene player integration', () => {
   it('exposes the latest player input snapshot for other systems', () => {
     const scene = new GameScene();
     const updateSpy = vi.fn();
-    createKirdyMock.mockReturnValue({ update: updateSpy });
+    createKirdyMock.mockReturnValue(makeKirdyStub({ update: updateSpy }));
 
     const firstSnapshot = createSnapshot({
       kirdy: { left: true },

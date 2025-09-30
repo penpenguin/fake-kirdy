@@ -18,6 +18,7 @@ import {
   type DrontoDurtOptions,
 } from '../enemies';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
+import { AreaManager } from '../world/AreaManager';
 
 export const SceneKeys = {
   Boot: 'BootScene',
@@ -92,6 +93,7 @@ export class GameScene extends Phaser.Scene {
   private enemySpawnCooldownRemaining = 0;
   private static readonly PLAYER_SPAWN = { x: 160, y: 360 } as const;
   private physicsSystem?: PhysicsSystem;
+  private areaManager?: AreaManager;
 
   constructor() {
     super(buildConfig(SceneKeys.Game));
@@ -99,10 +101,12 @@ export class GameScene extends Phaser.Scene {
 
   create() {
     this.physicsSystem = new PhysicsSystem(this);
+    this.areaManager = new AreaManager();
+    const spawn = this.areaManager.getCurrentAreaState().playerSpawnPosition ?? GameScene.PLAYER_SPAWN;
     const pauseHandler = () => this.pauseGame();
     this.input?.keyboard?.once?.('keydown-ESC', pauseHandler);
 
-    this.kirdy = createKirdy(this, GameScene.PLAYER_SPAWN);
+    this.kirdy = createKirdy(this, spawn);
     if (this.kirdy) {
       this.physicsSystem?.registerPlayer(this.kirdy);
     }
@@ -122,6 +126,7 @@ export class GameScene extends Phaser.Scene {
       this.abilitySystem = undefined;
       this.enemies = [];
       this.physicsSystem = undefined;
+      this.areaManager = undefined;
     });
   }
 
@@ -147,6 +152,7 @@ export class GameScene extends Phaser.Scene {
 
     this.abilitySystem?.update(snapshot.actions);
     this.updateEnemies(delta);
+    this.updateAreaState();
   }
 
   getPlayerInputSnapshot(): PlayerInputSnapshot | undefined {
@@ -220,6 +226,26 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.enforceEnemyDensity();
+  }
+
+  private updateAreaState() {
+    if (!this.areaManager || !this.kirdy) {
+      return;
+    }
+
+    const playerPosition = this.getPlayerPosition();
+    if (!playerPosition) {
+      return;
+    }
+
+    const result = this.areaManager.updatePlayerPosition(playerPosition);
+    if (!result.areaChanged || !result.transition) {
+      return;
+    }
+
+    const { entryPosition } = result.transition;
+    this.kirdy.sprite.setPosition?.(entryPosition.x, entryPosition.y);
+    this.kirdy.sprite.setVelocity?.(0, 0);
   }
 
   private canSpawnEnemy() {
