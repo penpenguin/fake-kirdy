@@ -17,11 +17,14 @@ const JUMP_SPEED = 260;
 const HOVER_ASCENT_SPEED = -40;
 const GROUND_VELOCITY_TOLERANCE = 1;
 
+type KirdyAnimationKey = 'kirdy-idle' | 'kirdy-run' | 'kirdy-jump' | 'kirdy-hover' | 'kirdy-inhale';
+
 export class Kirdy {
   public readonly sprite: Phaser.Physics.Matter.Sprite;
   private previousJumpPressed = false;
   private grounded = false;
   private currentAnimation?: string;
+  private mouthContent?: Phaser.Physics.Matter.Sprite;
 
   constructor(sprite: Phaser.Physics.Matter.Sprite) {
     this.sprite = sprite;
@@ -58,7 +61,7 @@ export class Kirdy {
     }
 
     const wantsToJump = input.jumpPressed && !this.previousJumpPressed;
-    let animationKey: 'kirdy-idle' | 'kirdy-run' | 'kirdy-jump' | 'kirdy-hover' | undefined;
+    let animationKey: KirdyAnimationKey | undefined;
 
     if (wantsToJump && this.grounded) {
       this.sprite.setVelocityY(-JUMP_SPEED);
@@ -84,7 +87,7 @@ export class Kirdy {
     this.previousJumpPressed = input.jumpPressed;
   }
 
-  private playAnimation(key: 'kirdy-idle' | 'kirdy-run' | 'kirdy-jump' | 'kirdy-hover') {
+  private playAnimation(key: KirdyAnimationKey) {
     if (!this.sprite.anims?.play) {
       return;
     }
@@ -95,6 +98,14 @@ export class Kirdy {
 
     this.sprite.anims.play(key, true);
     this.currentAnimation = key;
+  }
+
+  setMouthContent(target?: Phaser.Physics.Matter.Sprite) {
+    this.mouthContent = target;
+  }
+
+  getMouthContent() {
+    return this.mouthContent;
   }
 }
 
@@ -114,11 +125,12 @@ export function createKirdy(scene: Phaser.Scene, spawn: KirdySpawnConfig) {
 }
 
 function registerAnimations(scene: Phaser.Scene) {
-  const animations: Array<{ key: 'kirdy-idle' | 'kirdy-run' | 'kirdy-jump' | 'kirdy-hover'; frameRate: number; repeat: number }> = [
+  const animations: Array<{ key: KirdyAnimationKey; frameRate: number; repeat: number }> = [
     { key: 'kirdy-idle', frameRate: 6, repeat: -1 },
     { key: 'kirdy-run', frameRate: 12, repeat: -1 },
     { key: 'kirdy-jump', frameRate: 0, repeat: 0 },
     { key: 'kirdy-hover', frameRate: 8, repeat: -1 },
+    { key: 'kirdy-inhale', frameRate: 10, repeat: -1 },
   ];
 
   animations.forEach((config) => {

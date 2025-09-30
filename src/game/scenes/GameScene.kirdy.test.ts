@@ -62,6 +62,19 @@ vi.mock('../input/PlayerInputManager', () => ({
   PlayerInputManager: PlayerInputManagerMock,
 }));
 
+const inhaleSystemUpdateMock = vi.hoisted(() => vi.fn());
+const inhaleSystemAddTargetMock = vi.hoisted(() => vi.fn());
+const inhaleSystemSetTargetsMock = vi.hoisted(() => vi.fn());
+const InhaleSystemMock = vi.hoisted(() => vi.fn(() => ({
+  update: inhaleSystemUpdateMock,
+  addInhalableTarget: inhaleSystemAddTargetMock,
+  setInhalableTargets: inhaleSystemSetTargetsMock,
+})));
+
+vi.mock('../mechanics/InhaleSystem', () => ({
+  InhaleSystem: InhaleSystemMock,
+}));
+
 import { GameScene } from './index';
 
 describe('GameScene player integration', () => {
@@ -130,6 +143,47 @@ describe('GameScene player integration', () => {
 
     expect(playerInputUpdateMock).toHaveBeenCalled();
     expect(updateSpy).toHaveBeenCalledWith(100, 16, snapshot.kirdy);
+  });
+
+  it('creates the inhale system and forwards action state updates', () => {
+    const scene = new GameScene();
+    const kirdyInstance = { update: vi.fn() };
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    const snapshot = createSnapshot({
+      actions: {
+        inhale: { isDown: true, justPressed: true },
+      },
+    });
+
+    playerInputUpdateMock.mockReturnValue(snapshot);
+
+    scene.create();
+
+    expect(InhaleSystemMock).toHaveBeenCalledWith(scene, kirdyInstance);
+
+    scene.update(32, 16);
+
+    expect(inhaleSystemUpdateMock).toHaveBeenCalledWith(snapshot.actions);
+  });
+
+  it('exposes helpers to manage inhalable targets from other systems', () => {
+    const scene = new GameScene();
+    const kirdyInstance = { update: vi.fn() };
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const fakeTarget = {} as any;
+    const fakeList = [fakeTarget] as any;
+
+    scene.addInhalableTarget(fakeTarget);
+    scene.setInhalableTargets(fakeList);
+
+    expect(inhaleSystemAddTargetMock).toHaveBeenCalledWith(fakeTarget);
+    expect(inhaleSystemSetTargetsMock).toHaveBeenCalledWith(fakeList);
   });
 
   it('cleans up the player input manager during shutdown', () => {

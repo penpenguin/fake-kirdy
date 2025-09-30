@@ -88,6 +88,7 @@ describe('Kirdy basics', () => {
       'kirdy-run',
       'kirdy-jump',
       'kirdy-hover',
+      'kirdy-inhale',
     ]));
   });
 
@@ -248,5 +249,19 @@ describe('Kirdy basics', () => {
     });
 
     expect(sprite.anims.play).toHaveBeenCalledWith('kirdy-hover', true);
+  });
+
+  it('tracks enemies stored in Kirdy\'s mouth for later actions', () => {
+    const { scene } = stubFactory.createScene();
+    const kirdy = createKirdy(scene, { x: 0, y: 0 });
+    const captured = {} as unknown as Phaser.Physics.Matter.Sprite;
+
+    expect(kirdy.getMouthContent()).toBeUndefined();
+
+    kirdy.setMouthContent(captured);
+    expect(kirdy.getMouthContent()).toBe(captured);
+
+    kirdy.setMouthContent(undefined);
+    expect(kirdy.getMouthContent()).toBeUndefined();
   });
 });
