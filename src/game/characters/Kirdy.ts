@@ -17,7 +17,14 @@ const JUMP_SPEED = 260;
 const HOVER_ASCENT_SPEED = -40;
 const GROUND_VELOCITY_TOLERANCE = 1;
 
-type KirdyAnimationKey = 'kirdy-idle' | 'kirdy-run' | 'kirdy-jump' | 'kirdy-hover' | 'kirdy-inhale';
+type KirdyAnimationKey =
+  | 'kirdy-idle'
+  | 'kirdy-run'
+  | 'kirdy-jump'
+  | 'kirdy-hover'
+  | 'kirdy-inhale'
+  | 'kirdy-swallow'
+  | 'kirdy-spit';
 
 export class Kirdy {
   public readonly sprite: Phaser.Physics.Matter.Sprite;
@@ -131,6 +138,8 @@ function registerAnimations(scene: Phaser.Scene) {
     { key: 'kirdy-jump', frameRate: 0, repeat: 0 },
     { key: 'kirdy-hover', frameRate: 8, repeat: -1 },
     { key: 'kirdy-inhale', frameRate: 10, repeat: -1 },
+    { key: 'kirdy-swallow', frameRate: 12, repeat: 0 },
+    { key: 'kirdy-spit', frameRate: 12, repeat: 0 },
   ];
 
   animations.forEach((config) => {

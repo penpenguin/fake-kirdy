@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { createKirdy, type Kirdy } from '../characters/Kirdy';
 import { InhaleSystem } from '../mechanics/InhaleSystem';
+import { SwallowSystem, type SwallowedPayload } from '../mechanics/SwallowSystem';
 import {
   PlayerInputManager,
   type PlayerInputSnapshot,
@@ -71,6 +72,7 @@ export class GameScene extends Phaser.Scene {
   private playerInput?: PlayerInputManager;
   private latestInput?: PlayerInputSnapshot;
   private inhaleSystem?: InhaleSystem;
+  private swallowSystem?: SwallowSystem;
   private static readonly PLAYER_SPAWN = { x: 160, y: 360 } as const;
 
   constructor() {
@@ -85,6 +87,7 @@ export class GameScene extends Phaser.Scene {
     this.playerInput = new PlayerInputManager(this);
     if (this.kirdy) {
       this.inhaleSystem = new InhaleSystem(this, this.kirdy);
+      this.swallowSystem = new SwallowSystem(this, this.kirdy, this.inhaleSystem);
     }
 
     this.events?.once?.('shutdown', () => {
@@ -92,6 +95,7 @@ export class GameScene extends Phaser.Scene {
       this.playerInput = undefined;
       this.latestInput = undefined;
       this.inhaleSystem = undefined;
+      this.swallowSystem = undefined;
     });
   }
 
@@ -108,6 +112,7 @@ export class GameScene extends Phaser.Scene {
     this.latestInput = snapshot;
     this.kirdy?.update?.(time, delta, snapshot.kirdy);
     this.inhaleSystem?.update(snapshot.actions);
+    this.swallowSystem?.update(snapshot.actions);
   }
 
   getPlayerInputSnapshot(): PlayerInputSnapshot | undefined {
@@ -124,6 +129,10 @@ export class GameScene extends Phaser.Scene {
 
   setInhalableTargets(targets: Phaser.Physics.Matter.Sprite[]) {
     this.inhaleSystem?.setInhalableTargets(targets);
+  }
+
+  consumeSwallowedPayload(): SwallowedPayload | undefined {
+    return this.swallowSystem?.consumeSwallowedPayload();
   }
 }
 

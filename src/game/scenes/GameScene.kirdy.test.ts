@@ -65,14 +65,29 @@ vi.mock('../input/PlayerInputManager', () => ({
 const inhaleSystemUpdateMock = vi.hoisted(() => vi.fn());
 const inhaleSystemAddTargetMock = vi.hoisted(() => vi.fn());
 const inhaleSystemSetTargetsMock = vi.hoisted(() => vi.fn());
+const inhaleSystemReleaseMock = vi.hoisted(() => vi.fn());
 const InhaleSystemMock = vi.hoisted(() => vi.fn(() => ({
   update: inhaleSystemUpdateMock,
   addInhalableTarget: inhaleSystemAddTargetMock,
   setInhalableTargets: inhaleSystemSetTargetsMock,
+  releaseCapturedTarget: inhaleSystemReleaseMock,
 })));
 
 vi.mock('../mechanics/InhaleSystem', () => ({
   InhaleSystem: InhaleSystemMock,
+}));
+
+const swallowSystemUpdateMock = vi.hoisted(() => vi.fn());
+const swallowSystemConsumeMock = vi.hoisted(() => vi.fn());
+const SwallowSystemMock = vi.hoisted(() =>
+  vi.fn(() => ({
+    update: swallowSystemUpdateMock,
+    consumeSwallowedPayload: swallowSystemConsumeMock,
+  })),
+);
+
+vi.mock('../mechanics/SwallowSystem', () => ({
+  SwallowSystem: SwallowSystemMock,
 }));
 
 import { GameScene } from './index';
@@ -145,7 +160,7 @@ describe('GameScene player integration', () => {
     expect(updateSpy).toHaveBeenCalledWith(100, 16, snapshot.kirdy);
   });
 
-  it('creates the inhale system and forwards action state updates', () => {
+  it('creates the inhale and swallow systems and forwards action state updates', () => {
     const scene = new GameScene();
     const kirdyInstance = { update: vi.fn() };
     createKirdyMock.mockReturnValue(kirdyInstance);
@@ -153,6 +168,7 @@ describe('GameScene player integration', () => {
     const snapshot = createSnapshot({
       actions: {
         inhale: { isDown: true, justPressed: true },
+        swallow: { isDown: true, justPressed: true },
       },
     });
 
@@ -161,10 +177,13 @@ describe('GameScene player integration', () => {
     scene.create();
 
     expect(InhaleSystemMock).toHaveBeenCalledWith(scene, kirdyInstance);
+    const inhaleInstance = InhaleSystemMock.mock.results[0]?.value;
+    expect(SwallowSystemMock).toHaveBeenCalledWith(scene, kirdyInstance, inhaleInstance);
 
     scene.update(32, 16);
 
     expect(inhaleSystemUpdateMock).toHaveBeenCalledWith(snapshot.actions);
+    expect(swallowSystemUpdateMock).toHaveBeenCalledWith(snapshot.actions);
   });
 
   it('exposes helpers to manage inhalable targets from other systems', () => {
