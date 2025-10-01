@@ -31,6 +31,7 @@ vi.mock('phaser', () => {
   const createKeyboardMock = () => ({
     once: vi.fn(),
     on: vi.fn(),
+    off: vi.fn(),
     addKey: vi.fn(() => ({ isDown: false })),
   });
 
@@ -131,7 +132,8 @@ const audioManagerStubs = vi.hoisted(() => {
   const setMasterVolume = vi.fn();
   const setMuted = vi.fn();
   const toggleMute = vi.fn();
-  const instance = { playBgm, setMasterVolume, setMuted, toggleMute };
+  const stopBgm = vi.fn();
+  const instance = { playBgm, setMasterVolume, setMuted, toggleMute, stopBgm };
   const mock = vi.fn(() => instance);
 
   return {
@@ -140,6 +142,7 @@ const audioManagerStubs = vi.hoisted(() => {
     setMasterVolume,
     setMuted,
     toggleMute,
+    stopBgm,
   };
 });
 
@@ -200,6 +203,7 @@ describe('Scene registration', () => {
     audioManagerStubs.setMasterVolume.mockClear();
     audioManagerStubs.setMuted.mockClear();
     audioManagerStubs.toggleMute.mockClear();
+    audioManagerStubs.stopBgm.mockClear();
   });
 
   it('exposes stable scene keys for coordination', () => {
@@ -297,12 +301,35 @@ describe('Scene registration', () => {
 
     gameScene.create();
 
-    expect(gameScene.input.keyboard.once).toHaveBeenCalledWith('keydown-ESC', expect.any(Function));
+    expect(gameScene.input.keyboard.on).toHaveBeenCalledWith('keydown-ESC', expect.any(Function));
 
-    const [, handler] = gameScene.input.keyboard.once.mock.calls[0];
+    const [, handler] = gameScene.input.keyboard.on.mock.calls[0];
     handler?.();
 
     expect(gameScene.scene.launch).toHaveBeenCalledWith(SceneKeys.Pause);
+  });
+
+  it('game scene keeps the pause listener active and cleans it up on shutdown', () => {
+    const gameScene = new GameScene();
+
+    gameScene.create();
+
+    const pauseCall = gameScene.input.keyboard.on.mock.calls.find(([event]) => event === 'keydown-ESC');
+    expect(pauseCall).toBeTruthy();
+    const [, pauseHandler] = pauseCall ?? [];
+    expect(pauseHandler).toBeInstanceOf(Function);
+
+    pauseHandler?.();
+    expect(gameScene.scene.launch).toHaveBeenCalledWith(SceneKeys.Pause);
+
+    const shutdownCall = gameScene.events.once.mock.calls.find(([event]) => event === 'shutdown');
+    const shutdownHandler = shutdownCall?.[1];
+    expect(shutdownHandler).toBeInstanceOf(Function);
+
+    gameScene.input.keyboard.off.mockClear();
+    shutdownHandler?.();
+
+    expect(gameScene.input.keyboard.off).toHaveBeenCalledWith('keydown-ESC', pauseHandler);
   });
 
   it('game scene starts background music when created', () => {

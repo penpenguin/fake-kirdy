@@ -181,6 +181,7 @@ export class GameScene extends Phaser.Scene {
   private areaManager?: AreaManager;
   private mapOverlay?: MapOverlay;
   private mapToggleHandler?: () => void;
+  private pauseKeyHandler?: () => void;
   private lastAreaSummaryHash?: string;
   private hud?: Hud;
   private readonly playerMaxHP = 6;
@@ -305,8 +306,8 @@ export class GameScene extends Phaser.Scene {
     this.hud = new Hud(this);
 
     const spawn = this.determineSpawnPosition();
-    const pauseHandler = () => this.pauseGame();
-    this.input?.keyboard?.once?.('keydown-ESC', pauseHandler);
+    this.pauseKeyHandler = () => this.pauseGame();
+    this.input?.keyboard?.on?.('keydown-ESC', this.pauseKeyHandler);
     this.mapToggleHandler = () => this.toggleMapOverlay();
     if (this.mapToggleHandler) {
       this.input?.keyboard?.on?.('keydown-M', this.mapToggleHandler);
@@ -346,6 +347,10 @@ export class GameScene extends Phaser.Scene {
       if (this.mapToggleHandler) {
         this.input?.keyboard?.off?.('keydown-M', this.mapToggleHandler);
         this.mapToggleHandler = undefined;
+      }
+      if (this.pauseKeyHandler) {
+        this.input?.keyboard?.off?.('keydown-ESC', this.pauseKeyHandler);
+        this.pauseKeyHandler = undefined;
       }
       this.mapOverlay?.destroy();
       this.mapOverlay = undefined;

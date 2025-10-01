@@ -408,7 +408,7 @@ describe('GameScene player integration', () => {
     expect(PlayerInputManagerMock).toHaveBeenCalledWith(scene);
     expect((scene as any).kirdy).toBe(kirdyInstance);
     expect((scene as any).playerInput).toBeDefined();
-    expect(stubs.keyboard.once).toHaveBeenCalledWith('keydown-ESC', expect.any(Function));
+    expect(stubs.keyboard.on).toHaveBeenCalledWith('keydown-ESC', expect.any(Function));
     expect(stubs.events.once).toHaveBeenCalledWith('shutdown', expect.any(Function));
     expect(PhysicsSystemMock).toHaveBeenCalledWith(scene);
     expect(physicsRegisterPlayerMock).toHaveBeenCalledWith(kirdyInstance);
