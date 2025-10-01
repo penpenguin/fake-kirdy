@@ -74,8 +74,8 @@ describe('PhysicsSystem', () => {
     collisionHandler?.({
       pairs: [
         {
-          bodyA: { gameObject: playerSprite },
-          bodyB: { gameObject: terrainSprite },
+          bodyA: { gameObject: playerSprite, id: 1001 } as any,
+          bodyB: { gameObject: terrainSprite, id: 2001 } as any,
           isSensor: false,
         },
       ],
@@ -148,6 +148,69 @@ describe('PhysicsSystem', () => {
     expect(eventsEmit).toHaveBeenCalledWith('player-attack-hit-enemy', { enemy, damage: 3 });
   });
 
+  it('keeps the player grounded while any terrain contact remains', () => {
+    const system = new PhysicsSystem(scene);
+    const playerSprite = createSpriteStub();
+    system.registerPlayer({ sprite: playerSprite } as any);
+
+    const terrainA = createSpriteStub();
+    const terrainB = createSpriteStub();
+    system.registerTerrain(terrainA as any);
+    system.registerTerrain(terrainB as any);
+
+    const collisionStart = getCollisionStartHandler(worldOn);
+    const collisionEnd = getCollisionEndHandler(worldOn);
+
+    expect(collisionStart).toBeDefined();
+    expect(collisionEnd).toBeDefined();
+
+    collisionStart?.({
+      pairs: [
+        {
+          bodyA: { gameObject: playerSprite, id: 1001 } as any,
+          bodyB: { gameObject: terrainA, id: 2001 } as any,
+          isSensor: false,
+        },
+      ],
+    } as any);
+
+    collisionStart?.({
+      pairs: [
+        {
+          bodyA: { gameObject: playerSprite, id: 1001 } as any,
+          bodyB: { gameObject: terrainB, id: 2002 } as any,
+          isSensor: false,
+        },
+      ],
+    } as any);
+
+    playerSprite.setData.mockClear();
+
+    collisionEnd?.({
+      pairs: [
+        {
+          bodyA: { gameObject: playerSprite, id: 1001 } as any,
+          bodyB: { gameObject: terrainA, id: 2001 } as any,
+          isSensor: false,
+        },
+      ],
+    } as any);
+
+    expect(playerSprite.setData).not.toHaveBeenCalled();
+
+    collisionEnd?.({
+      pairs: [
+        {
+          bodyA: { gameObject: playerSprite, id: 1001 } as any,
+          bodyB: { gameObject: terrainB, id: 2002 } as any,
+          isSensor: false,
+        },
+      ],
+    } as any);
+
+    expect(playerSprite.setData).toHaveBeenCalledWith('isGrounded', false);
+  });
+
   it('uses recycle handlers when destroying projectiles', () => {
     const system = new PhysicsSystem(scene);
     const projectileSprite = createSpriteStub();
@@ -176,5 +239,10 @@ function createSpriteStub() {
 
 function getCollisionStartHandler(worldOn: ReturnType<typeof vi.fn>) {
   const entry = worldOn.mock.calls.find(([event]) => event === 'collisionstart');
+  return entry?.[1] as ((event: unknown) => void) | undefined;
+}
+
+function getCollisionEndHandler(worldOn: ReturnType<typeof vi.fn>) {
+  const entry = worldOn.mock.calls.find(([event]) => event === 'collisionend');
   return entry?.[1] as ((event: unknown) => void) | undefined;
 }

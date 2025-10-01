@@ -140,15 +140,15 @@ export class PhysicsSystem {
       return;
     }
 
-    this.handleTerrainSeparation(gameObjectA, pair.bodyA, gameObjectB);
-    this.handleTerrainSeparation(gameObjectB, pair.bodyB, gameObjectA);
+    this.handleTerrainSeparation(gameObjectA, pair.bodyA, gameObjectB, pair.bodyB);
+    this.handleTerrainSeparation(gameObjectB, pair.bodyB, gameObjectA, pair.bodyA);
   }
 
   private handlePlayerTerrainContact(
     candidate: MatterGameObject,
-    candidateBody: MatterJS.BodyType,
+    _candidateBody: MatterJS.BodyType,
     other: MatterGameObject,
-    _otherBody: MatterJS.BodyType,
+    otherBody: MatterJS.BodyType,
   ) {
     if (!this.playerSprite || candidate !== this.playerSprite) {
       return;
@@ -158,14 +158,19 @@ export class PhysicsSystem {
       return;
     }
 
-    this.terrainContactIds.add(candidateBody.id);
+    if (typeof otherBody?.id !== 'number') {
+      return;
+    }
+
+    this.terrainContactIds.add(otherBody.id);
     this.playerSprite.setData?.('isGrounded', true);
   }
 
   private handleTerrainSeparation(
     candidate: MatterGameObject,
-    candidateBody: MatterJS.BodyType,
+    _candidateBody: MatterJS.BodyType,
     other: MatterGameObject,
+    otherBody: MatterJS.BodyType,
   ) {
     if (!this.playerSprite || candidate !== this.playerSprite) {
       return;
@@ -175,7 +180,11 @@ export class PhysicsSystem {
       return;
     }
 
-    this.terrainContactIds.delete(candidateBody.id);
+    if (typeof otherBody?.id !== 'number') {
+      return;
+    }
+
+    this.terrainContactIds.delete(otherBody.id);
     if (this.terrainContactIds.size === 0) {
       this.playerSprite.setData?.('isGrounded', false);
     }
