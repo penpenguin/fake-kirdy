@@ -9,7 +9,7 @@ type SoundManagerLike = Partial<{
 
 type BaseSoundLike = Partial<Phaser.Sound.BaseSound> & { key?: string };
 
-const DEFAULT_MASTER_VOLUME = 0.6;
+const DEFAULT_MASTER_VOLUME = 0.8;
 
 function clamp01(value: number) {
   if (!Number.isFinite(value)) {
