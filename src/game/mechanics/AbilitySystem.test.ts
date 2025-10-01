@@ -148,6 +148,24 @@ describe('AbilitySystem', () => {
     expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(projectile, { damage: 2 });
   });
 
+  it('routes ability attack sounds through the audio manager when available', () => {
+    const audioManager = {
+      playSfx: vi.fn(),
+    };
+
+    const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any, audioManager as any);
+    system.applySwallowedPayload({ abilityType: 'fire' });
+
+    system.update(
+      buildActions({
+        spit: { isDown: true, justPressed: true },
+      }),
+    );
+
+    expect(audioManager.playSfx).toHaveBeenCalledWith('ability-fire-attack');
+    expect(playSound).not.toHaveBeenCalled();
+  });
+
   it('launches ice shards in the faced direction', () => {
     const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
     system.applySwallowedPayload({ abilityType: 'ice' });

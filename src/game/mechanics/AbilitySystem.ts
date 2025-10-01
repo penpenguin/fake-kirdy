@@ -3,6 +3,7 @@ import type { Kirdy } from '../characters/Kirdy';
 import type { ActionStateMap } from './InhaleSystem';
 import type { SwallowedPayload } from './SwallowSystem';
 import type { PhysicsSystem } from '../physics/PhysicsSystem';
+import type { AudioManager } from '../audio/AudioManager';
 
 export const ABILITY_TYPES = ['fire', 'ice', 'sword'] as const;
 export type AbilityType = (typeof ABILITY_TYPES)[number];
@@ -11,6 +12,7 @@ type AbilityContext = {
   scene: Phaser.Scene;
   kirdy: Kirdy;
   physicsSystem?: PhysicsSystem;
+  audioManager?: AudioManager;
 };
 
 type AbilityDefinition = {
@@ -27,6 +29,15 @@ const ICE_PROJECTILE_LIFETIME = 900;
 const SWORD_SLASH_LIFETIME = 200;
 const ABILITY_PROJECTILE_DAMAGE = 2;
 
+function playAbilitySound(context: AbilityContext, key: string) {
+  if (context.audioManager) {
+    context.audioManager.playSfx(key);
+    return;
+  }
+
+  context.scene.sound?.play?.(key);
+}
+
 const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
   fire: {
     type: 'fire',
@@ -38,7 +49,8 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
       kirdy.sprite.clearTint?.();
       kirdy.sprite.setTexture?.('kirdy');
     },
-    performAttack: ({ scene, kirdy, physicsSystem }) => {
+    performAttack: (context) => {
+      const { scene, kirdy, physicsSystem } = context;
       const projectile = spawnProjectile({ scene, kirdy }, 'fire-attack');
       if (!projectile) {
         return;
@@ -60,7 +72,7 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
         }
       });
       physicsSystem?.registerPlayerAttack(projectile, { damage: ABILITY_PROJECTILE_DAMAGE });
-      scene.sound?.play?.('ability-fire-attack');
+      playAbilitySound(context, 'ability-fire-attack');
     },
   },
   ice: {
@@ -73,7 +85,8 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
       kirdy.sprite.clearTint?.();
       kirdy.sprite.setTexture?.('kirdy');
     },
-    performAttack: ({ scene, kirdy, physicsSystem }) => {
+    performAttack: (context) => {
+      const { scene, kirdy, physicsSystem } = context;
       const projectile = spawnProjectile({ scene, kirdy }, 'ice-attack');
       if (!projectile) {
         return;
@@ -95,7 +108,7 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
         }
       });
       physicsSystem?.registerPlayerAttack(projectile, { damage: ABILITY_PROJECTILE_DAMAGE });
-      scene.sound?.play?.('ability-ice-attack');
+      playAbilitySound(context, 'ability-ice-attack');
     },
   },
   sword: {
@@ -108,7 +121,8 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
       kirdy.sprite.clearTint?.();
       kirdy.sprite.setTexture?.('kirdy');
     },
-    performAttack: ({ scene, kirdy, physicsSystem }) => {
+    performAttack: (context) => {
+      const { scene, kirdy, physicsSystem } = context;
       const slash = spawnSlash({ scene, kirdy }, 'sword-slash');
       if (!slash) {
         return;
@@ -125,7 +139,7 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
         }
       });
       physicsSystem?.registerPlayerAttack(slash, { damage: ABILITY_PROJECTILE_DAMAGE });
-      scene.sound?.play?.('ability-sword-attack');
+      playAbilitySound(context, 'ability-sword-attack');
     },
   },
 };
@@ -137,7 +151,17 @@ export class AbilitySystem {
     private readonly scene: Phaser.Scene,
     private readonly kirdy: Kirdy,
     private readonly physicsSystem?: PhysicsSystem,
+    private readonly audioManager?: AudioManager,
   ) {}
+
+  private buildAbilityContext(): AbilityContext {
+    return {
+      scene: this.scene,
+      kirdy: this.kirdy,
+      physicsSystem: this.physicsSystem,
+      audioManager: this.audioManager,
+    };
+  }
 
   update(actions: ActionStateMap) {
     if (!this.currentAbility) {
@@ -152,7 +176,7 @@ export class AbilitySystem {
     }
 
     if (actions.spit?.justPressed) {
-      this.currentAbility.performAttack?.({ scene: this.scene, kirdy: this.kirdy, physicsSystem: this.physicsSystem });
+      this.currentAbility.performAttack?.(this.buildAbilityContext());
       this.kirdy.sprite.anims?.play?.(`kirdy-${this.currentAbility.type}-attack`, true);
     }
   }
@@ -169,7 +193,7 @@ export class AbilitySystem {
     }
 
     if (this.currentAbility?.type === abilityType) {
-      definition.onAcquire?.({ scene: this.scene, kirdy: this.kirdy, physicsSystem: this.physicsSystem });
+      definition.onAcquire?.(this.buildAbilityContext());
       this.kirdy.sprite.setData?.('equippedAbility', abilityType);
       this.scene.events?.emit?.('ability-acquired', { abilityType });
       return;
@@ -177,7 +201,7 @@ export class AbilitySystem {
 
     this.clearAbility();
     this.currentAbility = definition;
-    definition.onAcquire?.({ scene: this.scene, kirdy: this.kirdy, physicsSystem: this.physicsSystem });
+    definition.onAcquire?.(this.buildAbilityContext());
     this.kirdy.sprite.setData?.('equippedAbility', abilityType);
     this.scene.events?.emit?.('ability-acquired', { abilityType });
   }
@@ -191,7 +215,7 @@ export class AbilitySystem {
       return;
     }
 
-    this.currentAbility.onRemove?.({ scene: this.scene, kirdy: this.kirdy, physicsSystem: this.physicsSystem });
+    this.currentAbility.onRemove?.(this.buildAbilityContext());
     this.kirdy.sprite.setData?.('equippedAbility', undefined);
     this.scene.events?.emit?.('ability-cleared', {});
     this.currentAbility = undefined;

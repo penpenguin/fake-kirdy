@@ -54,6 +54,36 @@ const AUDIO_ASSETS: ReadonlyArray<AudioAsset> = [
     urls: ['audio/bgm-main.ogg', 'audio/bgm-main.mp3'],
     fallbackUrl: 'audio/bgm-main.mp3',
   },
+  {
+    key: 'kirdy-inhale',
+    urls: ['audio/sfx/kirdy-inhale.ogg', 'audio/sfx/kirdy-inhale.mp3'],
+    fallbackUrl: 'audio/sfx/kirdy-inhale.mp3',
+  },
+  {
+    key: 'kirdy-swallow',
+    urls: ['audio/sfx/kirdy-swallow.ogg', 'audio/sfx/kirdy-swallow.mp3'],
+    fallbackUrl: 'audio/sfx/kirdy-swallow.mp3',
+  },
+  {
+    key: 'kirdy-spit',
+    urls: ['audio/sfx/kirdy-spit.ogg', 'audio/sfx/kirdy-spit.mp3'],
+    fallbackUrl: 'audio/sfx/kirdy-spit.mp3',
+  },
+  {
+    key: 'ability-fire-attack',
+    urls: ['audio/sfx/ability-fire-attack.ogg', 'audio/sfx/ability-fire-attack.mp3'],
+    fallbackUrl: 'audio/sfx/ability-fire-attack.mp3',
+  },
+  {
+    key: 'ability-ice-attack',
+    urls: ['audio/sfx/ability-ice-attack.ogg', 'audio/sfx/ability-ice-attack.mp3'],
+    fallbackUrl: 'audio/sfx/ability-ice-attack.mp3',
+  },
+  {
+    key: 'ability-sword-attack',
+    urls: ['audio/sfx/ability-sword-attack.ogg', 'audio/sfx/ability-sword-attack.mp3'],
+    fallbackUrl: 'audio/sfx/ability-sword-attack.mp3',
+  },
 ];
 
 const DATA_ASSETS: ReadonlyArray<DataAsset> = [
@@ -135,4 +165,3 @@ export function queueAssetManifest(
     fallbackMap,
   };
 }
-

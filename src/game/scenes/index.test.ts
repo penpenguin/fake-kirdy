@@ -126,6 +126,27 @@ vi.mock('../physics/PhysicsSystem', () => ({
   PhysicsSystem: physicsSystemStubs.mock,
 }));
 
+const audioManagerStubs = vi.hoisted(() => {
+  const playBgm = vi.fn();
+  const setMasterVolume = vi.fn();
+  const setMuted = vi.fn();
+  const toggleMute = vi.fn();
+  const instance = { playBgm, setMasterVolume, setMuted, toggleMute };
+  const mock = vi.fn(() => instance);
+
+  return {
+    mock,
+    playBgm,
+    setMasterVolume,
+    setMuted,
+    toggleMute,
+  };
+});
+
+vi.mock('../audio/AudioManager', () => ({
+  AudioManager: audioManagerStubs.mock,
+}));
+
 const assetPipelineStubs = vi.hoisted(() => {
   const createAssetManifest = vi.fn(() => ({
     baseURL: '',
@@ -174,6 +195,11 @@ describe('Scene registration', () => {
     vi.clearAllMocks();
     physicsSystemStubs.mock.mockClear();
     physicsSystemStubs.registerPlayer.mockClear();
+    audioManagerStubs.mock.mockClear();
+    audioManagerStubs.playBgm.mockClear();
+    audioManagerStubs.setMasterVolume.mockClear();
+    audioManagerStubs.setMuted.mockClear();
+    audioManagerStubs.toggleMute.mockClear();
   });
 
   it('exposes stable scene keys for coordination', () => {
@@ -277,6 +303,28 @@ describe('Scene registration', () => {
     handler?.();
 
     expect(gameScene.scene.launch).toHaveBeenCalledWith(SceneKeys.Pause);
+  });
+
+  it('game scene starts background music when created', () => {
+    const gameScene = new GameScene();
+
+    gameScene.create();
+
+    expect(audioManagerStubs.mock).toHaveBeenCalledWith(gameScene);
+    expect(audioManagerStubs.playBgm).toHaveBeenCalledWith('bgm-main', expect.any(Object));
+  });
+
+  it('game scene forwards audio controls to the audio manager', () => {
+    const gameScene = new GameScene();
+
+    gameScene.create();
+    gameScene.setAudioVolume(0.6);
+    gameScene.setAudioMuted(true);
+    gameScene.toggleAudioMute();
+
+    expect(audioManagerStubs.setMasterVolume).toHaveBeenCalledWith(0.6);
+    expect(audioManagerStubs.setMuted).toHaveBeenCalledWith(true);
+    expect(audioManagerStubs.toggleMute).toHaveBeenCalled();
   });
 
   it('pause scene resumes gameplay and closes itself', () => {

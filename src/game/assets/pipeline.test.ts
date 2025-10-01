@@ -85,4 +85,21 @@ describe('asset pipeline manifest', () => {
     expect(overridden.baseURL).toBe('https://cdn.example.com/kirdy');
     expect(loader.setBaseURL).toHaveBeenCalledWith('https://cdn.example.com/kirdy');
   });
+
+  it('lists background music and core sound effect assets', () => {
+    const manifest = createAssetManifest();
+    const audioKeys = manifest.audio.map((asset) => asset.key);
+
+    expect(audioKeys).toEqual(
+      expect.arrayContaining([
+        'bgm-main',
+        'kirdy-inhale',
+        'kirdy-swallow',
+        'kirdy-spit',
+        'ability-fire-attack',
+        'ability-ice-attack',
+        'ability-sword-attack',
+      ]),
+    );
+  });
 });

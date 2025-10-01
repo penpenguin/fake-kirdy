@@ -25,6 +25,7 @@ import { SaveManager, type GameProgressSnapshot } from '../save/SaveManager';
 import { createAssetManifest, queueAssetManifest, type AssetFallback } from '../assets/pipeline';
 import { PerformanceMonitor, type PerformanceMetrics } from '../performance/PerformanceMonitor';
 import { recordLowFpsEvent, recordStableFpsEvent } from '../performance/RenderingModePreference';
+import { AudioManager } from '../audio/AudioManager';
 
 export const SceneKeys = {
   Boot: 'BootScene',
@@ -193,6 +194,7 @@ export class GameScene extends Phaser.Scene {
   private lastSavedTileKey?: string;
   private performanceMonitor?: PerformanceMonitor;
   private readonly performanceRecoveryThresholdFps = 55;
+  private audioManager?: AudioManager;
 
   constructor() {
     super(buildConfig(SceneKeys.Game));
@@ -279,6 +281,9 @@ export class GameScene extends Phaser.Scene {
   create() {
     const savedProgress = this.initializeSaveManager();
 
+    this.audioManager = new AudioManager(this);
+    this.audioManager.playBgm('bgm-main', { volume: 1 });
+
     this.playerHP = savedProgress?.player.hp ?? this.playerMaxHP;
     this.playerScore = savedProgress?.player.score ?? 0;
     this.currentAbility = undefined;
@@ -315,7 +320,7 @@ export class GameScene extends Phaser.Scene {
     if (this.kirdy) {
       this.inhaleSystem = new InhaleSystem(this, this.kirdy);
       this.swallowSystem = new SwallowSystem(this, this.kirdy, this.inhaleSystem, this.physicsSystem);
-      this.abilitySystem = new AbilitySystem(this, this.kirdy, this.physicsSystem);
+      this.abilitySystem = new AbilitySystem(this, this.kirdy, this.physicsSystem, this.audioManager);
     }
 
     this.events?.on?.('ability-acquired', this.handleAbilityAcquired, this);
@@ -357,12 +362,26 @@ export class GameScene extends Phaser.Scene {
       this.progressDirty = false;
       this.lastSavedTileKey = undefined;
       this.performanceMonitor = undefined;
+      this.audioManager?.stopBgm();
+      this.audioManager = undefined;
     });
 
     this.hud?.updateHP({ current: this.playerHP, max: this.playerMaxHP });
     this.hud?.updateScore(this.playerScore);
 
     this.initializeExplorationSaveKey();
+  }
+
+  setAudioVolume(value: number) {
+    this.audioManager?.setMasterVolume(value);
+  }
+
+  setAudioMuted(muted: boolean) {
+    this.audioManager?.setMuted(muted);
+  }
+
+  toggleAudioMute() {
+    this.audioManager?.toggleMute();
   }
 
   pauseGame() {

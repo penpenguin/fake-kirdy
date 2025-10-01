@@ -1335,7 +1335,12 @@ describe('GameScene player integration', () => {
     scene.create();
 
     const createdPhysics = PhysicsSystemMock.mock.results[0]?.value;
-    expect(AbilitySystemMock).toHaveBeenCalledWith(scene, kirdyInstance, createdPhysics);
+    expect(AbilitySystemMock).toHaveBeenCalledWith(
+      scene,
+      kirdyInstance,
+      createdPhysics,
+      expect.anything(),
+    );
 
     scene.update(16, 16);
 
