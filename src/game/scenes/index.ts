@@ -254,13 +254,12 @@ export class GameScene extends Phaser.Scene {
     }
 
     const result = this.areaManager.updatePlayerPosition(playerPosition);
-    if (!result.areaChanged || !result.transition) {
-      return;
-    }
 
-    const { entryPosition } = result.transition;
-    this.kirdy.sprite.setPosition?.(entryPosition.x, entryPosition.y);
-    this.kirdy.sprite.setVelocity?.(0, 0);
+    if (result.areaChanged && result.transition) {
+      const { entryPosition } = result.transition;
+      this.kirdy.sprite.setPosition?.(entryPosition.x, entryPosition.y);
+      this.kirdy.sprite.setVelocity?.(0, 0);
+    }
 
     if (this.mapOverlay?.isVisible()) {
       this.refreshMapOverlay();

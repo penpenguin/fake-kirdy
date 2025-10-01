@@ -549,6 +549,75 @@ describe('GameScene player integration', () => {
     ]);
   });
 
+  it('updates the world map overlay while visible when exploration increases in the current area', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    let completion = 0.25;
+    areaManagerGetExplorationStateMock.mockImplementation((areaId: string) => {
+      if (areaId === 'central-hub') {
+        return {
+          visitedTiles: Math.round(20 * completion),
+          totalTiles: 20,
+          completion,
+        };
+      }
+
+      return { visitedTiles: 0, totalTiles: 0, completion: 0 };
+    });
+
+    const snapshot = createSnapshot();
+    playerInputUpdateMock.mockReturnValue(snapshot);
+
+    scene.create();
+
+    const mapToggleHandler = stubs.keyboard.on.mock.calls.find(([event]) => event === 'keydown-M')?.[1];
+    expect(mapToggleHandler).toBeInstanceOf(Function);
+
+    mapToggleHandler?.({});
+
+    expect(mapOverlayUpdateMock).toHaveBeenCalledWith([
+      {
+        id: 'central-hub',
+        name: 'Central Hub',
+        discovered: true,
+        isCurrent: true,
+        exploration: { visitedTiles: 5, totalTiles: 20, completion: 0.25 },
+      },
+      {
+        id: 'mirror-corridor',
+        name: 'Mirror Corridor',
+        discovered: false,
+        isCurrent: false,
+        exploration: { visitedTiles: 0, totalTiles: 0, completion: 0 },
+      },
+    ]);
+
+    mapOverlayUpdateMock.mockClear();
+    mapOverlayIsVisibleMock.mockReturnValue(true);
+    completion = 0.6;
+
+    scene.update(0, 16);
+
+    expect(mapOverlayUpdateMock).toHaveBeenCalledWith([
+      {
+        id: 'central-hub',
+        name: 'Central Hub',
+        discovered: true,
+        isCurrent: true,
+        exploration: { visitedTiles: 12, totalTiles: 20, completion: 0.6 },
+      },
+      {
+        id: 'mirror-corridor',
+        name: 'Mirror Corridor',
+        discovered: false,
+        isCurrent: false,
+        exploration: { visitedTiles: 0, totalTiles: 0, completion: 0 },
+      },
+    ]);
+  });
+
   it('spawns a Wabble Bee enemy and adds it to the update loop and inhale targets', () => {
     const scene = new GameScene();
     const updateSpy = vi.fn();
