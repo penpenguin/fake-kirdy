@@ -147,6 +147,18 @@ describe('PhysicsSystem', () => {
     expect(projectileSprite.destroy).toHaveBeenCalled();
     expect(eventsEmit).toHaveBeenCalledWith('player-attack-hit-enemy', { enemy, damage: 3 });
   });
+
+  it('uses recycle handlers when destroying projectiles', () => {
+    const system = new PhysicsSystem(scene);
+    const projectileSprite = createSpriteStub();
+    const recycle = vi.fn().mockReturnValue(true);
+
+    system.registerPlayerAttack(projectileSprite as any, { damage: 1, recycle });
+    system.destroyProjectile(projectileSprite as any);
+
+    expect(recycle).toHaveBeenCalledWith(projectileSprite);
+    expect(projectileSprite.destroy).not.toHaveBeenCalled();
+  });
 });
 
 function createSpriteStub() {

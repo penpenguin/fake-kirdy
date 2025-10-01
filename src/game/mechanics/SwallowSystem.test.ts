@@ -59,17 +59,26 @@ describe('SwallowSystem', () => {
     setOnCollide: ReturnType<typeof vi.fn>;
     setName: ReturnType<typeof vi.fn>;
     setFixedRotation: ReturnType<typeof vi.fn>;
+    setActive: ReturnType<typeof vi.fn>;
+    setVisible: ReturnType<typeof vi.fn>;
+    setPosition: ReturnType<typeof vi.fn>;
+    setVelocity: ReturnType<typeof vi.fn>;
+    setData: ReturnType<typeof vi.fn>;
+    getData: ReturnType<typeof vi.fn>;
     once: ReturnType<typeof vi.fn>;
     destroy: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
     playSound = vi.fn();
-    delayedCall = vi.fn();
+    const removeTimer = vi.fn();
+    delayedCall = vi.fn().mockReturnValue({ remove: removeTimer });
     physicsSystem = {
       registerPlayerAttack: vi.fn(),
       destroyProjectile: vi.fn(),
     };
+
+    const starProjectileData = new Map<string, unknown>();
 
     starProjectile = {
       setVelocityX: vi.fn().mockReturnThis(),
@@ -79,6 +88,15 @@ describe('SwallowSystem', () => {
       setOnCollide: vi.fn().mockReturnThis(),
       setName: vi.fn().mockReturnThis(),
       setFixedRotation: vi.fn().mockReturnThis(),
+      setActive: vi.fn().mockReturnThis(),
+      setVisible: vi.fn().mockReturnThis(),
+      setPosition: vi.fn().mockReturnThis(),
+      setVelocity: vi.fn().mockReturnThis(),
+      setData: vi.fn((key: string, value: unknown) => {
+        starProjectileData.set(key, value);
+        return starProjectile;
+      }),
+      getData: vi.fn((key: string) => starProjectileData.get(key)),
       once: vi.fn().mockReturnThis(),
       destroy: vi.fn(),
     };
@@ -171,13 +189,17 @@ describe('SwallowSystem', () => {
     );
 
     expect(playSound).toHaveBeenCalledWith('kirdy-spit');
-    expect(addSprite).toHaveBeenCalledWith(128, 256, 'star-bullet');
+    expect(addSprite).toHaveBeenCalledWith(0, 0, 'star-bullet');
+    expect(starProjectile.setPosition).toHaveBeenCalledWith(128, 256);
     expect(starProjectile.setVelocityX).toHaveBeenCalledWith(350);
     expect(starProjectile.setIgnoreGravity).toHaveBeenCalledWith(true);
     expect(starProjectile.setOnCollide).toHaveBeenCalledWith(expect.any(Function));
-    expect(starProjectile.once).toHaveBeenCalledWith('destroy', expect.any(Function));
+    expect(starProjectile.once).not.toHaveBeenCalled();
     expect(delayedCall).toHaveBeenCalled();
-    expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(starProjectile, { damage: 2 });
+    expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(
+      starProjectile,
+      expect.objectContaining({ damage: 2, recycle: expect.any(Function) }),
+    );
     expect(target.destroy).toHaveBeenCalled();
     expect(inhaleSystem.releaseCapturedTarget).toHaveBeenCalled();
   });
@@ -209,5 +231,52 @@ describe('SwallowSystem', () => {
 
     expect(addSprite).not.toHaveBeenCalled();
     expect(inhaleSystem.releaseCapturedTarget).not.toHaveBeenCalled();
+  });
+
+  it('reuses a pooled star projectile after it is recycled', () => {
+    const recycleCallbacks: Array<() => boolean> = [];
+    physicsSystem.registerPlayerAttack.mockImplementation((_, options) => {
+      if (options?.recycle) {
+        recycleCallbacks.push(options.recycle);
+      }
+    });
+
+    const secondTarget: FakeTarget = {
+      destroy: vi.fn(),
+      setVisible: vi.fn().mockReturnThis(),
+      setActive: vi.fn().mockReturnThis(),
+      setIgnoreGravity: vi.fn().mockReturnThis(),
+      setStatic: vi.fn().mockReturnThis(),
+      getData: vi.fn(),
+    } as unknown as FakeTarget;
+
+    kirdy.getMouthContent
+      .mockReturnValueOnce(target)
+      .mockReturnValueOnce(secondTarget);
+
+    const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any, physicsSystem as any);
+
+    system.update(
+      buildActions({
+        spit: { isDown: true, justPressed: true },
+      }),
+    );
+
+    expect(addSprite).toHaveBeenCalledTimes(1);
+
+    const recycler = recycleCallbacks.pop();
+    expect(recycler).toBeTypeOf('function');
+    recycler?.(starProjectile as any);
+
+    system.update(
+      buildActions({
+        spit: { isDown: true, justPressed: true },
+      }),
+    );
+
+    expect(addSprite).toHaveBeenCalledTimes(1);
+    expect(starProjectile.setActive).toHaveBeenCalledWith(true);
+    expect(starProjectile.setVisible).toHaveBeenCalledWith(true);
+    expect(starProjectile.setPosition).toHaveBeenCalledWith(128, 256);
   });
 });

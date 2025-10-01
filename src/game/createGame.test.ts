@@ -25,6 +25,8 @@ vi.mock('phaser', () => {
       Game: PhaserGameMock,
       Scene: class {},
       AUTO: 'AUTO',
+      WEBGL: 'WEBGL',
+      CANVAS: 'CANVAS',
       Scale: { FIT: 'FIT', CENTER_BOTH: 'CENTER_BOTH' },
       Types: {
         Scenes: {
@@ -34,6 +36,14 @@ vi.mock('phaser', () => {
     },
   };
 });
+
+const renderingPreferenceStubs = vi.hoisted(() => ({
+  getPreferredRenderer: vi.fn().mockReturnValue('auto'),
+  recordLowFpsEvent: vi.fn(),
+  recordStableFpsEvent: vi.fn(),
+}));
+
+vi.mock('./performance/RenderingModePreference', () => renderingPreferenceStubs);
 
 import { createGame } from './createGame';
 import { coreScenes } from './scenes';
@@ -49,6 +59,8 @@ describe('createGame', () => {
     }
     container = found as HTMLDivElement;
     (PhaserGameMock as any).lastConfig = undefined;
+    (globalThis as any).WebGLRenderingContext = function WebGLRenderingContext() {};
+    renderingPreferenceStubs.getPreferredRenderer.mockReturnValue('auto');
   });
 
   it('creates a Phaser.Game instance attached to the provided container', () => {
@@ -64,7 +76,7 @@ describe('createGame', () => {
 
     const config = (PhaserGameMock as any).lastConfig;
     expect(config).toBeDefined();
-    expect(config.type).toBe('AUTO');
+    expect(config.type).toBe('WEBGL');
     expect(config.width).toBeGreaterThan(0);
     expect(config.height).toBeGreaterThan(0);
     expect(config.scene).toBeDefined();
@@ -75,5 +87,23 @@ describe('createGame', () => {
 
     const config = (PhaserGameMock as any).lastConfig;
     expect(config.scene).toEqual(coreScenes);
+  });
+
+  it('レンダリングプリファレンスがキャンバスを要求したら強制する', () => {
+    renderingPreferenceStubs.getPreferredRenderer.mockReturnValue('canvas');
+
+    createGame(container);
+
+    const config = (PhaserGameMock as any).lastConfig;
+    expect(config.type).toBe('CANVAS');
+  });
+
+  it('WebGLが利用できない場合はキャンバスにフォールバックする', () => {
+    delete (globalThis as any).WebGLRenderingContext;
+
+    createGame(container);
+
+    const config = (PhaserGameMock as any).lastConfig;
+    expect(config.type).toBe('CANVAS');
   });
 });

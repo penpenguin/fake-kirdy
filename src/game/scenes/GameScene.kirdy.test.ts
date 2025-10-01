@@ -32,6 +32,11 @@ const stubs = vi.hoisted(() => {
     public matter = matterFactory;
     public scene = scenePlugin;
     public events = events;
+    public cameras = {
+      main: {
+        worldView: { x: 0, y: 0, width: 800, height: 600 },
+      },
+    };
   }
 
   return { keyboard, scenePlugin, matterFactory, events, PhaserSceneMock };
@@ -41,6 +46,8 @@ vi.mock('phaser', () => ({
   default: {
     Scene: stubs.PhaserSceneMock,
     AUTO: 'AUTO',
+    WEBGL: 'WEBGL',
+    CANVAS: 'CANVAS',
     Scale: { FIT: 'FIT', CENTER_BOTH: 'CENTER_BOTH' },
     Types: {
       Scenes: {
@@ -49,6 +56,24 @@ vi.mock('phaser', () => ({
     },
   },
 }));
+
+const performanceMonitorStubs = vi.hoisted(() => {
+  const update = vi.fn();
+  const monitorInstance = { update };
+  const monitorMock = vi.fn((_options?: unknown) => monitorInstance);
+  return { update, monitorMock };
+});
+
+vi.mock('../performance/PerformanceMonitor', () => ({
+  PerformanceMonitor: performanceMonitorStubs.monitorMock,
+}));
+
+const renderingPreferenceStubs = vi.hoisted(() => ({
+  recordLowFpsEvent: vi.fn(),
+  recordStableFpsEvent: vi.fn(),
+}));
+
+vi.mock('../performance/RenderingModePreference', () => renderingPreferenceStubs);
 
 const createKirdyMock = vi.hoisted(() => vi.fn());
 
@@ -317,6 +342,10 @@ describe('GameScene player integration', () => {
       lastKnownPlayerPosition: { ...defaultAreaState.playerSpawnPosition },
     });
     mapOverlayIsVisibleMock.mockReturnValue(false);
+    performanceMonitorStubs.monitorMock.mockClear();
+    performanceMonitorStubs.update.mockClear();
+    renderingPreferenceStubs.recordLowFpsEvent.mockClear();
+    renderingPreferenceStubs.recordStableFpsEvent.mockClear();
   });
 
   function createSnapshot(overrides?: Partial<ReturnType<typeof playerInputUpdateMock>>) {
@@ -384,6 +413,115 @@ describe('GameScene player integration', () => {
     expect(PhysicsSystemMock).toHaveBeenCalledWith(scene);
     expect(physicsRegisterPlayerMock).toHaveBeenCalledWith(kirdyInstance);
     expect(AreaManagerMock).toHaveBeenCalled();
+  });
+
+  it('フレーム毎にパフォーマンスモニターを更新する', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    const snapshot = createSnapshot();
+    playerInputUpdateMock.mockReturnValue(snapshot);
+
+    scene.create();
+
+    scene.update(100, 16);
+
+    expect(performanceMonitorStubs.monitorMock).toHaveBeenCalled();
+    expect(performanceMonitorStubs.update).toHaveBeenCalledWith(16);
+  });
+
+  it('低FPS検出時にレンダリングモードの降格を記録しイベントを発火する', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const options = performanceMonitorStubs.monitorMock.mock.calls[0]?.[0] as {
+      onLowFps?: (metrics: any) => void;
+    };
+
+    expect(options?.onLowFps).toBeTypeOf('function');
+
+    const metrics = {
+      frameCount: 5,
+      durationMs: 320,
+      averageFps: 15,
+      averageFrameTimeMs: 64,
+      timestamp: Date.now(),
+    };
+
+    options?.onLowFps?.(metrics);
+
+    expect(renderingPreferenceStubs.recordLowFpsEvent).toHaveBeenCalled();
+    expect(stubs.events.emit).toHaveBeenCalledWith('performance:low-fps', metrics);
+  });
+
+  it('高FPS計測で低FPS記録をクリアする', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const options = performanceMonitorStubs.monitorMock.mock.calls[0]?.[0] as {
+      onSample?: (metrics: any) => void;
+    };
+
+    expect(options?.onSample).toBeTypeOf('function');
+
+    options?.onSample?.({
+      frameCount: 6,
+      durationMs: 100,
+      averageFps: 60,
+      averageFrameTimeMs: 16.6,
+      timestamp: Date.now(),
+    });
+
+    expect(renderingPreferenceStubs.recordStableFpsEvent).toHaveBeenCalled();
+  });
+
+  it('画面外の敵を一時的に非アクティブ化し、戻った際に復帰させる', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const firstEnemy = scene.spawnWabbleBee({ x: 48, y: 48 });
+    (scene as any).enemySpawnCooldownRemaining = 0;
+    const secondEnemy = scene.spawnWabbleBee({ x: 400, y: 400 });
+
+    if (!firstEnemy || !secondEnemy) {
+      throw new Error('Enemy spawn failed in test setup');
+    }
+
+    scene.cameras.main.worldView = { x: 0, y: 0, width: 120, height: 120 } as any;
+
+    firstEnemy.sprite.x = 60;
+    firstEnemy.sprite.y = 60;
+    secondEnemy.sprite.x = 500;
+    secondEnemy.sprite.y = 500;
+
+    scene.update(300, 16);
+
+    expect(secondEnemy.sprite.setActive).toHaveBeenCalledWith(false);
+    expect(secondEnemy.sprite.setVisible).toHaveBeenCalledWith(false);
+
+    secondEnemy.sprite.setActive.mockClear();
+    secondEnemy.sprite.setVisible.mockClear();
+
+    secondEnemy.sprite.x = 80;
+    secondEnemy.sprite.y = 80;
+
+    scene.update(320, 16);
+
+    expect(secondEnemy.sprite.setActive).toHaveBeenCalledWith(true);
+    expect(secondEnemy.sprite.setVisible).toHaveBeenCalledWith(true);
   });
 
   it('repositions Kirdy when the area manager triggers an area transition', () => {

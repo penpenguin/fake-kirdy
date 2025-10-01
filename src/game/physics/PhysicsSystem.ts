@@ -25,12 +25,18 @@ export const PhysicsCategory = {
 
 type PlayerAttackOptions = {
   damage?: number;
+  recycle?: (projectile: MatterGameObject) => boolean | void;
+};
+
+type ProjectileMetadata = {
+  damage: number;
+  recycle?: (projectile: MatterGameObject) => boolean | void;
 };
 
 export class PhysicsSystem {
   private readonly enemyByObject = new Map<MatterGameObject, Enemy>();
   private readonly terrainObjects = new Set<MatterGameObject>();
-  private readonly projectileData = new Map<MatterGameObject, { damage: number }>();
+  private readonly projectileData = new Map<MatterGameObject, ProjectileMetadata>();
   private readonly terrainContactIds = new Set<number>();
   private playerSprite?: MatterGameObject;
 
@@ -74,18 +80,25 @@ export class PhysicsSystem {
     const damage = Math.max(0, Math.floor(options.damage ?? 1));
     projectile.setCollisionCategory?.(PhysicsCategory.PlayerAttack);
     projectile.setCollidesWith?.(PhysicsCategory.Enemy | PhysicsCategory.Terrain);
-    this.projectileData.set(projectile, { damage });
+    const recycle = typeof options.recycle === 'function' ? options.recycle : undefined;
+    this.projectileData.set(projectile, { damage, recycle });
     projectile.once?.('destroy', () => {
       this.projectileData.delete(projectile);
     });
   }
 
   destroyProjectile(projectile: MatterGameObject) {
-    if (!this.projectileData.has(projectile)) {
-      return;
+    const metadata = this.projectileData.get(projectile);
+    if (metadata) {
+      this.projectileData.delete(projectile);
+      if (metadata.recycle) {
+        const handled = metadata.recycle(projectile);
+        if (handled) {
+          return;
+        }
+      }
     }
 
-    this.projectileData.delete(projectile);
     projectile.destroy?.();
   }
 

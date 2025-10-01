@@ -23,6 +23,8 @@ import { MapOverlay, createMapSummaries } from '../ui/MapOverlay';
 import { Hud } from '../ui/Hud';
 import { SaveManager, type GameProgressSnapshot } from '../save/SaveManager';
 import { createAssetManifest, queueAssetManifest, type AssetFallback } from '../assets/pipeline';
+import { PerformanceMonitor, type PerformanceMetrics } from '../performance/PerformanceMonitor';
+import { recordLowFpsEvent, recordStableFpsEvent } from '../performance/RenderingModePreference';
 
 export const SceneKeys = {
   Boot: 'BootScene',
@@ -170,6 +172,7 @@ export class GameScene extends Phaser.Scene {
   private readonly maxActiveEnemies = 3;
   private readonly enemyClusterLimit = 2;
   private readonly enemySafetyRadius = 96;
+  private readonly enemyCullingPadding = 96;
   private readonly enemySpawnCooldownMs = 1200;
   private enemySpawnCooldownRemaining = 0;
   private static readonly PLAYER_SPAWN = { x: 160, y: 360 } as const;
@@ -188,6 +191,8 @@ export class GameScene extends Phaser.Scene {
   private saveManager?: SaveManager;
   private progressDirty = false;
   private lastSavedTileKey?: string;
+  private performanceMonitor?: PerformanceMonitor;
+  private readonly performanceRecoveryThresholdFps = 55;
 
   constructor() {
     super(buildConfig(SceneKeys.Game));
@@ -230,6 +235,21 @@ export class GameScene extends Phaser.Scene {
     this.requestSave();
   };
 
+  private handlePerformanceSample(metrics: PerformanceMetrics) {
+    if (!Number.isFinite(metrics.averageFps)) {
+      return;
+    }
+
+    if (metrics.averageFps >= this.performanceRecoveryThresholdFps) {
+      recordStableFpsEvent();
+    }
+  }
+
+  private handleLowFps(metrics: PerformanceMetrics) {
+    recordLowFpsEvent();
+    this.events?.emit?.('performance:low-fps', metrics);
+  }
+
   public damagePlayer(amount: number) {
     if (!Number.isFinite(amount)) {
       return;
@@ -265,6 +285,13 @@ export class GameScene extends Phaser.Scene {
     this.isGameOver = false;
     this.progressDirty = false;
     this.physicsSystem = new PhysicsSystem(this);
+    this.performanceMonitor = new PerformanceMonitor({
+      sampleWindowMs: 500,
+      lowFpsThreshold: 40,
+      lowFpsSampleCount: 3,
+      onSample: (metrics) => this.handlePerformanceSample(metrics),
+      onLowFps: (metrics) => this.handleLowFps(metrics),
+    });
 
     const areaSnapshot = savedProgress?.area as AreaManagerSnapshot | undefined;
     const startingAreaId = areaSnapshot?.currentAreaId ?? AREA_IDS.CentralHub;
@@ -329,6 +356,7 @@ export class GameScene extends Phaser.Scene {
       this.saveManager = undefined;
       this.progressDirty = false;
       this.lastSavedTileKey = undefined;
+      this.performanceMonitor = undefined;
     });
 
     this.hud?.updateHP({ current: this.playerHP, max: this.playerMaxHP });
@@ -342,6 +370,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number) {
+    this.performanceMonitor?.update(delta);
+
     const snapshot = this.playerInput?.update();
     if (!snapshot) {
       return;
@@ -424,8 +454,20 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
+    const bounds = this.getCullingBounds();
+
     this.enemies.forEach((enemy) => {
-      if (!enemy.isDefeated()) {
+      if (enemy.isDefeated()) {
+        return;
+      }
+
+      const position = this.getEnemyPosition(enemy);
+      const inView = bounds ? this.isWithinBounds(position, bounds) : true;
+
+      enemy.sprite.setActive?.(inView);
+      enemy.sprite.setVisible?.(inView);
+
+      if (inView) {
         enemy.update(delta);
       }
     });
@@ -526,6 +568,26 @@ export class GameScene extends Phaser.Scene {
       x: sprite.x ?? sprite.body?.position?.x ?? 0,
       y: sprite.y ?? sprite.body?.position?.y ?? 0,
     };
+  }
+
+  private getCullingBounds() {
+    const camera = this.cameras?.main;
+    const view = camera?.worldView as { x: number; y: number; width: number; height: number } | undefined;
+    if (!view) {
+      return undefined;
+    }
+
+    const padding = this.enemyCullingPadding;
+    return {
+      left: view.x - padding,
+      right: view.x + view.width + padding,
+      top: view.y - padding,
+      bottom: view.y + view.height + padding,
+    };
+  }
+
+  private isWithinBounds(position: { x: number; y: number }, bounds: { left: number; right: number; top: number; bottom: number }) {
+    return position.x >= bounds.left && position.x <= bounds.right && position.y >= bounds.top && position.y <= bounds.bottom;
   }
 
   private getDistanceSquared(a: { x: number; y: number }, b: { x: number; y: number }) {

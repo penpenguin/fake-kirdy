@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { coreScenes } from './scenes';
+import { getPreferredRenderer } from './performance/RenderingModePreference';
 
 export interface CreateGameOptions {
   config?: Partial<Phaser.Types.Core.GameConfig>;
@@ -14,7 +15,7 @@ export function createGame(parent: HTMLElement, options: CreateGameOptions = {})
   }
 
   const baseConfig: Phaser.Types.Core.GameConfig = {
-    type: Phaser.AUTO,
+    type: determineRendererType(),
     parent,
     width: DEFAULT_WIDTH,
     height: DEFAULT_HEIGHT,
@@ -37,4 +38,25 @@ export function createGame(parent: HTMLElement, options: CreateGameOptions = {})
   };
 
   return new Phaser.Game(mergedConfig);
+}
+
+function determineRendererType() {
+  const preferred = getPreferredRenderer();
+  if (preferred === 'canvas') {
+    return Phaser.CANVAS ?? Phaser.AUTO;
+  }
+
+  if (isWebglSupported()) {
+    return Phaser.WEBGL ?? Phaser.AUTO;
+  }
+
+  return Phaser.CANVAS ?? Phaser.AUTO;
+}
+
+function isWebglSupported() {
+  if (typeof globalThis === 'undefined') {
+    return false;
+  }
+
+  return typeof (globalThis as any).WebGLRenderingContext !== 'undefined';
 }
