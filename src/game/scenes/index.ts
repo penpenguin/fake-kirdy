@@ -18,9 +18,10 @@ import {
   type DrontoDurtOptions,
 } from '../enemies';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
-import { AreaManager } from '../world/AreaManager';
+import { AreaManager, AREA_IDS, type AreaManagerSnapshot, type Vector2 } from '../world/AreaManager';
 import { MapOverlay, createMapSummaries } from '../ui/MapOverlay';
 import { Hud } from '../ui/Hud';
+import { SaveManager, type GameProgressSnapshot } from '../save/SaveManager';
 
 export const SceneKeys = {
   Boot: 'BootScene',
@@ -107,6 +108,9 @@ export class GameScene extends Phaser.Scene {
   private currentAbility?: AbilityType;
   private readonly scorePerEnemy = 100;
   private isGameOver = false;
+  private saveManager?: SaveManager;
+  private progressDirty = false;
+  private lastSavedTileKey?: string;
 
   constructor() {
     super(buildConfig(SceneKeys.Game));
@@ -119,16 +123,19 @@ export class GameScene extends Phaser.Scene {
 
     this.currentAbility = event.abilityType;
     this.hud?.updateAbility(event.abilityType);
+    this.requestSave();
   };
 
   private readonly handleAbilityCleared = () => {
     this.currentAbility = undefined;
     this.hud?.updateAbility(undefined);
+    this.requestSave();
   };
 
   private readonly handleEnemyDefeated = () => {
     this.playerScore += this.scorePerEnemy;
     this.hud?.updateScore(this.playerScore);
+    this.requestSave();
   };
 
   private readonly handlePlayerDefeated = () => {
@@ -143,6 +150,7 @@ export class GameScene extends Phaser.Scene {
       ability: this.currentAbility,
       maxHP: this.playerMaxHP,
     });
+    this.requestSave();
   };
 
   public damagePlayer(amount: number) {
@@ -167,18 +175,27 @@ export class GameScene extends Phaser.Scene {
     if (this.playerHP <= 0) {
       this.handlePlayerDefeated();
     }
+
+    this.requestSave();
   }
 
   create() {
-    this.playerHP = this.playerMaxHP;
-    this.playerScore = 0;
+    const savedProgress = this.initializeSaveManager();
+
+    this.playerHP = savedProgress?.player.hp ?? this.playerMaxHP;
+    this.playerScore = savedProgress?.player.score ?? 0;
     this.currentAbility = undefined;
     this.isGameOver = false;
+    this.progressDirty = false;
     this.physicsSystem = new PhysicsSystem(this);
-    this.areaManager = new AreaManager();
+
+    const areaSnapshot = savedProgress?.area as AreaManagerSnapshot | undefined;
+    const startingAreaId = areaSnapshot?.currentAreaId ?? AREA_IDS.CentralHub;
+    this.areaManager = new AreaManager(startingAreaId, undefined, areaSnapshot);
     this.mapOverlay = new MapOverlay(this);
     this.hud = new Hud(this);
-    const spawn = this.areaManager.getCurrentAreaState().playerSpawnPosition ?? GameScene.PLAYER_SPAWN;
+
+    const spawn = this.determineSpawnPosition();
     const pauseHandler = () => this.pauseGame();
     this.input?.keyboard?.once?.('keydown-ESC', pauseHandler);
     this.mapToggleHandler = () => this.toggleMapOverlay();
@@ -200,6 +217,12 @@ export class GameScene extends Phaser.Scene {
     this.events?.on?.('ability-acquired', this.handleAbilityAcquired, this);
     this.events?.on?.('ability-cleared', this.handleAbilityCleared, this);
     this.events?.on?.('enemy-defeated', this.handleEnemyDefeated, this);
+
+    if (savedProgress?.player.ability) {
+      this.abilitySystem?.applySwallowedPayload({ abilityType: savedProgress.player.ability } as SwallowedPayload);
+    } else {
+      this.hud?.updateAbility(undefined);
+    }
 
     this.events?.once?.('shutdown', () => {
       this.playerInput?.destroy();
@@ -226,11 +249,15 @@ export class GameScene extends Phaser.Scene {
       this.playerScore = 0;
       this.currentAbility = undefined;
       this.isGameOver = false;
+      this.saveManager = undefined;
+      this.progressDirty = false;
+      this.lastSavedTileKey = undefined;
     });
 
     this.hud?.updateHP({ current: this.playerHP, max: this.playerMaxHP });
-    this.hud?.updateAbility(undefined);
     this.hud?.updateScore(this.playerScore);
+
+    this.initializeExplorationSaveKey();
   }
 
   pauseGame() {
@@ -256,6 +283,10 @@ export class GameScene extends Phaser.Scene {
     this.abilitySystem?.update(snapshot.actions);
     this.updateEnemies(delta);
     this.updateAreaState();
+
+    if (this.progressDirty) {
+      this.persistProgress();
+    }
   }
 
   getPlayerInputSnapshot(): PlayerInputSnapshot | undefined {
@@ -348,6 +379,8 @@ export class GameScene extends Phaser.Scene {
       this.kirdy.sprite.setPosition?.(entryPosition.x, entryPosition.y);
       this.kirdy.sprite.setVelocity?.(0, 0);
     }
+
+    this.trackExplorationProgress(result.areaChanged);
 
     if (this.mapOverlay?.isVisible()) {
       this.refreshMapOverlay();
@@ -474,6 +507,105 @@ export class GameScene extends Phaser.Scene {
       x: sprite.x ?? sprite.body?.position?.x ?? 0,
       y: sprite.y ?? sprite.body?.position?.y ?? 0,
     };
+  }
+
+  private initializeSaveManager(): GameProgressSnapshot | undefined {
+    this.saveManager = new SaveManager();
+    return this.saveManager.load();
+  }
+
+  private determineSpawnPosition(): Vector2 {
+    if (this.areaManager) {
+      const lastKnown = this.areaManager.getLastKnownPlayerPosition();
+      if (lastKnown) {
+        return { x: lastKnown.x, y: lastKnown.y } satisfies Vector2;
+      }
+
+      const areaState = this.areaManager.getCurrentAreaState();
+      if (areaState?.playerSpawnPosition) {
+        return { ...areaState.playerSpawnPosition } satisfies Vector2;
+      }
+    }
+
+    return { ...GameScene.PLAYER_SPAWN } satisfies Vector2;
+  }
+
+  private initializeExplorationSaveKey() {
+    if (!this.areaManager) {
+      this.lastSavedTileKey = undefined;
+      return;
+    }
+
+    const position = this.areaManager.getLastKnownPlayerPosition();
+    this.lastSavedTileKey = this.buildTileKey(position);
+  }
+
+  private trackExplorationProgress(areaChanged: boolean) {
+    if (!this.areaManager) {
+      return;
+    }
+
+    const position = this.areaManager.getLastKnownPlayerPosition();
+    const key = this.buildTileKey(position);
+    if (!key) {
+      return;
+    }
+
+    if (!this.lastSavedTileKey) {
+      this.lastSavedTileKey = key;
+      return;
+    }
+
+    if (areaChanged || this.lastSavedTileKey !== key) {
+      this.lastSavedTileKey = key;
+      this.requestSave();
+    }
+  }
+
+  private buildTileKey(position?: Vector2) {
+    if (!this.areaManager || !position) {
+      return undefined;
+    }
+
+    const areaState = this.areaManager.getCurrentAreaState();
+    const coordinate = areaState.tileMap.getClampedTileCoordinate(position);
+    if (!coordinate) {
+      return undefined;
+    }
+
+    return `${areaState.definition.id}:${coordinate.column},${coordinate.row}`;
+  }
+
+  private requestSave() {
+    this.progressDirty = true;
+  }
+
+  private persistProgress() {
+    if (!this.saveManager || !this.areaManager) {
+      this.progressDirty = false;
+      return;
+    }
+
+    const areaSnapshot = this.areaManager.getPersistenceSnapshot();
+    const position = this.getPlayerPosition() ?? this.areaManager.getLastKnownPlayerPosition();
+    const playerPosition = position ?? { ...GameScene.PLAYER_SPAWN };
+
+    const snapshot: GameProgressSnapshot = {
+      player: {
+        hp: this.playerHP,
+        maxHP: this.playerMaxHP,
+        score: this.playerScore,
+        ability: this.currentAbility,
+        position: playerPosition,
+      },
+      area: {
+        ...areaSnapshot,
+        lastKnownPlayerPosition: playerPosition,
+      },
+    };
+
+    this.saveManager.save(snapshot);
+    this.progressDirty = false;
   }
 
   private toggleMapOverlay() {

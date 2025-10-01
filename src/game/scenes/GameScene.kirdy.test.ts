@@ -152,6 +152,9 @@ const areaManagerUpdateMock = vi.hoisted(() => vi.fn());
 const areaManagerGetDiscoveredMock = vi.hoisted(() => vi.fn());
 const areaManagerGetExplorationStateMock = vi.hoisted(() => vi.fn());
 const areaManagerGetAllDefinitionsMock = vi.hoisted(() => vi.fn());
+const areaManagerGetLastKnownPositionMock = vi.hoisted(() => vi.fn());
+const areaManagerGetSnapshotMock = vi.hoisted(() => vi.fn());
+const areaManagerRestoreMock = vi.hoisted(() => vi.fn());
 const AreaManagerMock = vi.hoisted(() =>
   vi.fn(() => ({
     getCurrentAreaState: areaManagerGetStateMock,
@@ -159,11 +162,33 @@ const AreaManagerMock = vi.hoisted(() =>
     getDiscoveredAreas: areaManagerGetDiscoveredMock,
     getExplorationState: areaManagerGetExplorationStateMock,
     getAllAreaMetadata: areaManagerGetAllDefinitionsMock,
+    getLastKnownPlayerPosition: areaManagerGetLastKnownPositionMock,
+    getPersistenceSnapshot: areaManagerGetSnapshotMock,
+    restoreFromSnapshot: areaManagerRestoreMock,
   })),
 );
 
 vi.mock('../world/AreaManager', () => ({
+  AREA_IDS: {
+    CentralHub: 'central-hub',
+    MirrorCorridor: 'mirror-corridor',
+  },
   AreaManager: AreaManagerMock,
+}));
+
+const saveManagerLoadMock = vi.hoisted(() => vi.fn());
+const saveManagerSaveMock = vi.hoisted(() => vi.fn());
+const saveManagerClearMock = vi.hoisted(() => vi.fn());
+const SaveManagerMock = vi.hoisted(() =>
+  vi.fn(() => ({
+    load: saveManagerLoadMock,
+    save: saveManagerSaveMock,
+    clear: saveManagerClearMock,
+  })),
+);
+
+vi.mock('../save/SaveManager', () => ({
+  SaveManager: SaveManagerMock,
 }));
 
 const mapOverlayShowMock = vi.hoisted(() => vi.fn());
@@ -245,6 +270,9 @@ describe('GameScene player integration', () => {
     physicsDestroyProjectileMock.mockClear();
     PhysicsSystemMock.mockClear();
     AreaManagerMock.mockClear();
+    areaManagerGetLastKnownPositionMock.mockClear();
+    areaManagerGetSnapshotMock.mockClear();
+    areaManagerRestoreMock.mockClear();
     mapOverlayShowMock.mockClear();
     mapOverlayHideMock.mockClear();
     mapOverlayUpdateMock.mockClear();
@@ -258,9 +286,14 @@ describe('GameScene player integration', () => {
     hudUpdateScoreMock.mockClear();
     hudDestroyMock.mockClear();
     HudMock.mockClear();
+    SaveManagerMock.mockClear();
+    saveManagerLoadMock.mockReset();
+    saveManagerSaveMock.mockReset();
+    saveManagerClearMock.mockReset();
+    const tileKeyFn = vi.fn().mockReturnValue({ column: 10, row: 5 });
     defaultAreaState = {
       definition: { id: 'central-hub' },
-      tileMap: { tileSize: 32, columns: 20, rows: 10 },
+      tileMap: { tileSize: 32, columns: 20, rows: 10, getClampedTileCoordinate: tileKeyFn },
       pixelBounds: { width: 640, height: 320 },
       playerSpawnPosition: { x: 320, y: 160 },
     };
@@ -276,6 +309,13 @@ describe('GameScene player integration', () => {
       { id: 'central-hub', name: 'Central Hub' },
       { id: 'mirror-corridor', name: 'Mirror Corridor' },
     ]);
+    areaManagerGetLastKnownPositionMock.mockReturnValue(defaultAreaState.playerSpawnPosition);
+    areaManagerGetSnapshotMock.mockReturnValue({
+      currentAreaId: 'central-hub',
+      discoveredAreas: ['central-hub'],
+      exploredTiles: {},
+      lastKnownPlayerPosition: { ...defaultAreaState.playerSpawnPosition },
+    });
     mapOverlayIsVisibleMock.mockReturnValue(false);
   });
 
@@ -383,6 +423,84 @@ describe('GameScene player integration', () => {
     });
     expect(kirdyInstance.sprite.setPosition).toHaveBeenCalledWith(entryPosition.x, entryPosition.y);
     expect(kirdyInstance.sprite.setVelocity).toHaveBeenCalledWith(0, 0);
+  });
+
+  it('保存済みの進行状況を復元し、HUDを更新する', () => {
+    const savedSnapshot = {
+      player: {
+        hp: 3,
+        maxHP: 6,
+        score: 450,
+        ability: 'ice',
+        position: { x: 480, y: 160 },
+      },
+      area: {
+        currentAreaId: 'mirror-corridor',
+        discoveredAreas: ['central-hub', 'mirror-corridor'],
+        exploredTiles: {
+          'mirror-corridor': ['0,0'],
+        },
+        lastKnownPlayerPosition: { x: 480, y: 160 },
+      },
+    } as any;
+
+    const savedAreaState = {
+      definition: { id: 'mirror-corridor' },
+      tileMap: {
+        tileSize: 32,
+        columns: 20,
+        rows: 10,
+        getClampedTileCoordinate: vi.fn().mockReturnValue({ column: 12, row: 4 }),
+      },
+      pixelBounds: { width: 640, height: 320 },
+      playerSpawnPosition: { x: 480, y: 160 },
+    };
+
+    areaManagerGetStateMock.mockReturnValue(savedAreaState as any);
+    areaManagerGetLastKnownPositionMock.mockReturnValue(savedSnapshot.area.lastKnownPlayerPosition);
+    saveManagerLoadMock.mockReturnValue(savedSnapshot);
+
+    const scene = new GameScene();
+    let capturedAbility: string | undefined;
+    abilitySystemApplyPayloadMock.mockImplementationOnce((payload: { abilityType?: string }) => {
+      capturedAbility = payload?.abilityType;
+    });
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    scene.create();
+
+    const abilityAcquiredHandler = stubs.events.on.mock.calls.find(([event]) => event === 'ability-acquired')?.[1];
+    abilityAcquiredHandler?.({ abilityType: capturedAbility });
+
+    expect(saveManagerLoadMock).toHaveBeenCalled();
+    expect(createKirdyMock).toHaveBeenCalledWith(scene, savedSnapshot.area.lastKnownPlayerPosition);
+    expect(hudUpdateHPMock).toHaveBeenLastCalledWith({ current: 3, max: 6 });
+    expect(hudUpdateScoreMock).toHaveBeenCalledWith(450);
+    expect(hudUpdateAbilityMock).toHaveBeenCalledWith('ice');
+  });
+
+  it('プレイヤーHPの変化時に進行状況を保存する', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    const snapshot = createSnapshot();
+    playerInputUpdateMock.mockReturnValue(snapshot);
+
+    scene.create();
+
+    saveManagerSaveMock.mockReset();
+
+    scene.damagePlayer(2);
+
+    playerInputUpdateMock.mockReturnValue(snapshot);
+    scene.update(16, 16);
+
+    expect(saveManagerSaveMock).toHaveBeenCalledTimes(1);
+    const payload = saveManagerSaveMock.mock.calls[0][0];
+    expect(payload.player.hp).toBe(4);
+    expect(areaManagerGetSnapshotMock).toHaveBeenCalled();
   });
 
   it('toggles the world map overlay and populates summaries when opening', () => {
@@ -569,7 +687,12 @@ describe('GameScene player integration', () => {
 
     const mirrorCorridorState = {
       definition: { id: 'mirror-corridor' },
-      tileMap: { tileSize: 32, columns: 20, rows: 5 },
+      tileMap: {
+        tileSize: 32,
+        columns: 20,
+        rows: 5,
+        getClampedTileCoordinate: vi.fn().mockReturnValue({ column: 15, row: 2 }),
+      },
       pixelBounds: { width: 640, height: 160 },
       playerSpawnPosition: { x: 96, y: 96 },
     };

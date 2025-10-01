@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   AREA_IDS,
   AreaManager,
+  type AreaManagerSnapshot,
   type AreaTransitionDirection,
   type AreaUpdateResult,
 } from './AreaManager';
@@ -115,5 +116,72 @@ describe('AreaManager', () => {
         { id: AREA_IDS.MirrorCorridor, name: 'Mirror Corridor' },
       ]),
     );
+  });
+
+  it('探索状態をスナップショットとして保存できる', () => {
+    const centralHub = manager.getCurrentAreaState();
+
+    manager.updatePlayerPosition({ x: centralHub.tileMap.tileSize * 2, y: centralHub.tileMap.tileSize * 3 });
+    manager.updatePlayerPosition({ x: centralHub.tileMap.tileSize * 7, y: centralHub.tileMap.tileSize * 3 });
+    manager.updatePlayerPosition({ x: centralHub.pixelBounds.width + centralHub.tileMap.tileSize, y: centralHub.tileMap.tileSize * 5 });
+
+    const snapshot = manager.getPersistenceSnapshot();
+
+    expect(snapshot.currentAreaId).toBe(AREA_IDS.MirrorCorridor);
+    expect(snapshot.discoveredAreas).toEqual(
+      expect.arrayContaining([AREA_IDS.CentralHub, AREA_IDS.MirrorCorridor]),
+    );
+    expect(snapshot.exploredTiles[AREA_IDS.CentralHub]?.length).toBeGreaterThan(0);
+    expect(snapshot.lastKnownPlayerPosition).toEqual(manager.getLastKnownPlayerPosition());
+  });
+
+  it('スナップショットから状態を復元し、不正な値を除去する', () => {
+    const snapshot: AreaManagerSnapshot = {
+      currentAreaId: AREA_IDS.MirrorCorridor,
+      discoveredAreas: [AREA_IDS.MirrorCorridor, AREA_IDS.CentralHub, 'unknown-area' as never],
+      exploredTiles: {
+        [AREA_IDS.CentralHub]: ['1,1', 'not-a-tile'],
+        [AREA_IDS.MirrorCorridor]: ['0,0', '0,0', '2,2'],
+        unknown: ['0,0'],
+      } as Record<string, string[]>,
+      lastKnownPlayerPosition: { x: 128, y: 96 },
+    };
+
+    manager.restoreFromSnapshot(snapshot);
+
+    const current = manager.getCurrentAreaState();
+    expect(current.definition.id).toBe(AREA_IDS.MirrorCorridor);
+    expect(manager.getDiscoveredAreas()).toEqual(
+      expect.arrayContaining([AREA_IDS.CentralHub, AREA_IDS.MirrorCorridor]),
+    );
+
+    const mirrorExploration = manager.getExplorationState(AREA_IDS.MirrorCorridor);
+    expect(mirrorExploration.visitedTiles).toBeGreaterThanOrEqual(2);
+
+    const hubExploration = manager.getExplorationState(AREA_IDS.CentralHub);
+    expect(hubExploration.visitedTiles).toBeGreaterThanOrEqual(1);
+
+    expect(manager.getLastKnownPlayerPosition()).toEqual({ x: 128, y: 96 });
+  });
+
+  it('無効なスナップショットでは安全な既定値を使用する', () => {
+    const snapshot = {
+      currentAreaId: 'mystery-zone',
+      discoveredAreas: ['mystery-zone'],
+      exploredTiles: {
+        'mystery-zone': ['a,b'],
+      },
+      lastKnownPlayerPosition: { x: Number.NaN, y: Number.POSITIVE_INFINITY },
+    } as unknown as AreaManagerSnapshot;
+
+    manager.restoreFromSnapshot(snapshot);
+
+    const current = manager.getCurrentAreaState();
+    expect(current.definition.id).toBe(AREA_IDS.CentralHub);
+    expect(manager.getDiscoveredAreas()).toEqual([AREA_IDS.CentralHub]);
+
+    const exploration = manager.getExplorationState(AREA_IDS.CentralHub);
+    expect(exploration.visitedTiles).toBe(0);
+    expect(manager.getLastKnownPlayerPosition()).toEqual({ x: 0, y: 0 });
   });
 });

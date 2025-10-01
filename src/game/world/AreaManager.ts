@@ -8,6 +8,8 @@ export type AreaTransitionDirection = 'north' | 'south' | 'east' | 'west';
 
 export type TileCode = 'wall' | 'floor' | 'door' | 'void';
 
+const TILE_KEY_PATTERN = /^\d+,\d+$/;
+
 export interface Vector2 {
   x: number;
   y: number;
@@ -32,6 +34,13 @@ export interface AreaExplorationState {
 export interface AreaMetadata {
   id: AreaId;
   name: string;
+}
+
+export interface AreaManagerSnapshot {
+  currentAreaId: AreaId;
+  discoveredAreas: AreaId[];
+  exploredTiles: Record<AreaId, string[]>;
+  lastKnownPlayerPosition: Vector2;
 }
 
 interface AreaEntryPoint {
@@ -182,10 +191,18 @@ export class AreaManager {
   private currentArea: LoadedArea;
   private lastKnownPlayerPosition: Vector2;
 
-  constructor(startingAreaId: AreaId = AREA_IDS.CentralHub, definitions = createDefaultAreaDefinitions()) {
+  constructor(
+    startingAreaId: AreaId = AREA_IDS.CentralHub,
+    definitions = createDefaultAreaDefinitions(),
+    snapshot?: AreaManagerSnapshot,
+  ) {
     this.definitions = new Map(definitions.map((def) => [def.id, def] as const));
     this.currentArea = this.loadArea(startingAreaId);
     this.lastKnownPlayerPosition = this.currentArea.playerSpawnPosition;
+
+    if (snapshot) {
+      this.restoreFromSnapshot(snapshot);
+    }
   }
 
   getCurrentAreaState(): LoadedArea {
@@ -252,6 +269,54 @@ export class AreaManager {
 
   getLastKnownPlayerPosition(): Vector2 {
     return this.lastKnownPlayerPosition;
+  }
+
+  getPersistenceSnapshot(): AreaManagerSnapshot {
+    return {
+      currentAreaId: this.currentArea.definition.id,
+      discoveredAreas: Array.from(this.discoveredAreas.values()),
+      exploredTiles: this.serializeExploredTiles(),
+      lastKnownPlayerPosition: { ...this.lastKnownPlayerPosition },
+    } satisfies AreaManagerSnapshot;
+  }
+
+  restoreFromSnapshot(snapshot: AreaManagerSnapshot) {
+    const sanitized = this.sanitizeSnapshot(snapshot);
+
+    this.discoveredAreas.clear();
+    this.exploration.clear();
+
+    this.currentArea = this.loadArea(sanitized.currentAreaId);
+    this.lastKnownPlayerPosition = clampToBounds(
+      sanitized.lastKnownPlayerPosition,
+      this.currentArea.pixelBounds,
+    );
+
+    const discovered = new Set<AreaId>(sanitized.discoveredAreas);
+    discovered.add(this.currentArea.definition.id);
+
+    discovered.forEach((areaId) => {
+      if (!this.definitions.has(areaId)) {
+        return;
+      }
+
+      this.discoveredAreas.add(areaId);
+      this.ensureExplorationArea(areaId);
+    });
+
+    Object.entries(sanitized.exploredTiles).forEach(([areaId, tiles]) => {
+      const typedAreaId = areaId as AreaId;
+      if (!this.definitions.has(typedAreaId)) {
+        return;
+      }
+
+      const areaExploration = this.ensureExplorationArea(typedAreaId);
+      tiles.forEach((tile) => {
+        if (this.isValidTileKey(typedAreaId, tile)) {
+          areaExploration.add(tile);
+        }
+      });
+    });
   }
 
   private loadArea(areaId: AreaId, entryDirection?: AreaTransitionDirection): LoadedArea {
@@ -327,13 +392,104 @@ export class AreaManager {
     }
 
     const key = `${coordinate.column},${coordinate.row}`;
+    const areaExploration = this.ensureExplorationArea(areaId);
+    areaExploration.add(key);
+  }
+
+  private ensureExplorationArea(areaId: AreaId) {
     let areaExploration = this.exploration.get(areaId);
     if (!areaExploration) {
       areaExploration = new Set<string>();
       this.exploration.set(areaId, areaExploration);
     }
 
-    areaExploration.add(key);
+    return areaExploration;
+  }
+
+  private serializeExploredTiles(): Record<AreaId, string[]> {
+    const record: Partial<Record<AreaId, string[]>> = {};
+
+    this.exploration.forEach((tiles, areaId) => {
+      if (tiles.size === 0 || !this.definitions.has(areaId)) {
+        return;
+      }
+
+      record[areaId] = Array.from(tiles.values());
+    });
+
+    return record as Record<AreaId, string[]>;
+  }
+
+  private sanitizeSnapshot(snapshot: AreaManagerSnapshot): AreaManagerSnapshot {
+    const validCurrentArea = this.definitions.has(snapshot?.currentAreaId)
+      ? snapshot.currentAreaId
+      : AREA_IDS.CentralHub;
+
+    const discoveredAreas = Array.isArray(snapshot?.discoveredAreas)
+      ? Array.from(
+          new Set(
+            snapshot.discoveredAreas.filter((areaId): areaId is AreaId => this.definitions.has(areaId as AreaId)),
+          ),
+        )
+      : [];
+
+    const exploredTiles = this.sanitizeExploredTiles(snapshot?.exploredTiles ?? {});
+    const lastKnownPlayerPosition = this.sanitizeVector(snapshot?.lastKnownPlayerPosition);
+
+    return {
+      currentAreaId: validCurrentArea,
+      discoveredAreas,
+      exploredTiles,
+      lastKnownPlayerPosition,
+    } satisfies AreaManagerSnapshot;
+  }
+
+  private sanitizeExploredTiles(input: Record<string, string[]>): Record<AreaId, string[]> {
+    const sanitized: Partial<Record<AreaId, string[]>> = {};
+
+    Object.entries(input).forEach(([areaId, tiles]) => {
+      if (!this.definitions.has(areaId as AreaId) || !Array.isArray(tiles)) {
+        return;
+      }
+
+      const validTiles = Array.from(
+        new Set(
+          tiles.filter((tile) => typeof tile === 'string' && TILE_KEY_PATTERN.test(tile)),
+        ),
+      );
+
+      if (validTiles.length === 0) {
+        return;
+      }
+
+      sanitized[areaId as AreaId] = validTiles;
+    });
+
+    return sanitized as Record<AreaId, string[]>;
+  }
+
+  private sanitizeVector(position?: Vector2): Vector2 {
+    const x = Number.isFinite(position?.x) ? (position!.x as number) : 0;
+    const y = Number.isFinite(position?.y) ? (position!.y as number) : 0;
+
+    return { x, y } satisfies Vector2;
+  }
+
+  private isValidTileKey(areaId: AreaId, tile: string) {
+    if (!TILE_KEY_PATTERN.test(tile)) {
+      return false;
+    }
+
+    const [columnText, rowText] = tile.split(',');
+    const column = Number.parseInt(columnText, 10);
+    const row = Number.parseInt(rowText, 10);
+
+    if (!Number.isFinite(column) || !Number.isFinite(row)) {
+      return false;
+    }
+
+    const derived = this.getAreaDerivedData(areaId);
+    return derived.tileMap.isInBounds(column, row);
   }
 
   private getAreaDerivedData(areaId: AreaId): AreaDerivedData {
@@ -357,6 +513,16 @@ export class AreaManager {
     this.areaCache.set(areaId, derived);
     return derived;
   }
+}
+
+function clampToBounds(position: Vector2, bounds: { width: number; height: number }): Vector2 {
+  const x = Number.isFinite(position?.x) ? position.x : 0;
+  const y = Number.isFinite(position?.y) ? position.y : 0;
+
+  const clampedX = Math.min(Math.max(0, x), Math.max(0, bounds.width - 1));
+  const clampedY = Math.min(Math.max(0, y), Math.max(0, bounds.height - 1));
+
+  return { x: clampedX, y: clampedY } satisfies Vector2;
 }
 
 function createDefaultAreaDefinitions(): AreaDefinition[] {
