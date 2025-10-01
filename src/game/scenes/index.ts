@@ -22,6 +22,7 @@ import { AreaManager, AREA_IDS, type AreaManagerSnapshot, type Vector2 } from '.
 import { MapOverlay, createMapSummaries } from '../ui/MapOverlay';
 import { Hud } from '../ui/Hud';
 import { SaveManager, type GameProgressSnapshot } from '../save/SaveManager';
+import { createAssetManifest, queueAssetManifest, type AssetFallback } from '../assets/pipeline';
 
 export const SceneKeys = {
   Boot: 'BootScene',
@@ -37,6 +38,29 @@ function buildConfig(key: SceneKey) {
   return { key } satisfies Phaser.Types.Scenes.SettingsConfig;
 }
 
+type LoaderLike = Partial<{
+  image(key: string, url: string, frameConfig?: unknown): void;
+  audio(key: string, urls: string[], config?: unknown): void;
+  json(key: string, url: string): void;
+  start(): void;
+}>;
+
+function enqueueFallback(loader: LoaderLike, key: string, fallback: AssetFallback) {
+  switch (fallback.type) {
+    case 'image':
+      loader.image?.(key, fallback.url);
+      break;
+    case 'audio':
+      loader.audio?.(key, [fallback.url]);
+      break;
+    case 'data':
+      loader.json?.(key, fallback.url);
+      break;
+    default:
+      break;
+  }
+}
+
 export class BootScene extends Phaser.Scene {
   public static readonly KEY = SceneKeys.Boot;
 
@@ -45,11 +69,64 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load?.once?.('complete', () => {
+    const loader = this.load;
+    const add = this.add;
+
+    if (!loader) {
+      this.scene.start(SceneKeys.Menu);
+      return;
+    }
+
+    const manifest = createAssetManifest();
+    const { fallbackMap } = queueAssetManifest(loader, manifest);
+    const attemptedFallbacks = new Set<string>();
+
+    const width = this.scale?.width ?? 800;
+    const height = this.scale?.height ?? 600;
+    const textStyle = {
+      fontSize: '18px',
+      color: '#ffffff',
+    } satisfies Phaser.Types.GameObjects.Text.TextStyle;
+
+    const progressText = add?.text?.(width / 2, height / 2, 'Loading... 0%', textStyle);
+    progressText?.setOrigin?.(0.5, 0.5);
+    progressText?.setScrollFactor?.(0, 0);
+    progressText?.setDepth?.(2000);
+    progressText?.setText?.('Loading... 0%');
+
+    const updateProgress = (value: number) => {
+      const normalized = Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0;
+      const percent = Math.round(normalized * 100);
+      progressText?.setText?.(`Loading... ${percent}%`);
+    };
+
+    const retryWithFallback = (file?: { key?: string; type?: string }) => {
+      const key = file?.key;
+      if (!key || attemptedFallbacks.has(key)) {
+        return;
+      }
+
+      const fallback = fallbackMap.get(key);
+      if (!fallback) {
+        return;
+      }
+
+      attemptedFallbacks.add(key);
+      enqueueFallback(loader, key, fallback);
+      loader.start?.();
+    };
+
+    loader.on?.('progress', updateProgress);
+    loader.on?.('loaderror', retryWithFallback);
+
+    loader.once?.('complete', () => {
+      loader.off?.('progress', updateProgress);
+      loader.off?.('loaderror', retryWithFallback);
+      progressText?.destroy?.();
       this.scene.start(SceneKeys.Menu);
     });
 
-    this.load?.start?.();
+    loader.start?.();
   }
 
   create() {}

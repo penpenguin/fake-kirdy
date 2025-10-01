@@ -19,6 +19,13 @@ vi.mock('phaser', () => {
   const createLoaderMock = () => ({
     start: vi.fn(),
     once: vi.fn(),
+    on: vi.fn(),
+    off: vi.fn(),
+    setBaseURL: vi.fn(),
+    setPath: vi.fn(),
+    image: vi.fn(),
+    audio: vi.fn(),
+    json: vi.fn(),
   });
 
   const createKeyboardMock = () => ({
@@ -41,6 +48,8 @@ vi.mock('phaser', () => {
     setInteractive: vi.fn().mockReturnThis(),
     on: vi.fn().mockReturnThis(),
     off: vi.fn().mockReturnThis(),
+    setText: vi.fn().mockReturnThis(),
+    destroy: vi.fn(),
   });
 
   class PhaserSceneMock {
@@ -117,6 +126,47 @@ vi.mock('../physics/PhysicsSystem', () => ({
   PhysicsSystem: physicsSystemStubs.mock,
 }));
 
+const assetPipelineStubs = vi.hoisted(() => {
+  const createAssetManifest = vi.fn(() => ({
+    baseURL: '',
+    path: 'assets/',
+    images: [
+      {
+        key: 'hero',
+        url: 'images/hero.png',
+        fallbackUrl: 'images/hero-fallback.png',
+      },
+    ],
+    audio: [
+      {
+        key: 'theme',
+        urls: ['audio/theme.ogg'],
+        fallbackUrl: 'audio/theme.mp3',
+      },
+    ],
+    data: [
+      {
+        key: 'level-data',
+        url: 'data/levels.json',
+      },
+    ],
+  }));
+
+  const queueAssetManifest = vi.fn(() => ({
+    fallbackMap: new Map([
+      ['hero', { type: 'image', url: 'images/hero-fallback.png' }],
+      ['theme', { type: 'audio', url: 'audio/theme.mp3' }],
+    ]),
+  }));
+
+  return {
+    createAssetManifest,
+    queueAssetManifest,
+  };
+});
+
+vi.mock('../assets/pipeline', () => assetPipelineStubs);
+
 import { BootScene, GameOverScene, GameScene, MenuScene, PauseScene, SceneKeys, coreScenes } from './index';
 
 describe('Scene registration', () => {
@@ -142,10 +192,59 @@ describe('Scene registration', () => {
     expect(bootScene.load.once).toHaveBeenCalledWith('complete', expect.any(Function));
     expect(bootScene.load.start).toHaveBeenCalled();
 
+    expect(assetPipelineStubs.createAssetManifest).toHaveBeenCalled();
+    expect(assetPipelineStubs.queueAssetManifest).toHaveBeenCalledWith(
+      bootScene.load,
+      expect.objectContaining({
+        images: expect.any(Array),
+      }),
+    );
+
     const [, onComplete] = bootScene.load.once.mock.calls[0];
     onComplete?.();
 
     expect(bootScene.scene.start).toHaveBeenCalledWith(SceneKeys.Menu);
+  });
+
+  it('boot scene displays progress feedback during loading', () => {
+    const bootScene = new BootScene();
+
+    bootScene.preload();
+
+    const progressText = bootScene.add.text.mock.results[0]?.value;
+    expect(progressText?.setText).toHaveBeenCalledWith('Loading... 0%');
+
+    const progressCall = bootScene.load.on.mock.calls.find(([event]) => event === 'progress');
+    expect(progressCall?.[1]).toBeTypeOf('function');
+
+    const [, progressHandler] = progressCall ?? [];
+    progressHandler?.(0.42);
+
+    expect(progressText?.setText).toHaveBeenCalledWith('Loading... 42%');
+  });
+
+  it('boot scene retries failed loads using fallback sources', () => {
+    const bootScene = new BootScene();
+
+    bootScene.preload();
+
+    const initialImageCalls = bootScene.load.image.mock.calls.length;
+    const initialStartCalls = bootScene.load.start.mock.calls.length;
+
+    const errorCall = bootScene.load.on.mock.calls.find(([event]) => event === 'loaderror');
+    expect(errorCall?.[1]).toBeTypeOf('function');
+
+    const [, errorHandler] = errorCall ?? [];
+    errorHandler?.({ key: 'hero', type: 'image' });
+
+    expect(bootScene.load.image).toHaveBeenCalledWith('hero', 'images/hero-fallback.png');
+    expect(bootScene.load.image.mock.calls.length).toBe(initialImageCalls + 1);
+    expect(bootScene.load.start.mock.calls.length).toBe(initialStartCalls + 1);
+
+    errorHandler?.({ key: 'hero', type: 'image' });
+
+    expect(bootScene.load.image.mock.calls.length).toBe(initialImageCalls + 1);
+    expect(bootScene.load.start.mock.calls.length).toBe(initialStartCalls + 1);
   });
 
   it('menu scene can transition into the main game scene', () => {
