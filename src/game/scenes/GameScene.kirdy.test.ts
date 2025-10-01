@@ -139,11 +139,16 @@ vi.mock('../mechanics/AbilitySystem', () => ({
 const enemyUpdateMock = vi.hoisted(() => vi.fn());
 const enemyIsDefeatedMock = vi.hoisted(() => vi.fn().mockReturnValue(false));
 const enemySpriteFactory = vi.hoisted(() => () => ({
+  x: 0,
+  y: 0,
   setData: vi.fn(),
   setActive: vi.fn(),
   setVisible: vi.fn(),
+  setPosition: vi.fn().mockReturnThis(),
   destroy: vi.fn(),
 }));
+
+type EnemySpriteStub = ReturnType<typeof enemySpriteFactory>;
 
 const createWabbleBeeMock = vi.hoisted(() =>
   vi.fn(() => ({
@@ -500,7 +505,7 @@ describe('GameScene player integration', () => {
       throw new Error('Enemy spawn failed in test setup');
     }
 
-    scene.cameras.main.worldView = { x: 0, y: 0, width: 120, height: 120 } as any;
+    Object.assign(scene.cameras.main.worldView, { x: 0, y: 0, width: 120, height: 120 });
 
     firstEnemy.sprite.x = 60;
     firstEnemy.sprite.y = 60;
@@ -509,19 +514,21 @@ describe('GameScene player integration', () => {
 
     scene.update(300, 16);
 
-    expect(secondEnemy.sprite.setActive).toHaveBeenCalledWith(false);
-    expect(secondEnemy.sprite.setVisible).toHaveBeenCalledWith(false);
+    const secondSprite = secondEnemy.sprite as unknown as EnemySpriteStub;
 
-    secondEnemy.sprite.setActive.mockClear();
-    secondEnemy.sprite.setVisible.mockClear();
+    expect(secondSprite.setActive).toHaveBeenCalledWith(false);
+    expect(secondSprite.setVisible).toHaveBeenCalledWith(false);
+
+    secondSprite.setActive.mockClear();
+    secondSprite.setVisible.mockClear();
 
     secondEnemy.sprite.x = 80;
     secondEnemy.sprite.y = 80;
 
     scene.update(320, 16);
 
-    expect(secondEnemy.sprite.setActive).toHaveBeenCalledWith(true);
-    expect(secondEnemy.sprite.setVisible).toHaveBeenCalledWith(true);
+    expect(secondSprite.setActive).toHaveBeenCalledWith(true);
+    expect(secondSprite.setVisible).toHaveBeenCalledWith(true);
   });
 
   it('repositions Kirdy when the area manager triggers an area transition', () => {
@@ -1212,7 +1219,6 @@ describe('GameScene player integration', () => {
 
     const makeEnemy = () => {
       const sprite = enemySpriteFactory();
-      sprite.setPosition = vi.fn();
       return {
         sprite,
         update: vi.fn(),

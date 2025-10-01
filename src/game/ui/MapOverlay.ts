@@ -89,11 +89,22 @@ export class MapOverlay {
     const baseY = height * 0.2;
     const lineHeight = 28;
 
+    const container = this.container;
+    if (!container) {
+      return;
+    }
+
+    const createText = add.text;
+    if (typeof createText !== 'function') {
+      return;
+    }
+
     this.summaries.forEach((summary, index) => {
       const completionPercent = Math.round(summary.exploration.completion * 100);
       const statusLabel = summary.discovered ? `${completionPercent}% explored` : 'Unknown';
       const prefix = summary.isCurrent ? '> ' : '  ';
-      const text = add.text(
+      const text = createText.call(
+        add,
         baseX,
         baseY + index * lineHeight,
         `${prefix}${summary.name} - ${statusLabel}`,
@@ -105,7 +116,7 @@ export class MapOverlay {
 
       text.setScrollFactor?.(0, 0);
       text.setDepth?.(10);
-      this.container.add?.(text);
+      container.add?.(text);
       this.entries.push(text);
     });
   }

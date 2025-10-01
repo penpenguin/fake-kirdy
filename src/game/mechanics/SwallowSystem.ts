@@ -1,7 +1,7 @@
 import type Phaser from 'phaser';
 import type { Kirdy } from '../characters/Kirdy';
 import type { ActionStateMap, InhaleSystem } from './InhaleSystem';
-import type { PhysicsSystem } from '../physics/PhysicsSystem';
+import type { PhysicsSystem, MatterGameObject } from '../physics/PhysicsSystem';
 import { ObjectPool } from '../performance/ObjectPool';
 
 export interface SwallowedPayload {
@@ -52,7 +52,7 @@ export class SwallowSystem {
         sprite.setActive?.(false);
         sprite.setVisible?.(false);
         sprite.setPosition?.(-10000, -10000);
-        sprite.setOnCollide?.(undefined as unknown as Phaser.Types.Physics.Matter.SetCollideCallback);
+        sprite.setOnCollide?.(() => undefined);
         sprite.setData?.('starProjectileExpire', undefined);
       },
       maxSize: STAR_PROJECTILE_POOL_SIZE,
@@ -174,7 +174,7 @@ export class SwallowSystem {
     }
   }
 
-  private recycleStarProjectile(projectile: Phaser.Physics.Matter.Sprite) {
+  private recycleStarProjectile(projectile: MatterGameObject) {
     const timer = projectile.getData?.('starProjectileExpire') as { remove?: () => void } | undefined;
     timer?.remove?.();
     projectile.setData?.('starProjectileExpire', undefined);
@@ -190,8 +190,8 @@ export class SwallowSystem {
     projectile.setActive?.(false);
     projectile.setVisible?.(false);
     projectile.setPosition?.(-10000, -10000);
-    projectile.setOnCollide?.(undefined as unknown as Phaser.Types.Physics.Matter.SetCollideCallback);
-    this.starProjectilePool.release(projectile);
+    projectile.setOnCollide?.(() => undefined);
+    this.starProjectilePool.release(projectile as Phaser.Physics.Matter.Sprite);
     return true;
   }
 }

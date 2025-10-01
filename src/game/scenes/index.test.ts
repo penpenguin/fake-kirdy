@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+const asMock = <T extends (...args: any[]) => any>(fn: T) => fn as unknown as ReturnType<typeof vi.fn>;
+
 vi.mock('phaser', () => {
   const createScenePluginMock = () => ({
     start: vi.fn(),
@@ -230,7 +232,8 @@ describe('Scene registration', () => {
       }),
     );
 
-    const [, onComplete] = bootScene.load.once.mock.calls[0];
+    const loadOnceMock = asMock(bootScene.load.once);
+    const [, onComplete] = loadOnceMock.mock.calls[0];
     onComplete?.();
 
     expect(bootScene.scene.start).toHaveBeenCalledWith(SceneKeys.Menu);
@@ -241,10 +244,12 @@ describe('Scene registration', () => {
 
     bootScene.preload();
 
-    const progressText = bootScene.add.text.mock.results[0]?.value;
+    const addTextMock = asMock(bootScene.add.text);
+    const progressText = addTextMock.mock.results[0]?.value;
     expect(progressText?.setText).toHaveBeenCalledWith('Loading... 0%');
 
-    const progressCall = bootScene.load.on.mock.calls.find(([event]) => event === 'progress');
+    const loadOnMock = asMock(bootScene.load.on);
+    const progressCall = loadOnMock.mock.calls.find(([event]) => event === 'progress');
     expect(progressCall?.[1]).toBeTypeOf('function');
 
     const [, progressHandler] = progressCall ?? [];
@@ -258,23 +263,26 @@ describe('Scene registration', () => {
 
     bootScene.preload();
 
-    const initialImageCalls = bootScene.load.image.mock.calls.length;
-    const initialStartCalls = bootScene.load.start.mock.calls.length;
+    const loadOnMock = asMock(bootScene.load.on);
+    const loadImageMock = asMock(bootScene.load.image);
+    const loadStartMock = asMock(bootScene.load.start);
+    const initialImageCalls = loadImageMock.mock.calls.length;
+    const initialStartCalls = loadStartMock.mock.calls.length;
 
-    const errorCall = bootScene.load.on.mock.calls.find(([event]) => event === 'loaderror');
+    const errorCall = loadOnMock.mock.calls.find(([event]) => event === 'loaderror');
     expect(errorCall?.[1]).toBeTypeOf('function');
 
     const [, errorHandler] = errorCall ?? [];
     errorHandler?.({ key: 'hero', type: 'image' });
 
     expect(bootScene.load.image).toHaveBeenCalledWith('hero', 'images/hero-fallback.png');
-    expect(bootScene.load.image.mock.calls.length).toBe(initialImageCalls + 1);
-    expect(bootScene.load.start.mock.calls.length).toBe(initialStartCalls + 1);
+    expect(loadImageMock.mock.calls.length).toBe(initialImageCalls + 1);
+    expect(loadStartMock.mock.calls.length).toBe(initialStartCalls + 1);
 
     errorHandler?.({ key: 'hero', type: 'image' });
 
-    expect(bootScene.load.image.mock.calls.length).toBe(initialImageCalls + 1);
-    expect(bootScene.load.start.mock.calls.length).toBe(initialStartCalls + 1);
+    expect(loadImageMock.mock.calls.length).toBe(initialImageCalls + 1);
+    expect(loadStartMock.mock.calls.length).toBe(initialStartCalls + 1);
   });
 
   it('menu scene can transition into the main game scene', () => {
@@ -282,15 +290,19 @@ describe('Scene registration', () => {
 
     menuScene.create();
 
-    expect(menuScene.input.keyboard.once).toHaveBeenCalledWith('keydown-SPACE', expect.any(Function));
+    const menuKeyboard = menuScene.input.keyboard!;
+    const keyboardOnceMock = asMock(menuKeyboard.once);
+    const inputOnMock = asMock(menuScene.input.on);
+
+    expect(menuKeyboard.once).toHaveBeenCalledWith('keydown-SPACE', expect.any(Function));
     expect(menuScene.input.on).toHaveBeenCalledWith('pointerdown', expect.any(Function));
 
-    const [, keyHandler] = menuScene.input.keyboard.once.mock.calls[0];
+    const [, keyHandler] = keyboardOnceMock.mock.calls[0];
     keyHandler?.();
 
     expect(menuScene.scene.start).toHaveBeenCalledWith(SceneKeys.Game);
 
-    const [, pointerHandler] = menuScene.input.on.mock.calls[0];
+    const [, pointerHandler] = inputOnMock.mock.calls[0];
     pointerHandler?.();
 
     expect(menuScene.scene.start).toHaveBeenCalledTimes(2);
@@ -301,9 +313,12 @@ describe('Scene registration', () => {
 
     gameScene.create();
 
-    expect(gameScene.input.keyboard.on).toHaveBeenCalledWith('keydown-ESC', expect.any(Function));
+    const gameKeyboard = gameScene.input.keyboard!;
+    const keyboardOnMock = asMock(gameKeyboard.on);
 
-    const [, handler] = gameScene.input.keyboard.on.mock.calls[0];
+    expect(gameKeyboard.on).toHaveBeenCalledWith('keydown-ESC', expect.any(Function));
+
+    const [, handler] = keyboardOnMock.mock.calls[0];
     handler?.();
 
     expect(gameScene.scene.launch).toHaveBeenCalledWith(SceneKeys.Pause);
@@ -314,7 +329,10 @@ describe('Scene registration', () => {
 
     gameScene.create();
 
-    const pauseCall = gameScene.input.keyboard.on.mock.calls.find(([event]) => event === 'keydown-ESC');
+    const gameKeyboard = gameScene.input.keyboard!;
+    const keyboardOnMock = asMock(gameKeyboard.on);
+
+    const pauseCall = keyboardOnMock.mock.calls.find(([event]) => event === 'keydown-ESC');
     expect(pauseCall).toBeTruthy();
     const [, pauseHandler] = pauseCall ?? [];
     expect(pauseHandler).toBeInstanceOf(Function);
@@ -322,14 +340,16 @@ describe('Scene registration', () => {
     pauseHandler?.();
     expect(gameScene.scene.launch).toHaveBeenCalledWith(SceneKeys.Pause);
 
-    const shutdownCall = gameScene.events.once.mock.calls.find(([event]) => event === 'shutdown');
+    const eventsOnceMock = asMock(gameScene.events.once);
+    const shutdownCall = eventsOnceMock.mock.calls.find(([event]) => event === 'shutdown');
     const shutdownHandler = shutdownCall?.[1];
     expect(shutdownHandler).toBeInstanceOf(Function);
 
-    gameScene.input.keyboard.off.mockClear();
+    const keyboardOffMock = asMock(gameKeyboard.off);
+    keyboardOffMock.mockClear();
     shutdownHandler?.();
 
-    expect(gameScene.input.keyboard.off).toHaveBeenCalledWith('keydown-ESC', pauseHandler);
+    expect(gameKeyboard.off).toHaveBeenCalledWith('keydown-ESC', pauseHandler);
   });
 
   it('game scene starts background music when created', () => {
@@ -359,24 +379,28 @@ describe('Scene registration', () => {
 
     pauseScene.create();
 
-    expect(pauseScene.input.keyboard.once).toHaveBeenCalledWith('keydown-ESC', expect.any(Function));
-    expect(pauseScene.input.keyboard.once).toHaveBeenCalledWith('keydown-R', expect.any(Function));
-    expect(pauseScene.input.keyboard.once).toHaveBeenCalledWith('keydown-Q', expect.any(Function));
+    const pauseKeyboard = pauseScene.input.keyboard!;
+    const pauseKeyboardOnceMock = asMock(pauseKeyboard.once);
+    const pauseInputOnceMock = asMock(pauseScene.input.once);
+
+    expect(pauseKeyboard.once).toHaveBeenCalledWith('keydown-ESC', expect.any(Function));
+    expect(pauseKeyboard.once).toHaveBeenCalledWith('keydown-R', expect.any(Function));
+    expect(pauseKeyboard.once).toHaveBeenCalledWith('keydown-Q', expect.any(Function));
     expect(pauseScene.input.once).toHaveBeenCalledWith('pointerdown', expect.any(Function));
 
-    const [, keyHandler] = pauseScene.input.keyboard.once.mock.calls[0];
+    const [, keyHandler] = pauseKeyboardOnceMock.mock.calls[0];
     keyHandler?.();
 
     expect(pauseScene.scene.stop).toHaveBeenCalledWith(SceneKeys.Pause);
     expect(pauseScene.scene.resume).toHaveBeenCalledWith(SceneKeys.Game);
 
-    const [, pointerHandler] = pauseScene.input.once.mock.calls[0];
+    const [, pointerHandler] = pauseInputOnceMock.mock.calls[0];
     pointerHandler?.();
 
     expect(pauseScene.scene.stop).toHaveBeenCalledTimes(2);
     expect(pauseScene.scene.resume).toHaveBeenCalledTimes(2);
 
-    const restartCall = pauseScene.input.keyboard.once.mock.calls.find(([event]) => event === 'keydown-R');
+    const restartCall = pauseKeyboardOnceMock.mock.calls.find(([event]) => event === 'keydown-R');
     const restartHandler = restartCall?.[1];
     expect(restartHandler).toBeInstanceOf(Function);
     restartHandler?.();
@@ -384,7 +408,7 @@ describe('Scene registration', () => {
     expect(pauseScene.scene.stop).toHaveBeenCalledWith(SceneKeys.Game);
     expect(pauseScene.scene.start).toHaveBeenCalledWith(SceneKeys.Game);
 
-    const quitCall = pauseScene.input.keyboard.once.mock.calls.find(([event]) => event === 'keydown-Q');
+    const quitCall = pauseKeyboardOnceMock.mock.calls.find(([event]) => event === 'keydown-Q');
     const quitHandler = quitCall?.[1];
     expect(quitHandler).toBeInstanceOf(Function);
     quitHandler?.();
@@ -397,11 +421,15 @@ describe('Scene registration', () => {
 
     gameOverScene.create({ score: 123, ability: 'fire' as any });
 
-    expect(gameOverScene.input.keyboard.once).toHaveBeenCalledWith('keydown-R', expect.any(Function));
-    expect(gameOverScene.input.keyboard.once).toHaveBeenCalledWith('keydown-M', expect.any(Function));
+    const gameOverKeyboard = gameOverScene.input.keyboard!;
+    const gameOverKeyboardOnceMock = asMock(gameOverKeyboard.once);
+    const gameOverInputOnceMock = asMock(gameOverScene.input.once);
+
+    expect(gameOverKeyboard.once).toHaveBeenCalledWith('keydown-R', expect.any(Function));
+    expect(gameOverKeyboard.once).toHaveBeenCalledWith('keydown-M', expect.any(Function));
     expect(gameOverScene.input.once).toHaveBeenCalledWith('pointerdown', expect.any(Function));
 
-    const restartCall = gameOverScene.input.keyboard.once.mock.calls.find(([event]) => event === 'keydown-R');
+    const restartCall = gameOverKeyboardOnceMock.mock.calls.find(([event]) => event === 'keydown-R');
     const restartHandler = restartCall?.[1];
     expect(restartHandler).toBeInstanceOf(Function);
     restartHandler?.();
@@ -410,7 +438,7 @@ describe('Scene registration', () => {
     expect(gameOverScene.scene.stop).toHaveBeenCalledWith(SceneKeys.Game);
     expect(gameOverScene.scene.start).toHaveBeenCalledWith(SceneKeys.Game);
 
-    const menuCall = gameOverScene.input.keyboard.once.mock.calls.find(([event]) => event === 'keydown-M');
+    const menuCall = gameOverKeyboardOnceMock.mock.calls.find(([event]) => event === 'keydown-M');
     const menuHandler = menuCall?.[1];
     expect(menuHandler).toBeInstanceOf(Function);
     menuHandler?.();

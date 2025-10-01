@@ -44,7 +44,10 @@ const DEFAULT_PLAYER: PlayerProgressSnapshot = {
 const DEFAULT_AREA: AreaProgressSnapshot = {
   currentAreaId: AREA_IDS.CentralHub,
   discoveredAreas: [],
-  exploredTiles: {},
+  exploredTiles: {
+    [AREA_IDS.CentralHub]: [],
+    [AREA_IDS.MirrorCorridor]: [],
+  },
   lastKnownPlayerPosition: { x: 0, y: 0 },
 };
 
@@ -203,7 +206,12 @@ function sanitizePlayer(player?: PlayerProgressSnapshot): PlayerProgressSnapshot
 }
 
 function sanitizeArea(area?: AreaProgressSnapshot): AreaProgressSnapshot {
-  const base = { ...DEFAULT_AREA };
+  const base: AreaProgressSnapshot = {
+    currentAreaId: DEFAULT_AREA.currentAreaId,
+    discoveredAreas: [...DEFAULT_AREA.discoveredAreas],
+    exploredTiles: { ...DEFAULT_AREA.exploredTiles },
+    lastKnownPlayerPosition: { ...DEFAULT_AREA.lastKnownPlayerPosition },
+  };
   const currentAreaId = areaSet.has(area?.currentAreaId as AreaId)
     ? (area?.currentAreaId as AreaId)
     : base.currentAreaId;
@@ -242,6 +250,9 @@ function sanitizeExploredTiles(input: Record<string, string[]>): Record<AreaId, 
     );
 
     if (validTiles.length === 0) {
+      if (tiles.length === 0) {
+        sanitized[areaId as AreaId] = [];
+      }
       return;
     }
 

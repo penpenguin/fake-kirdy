@@ -1,13 +1,19 @@
 import type Phaser from 'phaser';
 
 type SoundManagerLike = Partial<{
-  play(key: string, config?: Phaser.Types.Sound.SoundConfig): Phaser.Sound.BaseSound | false | undefined;
+  play(key: string, config?: Phaser.Types.Sound.SoundConfig): Phaser.Sound.BaseSound | boolean | undefined;
   add(key: string, config?: Phaser.Types.Sound.SoundConfig): Phaser.Sound.BaseSound | undefined;
   setVolume(value: number): void;
   setMute(value: boolean): void;
 }>;
 
-type BaseSoundLike = Partial<Phaser.Sound.BaseSound> & { key?: string };
+type BaseSoundLike = {
+  key?: string;
+  stop?: () => void;
+  destroy?: () => void;
+  setVolume?: (value: number) => void;
+  setMute?: (value: boolean) => void;
+};
 
 const DEFAULT_MASTER_VOLUME = 0.8;
 
@@ -56,8 +62,7 @@ export class AudioManager {
     this.currentBgm?.destroy?.();
 
     const mergedConfig: Phaser.Types.Sound.SoundConfig = {
-      loop: true,
-      ...config,
+      ...(config ?? {}),
       loop: true,
     };
 

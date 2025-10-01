@@ -190,6 +190,7 @@ describe('SaveManager', () => {
         discoveredAreas: [AREA_IDS.CentralHub],
         exploredTiles: {
           [AREA_IDS.CentralHub]: ['0,0'],
+          [AREA_IDS.MirrorCorridor]: [],
         },
         lastKnownPlayerPosition: { x: 10, y: 20 },
       },

@@ -23,7 +23,7 @@ export function createGame(parent: HTMLElement, options: CreateGameOptions = {})
     physics: {
       default: 'matter',
       matter: {
-        gravity: { y: 1 },
+        gravity: { x: 0, y: 1 },
       },
     },
     scale: {

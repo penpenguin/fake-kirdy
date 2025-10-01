@@ -26,6 +26,13 @@ type ContainerStub = {
   destroy: () => void;
 };
 
+type ContainerMock = ContainerStub & {
+  add: ReturnType<typeof vi.fn>;
+  setScrollFactor: ReturnType<typeof vi.fn>;
+  setDepth: ReturnType<typeof vi.fn>;
+  destroy: ReturnType<typeof vi.fn>;
+};
+
 interface SceneStub {
   input: { keyboard: KeyboardStub };
   add: {
@@ -47,12 +54,7 @@ type SceneFactoryResult = {
     offCalls: Array<{ event: string; handler: (pointer?: unknown) => void }>;
     destroy: ReturnType<typeof vi.fn>;
   }>;
-  container?: ContainerStub & {
-    add: ReturnType<typeof vi.fn>;
-    setScrollFactor: ReturnType<typeof vi.fn>;
-    setDepth: ReturnType<typeof vi.fn>;
-    destroy: ReturnType<typeof vi.fn>;
-  };
+  container?: ContainerMock;
 };
 
 function createSceneStub(): SceneFactoryResult {
@@ -69,7 +71,7 @@ function createSceneStub(): SceneFactoryResult {
   };
 
   const recordedButtons: SceneFactoryResult['recordedButtons'] = [];
-  let containerInstance: SceneFactoryResult['container'];
+  let containerInstance: ContainerMock | undefined;
 
   const scene: SceneStub = {
     input: { keyboard },
@@ -105,12 +107,12 @@ function createSceneStub(): SceneFactoryResult {
         return imageStub;
       },
       container: (_x: number, _y: number) => {
-        const container = {
-          add: vi.fn(),
-          setScrollFactor: vi.fn(),
-          setDepth: vi.fn(),
-          destroy: vi.fn(),
-        } as SceneFactoryResult['container'];
+        const container: ContainerMock = {
+          add: vi.fn() as unknown as ContainerMock['add'],
+          setScrollFactor: vi.fn() as unknown as ContainerMock['setScrollFactor'],
+          setDepth: vi.fn() as unknown as ContainerMock['setDepth'],
+          destroy: vi.fn() as unknown as ContainerMock['destroy'],
+        };
 
         container.setScrollFactor.mockReturnValue(container);
         container.setDepth.mockReturnValue(container);

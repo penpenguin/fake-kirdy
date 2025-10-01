@@ -54,7 +54,7 @@ export class FakeMatterSprite {
   };
 
   private onceHandlers = new Map<string, TimerCallback>();
-  private collideHandler?: Phaser.Types.Physics.Matter.SetCollideCallback;
+  private collideHandler?: ((...args: unknown[]) => void);
 
   constructor(public texture: string) {}
 
@@ -118,7 +118,7 @@ export class FakeMatterSprite {
     return this.data.get(key) as T | undefined;
   }
 
-  setOnCollide(handler: Phaser.Types.Physics.Matter.SetCollideCallback | undefined) {
+  setOnCollide(handler: ((...args: unknown[]) => void) | undefined) {
     this.collideHandler = handler;
     return this;
   }
@@ -234,7 +234,7 @@ export interface GameplayHarness {
 export function createGameplayHarness(options: { abilityType: AbilityType }): GameplayHarness {
   const scene = new FakeScene();
   const playerSprite = new FakeMatterSprite('kirdy').setPosition(160, 360);
-  const kirdy = new Kirdy(playerSprite as Phaser.Physics.Matter.Sprite);
+  const kirdy = new Kirdy(playerSprite as unknown as Phaser.Physics.Matter.Sprite);
 
   const enemy = new FakeMatterSprite('test-enemy').setPosition(200, 360);
   enemy.setData('abilityType', options.abilityType);

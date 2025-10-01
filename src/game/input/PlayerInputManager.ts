@@ -57,7 +57,7 @@ export class PlayerInputManager {
   private touchContainer?: Phaser.GameObjects.Container;
 
   constructor(scene: Phaser.Scene) {
-    this.keyboard = scene.input?.keyboard;
+    this.keyboard = scene.input?.keyboard ?? undefined;
 
     this.registerMovementKeys();
     this.registerActionKeys();

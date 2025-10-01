@@ -3,6 +3,8 @@ import type Phaser from 'phaser';
 import type { ActionStateMap } from './InhaleSystem';
 import { SwallowSystem } from './SwallowSystem';
 
+type MockFn = ReturnType<typeof vi.fn>;
+
 function buildActions(
   overrides: Partial<{ [K in keyof ActionStateMap]: Partial<ActionStateMap[K]> }> = {},
 ): ActionStateMap {
@@ -21,12 +23,30 @@ function buildActions(
 }
 
 type FakeTarget = Phaser.Physics.Matter.Sprite & {
-  destroy: ReturnType<typeof vi.fn>;
-  setVisible: ReturnType<typeof vi.fn>;
-  setActive: ReturnType<typeof vi.fn>;
-  setIgnoreGravity: ReturnType<typeof vi.fn>;
-  setStatic: ReturnType<typeof vi.fn>;
-  getData: ReturnType<typeof vi.fn>;
+  destroy: MockFn;
+  setVisible: MockFn;
+  setActive: MockFn;
+  setIgnoreGravity: MockFn;
+  setStatic: MockFn;
+  getData: MockFn;
+};
+
+type StarProjectileStub = {
+  setVelocityX: MockFn;
+  setIgnoreGravity: MockFn;
+  setCollisionCategory: MockFn;
+  setCollidesWith: MockFn;
+  setOnCollide: MockFn;
+  setName: MockFn;
+  setFixedRotation: MockFn;
+  setActive: MockFn;
+  setVisible: MockFn;
+  setPosition: MockFn;
+  setVelocity: MockFn;
+  setData: MockFn;
+  getData: MockFn;
+  once: MockFn;
+  destroy: MockFn;
 };
 
 describe('SwallowSystem', () => {
@@ -51,23 +71,7 @@ describe('SwallowSystem', () => {
     releaseCapturedTarget: ReturnType<typeof vi.fn>;
   };
   let target: FakeTarget;
-  let starProjectile: {
-    setVelocityX: ReturnType<typeof vi.fn>;
-    setIgnoreGravity: ReturnType<typeof vi.fn>;
-    setCollisionCategory: ReturnType<typeof vi.fn>;
-    setCollidesWith: ReturnType<typeof vi.fn>;
-    setOnCollide: ReturnType<typeof vi.fn>;
-    setName: ReturnType<typeof vi.fn>;
-    setFixedRotation: ReturnType<typeof vi.fn>;
-    setActive: ReturnType<typeof vi.fn>;
-    setVisible: ReturnType<typeof vi.fn>;
-    setPosition: ReturnType<typeof vi.fn>;
-    setVelocity: ReturnType<typeof vi.fn>;
-    setData: ReturnType<typeof vi.fn>;
-    getData: ReturnType<typeof vi.fn>;
-    once: ReturnType<typeof vi.fn>;
-    destroy: ReturnType<typeof vi.fn>;
-  };
+  let starProjectile: StarProjectileStub;
 
   beforeEach(() => {
     playSound = vi.fn();
@@ -80,7 +84,7 @@ describe('SwallowSystem', () => {
 
     const starProjectileData = new Map<string, unknown>();
 
-    starProjectile = {
+    const projectile: Partial<StarProjectileStub> = {
       setVelocityX: vi.fn().mockReturnThis(),
       setIgnoreGravity: vi.fn().mockReturnThis(),
       setCollisionCategory: vi.fn().mockReturnThis(),
@@ -92,14 +96,18 @@ describe('SwallowSystem', () => {
       setVisible: vi.fn().mockReturnThis(),
       setPosition: vi.fn().mockReturnThis(),
       setVelocity: vi.fn().mockReturnThis(),
-      setData: vi.fn((key: string, value: unknown) => {
-        starProjectileData.set(key, value);
-        return starProjectile;
-      }),
-      getData: vi.fn((key: string) => starProjectileData.get(key)),
       once: vi.fn().mockReturnThis(),
       destroy: vi.fn(),
     };
+
+    projectile.setData = vi.fn((key: string, value: unknown) => {
+      starProjectileData.set(key, value);
+      return projectile as StarProjectileStub;
+    }) as unknown as MockFn;
+
+    projectile.getData = vi.fn((key: string) => starProjectileData.get(key)) as unknown as MockFn;
+
+    starProjectile = projectile as StarProjectileStub;
 
     addSprite = vi.fn().mockReturnValue(starProjectile);
 
@@ -234,7 +242,7 @@ describe('SwallowSystem', () => {
   });
 
   it('reuses a pooled star projectile after it is recycled', () => {
-    const recycleCallbacks: Array<() => boolean> = [];
+    const recycleCallbacks: Array<(projectile: unknown) => boolean> = [];
     physicsSystem.registerPlayerAttack.mockImplementation((_, options) => {
       if (options?.recycle) {
         recycleCallbacks.push(options.recycle);

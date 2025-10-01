@@ -1,13 +1,18 @@
 import type Phaser from 'phaser';
-import type MatterJS from 'matter-js';
 import type { Kirdy } from '../characters/Kirdy';
 import type { Enemy } from '../enemies';
 
-type MatterGameObject = Phaser.GameObjects.GameObject & Partial<Phaser.Physics.Matter.Sprite>;
+export type MatterGameObject = Phaser.GameObjects.GameObject & Partial<Phaser.Physics.Matter.Sprite>;
+
+type MatterBody = {
+  gameObject?: MatterGameObject;
+  id?: number;
+  [key: string]: unknown;
+};
 
 type CollisionPair = {
-  bodyA: MatterJS.BodyType & { gameObject?: MatterGameObject };
-  bodyB: MatterJS.BodyType & { gameObject?: MatterGameObject };
+  bodyA: MatterBody;
+  bodyB: MatterBody;
   isSensor?: boolean;
 };
 
@@ -146,9 +151,9 @@ export class PhysicsSystem {
 
   private handlePlayerTerrainContact(
     candidate: MatterGameObject,
-    _candidateBody: MatterJS.BodyType,
+    _candidateBody: MatterBody,
     other: MatterGameObject,
-    otherBody: MatterJS.BodyType,
+    otherBody: MatterBody,
   ) {
     if (!this.playerSprite || candidate !== this.playerSprite) {
       return;
@@ -168,9 +173,9 @@ export class PhysicsSystem {
 
   private handleTerrainSeparation(
     candidate: MatterGameObject,
-    _candidateBody: MatterJS.BodyType,
+    _candidateBody: MatterBody,
     other: MatterGameObject,
-    otherBody: MatterJS.BodyType,
+    otherBody: MatterBody,
   ) {
     if (!this.playerSprite || candidate !== this.playerSprite) {
       return;
