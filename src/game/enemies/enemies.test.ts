@@ -59,7 +59,7 @@ describe('enemy system', () => {
 
     expect(addSpriteMock).toHaveBeenCalledWith(100, 200, 'wabble-bee');
     expect(sprite.setIgnoreGravity).toHaveBeenCalledWith(true);
-    expect(sprite.setFixedRotation).toHaveBeenCalledWith(true);
+    expect(sprite.setFixedRotation).toHaveBeenCalledWith();
     expect(sprite.setData).toHaveBeenCalledWith('enemyType', 'wabble-bee');
     expect(sprite.setData).toHaveBeenCalledWith('abilityType', 'fire');
     expect(enemy.getAbilityType()).toBe('fire');

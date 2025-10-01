@@ -85,7 +85,7 @@ export class InhaleSystem {
       return;
     }
 
-    const effect = this.scene.add.particles('inhale-sparkle');
+    const effect = this.scene.add.particles(0, 0, 'inhale-sparkle');
     effect?.startFollow?.(this.kirdy.sprite as unknown as Phaser.GameObjects.GameObject);
     effect?.setDepth?.(1000);
     this.inhaleEffect = effect ?? undefined;

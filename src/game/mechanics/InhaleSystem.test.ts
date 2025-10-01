@@ -149,7 +149,7 @@ describe('InhaleSystem core behavior', () => {
       }),
     );
 
-    expect(addParticles).toHaveBeenCalledWith('inhale-sparkle');
+    expect(addParticles).toHaveBeenCalledWith(0, 0, 'inhale-sparkle');
     expect(particleManager.startFollow).toHaveBeenCalledWith(kirdy.sprite);
     expect(particleManager.setDepth).toHaveBeenCalled();
 

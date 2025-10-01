@@ -241,7 +241,7 @@ export function createWabbleBee(scene: Phaser.Scene, spawn: EnemySpawn, options:
   );
 
   sprite.setIgnoreGravity?.(true);
-  sprite.setFixedRotation?.(true);
+  sprite.setFixedRotation?.();
   sprite.setFrictionAir?.(0.02);
   sprite.setName?.('Wabble Bee');
 
@@ -255,7 +255,7 @@ export function createDrontoDurt(scene: Phaser.Scene, spawn: EnemySpawn, options
   );
 
   sprite.setIgnoreGravity?.(false);
-  sprite.setFixedRotation?.(true);
+  sprite.setFixedRotation?.();
   sprite.setFrictionAir?.(0.05);
   sprite.setName?.('Dronto Durt');
 
