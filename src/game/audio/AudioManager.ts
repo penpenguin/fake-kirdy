@@ -9,6 +9,8 @@ type SoundManagerLike = Partial<{
 
 type BaseSoundLike = Partial<Phaser.Sound.BaseSound> & { key?: string };
 
+const DEFAULT_MASTER_VOLUME = 0.6;
+
 function clamp01(value: number) {
   if (!Number.isFinite(value)) {
     return 0;
@@ -28,11 +30,12 @@ function clamp01(value: number) {
 export class AudioManager {
   private readonly sound: SoundManagerLike;
   private currentBgm?: BaseSoundLike;
-  private masterVolume = 1;
+  private masterVolume = DEFAULT_MASTER_VOLUME;
   private muted = false;
 
   constructor(private readonly scene: Phaser.Scene) {
     this.sound = scene.sound ?? {};
+    this.sound.setVolume?.(this.masterVolume);
   }
 
   playSfx(key: string, config?: Phaser.Types.Sound.SoundConfig) {

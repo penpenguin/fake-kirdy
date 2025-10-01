@@ -51,38 +51,38 @@ const IMAGE_ASSETS: ReadonlyArray<ImageAsset> = [
 const AUDIO_ASSETS: ReadonlyArray<AudioAsset> = [
   {
     key: 'bgm-main',
-    urls: ['audio/bgm-main.ogg', 'audio/bgm-main.mp3'],
-    fallbackUrl: 'audio/bgm-main.mp3',
+    urls: ['audio/bgm-main.wav'],
+    fallbackUrl: 'audio/bgm-main.wav',
   },
   {
     key: 'kirdy-inhale',
-    urls: ['audio/sfx/kirdy-inhale.ogg', 'audio/sfx/kirdy-inhale.mp3'],
-    fallbackUrl: 'audio/sfx/kirdy-inhale.mp3',
+    urls: ['audio/sfx/kirdy-inhale.wav'],
+    fallbackUrl: 'audio/sfx/kirdy-inhale.wav',
   },
   {
     key: 'kirdy-swallow',
-    urls: ['audio/sfx/kirdy-swallow.ogg', 'audio/sfx/kirdy-swallow.mp3'],
-    fallbackUrl: 'audio/sfx/kirdy-swallow.mp3',
+    urls: ['audio/sfx/kirdy-swallow.wav'],
+    fallbackUrl: 'audio/sfx/kirdy-swallow.wav',
   },
   {
     key: 'kirdy-spit',
-    urls: ['audio/sfx/kirdy-spit.ogg', 'audio/sfx/kirdy-spit.mp3'],
-    fallbackUrl: 'audio/sfx/kirdy-spit.mp3',
+    urls: ['audio/sfx/kirdy-spit.wav'],
+    fallbackUrl: 'audio/sfx/kirdy-spit.wav',
   },
   {
     key: 'ability-fire-attack',
-    urls: ['audio/sfx/ability-fire-attack.ogg', 'audio/sfx/ability-fire-attack.mp3'],
-    fallbackUrl: 'audio/sfx/ability-fire-attack.mp3',
+    urls: ['audio/sfx/ability-fire-attack.wav'],
+    fallbackUrl: 'audio/sfx/ability-fire-attack.wav',
   },
   {
     key: 'ability-ice-attack',
-    urls: ['audio/sfx/ability-ice-attack.ogg', 'audio/sfx/ability-ice-attack.mp3'],
-    fallbackUrl: 'audio/sfx/ability-ice-attack.mp3',
+    urls: ['audio/sfx/ability-ice-attack.wav'],
+    fallbackUrl: 'audio/sfx/ability-ice-attack.wav',
   },
   {
     key: 'ability-sword-attack',
-    urls: ['audio/sfx/ability-sword-attack.ogg', 'audio/sfx/ability-sword-attack.mp3'],
-    fallbackUrl: 'audio/sfx/ability-sword-attack.mp3',
+    urls: ['audio/sfx/ability-sword-attack.wav'],
+    fallbackUrl: 'audio/sfx/ability-sword-attack.wav',
   },
 ];
 

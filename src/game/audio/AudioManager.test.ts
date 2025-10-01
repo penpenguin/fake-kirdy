@@ -41,6 +41,13 @@ describe('AudioManager', () => {
     scene = { sound: soundManager };
   });
 
+  it('initializes with a slightly reduced master volume', () => {
+    const audio = new AudioManager(scene as any);
+
+    expect(soundManager.setVolume).toHaveBeenCalledWith(0.8);
+    expect(audio.getMasterVolume()).toBe(0.8);
+  });
+
   it('plays sound effects through the scene sound manager', () => {
     const audio = new AudioManager(scene as any);
 

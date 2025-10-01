@@ -1,4 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { existsSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { createAssetManifest, queueAssetManifest } from './pipeline';
 
@@ -101,5 +104,31 @@ describe('asset pipeline manifest', () => {
         'ability-sword-attack',
       ]),
     );
+  });
+
+  it('ensures every fallback asset file exists under public/assets', () => {
+    const manifest = createAssetManifest();
+    const baseDir = resolve(
+      dirname(fileURLToPath(import.meta.url)),
+      '../../../public',
+    );
+
+    const expectFallbackExists = (relativePath: string) => {
+      const normalized = relativePath.replace(/^\/+/, '');
+      const absolutePath = resolve(baseDir, normalized);
+      expect(existsSync(absolutePath)).toBe(true);
+    };
+
+    manifest.images
+      .filter((asset) => asset.fallbackUrl)
+      .forEach((asset) => expectFallbackExists(`assets/${asset.fallbackUrl}`));
+
+    manifest.audio
+      .filter((asset) => asset.fallbackUrl)
+      .forEach((asset) => expectFallbackExists(`assets/${asset.fallbackUrl}`));
+
+    manifest.data
+      .filter((asset) => asset.fallbackUrl)
+      .forEach((asset) => expectFallbackExists(`assets/${asset.fallbackUrl}`));
   });
 });
