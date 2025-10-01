@@ -6,10 +6,15 @@ const INHALE_HORIZONTAL_RANGE = 96;
 const INHALE_VERTICAL_RANGE = 48;
 
 type ParticleEffect = {
-  startFollow?: (target: Phaser.GameObjects.GameObject) => void;
-  stop?: () => void;
-  destroy?: () => void;
-  setDepth?: (value: number) => void;
+  startFollow?: (
+    target: Phaser.Types.Math.Vector2Like,
+    offsetX?: number,
+    offsetY?: number,
+    trackVisible?: boolean,
+  ) => unknown;
+  stop?: (kill?: boolean) => unknown;
+  destroy?: (fromScene?: boolean) => unknown;
+  setDepth?: (value: number) => unknown;
 };
 
 export type ActionStateMap = Record<PlayerAction, InputButtonState>;
@@ -86,7 +91,7 @@ export class InhaleSystem {
     }
 
     const effect = this.scene.add.particles(0, 0, 'inhale-sparkle');
-    effect?.startFollow?.(this.kirdy.sprite as unknown as Phaser.GameObjects.GameObject);
+    effect?.startFollow?.(this.kirdy.sprite as unknown as Phaser.Types.Math.Vector2Like);
     effect?.setDepth?.(1000);
     this.inhaleEffect = effect ?? undefined;
   }

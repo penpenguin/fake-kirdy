@@ -32,7 +32,7 @@ vi.mock('phaser', () => ({
 }));
 
 describe('enemy system', () => {
-  let sprite: ReturnType<ReturnType<typeof spriteFactory>>;
+  let sprite: ReturnType<typeof spriteFactory>;
   let scene: any;
 
   beforeEach(() => {

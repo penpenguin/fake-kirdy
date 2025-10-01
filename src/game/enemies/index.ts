@@ -33,7 +33,7 @@ interface BaseEnemyConfig extends EnemyCommonOptions {
 }
 
 abstract class BaseEnemy implements Enemy {
-  protected readonly sprite: Phaser.Physics.Matter.Sprite;
+  public readonly sprite: Phaser.Physics.Matter.Sprite;
   protected readonly scene: Phaser.Scene;
   protected readonly getPlayerPosition?: TargetProvider;
   private readonly enemyType: EnemyType;
