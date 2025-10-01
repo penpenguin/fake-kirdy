@@ -112,6 +112,14 @@ describe('AbilitySystem', () => {
     expect(system.getCurrentAbilityType()).toBe('fire');
   });
 
+  it('notifies listeners when a new ability is acquired', () => {
+    const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
+
+    system.applySwallowedPayload({ abilityType: 'fire' });
+
+    expect(eventsEmit).toHaveBeenCalledWith('ability-acquired', { abilityType: 'fire' });
+  });
+
   it('replaces an existing ability when a new one is copied', () => {
     const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
 
@@ -211,6 +219,20 @@ describe('AbilitySystem', () => {
     expect(kirdy.sprite.setData).toHaveBeenCalledWith('equippedAbility', undefined);
     expect(eventsEmit).toHaveBeenCalledWith('ability-discarded', { abilityType: 'fire' });
     expect(system.getCurrentAbilityType()).toBeUndefined();
+  });
+
+  it('emits ability-cleared when the current ability is removed', () => {
+    const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
+    system.applySwallowedPayload({ abilityType: 'fire' });
+    eventsEmit.mockClear();
+
+    system.update(
+      buildActions({
+        discard: { isDown: true, justPressed: true },
+      }),
+    );
+
+    expect(eventsEmit).toHaveBeenCalledWith('ability-cleared', {});
   });
 
   it('does nothing when an unknown ability type is provided', () => {

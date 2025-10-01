@@ -9,10 +9,16 @@ const stubs = vi.hoisted(() => {
 
   const events = {
     once: vi.fn(),
+    on: vi.fn(),
+    off: vi.fn(),
+    emit: vi.fn(),
   };
 
   const scenePlugin = {
     launch: vi.fn(),
+    pause: vi.fn(),
+    stop: vi.fn(),
+    start: vi.fn(),
   };
 
   const matterFactory = {
@@ -183,6 +189,23 @@ vi.mock('../ui/MapOverlay', async (importOriginal) => {
   };
 });
 
+const hudUpdateHPMock = vi.hoisted(() => vi.fn());
+const hudUpdateAbilityMock = vi.hoisted(() => vi.fn());
+const hudUpdateScoreMock = vi.hoisted(() => vi.fn());
+const hudDestroyMock = vi.hoisted(() => vi.fn());
+const HudMock = vi.hoisted(() =>
+  vi.fn(() => ({
+    updateHP: hudUpdateHPMock,
+    updateAbility: hudUpdateAbilityMock,
+    updateScore: hudUpdateScoreMock,
+    destroy: hudDestroyMock,
+  })),
+);
+
+vi.mock('../ui/Hud', () => ({
+  Hud: HudMock,
+}));
+
 const physicsRegisterPlayerMock = vi.hoisted(() => vi.fn());
 const physicsRegisterEnemyMock = vi.hoisted(() => vi.fn());
 const physicsDestroyProjectileMock = vi.hoisted(() => vi.fn());
@@ -201,7 +224,7 @@ vi.mock('../physics/PhysicsSystem', () => ({
   PhysicsSystem: PhysicsSystemMock,
 }));
 
-import { GameScene } from './index';
+import { GameScene, SceneKeys } from './index';
 
 describe('GameScene player integration', () => {
   let defaultAreaState: any;
@@ -213,6 +236,10 @@ describe('GameScene player integration', () => {
     enemyUpdateMock.mockReset();
     createWabbleBeeMock.mockClear();
     createDrontoDurtMock.mockClear();
+    stubs.scenePlugin.launch.mockClear();
+    stubs.scenePlugin.pause.mockClear();
+    stubs.scenePlugin.stop.mockClear();
+    stubs.scenePlugin.start.mockClear();
     physicsRegisterPlayerMock.mockClear();
     physicsRegisterEnemyMock.mockClear();
     physicsDestroyProjectileMock.mockClear();
@@ -223,6 +250,14 @@ describe('GameScene player integration', () => {
     mapOverlayUpdateMock.mockClear();
     mapOverlayIsVisibleMock.mockClear();
     mapOverlayDestroyMock.mockClear();
+    stubs.events.on.mockClear();
+    stubs.events.off.mockClear();
+    stubs.events.emit.mockClear();
+    hudUpdateHPMock.mockClear();
+    hudUpdateAbilityMock.mockClear();
+    hudUpdateScoreMock.mockClear();
+    hudDestroyMock.mockClear();
+    HudMock.mockClear();
     defaultAreaState = {
       definition: { id: 'central-hub' },
       tileMap: { tileSize: 32, columns: 20, rows: 10 },
@@ -422,6 +457,96 @@ describe('GameScene player integration', () => {
     expect(mapOverlayHideMock).toHaveBeenCalled();
     expect(mapOverlayShowMock).not.toHaveBeenCalled();
     expect(mapOverlayUpdateMock).not.toHaveBeenCalled();
+  });
+
+  it('初期状態でHUDを生成しプレイヤー情報を表示する', () => {
+    const scene = new GameScene();
+    createKirdyMock.mockReturnValue(makeKirdyStub());
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    expect(HudMock).toHaveBeenCalledWith(scene);
+    expect(hudUpdateHPMock).toHaveBeenCalledWith({ current: 6, max: 6 });
+    expect(hudUpdateAbilityMock).toHaveBeenCalledWith(undefined);
+    expect(hudUpdateScoreMock).toHaveBeenCalledWith(0);
+  });
+
+  it('能力イベントを受けてHUDを更新する', () => {
+    const scene = new GameScene();
+    createKirdyMock.mockReturnValue(makeKirdyStub());
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const abilityAcquiredHandler = stubs.events.on.mock.calls.find(([event]) => event === 'ability-acquired')?.[1];
+    expect(abilityAcquiredHandler).toBeInstanceOf(Function);
+
+    abilityAcquiredHandler?.({ abilityType: 'fire' });
+
+    expect(hudUpdateAbilityMock).toHaveBeenLastCalledWith('fire');
+
+    const abilityClearedHandler = stubs.events.on.mock.calls.find(([event]) => event === 'ability-cleared')?.[1];
+    expect(abilityClearedHandler).toBeInstanceOf(Function);
+
+    abilityClearedHandler?.({});
+
+    expect(hudUpdateAbilityMock).toHaveBeenLastCalledWith(undefined);
+  });
+
+  it('敵撃破イベントでスコアを加算してHUDに反映する', () => {
+    const scene = new GameScene();
+    createKirdyMock.mockReturnValue(makeKirdyStub());
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const enemyDefeatedHandler = stubs.events.on.mock.calls.find(([event]) => event === 'enemy-defeated')?.[1];
+    expect(enemyDefeatedHandler).toBeInstanceOf(Function);
+
+    enemyDefeatedHandler?.({ enemyType: 'wabble-bee' });
+    expect(hudUpdateScoreMock).toHaveBeenLastCalledWith(100);
+
+    enemyDefeatedHandler?.({ enemyType: 'dronto-durt' });
+    expect(hudUpdateScoreMock).toHaveBeenLastCalledWith(200);
+  });
+
+  it('ダメージを受けるとHPを減算しゲームオーバー閾値までHUDを更新する', () => {
+    const scene = new GameScene();
+    createKirdyMock.mockReturnValue(makeKirdyStub());
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    hudUpdateHPMock.mockClear();
+
+    expect(scene.damagePlayer).toBeInstanceOf(Function);
+
+    scene.damagePlayer(2);
+    expect(hudUpdateHPMock).toHaveBeenLastCalledWith({ current: 4, max: 6 });
+
+    scene.damagePlayer(10);
+    expect(hudUpdateHPMock).toHaveBeenLastCalledWith({ current: 0, max: 6 });
+  });
+
+  it('HPが0になるとゲームオーバーシーンを起動する', () => {
+    const scene = new GameScene();
+    createKirdyMock.mockReturnValue(makeKirdyStub());
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const enemyDefeatedHandler = stubs.events.on.mock.calls.find(([event]) => event === 'enemy-defeated')?.[1];
+    enemyDefeatedHandler?.({ enemyType: 'wabble-bee' });
+
+    const abilityAcquiredHandler = stubs.events.on.mock.calls.find(([event]) => event === 'ability-acquired')?.[1];
+    abilityAcquiredHandler?.({ abilityType: 'fire' });
+
+    scene.damagePlayer(6);
+
+    expect(stubs.scenePlugin.pause).toHaveBeenCalledWith(SceneKeys.Game);
+    const launchCall = stubs.scenePlugin.launch.mock.calls.find(([sceneKey]) => sceneKey === SceneKeys.GameOver);
+    expect(launchCall?.[1]).toEqual(expect.objectContaining({ score: 100, ability: 'fire' }));
   });
 
   it('refreshes the world map overlay when the player discovers a new area while it is visible', () => {

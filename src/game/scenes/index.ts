@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { createKirdy, type Kirdy } from '../characters/Kirdy';
 import { InhaleSystem } from '../mechanics/InhaleSystem';
-import { AbilitySystem } from '../mechanics/AbilitySystem';
+import { AbilitySystem, type AbilityType } from '../mechanics/AbilitySystem';
 import { SwallowSystem, type SwallowedPayload } from '../mechanics/SwallowSystem';
 import {
   PlayerInputManager,
@@ -20,12 +20,14 @@ import {
 import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { AreaManager } from '../world/AreaManager';
 import { MapOverlay, createMapSummaries } from '../ui/MapOverlay';
+import { Hud } from '../ui/Hud';
 
 export const SceneKeys = {
   Boot: 'BootScene',
   Menu: 'MenuScene',
   Game: 'GameScene',
   Pause: 'PauseScene',
+  GameOver: 'GameOverScene',
 } as const;
 
 type SceneKey = (typeof SceneKeys)[keyof typeof SceneKeys];
@@ -98,15 +100,84 @@ export class GameScene extends Phaser.Scene {
   private mapOverlay?: MapOverlay;
   private mapToggleHandler?: () => void;
   private lastAreaSummaryHash?: string;
+  private hud?: Hud;
+  private readonly playerMaxHP = 6;
+  private playerHP = this.playerMaxHP;
+  private playerScore = 0;
+  private currentAbility?: AbilityType;
+  private readonly scorePerEnemy = 100;
+  private isGameOver = false;
 
   constructor() {
     super(buildConfig(SceneKeys.Game));
   }
 
+  private readonly handleAbilityAcquired = (event: { abilityType?: AbilityType }) => {
+    if (!event?.abilityType) {
+      return;
+    }
+
+    this.currentAbility = event.abilityType;
+    this.hud?.updateAbility(event.abilityType);
+  };
+
+  private readonly handleAbilityCleared = () => {
+    this.currentAbility = undefined;
+    this.hud?.updateAbility(undefined);
+  };
+
+  private readonly handleEnemyDefeated = () => {
+    this.playerScore += this.scorePerEnemy;
+    this.hud?.updateScore(this.playerScore);
+  };
+
+  private readonly handlePlayerDefeated = () => {
+    if (this.isGameOver) {
+      return;
+    }
+
+    this.isGameOver = true;
+    this.scene.pause(SceneKeys.Game);
+    this.scene.launch(SceneKeys.GameOver, {
+      score: this.playerScore,
+      ability: this.currentAbility,
+      maxHP: this.playerMaxHP,
+    });
+  };
+
+  public damagePlayer(amount: number) {
+    if (!Number.isFinite(amount)) {
+      return;
+    }
+
+    const normalized = Math.max(0, Math.floor(amount));
+    if (normalized <= 0) {
+      return;
+    }
+
+    const previous = this.playerHP;
+    this.playerHP = Math.max(0, this.playerHP - normalized);
+
+    if (this.playerHP === previous) {
+      return;
+    }
+
+    this.hud?.updateHP({ current: this.playerHP, max: this.playerMaxHP });
+
+    if (this.playerHP <= 0) {
+      this.handlePlayerDefeated();
+    }
+  }
+
   create() {
+    this.playerHP = this.playerMaxHP;
+    this.playerScore = 0;
+    this.currentAbility = undefined;
+    this.isGameOver = false;
     this.physicsSystem = new PhysicsSystem(this);
     this.areaManager = new AreaManager();
     this.mapOverlay = new MapOverlay(this);
+    this.hud = new Hud(this);
     const spawn = this.areaManager.getCurrentAreaState().playerSpawnPosition ?? GameScene.PLAYER_SPAWN;
     const pauseHandler = () => this.pauseGame();
     this.input?.keyboard?.once?.('keydown-ESC', pauseHandler);
@@ -126,6 +197,10 @@ export class GameScene extends Phaser.Scene {
       this.abilitySystem = new AbilitySystem(this, this.kirdy, this.physicsSystem);
     }
 
+    this.events?.on?.('ability-acquired', this.handleAbilityAcquired, this);
+    this.events?.on?.('ability-cleared', this.handleAbilityCleared, this);
+    this.events?.on?.('enemy-defeated', this.handleEnemyDefeated, this);
+
     this.events?.once?.('shutdown', () => {
       this.playerInput?.destroy();
       this.playerInput = undefined;
@@ -142,7 +217,20 @@ export class GameScene extends Phaser.Scene {
       }
       this.mapOverlay?.destroy();
       this.mapOverlay = undefined;
+      this.events?.off?.('ability-acquired', this.handleAbilityAcquired, this);
+      this.events?.off?.('ability-cleared', this.handleAbilityCleared, this);
+      this.events?.off?.('enemy-defeated', this.handleEnemyDefeated, this);
+      this.hud?.destroy();
+      this.hud = undefined;
+      this.playerHP = this.playerMaxHP;
+      this.playerScore = 0;
+      this.currentAbility = undefined;
+      this.isGameOver = false;
     });
+
+    this.hud?.updateHP({ current: this.playerHP, max: this.playerMaxHP });
+    this.hud?.updateAbility(undefined);
+    this.hud?.updateScore(this.playerScore);
   }
 
   pauseGame() {
@@ -440,15 +528,51 @@ export class PauseScene extends Phaser.Scene {
 
   create() {
     const resumeHandler = () => this.resumeGame();
+    const restartHandler = () => this.restartGame();
+    const quitHandler = () => this.quitToMenu();
 
     this.input?.keyboard?.once?.('keydown-ESC', resumeHandler);
+    this.input?.keyboard?.once?.('keydown-R', restartHandler);
+    this.input?.keyboard?.once?.('keydown-Q', quitHandler);
     this.input?.once?.('pointerdown', resumeHandler);
 
     if (this.add?.text) {
-      this.add.text(0, 0, 'Paused - Press ESC or Tap to Resume', {
+      const style: Phaser.Types.GameObjects.Text.TextStyle = {
         fontSize: '24px',
         color: '#ffffff',
-      });
+        align: 'center',
+      };
+
+      const submenuStyle: Phaser.Types.GameObjects.Text.TextStyle = {
+        fontSize: '18px',
+        color: '#ffe4f2',
+      };
+
+      const title = this.add.text(0, -60, 'Game Paused', style);
+      title.setOrigin?.(0.5, 0.5);
+      title.setScrollFactor?.(0, 0);
+      title.setDepth?.(2000);
+
+      const resumeOption = this.add.text(0, -10, 'Resume (ESC)', submenuStyle);
+      resumeOption.setOrigin?.(0.5, 0.5);
+      resumeOption.setScrollFactor?.(0, 0);
+      resumeOption.setDepth?.(2000);
+      resumeOption.setInteractive?.({ useHandCursor: true });
+      resumeOption.on?.('pointerdown', resumeHandler);
+
+      const restartOption = this.add.text(0, 30, 'Restart (R)', submenuStyle);
+      restartOption.setOrigin?.(0.5, 0.5);
+      restartOption.setScrollFactor?.(0, 0);
+      restartOption.setDepth?.(2000);
+      restartOption.setInteractive?.({ useHandCursor: true });
+      restartOption.on?.('pointerdown', restartHandler);
+
+      const quitOption = this.add.text(0, 70, 'Quit to Menu (Q)', submenuStyle);
+      quitOption.setOrigin?.(0.5, 0.5);
+      quitOption.setScrollFactor?.(0, 0);
+      quitOption.setDepth?.(2000);
+      quitOption.setInteractive?.({ useHandCursor: true });
+      quitOption.on?.('pointerdown', quitHandler);
     }
   }
 
@@ -456,6 +580,104 @@ export class PauseScene extends Phaser.Scene {
     this.scene.stop(SceneKeys.Pause);
     this.scene.resume(SceneKeys.Game);
   }
+
+  restartGame() {
+    this.scene.stop(SceneKeys.Pause);
+    this.scene.stop(SceneKeys.Game);
+    this.scene.start(SceneKeys.Game);
+  }
+
+  quitToMenu() {
+    this.scene.stop(SceneKeys.Pause);
+    this.scene.stop(SceneKeys.Game);
+    this.scene.start(SceneKeys.Menu);
+  }
 }
 
-export const coreScenes = [BootScene, MenuScene, GameScene, PauseScene];
+interface GameOverData {
+  score?: number;
+  ability?: AbilityType;
+  maxHP?: number;
+}
+
+export class GameOverScene extends Phaser.Scene {
+  public static readonly KEY = SceneKeys.GameOver;
+  private finalScore = 0;
+  private finalAbility?: AbilityType;
+
+  constructor() {
+    super(buildConfig(SceneKeys.GameOver));
+  }
+
+  create(data?: GameOverData) {
+    this.finalScore = Math.max(0, Math.floor(data?.score ?? 0));
+    this.finalAbility = data?.ability;
+
+    const restartHandler = () => this.restartGame();
+    const menuHandler = () => this.returnToMenu();
+
+    this.input?.keyboard?.once?.('keydown-R', restartHandler);
+    this.input?.keyboard?.once?.('keydown-M', menuHandler);
+    this.input?.once?.('pointerdown', restartHandler);
+
+    if (this.add?.text) {
+      const style: Phaser.Types.GameObjects.Text.TextStyle = {
+        fontSize: '30px',
+        color: '#ffb4d9',
+        align: 'center',
+      };
+
+      const infoStyle: Phaser.Types.GameObjects.Text.TextStyle = {
+        fontSize: '18px',
+        color: '#ffffff',
+      };
+
+      const title = this.add.text(0, -80, 'Game Over', style);
+      title.setOrigin?.(0.5, 0.5);
+      title.setScrollFactor?.(0, 0);
+      title.setDepth?.(2000);
+
+      const abilityLabel = this.finalAbility ? this.finalAbility.toUpperCase() : 'None';
+      const scoreText = `Final Score: ${this.finalScore.toString().padStart(6, '0')}`;
+      const abilityText = `Ability Carried: ${abilityLabel}`;
+
+      const scoreLine = this.add.text(0, -20, scoreText, infoStyle);
+      scoreLine.setOrigin?.(0.5, 0.5);
+      scoreLine.setScrollFactor?.(0, 0);
+      scoreLine.setDepth?.(2000);
+
+      const abilityLine = this.add.text(0, 20, abilityText, infoStyle);
+      abilityLine.setOrigin?.(0.5, 0.5);
+      abilityLine.setScrollFactor?.(0, 0);
+      abilityLine.setDepth?.(2000);
+
+      const restartLine = this.add.text(0, 70, 'Restart (R)', infoStyle);
+      restartLine.setOrigin?.(0.5, 0.5);
+      restartLine.setScrollFactor?.(0, 0);
+      restartLine.setDepth?.(2000);
+      restartLine.setInteractive?.({ useHandCursor: true });
+      restartLine.on?.('pointerdown', restartHandler);
+
+      const menuLine = this.add.text(0, 110, 'Return to Menu (M)', infoStyle);
+      menuLine.setOrigin?.(0.5, 0.5);
+      menuLine.setScrollFactor?.(0, 0);
+      menuLine.setDepth?.(2000);
+      menuLine.setInteractive?.({ useHandCursor: true });
+      menuLine.on?.('pointerdown', menuHandler);
+    }
+  }
+
+  restartGame() {
+    this.scene.stop(SceneKeys.GameOver);
+    this.scene.stop(SceneKeys.Game);
+    this.scene.start(SceneKeys.Game);
+  }
+
+  returnToMenu() {
+    this.scene.stop(SceneKeys.GameOver);
+    this.scene.stop(SceneKeys.Game);
+    this.scene.start(SceneKeys.Menu);
+  }
+}
+
+export const coreScenes = [BootScene, MenuScene, GameScene, PauseScene, GameOverScene];

@@ -6,6 +6,7 @@ vi.mock('phaser', () => {
     launch: vi.fn(),
     stop: vi.fn(),
     resume: vi.fn(),
+    pause: vi.fn(),
   });
 
   const createEventEmitterMock = () => ({
@@ -33,6 +34,15 @@ vi.mock('phaser', () => {
     setName: vi.fn().mockReturnThis(),
   });
 
+  const createTextMock = () => ({
+    setOrigin: vi.fn().mockReturnThis(),
+    setScrollFactor: vi.fn().mockReturnThis(),
+    setDepth: vi.fn().mockReturnThis(),
+    setInteractive: vi.fn().mockReturnThis(),
+    on: vi.fn().mockReturnThis(),
+    off: vi.fn().mockReturnThis(),
+  });
+
   class PhaserSceneMock {
     public scene = createScenePluginMock();
     public events = createEventEmitterMock();
@@ -43,7 +53,7 @@ vi.mock('phaser', () => {
       once: vi.fn(),
     };
     public add = {
-      text: vi.fn(),
+      text: vi.fn(() => createTextMock()),
       image: vi.fn(() => ({
         setInteractive: vi.fn().mockReturnThis(),
         on: vi.fn().mockReturnThis(),
@@ -107,7 +117,7 @@ vi.mock('../physics/PhysicsSystem', () => ({
   PhysicsSystem: physicsSystemStubs.mock,
 }));
 
-import { BootScene, GameScene, MenuScene, PauseScene, SceneKeys, coreScenes } from './index';
+import { BootScene, GameOverScene, GameScene, MenuScene, PauseScene, SceneKeys, coreScenes } from './index';
 
 describe('Scene registration', () => {
   beforeEach(() => {
@@ -121,6 +131,7 @@ describe('Scene registration', () => {
     expect(SceneKeys.Menu).toBe('MenuScene');
     expect(SceneKeys.Game).toBe('GameScene');
     expect(SceneKeys.Pause).toBe('PauseScene');
+    expect(SceneKeys.GameOver).toBe('GameOverScene');
   });
 
   it('boot scene queues assets and transitions after load completes', () => {
@@ -175,6 +186,8 @@ describe('Scene registration', () => {
     pauseScene.create();
 
     expect(pauseScene.input.keyboard.once).toHaveBeenCalledWith('keydown-ESC', expect.any(Function));
+    expect(pauseScene.input.keyboard.once).toHaveBeenCalledWith('keydown-R', expect.any(Function));
+    expect(pauseScene.input.keyboard.once).toHaveBeenCalledWith('keydown-Q', expect.any(Function));
     expect(pauseScene.input.once).toHaveBeenCalledWith('pointerdown', expect.any(Function));
 
     const [, keyHandler] = pauseScene.input.keyboard.once.mock.calls[0];
@@ -188,6 +201,47 @@ describe('Scene registration', () => {
 
     expect(pauseScene.scene.stop).toHaveBeenCalledTimes(2);
     expect(pauseScene.scene.resume).toHaveBeenCalledTimes(2);
+
+    const restartCall = pauseScene.input.keyboard.once.mock.calls.find(([event]) => event === 'keydown-R');
+    const restartHandler = restartCall?.[1];
+    expect(restartHandler).toBeInstanceOf(Function);
+    restartHandler?.();
+
+    expect(pauseScene.scene.stop).toHaveBeenCalledWith(SceneKeys.Game);
+    expect(pauseScene.scene.start).toHaveBeenCalledWith(SceneKeys.Game);
+
+    const quitCall = pauseScene.input.keyboard.once.mock.calls.find(([event]) => event === 'keydown-Q');
+    const quitHandler = quitCall?.[1];
+    expect(quitHandler).toBeInstanceOf(Function);
+    quitHandler?.();
+
+    expect(pauseScene.scene.start).toHaveBeenCalledWith(SceneKeys.Menu);
+  });
+
+  it('game over scene can restart or return to menu', () => {
+    const gameOverScene = new GameOverScene();
+
+    gameOverScene.create({ score: 123, ability: 'fire' as any });
+
+    expect(gameOverScene.input.keyboard.once).toHaveBeenCalledWith('keydown-R', expect.any(Function));
+    expect(gameOverScene.input.keyboard.once).toHaveBeenCalledWith('keydown-M', expect.any(Function));
+    expect(gameOverScene.input.once).toHaveBeenCalledWith('pointerdown', expect.any(Function));
+
+    const restartCall = gameOverScene.input.keyboard.once.mock.calls.find(([event]) => event === 'keydown-R');
+    const restartHandler = restartCall?.[1];
+    expect(restartHandler).toBeInstanceOf(Function);
+    restartHandler?.();
+
+    expect(gameOverScene.scene.stop).toHaveBeenCalledWith(SceneKeys.GameOver);
+    expect(gameOverScene.scene.stop).toHaveBeenCalledWith(SceneKeys.Game);
+    expect(gameOverScene.scene.start).toHaveBeenCalledWith(SceneKeys.Game);
+
+    const menuCall = gameOverScene.input.keyboard.once.mock.calls.find(([event]) => event === 'keydown-M');
+    const menuHandler = menuCall?.[1];
+    expect(menuHandler).toBeInstanceOf(Function);
+    menuHandler?.();
+
+    expect(gameOverScene.scene.start).toHaveBeenCalledWith(SceneKeys.Menu);
   });
 
   it('registers all core scenes in the expected order', () => {
@@ -196,6 +250,7 @@ describe('Scene registration', () => {
       MenuScene,
       GameScene,
       PauseScene,
+      GameOverScene,
     ]);
   });
 });

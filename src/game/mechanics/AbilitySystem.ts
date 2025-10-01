@@ -171,6 +171,7 @@ export class AbilitySystem {
     if (this.currentAbility?.type === abilityType) {
       definition.onAcquire?.({ scene: this.scene, kirdy: this.kirdy, physicsSystem: this.physicsSystem });
       this.kirdy.sprite.setData?.('equippedAbility', abilityType);
+      this.scene.events?.emit?.('ability-acquired', { abilityType });
       return;
     }
 
@@ -178,6 +179,7 @@ export class AbilitySystem {
     this.currentAbility = definition;
     definition.onAcquire?.({ scene: this.scene, kirdy: this.kirdy, physicsSystem: this.physicsSystem });
     this.kirdy.sprite.setData?.('equippedAbility', abilityType);
+    this.scene.events?.emit?.('ability-acquired', { abilityType });
   }
 
   getCurrentAbilityType(): AbilityType | undefined {
@@ -191,6 +193,7 @@ export class AbilitySystem {
 
     this.currentAbility.onRemove?.({ scene: this.scene, kirdy: this.kirdy, physicsSystem: this.physicsSystem });
     this.kirdy.sprite.setData?.('equippedAbility', undefined);
+    this.scene.events?.emit?.('ability-cleared', {});
     this.currentAbility = undefined;
   }
 }
