@@ -15,7 +15,7 @@ import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { AreaManager, AREA_IDS, type AreaManagerSnapshot, type Vector2 } from '../world/AreaManager';
 import { MapOverlay, createMapSummaries } from '../ui/MapOverlay';
 import { Hud } from '../ui/Hud';
-import { SaveManager, type GameProgressSnapshot } from '../save/SaveManager';
+import { SaveManager, type GameProgressSnapshot, DEFAULT_SETTINGS, type GameSettingsSnapshot } from '../save/SaveManager';
 import { createAssetManifest, queueAssetManifest, type AssetFallback } from '../assets/pipeline';
 import { PerformanceMonitor, type PerformanceMetrics } from '../performance/PerformanceMonitor';
 import { recordLowFpsEvent, recordStableFpsEvent } from '../performance/RenderingModePreference';
@@ -855,11 +855,25 @@ export class GameScene extends Phaser.Scene {
       area: {
         ...areaSnapshot,
         lastKnownPlayerPosition: playerPosition,
+        completedAreas: areaSnapshot.completedAreas ?? [],
+        collectedItems: areaSnapshot.collectedItems ?? [],
       },
+      settings: this.getSettingsSnapshot(),
     };
 
     this.saveManager.save(snapshot);
     this.progressDirty = false;
+  }
+
+  private getSettingsSnapshot(): GameSettingsSnapshot {
+    const volume = this.audioManager?.getMasterVolume?.();
+    const normalizedVolume = Number.isFinite(volume) ? Math.min(1, Math.max(0, volume as number)) : DEFAULT_SETTINGS.volume;
+
+    return {
+      volume: normalizedVolume,
+      controls: DEFAULT_SETTINGS.controls,
+      difficulty: DEFAULT_SETTINGS.difficulty,
+    } satisfies GameSettingsSnapshot;
   }
 
   private toggleMapOverlay() {

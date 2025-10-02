@@ -21,6 +21,7 @@ function createStorageMock(): StorageMock {
 describe('SaveManager', () => {
   const key = 'kirdy-progress-test';
   let storage: StorageMock;
+  let fallbackStorage: StorageMock;
   let saveManager: SaveManager;
   const nowStub = vi.fn(() => 1_699_999_999_000);
 
@@ -40,12 +41,25 @@ describe('SaveManager', () => {
         [AREA_IDS.MirrorCorridor]: ['1,1'],
       },
       lastKnownPlayerPosition: { x: 512, y: 224 },
+      completedAreas: [AREA_IDS.CentralHub],
+      collectedItems: ['star-shard', 'healing-fruit'],
+    },
+    settings: {
+      volume: 0.65,
+      controls: 'keyboard',
+      difficulty: 'hard',
     },
   } satisfies GameProgressSnapshot;
 
   beforeEach(() => {
     storage = createStorageMock();
-    saveManager = new SaveManager({ key, storage: storage as unknown as Storage, now: nowStub });
+    fallbackStorage = createStorageMock();
+    saveManager = new SaveManager({
+      key,
+      storage: storage as unknown as Storage,
+      fallbackStorage: fallbackStorage as unknown as Storage,
+      now: nowStub,
+    });
   });
 
   it('進行状況をバージョン付きJSONとして保存する', () => {
@@ -72,7 +86,10 @@ describe('SaveManager', () => {
           discoveredAreas: snapshot.area.discoveredAreas,
           exploredTiles: snapshot.area.exploredTiles,
           lastKnownPlayerPosition: snapshot.area.lastKnownPlayerPosition,
+          completedAreas: snapshot.area.completedAreas,
+          collectedItems: snapshot.area.collectedItems,
         },
+        settings: snapshot.settings,
       },
     });
   });
@@ -99,6 +116,13 @@ describe('SaveManager', () => {
           },
           lastKnownPlayerPosition: { x: 12, y: 34 },
           extra: 'value',
+          completedAreas: ['wrong-land', AREA_IDS.CentralHub],
+          collectedItems: ['star-shard', { id: 'oops' }, 'star-shard', 42],
+        },
+        settings: {
+          volume: 2,
+          controls: 'arcade-stick',
+          difficulty: 'impossible',
         },
         unexpected: 'field',
       },
@@ -124,6 +148,13 @@ describe('SaveManager', () => {
           [AREA_IDS.CentralHub]: ['0,0', '1,1'],
         },
         lastKnownPlayerPosition: { x: 12, y: 34 },
+        completedAreas: [AREA_IDS.CentralHub],
+        collectedItems: ['star-shard'],
+      },
+      settings: {
+        volume: 1,
+        controls: 'keyboard',
+        difficulty: 'normal',
       },
     });
   });
@@ -152,6 +183,42 @@ describe('SaveManager', () => {
 
     expect(() => saveManager.save(snapshot)).not.toThrow();
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('failed to save'), error);
+
+    warn.mockRestore();
+  });
+
+  it('ローカルストレージに保存できない場合はフォールバックストレージへ保存し、読み込み時にも利用する', () => {
+    const error = new Error('quota exceeded');
+    const fallbackStorage = createStorageMock();
+
+    storage.setItem.mockImplementation(() => {
+      throw error;
+    });
+
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const manager = new SaveManager({
+      key,
+      storage: storage as unknown as Storage,
+      fallbackStorage: fallbackStorage as unknown as Storage,
+      now: nowStub,
+    });
+
+    manager.save(snapshot);
+
+    expect(storage.setItem).toHaveBeenCalledTimes(1);
+    expect(fallbackStorage.setItem).toHaveBeenCalledTimes(1);
+
+    const [fallbackKey, fallbackPayload] = fallbackStorage.setItem.mock.calls[0];
+    expect(fallbackKey).toBe(`${key}:fallback`);
+
+    storage.getItem.mockReturnValueOnce(null);
+    fallbackStorage.getItem.mockReturnValueOnce(fallbackPayload);
+
+    const loaded = manager.load();
+
+    expect(fallbackStorage.getItem).toHaveBeenCalledWith(`${key}:fallback`);
+    expect(loaded).toEqual(JSON.parse(fallbackPayload).data);
 
     warn.mockRestore();
   });
@@ -193,6 +260,13 @@ describe('SaveManager', () => {
           [AREA_IDS.MirrorCorridor]: [],
         },
         lastKnownPlayerPosition: { x: 10, y: 20 },
+        completedAreas: [AREA_IDS.CentralHub],
+        collectedItems: [],
+      },
+      settings: {
+        volume: 0.5,
+        controls: 'keyboard',
+        difficulty: 'normal',
       },
     };
 
@@ -257,6 +331,13 @@ describe('SaveManager', () => {
         discoveredAreas: [],
         exploredTiles: {},
         lastKnownPlayerPosition: { x: 0, y: 0 },
+        completedAreas: [],
+        collectedItems: [],
+      },
+      settings: {
+        volume: 0.8,
+        controls: 'keyboard',
+        difficulty: 'normal',
       },
     });
   });

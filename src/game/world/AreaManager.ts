@@ -45,6 +45,8 @@ export interface AreaManagerSnapshot {
   discoveredAreas: AreaId[];
   exploredTiles: Record<AreaId, string[]>;
   lastKnownPlayerPosition: Vector2;
+  completedAreas?: AreaId[];
+  collectedItems?: string[];
 }
 
 interface AreaEntryPoint {
@@ -281,6 +283,8 @@ export class AreaManager {
       discoveredAreas: Array.from(this.discoveredAreas.values()),
       exploredTiles: this.serializeExploredTiles(),
       lastKnownPlayerPosition: { ...this.lastKnownPlayerPosition },
+      completedAreas: [],
+      collectedItems: [],
     } satisfies AreaManagerSnapshot;
   }
 

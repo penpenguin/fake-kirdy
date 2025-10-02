@@ -244,6 +244,11 @@ const SaveManagerMock = vi.hoisted(() =>
 
 vi.mock('../save/SaveManager', () => ({
   SaveManager: SaveManagerMock,
+  DEFAULT_SETTINGS: {
+    volume: 0.8,
+    controls: 'keyboard',
+    difficulty: 'normal',
+  },
 }));
 
 const mapOverlayShowMock = vi.hoisted(() => vi.fn());

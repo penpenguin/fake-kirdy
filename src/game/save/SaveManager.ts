@@ -14,25 +14,43 @@ export interface AreaProgressSnapshot {
   discoveredAreas: AreaId[];
   exploredTiles: Record<AreaId, string[]>;
   lastKnownPlayerPosition: Vector2;
+  completedAreas: AreaId[];
+  collectedItems: string[];
 }
 
 export interface GameProgressSnapshot {
   player: PlayerProgressSnapshot;
   area: AreaProgressSnapshot;
+  settings: GameSettingsSnapshot;
+}
+
+export type ControlScheme = 'keyboard' | 'touch' | 'controller';
+export type DifficultyLevel = 'easy' | 'normal' | 'hard';
+
+export interface GameSettingsSnapshot {
+  volume: number;
+  controls: ControlScheme;
+  difficulty: DifficultyLevel;
 }
 
 export interface SaveManagerOptions {
   key?: string;
   storage?: Storage;
+  fallbackStorage?: Storage;
   now?: () => number;
   migrations?: Map<number, (data: unknown) => GameProgressSnapshot | undefined>;
 }
 
 const DEFAULT_KEY = 'kirdy-progress';
 const CURRENT_VERSION = 1;
+const FALLBACK_SUFFIX = ':fallback';
 const abilitySet = new Set<AbilityType>(ABILITY_TYPES);
 const areaSet = new Set<AreaId>(Object.values(AREA_IDS));
 const TILE_KEY_PATTERN = /^\d+,\d+$/;
+const CONTROL_SCHEMES: ControlScheme[] = ['keyboard', 'touch', 'controller'];
+const DIFFICULTY_LEVELS: DifficultyLevel[] = ['easy', 'normal', 'hard'];
+const controlSchemeSet = new Set<ControlScheme>(CONTROL_SCHEMES);
+const difficultySet = new Set<DifficultyLevel>(DIFFICULTY_LEVELS);
 
 const DEFAULT_PLAYER: PlayerProgressSnapshot = {
   hp: 6,
@@ -53,7 +71,15 @@ const DEFAULT_AREA: AreaProgressSnapshot = {
     [AREA_IDS.CaveArea]: [],
   },
   lastKnownPlayerPosition: { x: 0, y: 0 },
+  completedAreas: [],
+  collectedItems: [],
 };
+
+export const DEFAULT_SETTINGS: GameSettingsSnapshot = {
+  volume: 0.8,
+  controls: 'keyboard',
+  difficulty: 'normal',
+} as const satisfies GameSettingsSnapshot;
 
 type MigrationFn = (data: unknown) => GameProgressSnapshot | undefined;
 
@@ -68,50 +94,90 @@ type SavePayload = SavePayloadV1 | { version: number; savedAt?: number; data?: u
 export class SaveManager {
   private readonly key: string;
   private readonly storage?: Storage;
+  private readonly fallbackStorage?: Storage;
+  private readonly fallbackKey: string;
   private readonly now: () => number;
   private readonly migrations: Map<number, MigrationFn>;
 
   constructor(options: SaveManagerOptions = {}) {
     this.key = options.key ?? DEFAULT_KEY;
     this.storage = options.storage ?? getGlobalStorage();
+    this.fallbackStorage = options.fallbackStorage ?? getGlobalFallbackStorage();
+    this.fallbackKey = `${this.key}${FALLBACK_SUFFIX}`;
     this.now = options.now ?? (() => Date.now());
     this.migrations = options.migrations ?? new Map();
   }
 
   save(snapshot: GameProgressSnapshot) {
-    const storage = this.storage;
-    if (!storage?.setItem) {
-      return;
-    }
-
     const sanitized = sanitizeSnapshot(snapshot);
     const payload: SavePayloadV1 = {
       version: CURRENT_VERSION,
       savedAt: this.now(),
       data: sanitized,
     };
+    const serialized = JSON.stringify(payload);
 
-    try {
-      storage.setItem(this.key, JSON.stringify(payload));
-    } catch (error) {
-      console.warn('[SaveManager] failed to save progress', error);
+    const primaryResult = trySetItem(this.storage, this.key, serialized);
+    if (primaryResult.success) {
+      tryRemoveItem(this.fallbackStorage, this.fallbackKey);
+      return;
+    }
+
+    if (primaryResult.error) {
+      console.warn('[SaveManager] failed to save progress', primaryResult.error);
+    }
+
+    const fallbackResult = trySetItem(this.fallbackStorage, this.fallbackKey, serialized);
+    if (fallbackResult.success) {
+      if (primaryResult.error) {
+        console.warn('[SaveManager] wrote progress to fallback storage after primary failure');
+      }
+      return;
+    }
+
+    if (!primaryResult.error) {
+      console.warn('[SaveManager] primary storage unavailable, attempted fallback');
+    }
+
+    if (fallbackResult.error) {
+      console.warn('[SaveManager] fallback storage failed to save progress', fallbackResult.error);
     }
   }
 
   load(): GameProgressSnapshot | undefined {
-    const storage = this.storage;
-    if (!storage?.getItem) {
+    const primary = this.loadFromStorage(this.storage, this.key, true);
+    if (primary) {
+      return primary;
+    }
+
+    const fallback = this.loadFromStorage(this.fallbackStorage, this.fallbackKey, false);
+    if (fallback) {
+      this.save(fallback);
+      return fallback;
+    }
+
+    return undefined;
+  }
+
+  clear() {
+    tryRemoveItem(this.storage, this.key);
+    tryRemoveItem(this.fallbackStorage, this.fallbackKey);
+  }
+
+  private loadFromStorage(
+    storage: Storage | undefined,
+    key: string,
+    isPrimary: boolean,
+  ): GameProgressSnapshot | undefined {
+    const readResult = tryGetItem(storage, key);
+    if (!readResult.success) {
+      if (readResult.error) {
+        console.warn('[SaveManager] failed to access storage', readResult.error);
+      }
       return undefined;
     }
 
-    let raw: string | null = null;
-    try {
-      raw = storage.getItem(this.key);
-    } catch (error) {
-      console.warn('[SaveManager] failed to access storage', error);
-      return undefined;
-    }
-
+    const raw = readResult.value;
     if (!raw) {
       return undefined;
     }
@@ -121,7 +187,7 @@ export class SaveManager {
       parsed = JSON.parse(raw) as SavePayload;
     } catch (error) {
       console.warn('[SaveManager] failed to parse save payload', error);
-      this.safeRemove();
+      tryRemoveItem(storage, key);
       return undefined;
     }
 
@@ -132,7 +198,7 @@ export class SaveManager {
     const migration = this.migrations.get(parsed.version);
     if (!migration) {
       console.warn('[SaveManager] unsupported save version', parsed.version);
-      this.safeRemove();
+      tryRemoveItem(storage, key);
       return undefined;
     }
 
@@ -140,34 +206,22 @@ export class SaveManager {
       const migrated = migration(parsed.data);
       if (!migrated) {
         console.warn('[SaveManager] migration did not return data');
-        this.safeRemove();
+        tryRemoveItem(storage, key);
         return undefined;
       }
 
       const sanitized = sanitizeSnapshot(migrated);
-      this.save(sanitized);
+      if (isPrimary) {
+        this.save(sanitized);
+      } else {
+        // re-save migrated fallback data so both stores share the upgraded payload
+        this.save(sanitized);
+      }
       return sanitized;
     } catch (error) {
       console.warn('[SaveManager] migration failed', error);
-      this.safeRemove();
+      tryRemoveItem(storage, key);
       return undefined;
-    }
-  }
-
-  clear() {
-    this.safeRemove();
-  }
-
-  private safeRemove() {
-    const storage = this.storage;
-    if (!storage?.removeItem) {
-      return;
-    }
-
-    try {
-      storage.removeItem(this.key);
-    } catch (error) {
-      console.warn('[SaveManager] failed to remove corrupt save', error);
     }
   }
 }
@@ -184,10 +238,12 @@ function getGlobalStorage(): Storage | undefined {
 function sanitizeSnapshot(snapshot: GameProgressSnapshot): GameProgressSnapshot {
   const player = sanitizePlayer(snapshot?.player);
   const area = sanitizeArea(snapshot?.area);
+  const settings = sanitizeSettings(snapshot?.settings);
 
   return {
     player,
     area,
+    settings,
   } satisfies GameProgressSnapshot;
 }
 
@@ -215,6 +271,8 @@ function sanitizeArea(area?: AreaProgressSnapshot): AreaProgressSnapshot {
     discoveredAreas: [...DEFAULT_AREA.discoveredAreas],
     exploredTiles: { ...DEFAULT_AREA.exploredTiles },
     lastKnownPlayerPosition: { ...DEFAULT_AREA.lastKnownPlayerPosition },
+    completedAreas: [...DEFAULT_AREA.completedAreas],
+    collectedItems: [...DEFAULT_AREA.collectedItems],
   };
   const currentAreaId = areaSet.has(area?.currentAreaId as AreaId)
     ? (area?.currentAreaId as AreaId)
@@ -230,12 +288,29 @@ function sanitizeArea(area?: AreaProgressSnapshot): AreaProgressSnapshot {
 
   const exploredTiles = sanitizeExploredTiles(area?.exploredTiles ?? {});
   const lastKnownPlayerPosition = sanitizeVector(area?.lastKnownPlayerPosition, base.lastKnownPlayerPosition);
+  const completedAreas = Array.isArray(area?.completedAreas)
+    ? Array.from(
+        new Set(
+          area!.completedAreas.filter((candidate): candidate is AreaId => areaSet.has(candidate as AreaId)),
+        ),
+      )
+    : base.completedAreas.slice();
+
+  const collectedItems = Array.isArray(area?.collectedItems)
+    ? Array.from(
+        new Set(
+          area!.collectedItems.filter((candidate): candidate is string => typeof candidate === 'string' && candidate.trim().length > 0),
+        ),
+      )
+    : base.collectedItems.slice();
 
   return {
     currentAreaId,
     discoveredAreas,
     exploredTiles,
     lastKnownPlayerPosition,
+    completedAreas,
+    collectedItems,
   } satisfies AreaProgressSnapshot;
 }
 
@@ -272,6 +347,28 @@ function sanitizeVector(vector: Vector2 | undefined, fallback: Vector2): Vector2
   return { x, y } satisfies Vector2;
 }
 
+function sanitizeSettings(settings?: GameSettingsSnapshot): GameSettingsSnapshot {
+  const base = { ...DEFAULT_SETTINGS } satisfies GameSettingsSnapshot;
+  const volumeCandidate = Number(settings?.volume);
+  const volume = Number.isFinite(volumeCandidate)
+    ? Math.min(1, Math.max(0, volumeCandidate))
+    : base.volume;
+
+  const controls = controlSchemeSet.has(settings?.controls as ControlScheme)
+    ? (settings!.controls as ControlScheme)
+    : base.controls;
+
+  const difficulty = difficultySet.has(settings?.difficulty as DifficultyLevel)
+    ? (settings!.difficulty as DifficultyLevel)
+    : base.difficulty;
+
+  return {
+    volume,
+    controls,
+    difficulty,
+  } satisfies GameSettingsSnapshot;
+}
+
 function clampToInt(
   value: unknown,
   min: number,
@@ -284,4 +381,62 @@ function clampToInt(
 
   const coerced = Math.trunc(value as number);
   return Math.min(max, Math.max(min, coerced));
+}
+
+interface StorageWriteResult {
+  success: boolean;
+  error?: unknown;
+}
+
+interface StorageReadResult {
+  success: boolean;
+  value?: string | null;
+  error?: unknown;
+}
+
+function trySetItem(storage: Storage | undefined, key: string, value: string): StorageWriteResult {
+  if (!storage?.setItem) {
+    return { success: false };
+  }
+
+  try {
+    storage.setItem(key, value);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error };
+  }
+}
+
+function tryGetItem(storage: Storage | undefined, key: string): StorageReadResult {
+  if (!storage?.getItem) {
+    return { success: false };
+  }
+
+  try {
+    const value = storage.getItem(key);
+    return { success: true, value };
+  } catch (error) {
+    return { success: false, error };
+  }
+}
+
+function tryRemoveItem(storage: Storage | undefined, key: string) {
+  if (!storage?.removeItem) {
+    return;
+  }
+
+  try {
+    storage.removeItem(key);
+  } catch (error) {
+    console.warn('[SaveManager] failed to remove corrupt save', error);
+  }
+}
+
+function getGlobalFallbackStorage(): Storage | undefined {
+  if (typeof globalThis === 'undefined') {
+    return undefined;
+  }
+
+  const maybeStorage = (globalThis as { sessionStorage?: Storage }).sessionStorage;
+  return maybeStorage;
 }

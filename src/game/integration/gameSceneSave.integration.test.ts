@@ -174,6 +174,13 @@ describe('統合: GameScene と SaveManager', () => {
     });
     expect(payload.data.area.currentAreaId).toBe(AREA_IDS.CentralHub);
     expect(payload.data.area.lastKnownPlayerPosition).toEqual({ x: 320, y: 192 });
+    expect(payload.data.area.completedAreas).toEqual([]);
+    expect(payload.data.area.collectedItems).toEqual([]);
+    expect(payload.data.settings).toEqual({
+      volume: 0.8,
+      controls: 'keyboard',
+      difficulty: 'normal',
+    });
 
     const loaded = saveManager.load();
     expect(loaded).toEqual(payload.data);
