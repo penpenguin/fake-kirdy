@@ -199,7 +199,8 @@ export class PlayerInputManager {
       { control: 'discard', x: width - 160, y: height - 240 },
     ];
 
-    const availableFrames = textures?.getFrameNames?.('virtual-controls') ?? [];
+    const controlTexture = textures?.get?.('virtual-controls');
+    const availableFrames = controlTexture?.getFrameNames?.() ?? [];
 
     buttons.forEach(({ control, x, y }) => {
       const frame = availableFrames.includes(control) ? control : undefined;

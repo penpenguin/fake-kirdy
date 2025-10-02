@@ -308,7 +308,10 @@ describe('Scene registration', () => {
 
     bootScene.preload();
 
-    expect(bootScene.textures.setDefaultFilter).toHaveBeenCalledWith(Phaser.Textures.FilterMode.NEAREST);
+    const textureManager = bootScene.textures as unknown as {
+      setDefaultFilter: ReturnType<typeof vi.fn>;
+    };
+    expect(textureManager.setDefaultFilter).toHaveBeenCalledWith(Phaser.Textures.FilterMode.NEAREST);
 
     const loadOnceMock = asMock(bootScene.load.once);
     const fileCompleteCall = loadOnceMock.mock.calls.find(([event]) => event === 'filecomplete-image-tileset-main');

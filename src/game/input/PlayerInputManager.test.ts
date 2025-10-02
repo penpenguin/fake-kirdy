@@ -35,15 +35,22 @@ type ContainerMock = ContainerStub & {
   destroy: ReturnType<typeof vi.fn>;
 };
 
+type TextureMock = {
+  getFrameNames: ReturnType<typeof vi.fn>;
+};
+
+type TextureManagerStub = {
+  exists: ReturnType<typeof vi.fn>;
+  get: ReturnType<typeof vi.fn>;
+};
+
 interface SceneStub {
   input: { keyboard: KeyboardStub };
   add: {
     image: (x: number, y: number, texture: string, frame?: string) => ImageStub;
     container: (x: number, y: number) => ContainerStub;
   };
-  textures?: {
-    exists: (key: string) => boolean;
-  };
+  textures: TextureManagerStub;
 }
 
 type SceneFactoryResult = {
@@ -59,6 +66,7 @@ type SceneFactoryResult = {
     destroy: ReturnType<typeof vi.fn>;
   }>;
   container?: ContainerMock;
+  controlTexture: TextureMock;
 };
 
 function createSceneStub(): SceneFactoryResult {
@@ -76,6 +84,17 @@ function createSceneStub(): SceneFactoryResult {
 
   const recordedButtons: SceneFactoryResult['recordedButtons'] = [];
   let containerInstance: ContainerMock | undefined;
+
+  const controlTexture: TextureMock = {
+    getFrameNames: vi.fn().mockReturnValue(['left', 'right', 'jump', 'inhale', 'swallow', 'spit', 'discard']),
+  };
+
+  const textures: TextureManagerStub = {
+    exists: vi.fn().mockReturnValue(true),
+    get: vi.fn().mockImplementation((key: string) =>
+      key === 'virtual-controls' ? controlTexture : undefined,
+    ),
+  };
 
   const scene: SceneStub = {
     input: { keyboard },
@@ -144,12 +163,7 @@ function createSceneStub(): SceneFactoryResult {
         return container;
       },
     },
-    textures: {
-      exists: vi.fn().mockReturnValue(true),
-      getFrameNames: vi
-        .fn()
-        .mockReturnValue(['left', 'right', 'jump', 'inhale', 'swallow', 'spit', 'discard']),
-    },
+    textures,
   };
 
   return {
@@ -159,6 +173,7 @@ function createSceneStub(): SceneFactoryResult {
     get container() {
       return containerInstance;
     },
+    controlTexture,
   } as SceneFactoryResult;
 }
 
@@ -271,6 +286,7 @@ describe('PlayerInputManager', () => {
   it('仮想ボタン用テクスチャが未ロードの場合はタッチUIを生成しない', () => {
     (sceneFactory.scene as any).textures = {
       exists: vi.fn().mockReturnValue(false),
+      get: vi.fn().mockReturnValue(undefined),
     };
 
     createManager();
@@ -289,7 +305,7 @@ describe('PlayerInputManager', () => {
   });
 
   it('named frameが無い場合でも仮想ボタンを表示できるよう拡大扱いにする', () => {
-    (sceneFactory.scene.textures.getFrameNames as ReturnType<typeof vi.fn>).mockReturnValue([]);
+    sceneFactory.controlTexture.getFrameNames.mockReturnValue([]);
 
     createManager();
 

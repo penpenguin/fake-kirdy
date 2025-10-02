@@ -22,14 +22,28 @@ const stubs = vi.hoisted(() => {
     start: vi.fn(),
   };
 
-  const addRectangle = vi.fn(() => ({
-    setVisible: vi.fn().mockReturnThis(),
-    setActive: vi.fn().mockReturnThis(),
-    setDepth: vi.fn().mockReturnThis(),
-    destroy: vi.fn(),
-  }));
+  const addRectangle = vi.fn(
+    (
+      _x: number,
+      _y: number,
+      _width: number,
+      _height: number,
+      _color?: number,
+      _alpha?: number,
+    ) => ({
+      setVisible: vi.fn().mockReturnThis(),
+      setActive: vi.fn().mockReturnThis(),
+      setDepth: vi.fn().mockReturnThis(),
+      destroy: vi.fn(),
+    }),
+  );
 
-  const addImage = vi.fn(() => ({
+  const addImage = vi.fn((
+    _x: number,
+    _y: number,
+    _texture: string,
+    _frame?: string,
+  ) => ({
     setOrigin: vi.fn().mockReturnThis(),
     setDepth: vi.fn().mockReturnThis(),
     setDisplaySize: vi.fn().mockReturnThis(),
@@ -42,6 +56,8 @@ const stubs = vi.hoisted(() => {
   const matterFactory = {
     add: {
       existing: vi.fn(),
+      gameObject: vi.fn(),
+      rectangle: vi.fn(),
     },
   };
 
@@ -726,7 +742,7 @@ describe('GameScene player integration', () => {
     });
 
     const createdImages: Array<ReturnType<typeof stubs.addImage>> = [];
-    stubs.addImage.mockImplementation((x: number, y: number, textureKey: string, frame: string) => {
+    stubs.addImage.mockImplementation((x: number, y: number, textureKey: string, frame?: string) => {
       const image = {
         x,
         y,
@@ -763,7 +779,9 @@ describe('GameScene player integration', () => {
       expect(image.setDepth).toHaveBeenCalledWith(-50);
     });
 
-    const terrainTiles = ((scene as any).terrainTiles ?? []) as Array<{ destroy: vi.Mock }>;
+    const terrainTiles = ((scene as any).terrainTiles ?? []) as Array<
+      { destroy: ReturnType<typeof vi.fn> }
+    >;
     expect(terrainTiles).toHaveLength(wallCoordinates.length);
     createdImages.forEach((image) => {
       expect(terrainTiles).toContain(image);

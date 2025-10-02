@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AbilityType } from '../mechanics/AbilitySystem';
 import { ABILITY_TYPES } from '../mechanics/AbilitySystem';
 import { AREA_IDS } from '../world/AreaManager';
+import type { AreaId } from '../world/AreaManager';
 import { SaveManager, type GameProgressSnapshot } from './SaveManager';
 
 interface StorageMock {
@@ -16,6 +17,18 @@ function createStorageMock(): StorageMock {
     setItem: vi.fn(),
     removeItem: vi.fn(),
   } as const as StorageMock;
+}
+
+function createExploredTiles(overrides: Partial<Record<AreaId, string[]>> = {}): Record<AreaId, string[]> {
+  return {
+    [AREA_IDS.CentralHub]: [],
+    [AREA_IDS.MirrorCorridor]: [],
+    [AREA_IDS.IceArea]: [],
+    [AREA_IDS.FireArea]: [],
+    [AREA_IDS.ForestArea]: [],
+    [AREA_IDS.CaveArea]: [],
+    ...overrides,
+  };
 }
 
 describe('SaveManager', () => {
@@ -36,10 +49,10 @@ describe('SaveManager', () => {
     area: {
       currentAreaId: AREA_IDS.MirrorCorridor,
       discoveredAreas: [AREA_IDS.CentralHub, AREA_IDS.MirrorCorridor],
-      exploredTiles: {
-        [AREA_IDS.CentralHub]: ['2,3', '3,3'],
-        [AREA_IDS.MirrorCorridor]: ['1,1'],
-      },
+    exploredTiles: createExploredTiles({
+      [AREA_IDS.CentralHub]: ['2,3', '3,3'],
+      [AREA_IDS.MirrorCorridor]: ['1,1'],
+    }),
       lastKnownPlayerPosition: { x: 512, y: 224 },
       completedAreas: [AREA_IDS.CentralHub],
       collectedItems: ['star-shard', 'healing-fruit'],
@@ -255,10 +268,9 @@ describe('SaveManager', () => {
       area: {
         currentAreaId: AREA_IDS.CentralHub,
         discoveredAreas: [AREA_IDS.CentralHub],
-        exploredTiles: {
+        exploredTiles: createExploredTiles({
           [AREA_IDS.CentralHub]: ['0,0'],
-          [AREA_IDS.MirrorCorridor]: [],
-        },
+        }),
         lastKnownPlayerPosition: { x: 10, y: 20 },
         completedAreas: [AREA_IDS.CentralHub],
         collectedItems: [],

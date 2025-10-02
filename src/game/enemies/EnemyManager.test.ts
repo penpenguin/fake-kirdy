@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Mock } from 'vitest';
 import type { Enemy, EnemySpawn } from './index';
 
 type Bounds = { left: number; right: number; top: number; bottom: number };
@@ -7,10 +8,15 @@ type PlayerPosition = { x: number; y: number } | undefined;
 
 type TestEnemy = Enemy & {
   sprite: Enemy['sprite'] & {
-    setActive: vi.Mock;
-    setVisible: vi.Mock;
-    setPosition: vi.Mock;
+    setActive: Mock;
+    setVisible: Mock;
+    setPosition: Mock;
   };
+  update: Mock;
+  takeDamage: Mock;
+  getHP: Mock;
+  isDefeated: Mock;
+  getAbilityType: Mock;
 };
 
 const createWabbleBeeMock = vi.hoisted(() => vi.fn());
@@ -26,14 +32,15 @@ vi.mock('./index', async (importOriginal) => {
 });
 
 describe('EnemyManager', () => {
-  const makeSprite = () => ({
-    x: 0,
-    y: 0,
-    body: { position: { x: 0, y: 0 } },
-    setActive: vi.fn().mockReturnThis(),
-    setVisible: vi.fn().mockReturnThis(),
-    setPosition: vi.fn().mockReturnThis(),
-  });
+  const makeSprite = (): TestEnemy['sprite'] =>
+    ({
+      x: 0,
+      y: 0,
+      body: { position: { x: 0, y: 0 } },
+      setActive: vi.fn().mockReturnThis(),
+      setVisible: vi.fn().mockReturnThis(),
+      setPosition: vi.fn().mockReturnThis(),
+    } as unknown as TestEnemy['sprite']);
 
   const makeEnemy = (): TestEnemy => ({
     sprite: makeSprite(),
@@ -48,10 +55,10 @@ describe('EnemyManager', () => {
 
   let EnemyManager: typeof import('./EnemyManager').EnemyManager;
   let manager: import('./EnemyManager').EnemyManager;
-  let inhaleSystem: { addInhalableTarget: vi.Mock; setInhalableTargets: vi.Mock };
-  let physicsSystem: { registerEnemy: vi.Mock };
-  let getPlayerPosition: vi.Mock<[void], PlayerPosition>;
-  let getCullingBounds: vi.Mock<[void], Bounds | undefined>;
+  let inhaleSystem: { addInhalableTarget: Mock; setInhalableTargets: Mock };
+  let physicsSystem: { registerEnemy: Mock };
+  let getPlayerPosition: Mock<[], PlayerPosition>;
+  let getCullingBounds: Mock<[], Bounds | undefined>;
   let scene: any;
 
   beforeEach(async () => {
@@ -72,8 +79,8 @@ describe('EnemyManager', () => {
       registerEnemy: vi.fn(),
     };
 
-    getPlayerPosition = vi.fn(() => ({ x: 160, y: 360 }));
-    getCullingBounds = vi.fn(() => ({ left: -32, right: 320, top: -32, bottom: 640 }));
+    getPlayerPosition = vi.fn<[], PlayerPosition>(() => ({ x: 160, y: 360 }));
+    getCullingBounds = vi.fn<[], Bounds | undefined>(() => ({ left: -32, right: 320, top: -32, bottom: 640 }));
 
     scene = { events: { emit: vi.fn() } };
 

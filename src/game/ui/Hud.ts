@@ -65,7 +65,8 @@ export class Hud {
     controlsLabel.setScrollFactor?.(0, 0);
     controlsLabel.setDepth?.(3);
     controlsLabel.setLineSpacing?.(2);
-    controlsLabel.setWordWrap?.({ width: (this.scene.scale?.width ?? 800) - padding * 2 });
+    const wrapWidth = (this.scene.scale?.width ?? 800) - padding * 2;
+    controlsLabel.setWordWrapWidth?.(wrapWidth, true);
     controlsLabel.setText?.(controlsLines.join('\n'));
 
     container.add?.([hpBar, hpFill, hpLabel, abilityLabel, scoreLabel, controlsLabel] as any);

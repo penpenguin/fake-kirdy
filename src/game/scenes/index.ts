@@ -650,13 +650,14 @@ export class GameScene extends Phaser.Scene {
     }
 
     placements.forEach(({ centerX, centerY, tileSize }) => {
-      let visual = displayFactory.image?.(centerX, centerY, TERRAIN_TEXTURE_KEY, TERRAIN_FRAME_KEYS.wall) as
-        | (Phaser.GameObjects.Image & { destroy?: () => void })
-        | undefined;
+      let visual: Phaser.GameObjects.Image | Phaser.GameObjects.Rectangle | undefined =
+        displayFactory.image?.(centerX, centerY, TERRAIN_TEXTURE_KEY, TERRAIN_FRAME_KEYS.wall) as
+          | Phaser.GameObjects.Image
+          | undefined;
 
       if (!visual && displayFactory.rectangle) {
         visual = displayFactory.rectangle(centerX, centerY, tileSize, tileSize, 0x4a4a4a, 1) as
-          | (Phaser.GameObjects.Rectangle & { destroy?: () => void })
+          | Phaser.GameObjects.Rectangle
           | undefined;
       }
 
@@ -667,10 +668,12 @@ export class GameScene extends Phaser.Scene {
       visual.setOrigin?.(0.5, 0.5);
       visual.setDepth?.(TERRAIN_VISUAL_DEPTH);
       visual.setDisplaySize?.(tileSize, tileSize);
-      visual.setFrame?.(TERRAIN_FRAME_KEYS.wall);
+      if ('setFrame' in visual) {
+        (visual as Phaser.GameObjects.Image).setFrame?.(TERRAIN_FRAME_KEYS.wall);
+      }
       visual.setVisible?.(true);
 
-      this.terrainTiles.push(visual);
+      this.terrainTiles.push(visual as Phaser.GameObjects.GameObject & { destroy?: () => void });
     });
   }
 
@@ -691,12 +694,22 @@ export class GameScene extends Phaser.Scene {
     const areaState = this.areaManager?.getCurrentAreaState();
     const displayFactory = this.add;
     const matterFactory = this.matter?.add;
-    if (!areaState || !displayFactory?.rectangle) {
+    if (!areaState || !displayFactory?.rectangle || !matterFactory) {
       return;
     }
 
-    const attachMatterObject = matterFactory?.gameObject ?? matterFactory?.existing;
-    if (!attachMatterObject) {
+    const matterMethods = matterFactory as unknown as {
+      gameObject?: (
+        displayObject: Phaser.GameObjects.GameObject,
+        options?: Phaser.Types.Physics.Matter.MatterBodyConfig,
+      ) => Phaser.GameObjects.GameObject;
+      existing?: (
+        displayObject: Phaser.GameObjects.GameObject,
+        options?: Phaser.Types.Physics.Matter.MatterBodyConfig,
+      ) => Phaser.GameObjects.GameObject;
+    };
+
+    if (!matterMethods.gameObject && !matterMethods.existing) {
       return;
     }
 
@@ -711,10 +724,13 @@ export class GameScene extends Phaser.Scene {
       rectangle.setActive?.(false);
       rectangle.setDepth?.(0);
 
-      const matterObject = attachMatterObject.call(matterFactory, rectangle, { isStatic: true }) as
+      const rawMatterObject =
+        matterMethods.gameObject?.call(matterFactory, rectangle, { isStatic: true }) ??
+        matterMethods.existing?.call(matterFactory, rectangle, { isStatic: true });
+
+      const matterObject = rawMatterObject as
         | (Phaser.Physics.Matter.Image & { body?: { gameObject?: any } })
         | (Phaser.Physics.Matter.Sprite & { body?: { gameObject?: any } })
-        | (Phaser.GameObjects.Rectangle & { body?: { gameObject?: any } })
         | undefined;
 
       if (!matterObject) {
@@ -728,13 +744,15 @@ export class GameScene extends Phaser.Scene {
         (matterObject as any).body = body;
       }
 
-      matterObject.setStatic?.(true);
-      matterObject.setIgnoreGravity?.(true);
-      matterObject.setDepth?.(0);
-      matterObject.setName?.('Terrain');
+      const terrainCollider = matterObject as Phaser.Physics.Matter.Image | Phaser.Physics.Matter.Sprite;
 
-      this.physicsSystem!.registerTerrain(matterObject as any);
-      this.terrainColliders.push(matterObject);
+      terrainCollider.setStatic?.(true);
+      terrainCollider.setIgnoreGravity?.(true);
+      terrainCollider.setDepth?.(0);
+      terrainCollider.setName?.('Terrain');
+
+      this.physicsSystem!.registerTerrain(terrainCollider as any);
+      this.terrainColliders.push(terrainCollider);
     });
   }
 
