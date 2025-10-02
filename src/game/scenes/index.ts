@@ -614,8 +614,14 @@ export class GameScene extends Phaser.Scene {
     }
 
     const areaState = this.areaManager?.getCurrentAreaState();
+    const displayFactory = this.add;
     const matterFactory = this.matter?.add;
-    if (!areaState || !matterFactory?.rectangle) {
+    if (!areaState || !displayFactory?.rectangle) {
+      return;
+    }
+
+    const attachMatterObject = matterFactory?.gameObject ?? matterFactory?.existing;
+    if (!attachMatterObject) {
       return;
     }
 
@@ -645,15 +651,38 @@ export class GameScene extends Phaser.Scene {
         const centerX = column * tileSize + tileSize / 2;
         const centerY = row * tileSize + tileSize / 2;
 
-        const collider = matterFactory.rectangle(centerX, centerY, tileSize, tileSize, { isStatic: true });
-        if (!collider) {
+        // Use an invisible display object so Matter assigns a matching gameObject to the body.
+        const rectangle = displayFactory.rectangle(centerX, centerY, tileSize, tileSize, 0x000000, 0);
+        if (!rectangle) {
           continue;
         }
 
-        const matterObject = collider as Phaser.Physics.Matter.Image | Phaser.Physics.Matter.Sprite;
+        rectangle.setVisible?.(false);
+        rectangle.setActive?.(false);
+        rectangle.setDepth?.(0);
+
+        const matterObject = attachMatterObject.call(matterFactory, rectangle, { isStatic: true }) as
+          | (Phaser.Physics.Matter.Image & { body?: { gameObject?: any } })
+          | (Phaser.Physics.Matter.Sprite & { body?: { gameObject?: any } })
+          | (Phaser.GameObjects.Rectangle & { body?: { gameObject?: any } })
+          | undefined;
+
+        if (!matterObject) {
+          rectangle.destroy?.();
+          continue;
+        }
+
+        const body = (matterObject as any).body ?? (rectangle as any).body;
+        if (body) {
+          body.gameObject = matterObject;
+          (matterObject as any).body = body;
+        }
+
+        matterObject.setStatic?.(true);
         matterObject.setIgnoreGravity?.(true);
         matterObject.setDepth?.(0);
         matterObject.setName?.('Terrain');
+
         this.physicsSystem.registerTerrain(matterObject as any);
         this.terrainColliders.push(matterObject);
       }

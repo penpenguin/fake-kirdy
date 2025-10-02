@@ -374,6 +374,54 @@ describe('Scene registration', () => {
     expect(audioManagerStubs.toggleMute).toHaveBeenCalled();
   });
 
+  it('terrain colliders register as matter game objects so physics callbacks can resolve gameObject references', () => {
+    const gameScene = new GameScene();
+
+    const registerTerrain = vi.fn();
+    (gameScene as unknown as { physicsSystem: { registerTerrain: typeof registerTerrain } }).physicsSystem = {
+      registerTerrain,
+    };
+
+    const tileMap = {
+      columns: 1,
+      rows: 1,
+      tileSize: 16,
+      getTileAt: vi.fn(() => 'wall'),
+    };
+
+    (gameScene as unknown as { areaManager: { getCurrentAreaState: () => unknown } }).areaManager = {
+      getCurrentAreaState: () => ({ tileMap }),
+    };
+
+    const addRectangle = vi.fn(() => ({
+      setVisible: vi.fn().mockReturnThis(),
+      setActive: vi.fn().mockReturnThis(),
+      setDepth: vi.fn().mockReturnThis(),
+      destroy: vi.fn(),
+    }));
+
+    const matterAdd = (gameScene as any).matter?.add ?? {};
+    matterAdd.rectangle = vi.fn(() => ({ body: { id: 42 } }));
+    matterAdd.gameObject = vi.fn((gameObject: any) => {
+      const collider = {
+        ...gameObject,
+        setIgnoreGravity: vi.fn().mockReturnThis(),
+        setDepth: vi.fn().mockReturnThis(),
+        setName: vi.fn().mockReturnThis(),
+      };
+      collider.body = { id: 42, gameObject: collider };
+      return collider;
+    });
+    (gameScene as any).matter.add = matterAdd;
+    (gameScene as any).add.rectangle = addRectangle;
+
+    (gameScene as any).rebuildTerrainColliders();
+
+    expect(registerTerrain).toHaveBeenCalledTimes(1);
+    const [collider] = registerTerrain.mock.calls[0] ?? [];
+    expect(collider?.body?.gameObject).toBe(collider);
+  });
+
   it('pause scene resumes gameplay and closes itself', () => {
     const pauseScene = new PauseScene();
 

@@ -21,6 +21,13 @@ const stubs = vi.hoisted(() => {
     start: vi.fn(),
   };
 
+  const addRectangle = vi.fn(() => ({
+    setVisible: vi.fn().mockReturnThis(),
+    setActive: vi.fn().mockReturnThis(),
+    setDepth: vi.fn().mockReturnThis(),
+    destroy: vi.fn(),
+  }));
+
   const matterFactory = {
     add: {
       existing: vi.fn(),
@@ -34,6 +41,9 @@ const stubs = vi.hoisted(() => {
     public matter = matterFactory;
     public scene = scenePlugin;
     public events = events;
+    public add = {
+      rectangle: addRectangle,
+    };
     public cameras = {
       main: {
         worldView: { x: 0, y: 0, width: 800, height: 600 },
@@ -42,7 +52,7 @@ const stubs = vi.hoisted(() => {
     };
   }
 
-  return { keyboard, scenePlugin, matterFactory, events, cameraStartFollow, PhaserSceneMock };
+  return { keyboard, scenePlugin, matterFactory, events, cameraStartFollow, PhaserSceneMock, addRectangle };
 });
 
 vi.mock('phaser', () => ({
@@ -305,6 +315,23 @@ describe('GameScene player integration', () => {
     physicsDestroyProjectileMock.mockClear();
     PhysicsSystemMock.mockClear();
     AreaManagerMock.mockClear();
+    stubs.matterFactory.add.existing.mockReset();
+    stubs.addRectangle.mockReset();
+    stubs.addRectangle.mockImplementation(() => ({
+      setVisible: vi.fn().mockReturnThis(),
+      setActive: vi.fn().mockReturnThis(),
+      setDepth: vi.fn().mockReturnThis(),
+      destroy: vi.fn(),
+    }));
+    stubs.matterFactory.add.existing.mockImplementation((gameObject: any) => {
+      const collider = gameObject as any;
+      collider.setStatic = vi.fn().mockReturnThis();
+      collider.setIgnoreGravity = vi.fn().mockReturnThis();
+      collider.setDepth = vi.fn().mockReturnThis();
+      collider.setName = vi.fn().mockReturnThis();
+      collider.body = collider.body ?? { gameObject: collider };
+      return collider;
+    });
     areaManagerGetLastKnownPositionMock.mockClear();
     areaManagerGetSnapshotMock.mockClear();
     areaManagerRestoreMock.mockClear();
@@ -502,21 +529,41 @@ describe('GameScene player integration', () => {
       lastKnownPlayerPosition: { ...areaState.playerSpawnPosition },
     });
 
-    const createdBodies: unknown[] = [];
-    const rectangleStub = vi.fn(() => {
-      const body = {};
-      createdBodies.push(body);
-      return body;
+    stubs.addRectangle.mockImplementation(() => {
+      const rectangle = {
+        setVisible: vi.fn().mockReturnThis(),
+        setActive: vi.fn().mockReturnThis(),
+        setDepth: vi.fn().mockReturnThis(),
+        destroy: vi.fn(),
+      };
+      return rectangle;
     });
-    stubs.matterFactory.add.rectangle = rectangleStub;
+
+    const createdColliders: any[] = [];
+    stubs.matterFactory.add.existing.mockImplementation((gameObject: any) => {
+      const collider = gameObject;
+      collider.setStatic = vi.fn().mockReturnThis();
+      collider.setIgnoreGravity = vi.fn().mockReturnThis();
+      collider.setDepth = vi.fn().mockReturnThis();
+      collider.setName = vi.fn().mockReturnThis();
+      collider.body = { id: createdColliders.length + 1, gameObject: collider };
+      createdColliders.push(collider);
+      return collider;
+    });
 
     scene.create();
 
     const expectedSolidTiles = layout.flat().filter((tile) => tile === 'wall').length;
-    expect(rectangleStub).toHaveBeenCalledTimes(expectedSolidTiles);
+    expect(stubs.addRectangle).toHaveBeenCalledTimes(expectedSolidTiles);
+    expect(stubs.matterFactory.add.existing).toHaveBeenCalledTimes(expectedSolidTiles);
     expect(physicsRegisterTerrainMock).toHaveBeenCalledTimes(expectedSolidTiles);
-    createdBodies.forEach((body) => {
-      expect(physicsRegisterTerrainMock).toHaveBeenCalledWith(body);
+    createdColliders.forEach((collider) => {
+      expect(physicsRegisterTerrainMock).toHaveBeenCalledWith(collider);
+      expect(collider.body?.gameObject).toBe(collider);
+      expect(collider.setStatic).toHaveBeenCalledWith(true);
+      expect(collider.setIgnoreGravity).toHaveBeenCalledWith(true);
+      expect(collider.setDepth).toHaveBeenCalledWith(0);
+      expect(collider.setName).toHaveBeenCalledWith('Terrain');
     });
   });
 
