@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type Phaser from 'phaser';
 import type { ActionStateMap } from './InhaleSystem';
+import { AbilitySystem } from './AbilitySystem';
 import { SwallowSystem } from './SwallowSystem';
 
 type MockFn = ReturnType<typeof vi.fn>;
@@ -168,7 +169,7 @@ describe('SwallowSystem', () => {
     expect(inhaleSystem.releaseCapturedTarget).toHaveBeenCalled();
 
     const payload = system.consumeSwallowedPayload();
-    expect(payload).toEqual({ abilityType: 'fire' });
+    expect(payload).toEqual({ abilityType: 'fire', ability: AbilitySystem.abilities.fire });
     expect(system.consumeSwallowedPayload()).toBeUndefined();
   });
 

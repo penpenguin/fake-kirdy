@@ -97,6 +97,41 @@ describe('AbilitySystem', () => {
     };
   });
 
+  it('publishes ability metadata through the static catalogue', () => {
+    expect(AbilitySystem.abilities.fire).toMatchObject({
+      type: 'fire',
+      name: 'Fire',
+      attack: 'fire-attack',
+      color: expect.stringMatching(/^#/),
+      damage: expect.any(Number),
+    });
+    expect(Object.keys(AbilitySystem.abilities)).toEqual(expect.arrayContaining(['fire', 'ice', 'sword']));
+  });
+
+  it('copies ability metadata from enemies exposing ability types', () => {
+    const enemy = {
+      getAbilityType: vi.fn(() => 'fire'),
+    };
+
+    const ability = AbilitySystem.copyAbility(enemy);
+
+    expect(enemy.getAbilityType).toHaveBeenCalled();
+    expect(ability).toBe(AbilitySystem.abilities.fire);
+  });
+
+  it('executes static ability attacks using the provided context', () => {
+    const ability = AbilitySystem.abilities.fire;
+
+    AbilitySystem.executeAbility(ability, {
+      scene,
+      kirdy: kirdy as any,
+      physicsSystem: physicsSystem as any,
+    });
+
+    expect(addSprite).toHaveBeenCalledWith(128, 256, 'fire-attack');
+    expect(projectile.setVelocityX).toHaveBeenCalledWith(420);
+  });
+
   it('exposes all core ability types', () => {
     expect(ABILITY_TYPES).toEqual(expect.arrayContaining(['fire', 'ice', 'sword']));
   });

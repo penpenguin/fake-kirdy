@@ -5,10 +5,10 @@
   - 仕様に示された `move/jump/startHover/inhale/swallow/spit/useAbility` などの明示的メソッドが未提供。
   - プレイヤー体力・スコアが `GameScene` 側に分散し、責務が設計から乖離している。
 
-- [ ] 2. 能力システムの設計不一致
-  - 仕様の静的API（`AbilitySystem.copyAbility(enemy)` 等）が存在せず、`applySwallowedPayload` に依存。
-  - 敵から能力をコピーする共通インターフェースが欠落し、Swallow → Ability の暗黙連携に留まっている。
-  - `abilities` 定義オブジェクトを外部公開しておらず、仕様の再利用性要件を満たさない。
+- [x] 2. 能力システムの設計不一致
+  - `AbilitySystem.abilities` / `copyAbility` / `executeAbility` を追加し、`SwallowSystem` から静的API経由で能力メタデータを連携するように修正。
+  - 敵やスプライトから能力タイプを抽出する共通インターフェースを提供し、Swallow → Ability の暗黙依存を解消。
+  - 仕様準拠の能力カタログを公開し、外部からの再利用を可能にした。
 
 - [ ] 3. 敵管理のモジュール化不足
   - `EnemyManager` クラスがなく、敵配列とスポーン制御を `GameScene` が直接保持。

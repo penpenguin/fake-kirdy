@@ -2,10 +2,13 @@ import type Phaser from 'phaser';
 import type { Kirdy } from '../characters/Kirdy';
 import type { ActionStateMap, InhaleSystem } from './InhaleSystem';
 import type { PhysicsSystem, MatterGameObject } from '../physics/PhysicsSystem';
+import { AbilitySystem } from './AbilitySystem';
+import type { AbilityMetadata } from './AbilitySystem';
 import { ObjectPool } from '../performance/ObjectPool';
 
 export interface SwallowedPayload {
   abilityType?: string;
+  ability?: AbilityMetadata;
 }
 
 const STAR_PROJECTILE_SPEED = 350;
@@ -87,12 +90,8 @@ export class SwallowSystem {
 
     target.setData?.('inMouth', false);
 
-    const abilityType = target.getData?.('abilityType');
-    if (abilityType !== undefined) {
-      this.swallowedPayload = { abilityType };
-    } else {
-      this.swallowedPayload = undefined;
-    }
+    const ability = AbilitySystem.copyAbility(target);
+    this.swallowedPayload = ability ? { abilityType: ability.type, ability } : undefined;
 
     target.destroy?.();
     this.inhaleSystem.releaseCapturedTarget();
