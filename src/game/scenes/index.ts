@@ -196,6 +196,8 @@ export class GameScene extends Phaser.Scene {
   private performanceMonitor?: PerformanceMonitor;
   private readonly performanceRecoveryThresholdFps = 55;
   private audioManager?: AudioManager;
+  private terrainColliders: Array<Phaser.Physics.Matter.Image | Phaser.Physics.Matter.Sprite> = [];
+  private cameraFollowConfigured = false;
 
   constructor() {
     super(buildConfig(SceneKeys.Game));
@@ -305,6 +307,8 @@ export class GameScene extends Phaser.Scene {
     this.mapOverlay = new MapOverlay(this);
     this.hud = new Hud(this);
 
+    this.rebuildTerrainColliders();
+
     const spawn = this.determineSpawnPosition();
     this.pauseKeyHandler = () => this.pauseGame();
     this.input?.keyboard?.on?.('keydown-ESC', this.pauseKeyHandler);
@@ -316,6 +320,7 @@ export class GameScene extends Phaser.Scene {
     this.kirdy = createKirdy(this, spawn);
     if (this.kirdy) {
       this.physicsSystem?.registerPlayer(this.kirdy);
+      this.configureCamera();
     }
     this.playerInput = new PlayerInputManager(this);
     if (this.kirdy) {
@@ -344,6 +349,8 @@ export class GameScene extends Phaser.Scene {
       this.enemies = [];
       this.physicsSystem = undefined;
       this.areaManager = undefined;
+      this.destroyTerrainColliders();
+      this.cameraFollowConfigured = false;
       if (this.mapToggleHandler) {
         this.input?.keyboard?.off?.('keydown-M', this.mapToggleHandler);
         this.mapToggleHandler = undefined;
@@ -523,6 +530,11 @@ export class GameScene extends Phaser.Scene {
       this.kirdy.sprite.setVelocity?.(0, 0);
     }
 
+    if (result.areaChanged) {
+      this.rebuildTerrainColliders();
+      this.configureCamera();
+    }
+
     this.trackExplorationProgress(result.areaChanged);
 
     if (this.mapOverlay?.isVisible()) {
@@ -592,6 +604,85 @@ export class GameScene extends Phaser.Scene {
       x: sprite.x ?? sprite.body?.position?.x ?? 0,
       y: sprite.y ?? sprite.body?.position?.y ?? 0,
     };
+  }
+
+  private rebuildTerrainColliders() {
+    this.destroyTerrainColliders();
+
+    if (!this.physicsSystem) {
+      return;
+    }
+
+    const areaState = this.areaManager?.getCurrentAreaState();
+    const matterFactory = this.matter?.add;
+    if (!areaState || !matterFactory?.rectangle) {
+      return;
+    }
+
+    const tileMap = areaState.tileMap as Partial<{
+      tileSize: number;
+      columns: number;
+      rows: number;
+      getTileAt: (column: number, row: number) => string | undefined;
+    }>;
+
+    const columns = Number.isFinite(tileMap?.columns) ? (tileMap!.columns as number) : 0;
+    const rows = Number.isFinite(tileMap?.rows) ? (tileMap!.rows as number) : 0;
+    const tileSize = Number.isFinite(tileMap?.tileSize) ? (tileMap!.tileSize as number) : 32;
+    const getTileAt = typeof tileMap?.getTileAt === 'function' ? tileMap!.getTileAt!.bind(tileMap) : undefined;
+
+    if (!getTileAt || columns <= 0 || rows <= 0 || tileSize <= 0) {
+      return;
+    }
+
+    for (let row = 0; row < rows; row += 1) {
+      for (let column = 0; column < columns; column += 1) {
+        const tile = getTileAt(column, row);
+        if (tile !== 'wall') {
+          continue;
+        }
+
+        const centerX = column * tileSize + tileSize / 2;
+        const centerY = row * tileSize + tileSize / 2;
+
+        const collider = matterFactory.rectangle(centerX, centerY, tileSize, tileSize, { isStatic: true });
+        if (!collider) {
+          continue;
+        }
+
+        const matterObject = collider as Phaser.Physics.Matter.Image | Phaser.Physics.Matter.Sprite;
+        matterObject.setIgnoreGravity?.(true);
+        matterObject.setDepth?.(0);
+        matterObject.setName?.('Terrain');
+        this.physicsSystem.registerTerrain(matterObject as any);
+        this.terrainColliders.push(matterObject);
+      }
+    }
+  }
+
+  private destroyTerrainColliders() {
+    this.terrainColliders.forEach((collider) => {
+      collider.destroy?.();
+    });
+    this.terrainColliders = [];
+  }
+
+  private configureCamera() {
+    const camera = this.cameras?.main as Partial<Phaser.Cameras.Scene2D.Camera> | undefined;
+    const sprite = this.kirdy?.sprite;
+    if (!camera || !sprite) {
+      return;
+    }
+
+    if (!this.cameraFollowConfigured) {
+      camera.startFollow?.(sprite, true, 0.1, 0.1);
+      this.cameraFollowConfigured = true;
+    }
+
+    const bounds = this.areaManager?.getCurrentAreaState()?.pixelBounds;
+    if (Number.isFinite(bounds?.width) && Number.isFinite(bounds?.height)) {
+      camera.setBounds?.(0, 0, bounds!.width as number, bounds!.height as number);
+    }
   }
 
   private getCullingBounds() {
@@ -681,16 +772,34 @@ export class GameScene extends Phaser.Scene {
     if (this.areaManager) {
       const lastKnown = this.areaManager.getLastKnownPlayerPosition();
       if (lastKnown) {
-        return { x: lastKnown.x, y: lastKnown.y } satisfies Vector2;
+        return this.clampPositionToArea(lastKnown);
       }
 
       const areaState = this.areaManager.getCurrentAreaState();
       if (areaState?.playerSpawnPosition) {
-        return { ...areaState.playerSpawnPosition } satisfies Vector2;
+        return this.clampPositionToArea(areaState.playerSpawnPosition);
       }
     }
 
     return { ...GameScene.PLAYER_SPAWN } satisfies Vector2;
+  }
+
+  private clampPositionToArea(position?: Vector2): Vector2 {
+    const fallback = { ...GameScene.PLAYER_SPAWN } satisfies Vector2;
+    const targetX = Number.isFinite(position?.x) ? (position!.x as number) : fallback.x;
+    const targetY = Number.isFinite(position?.y) ? (position!.y as number) : fallback.y;
+
+    const bounds = this.areaManager?.getCurrentAreaState()?.pixelBounds;
+    if (!Number.isFinite(bounds?.width) || !Number.isFinite(bounds?.height)) {
+      return { x: targetX, y: targetY } satisfies Vector2;
+    }
+
+    const maxX = Math.max(0, (bounds!.width as number) - 1);
+    const maxY = Math.max(0, (bounds!.height as number) - 1);
+    const clampedX = Math.min(Math.max(0, targetX), maxX);
+    const clampedY = Math.min(Math.max(0, targetY), maxY);
+
+    return { x: clampedX, y: clampedY } satisfies Vector2;
   }
 
   private initializeExplorationSaveKey() {
@@ -750,8 +859,8 @@ export class GameScene extends Phaser.Scene {
     }
 
     const areaSnapshot = this.areaManager.getPersistenceSnapshot();
-    const position = this.getPlayerPosition() ?? this.areaManager.getLastKnownPlayerPosition();
-    const playerPosition = position ?? { ...GameScene.PLAYER_SPAWN };
+    const rawPosition = this.getPlayerPosition() ?? this.areaManager.getLastKnownPlayerPosition();
+    const playerPosition = this.clampPositionToArea(rawPosition);
 
     const snapshot: GameProgressSnapshot = {
       player: {

@@ -15,6 +15,8 @@ type ImageStub = {
   on: (event: string, handler: (pointer?: unknown) => void) => ImageStub;
   off: (event: string, handler: (pointer?: unknown) => void) => ImageStub;
   setScrollFactor: (x: number, y?: number) => ImageStub;
+  setDisplaySize: (width: number, height: number) => ImageStub;
+  setName: (value: string) => ImageStub;
   setAlpha: (value: number) => ImageStub;
   destroy: () => void;
 };
@@ -51,6 +53,8 @@ type SceneFactoryResult = {
     control?: string;
     events: Record<string, Array<(pointer?: unknown) => void>>;
     setAlpha: ReturnType<typeof vi.fn>;
+     setDisplaySize: ReturnType<typeof vi.fn>;
+     setName: ReturnType<typeof vi.fn>;
     offCalls: Array<{ event: string; handler: (pointer?: unknown) => void }>;
     destroy: ReturnType<typeof vi.fn>;
   }>;
@@ -79,6 +83,8 @@ function createSceneStub(): SceneFactoryResult {
       image: (_x: number, _y: number, _texture: string, frame?: string) => {
         const events: Record<string, Array<(pointer?: unknown) => void>> = {};
         const setAlphaSpy = vi.fn();
+        const setDisplaySizeSpy = vi.fn();
+        const setNameSpy = vi.fn();
         const offCalls: Array<{ event: string; handler: (pointer?: unknown) => void }> = [];
         const destroySpy = vi.fn();
 
@@ -95,6 +101,14 @@ function createSceneStub(): SceneFactoryResult {
             return imageStub;
           },
           setScrollFactor: () => imageStub,
+          setDisplaySize: (width: number, height: number) => {
+            setDisplaySizeSpy(width, height);
+            return imageStub;
+          },
+          setName: (value: string) => {
+            setNameSpy(value);
+            return imageStub;
+          },
           setAlpha: (value: number) => {
             setAlphaSpy(value);
             return imageStub;
@@ -102,7 +116,15 @@ function createSceneStub(): SceneFactoryResult {
           destroy: destroySpy,
         };
 
-        recordedButtons.push({ events, setAlpha: setAlphaSpy, control: frame, offCalls, destroy: destroySpy });
+        recordedButtons.push({
+          events,
+          setAlpha: setAlphaSpy,
+          setDisplaySize: setDisplaySizeSpy,
+          setName: setNameSpy,
+          control: frame,
+          offCalls,
+          destroy: destroySpy,
+        });
 
         return imageStub;
       },
@@ -124,6 +146,9 @@ function createSceneStub(): SceneFactoryResult {
     },
     textures: {
       exists: vi.fn().mockReturnValue(true),
+      getFrameNames: vi
+        .fn()
+        .mockReturnValue(['left', 'right', 'jump', 'inhale', 'swallow', 'spit', 'discard']),
     },
   };
 
@@ -251,6 +276,28 @@ describe('PlayerInputManager', () => {
     createManager();
 
     expect(sceneFactory.recordedButtons.length).toBe(0);
+  });
+
+  it('virtual-controlsテクスチャのフレームを利用してボタンを配置する', () => {
+    createManager();
+
+    expect(sceneFactory.recordedButtons).toHaveLength(7);
+    sceneFactory.recordedButtons.forEach((button) => {
+      expect(button.setDisplaySize).toHaveBeenCalledWith(80, 80);
+      expect(button.setName).toHaveBeenCalledWith(expect.stringMatching(/^touch-/));
+    });
+  });
+
+  it('named frameが無い場合でも仮想ボタンを表示できるよう拡大扱いにする', () => {
+    (sceneFactory.scene.textures.getFrameNames as ReturnType<typeof vi.fn>).mockReturnValue([]);
+
+    createManager();
+
+    expect(sceneFactory.recordedButtons).toHaveLength(7);
+    sceneFactory.recordedButtons.forEach((button) => {
+      expect(button.control).toBeUndefined();
+      expect(button.setDisplaySize).toHaveBeenCalledWith(96, 96);
+    });
   });
 
   it('applies visual feedback when virtual buttons are pressed', () => {

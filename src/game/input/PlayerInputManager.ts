@@ -199,8 +199,11 @@ export class PlayerInputManager {
       { control: 'discard', x: width - 160, y: height - 240 },
     ];
 
+    const availableFrames = textures?.getFrameNames?.('virtual-controls') ?? [];
+
     buttons.forEach(({ control, x, y }) => {
-      const button = scene.add?.image?.(x, y, 'virtual-controls', control);
+      const frame = availableFrames.includes(control) ? control : undefined;
+      const button = scene.add?.image?.(x, y, 'virtual-controls', frame);
       if (!button) {
         return;
       }
@@ -215,6 +218,12 @@ export class PlayerInputManager {
       };
 
       button.setInteractive?.({ useHandCursor: true });
+      if (!availableFrames.includes(control)) {
+        button.setDisplaySize?.(96, 96);
+      } else {
+        button.setDisplaySize?.(80, 80);
+      }
+      button.setName?.(`touch-${control}`);
       button.on?.('pointerdown', downHandler);
       button.on?.('pointerup', upHandler);
       button.on?.('pointerout', upHandler);

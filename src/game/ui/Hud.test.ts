@@ -41,13 +41,15 @@ function createSceneStubs() {
   const hpLabel = createText();
   const abilityLabel = createText();
   const scoreLabel = createText();
+  const controlsLabel = createText();
 
   const addRectangle = vi.fn().mockImplementationOnce(() => hpBar).mockImplementationOnce(() => hpFill);
   const addText = vi
     .fn()
     .mockImplementationOnce(() => hpLabel)
     .mockImplementationOnce(() => abilityLabel)
-    .mockImplementationOnce(() => scoreLabel);
+    .mockImplementationOnce(() => scoreLabel)
+    .mockImplementationOnce(() => controlsLabel);
 
   const scene = {
     add: {
@@ -66,6 +68,7 @@ function createSceneStubs() {
     hpLabel,
     abilityLabel,
     scoreLabel,
+    controlsLabel,
   };
 }
 
@@ -106,8 +109,22 @@ describe('Hud', () => {
     expect(scoreLabel.setText).toHaveBeenLastCalledWith('Score: 000020');
   });
 
+  it('shows keyboardとタッチ操作の案内テキストを表示する', () => {
+    const { scene, controlsLabel } = createSceneStubs();
+    // コンストラクタ呼び出しで指示テキストが設定されることを検証
+    // eslint-disable-next-line no-new
+    new Hud(scene);
+
+    expect(controlsLabel.setText).toHaveBeenCalledWith(
+      expect.stringContaining('Left/Right or A/D'),
+    );
+    expect(controlsLabel.setText).toHaveBeenCalledWith(
+      expect.stringContaining('Touch:'),
+    );
+  });
+
   it('destroys all created objects when disposed', () => {
-    const { scene, container, hpBar, hpFill, hpLabel, abilityLabel, scoreLabel } = createSceneStubs();
+    const { scene, container, hpBar, hpFill, hpLabel, abilityLabel, scoreLabel, controlsLabel } = createSceneStubs();
     const hud = new Hud(scene);
 
     hud.destroy();
@@ -115,6 +132,7 @@ describe('Hud', () => {
     expect(hpLabel.destroy).toHaveBeenCalled();
     expect(abilityLabel.destroy).toHaveBeenCalled();
     expect(scoreLabel.destroy).toHaveBeenCalled();
+    expect(controlsLabel.destroy).toHaveBeenCalled();
     expect(hpFill.destroy).toHaveBeenCalled();
     expect(hpBar.destroy).toHaveBeenCalled();
     expect(container.destroy).toHaveBeenCalled();

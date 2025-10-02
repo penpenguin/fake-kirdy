@@ -46,6 +46,11 @@ const IMAGE_ASSETS: ReadonlyArray<ImageAsset> = [
     url: 'images/tileset-main.png',
     fallbackUrl: 'images/fallbacks/tileset-placeholder.png',
   },
+  {
+    key: 'virtual-controls',
+    url: 'images/virtual-controls.png',
+    fallbackUrl: 'images/fallbacks/virtual-controls.png',
+  },
 ];
 
 const AUDIO_ASSETS: ReadonlyArray<AudioAsset> = [

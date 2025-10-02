@@ -15,6 +15,7 @@ export class Hud {
   private hpLabel?: Phaser.GameObjects.Text;
   private abilityLabel?: Phaser.GameObjects.Text;
   private scoreLabel?: Phaser.GameObjects.Text;
+  private controlsLabel?: Phaser.GameObjects.Text;
 
   constructor(private readonly scene: Phaser.Scene) {
     const { add } = scene;
@@ -55,7 +56,19 @@ export class Hud {
     scoreLabel.setScrollFactor?.(0, 0);
     scoreLabel.setDepth?.(3);
 
-    container.add?.([hpBar, hpFill, hpLabel, abilityLabel, scoreLabel] as any);
+    const controlsLines = [
+      'Controls: Left/Right or A/D to move, Space to jump or hover',
+      'C inhale, S swallow, Z spit, X discard',
+      'Touch: use on-screen buttons',
+    ];
+    const controlsLabel = add.text(padding, padding + 48, '', labelStyle);
+    controlsLabel.setScrollFactor?.(0, 0);
+    controlsLabel.setDepth?.(3);
+    controlsLabel.setLineSpacing?.(2);
+    controlsLabel.setWordWrap?.({ width: (this.scene.scale?.width ?? 800) - padding * 2 });
+    controlsLabel.setText?.(controlsLines.join('\n'));
+
+    container.add?.([hpBar, hpFill, hpLabel, abilityLabel, scoreLabel, controlsLabel] as any);
 
     this.container = container;
     this.hpBar = hpBar;
@@ -63,6 +76,7 @@ export class Hud {
     this.hpLabel = hpLabel;
     this.abilityLabel = abilityLabel;
     this.scoreLabel = scoreLabel;
+    this.controlsLabel = controlsLabel;
   }
 
   updateHP(state: HudHPState) {
@@ -102,12 +116,14 @@ export class Hud {
     this.hpLabel?.destroy?.();
     this.abilityLabel?.destroy?.();
     this.scoreLabel?.destroy?.();
+    this.controlsLabel?.destroy?.();
     this.hpFill?.destroy?.();
     this.hpBar?.destroy?.();
     this.container?.destroy?.();
     this.hpLabel = undefined;
     this.abilityLabel = undefined;
     this.scoreLabel = undefined;
+    this.controlsLabel = undefined;
     this.hpFill = undefined;
     this.hpBar = undefined;
     this.container = undefined;

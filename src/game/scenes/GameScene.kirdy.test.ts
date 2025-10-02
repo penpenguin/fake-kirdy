@@ -27,6 +27,8 @@ const stubs = vi.hoisted(() => {
     },
   };
 
+  const cameraStartFollow = vi.fn();
+
   class PhaserSceneMock {
     public input = { keyboard };
     public matter = matterFactory;
@@ -35,11 +37,12 @@ const stubs = vi.hoisted(() => {
     public cameras = {
       main: {
         worldView: { x: 0, y: 0, width: 800, height: 600 },
+        startFollow: cameraStartFollow,
       },
     };
   }
 
-  return { keyboard, scenePlugin, matterFactory, events, PhaserSceneMock };
+  return { keyboard, scenePlugin, matterFactory, events, cameraStartFollow, PhaserSceneMock };
 });
 
 vi.mock('phaser', () => ({
@@ -262,13 +265,14 @@ vi.mock('../ui/Hud', () => ({
 }));
 
 const physicsRegisterPlayerMock = vi.hoisted(() => vi.fn());
+const physicsRegisterTerrainMock = vi.hoisted(() => vi.fn());
 const physicsRegisterEnemyMock = vi.hoisted(() => vi.fn());
 const physicsDestroyProjectileMock = vi.hoisted(() => vi.fn());
 
 const PhysicsSystemMock = vi.hoisted(() =>
   vi.fn(() => ({
     registerPlayer: physicsRegisterPlayerMock,
-    registerTerrain: vi.fn(),
+    registerTerrain: physicsRegisterTerrainMock,
     registerEnemy: physicsRegisterEnemyMock,
     registerPlayerAttack: vi.fn(),
     destroyProjectile: physicsDestroyProjectileMock,
@@ -296,6 +300,7 @@ describe('GameScene player integration', () => {
     stubs.scenePlugin.stop.mockClear();
     stubs.scenePlugin.start.mockClear();
     physicsRegisterPlayerMock.mockClear();
+    physicsRegisterTerrainMock.mockClear();
     physicsRegisterEnemyMock.mockClear();
     physicsDestroyProjectileMock.mockClear();
     PhysicsSystemMock.mockClear();
@@ -321,11 +326,36 @@ describe('GameScene player integration', () => {
     saveManagerSaveMock.mockReset();
     saveManagerClearMock.mockReset();
     const tileKeyFn = vi.fn().mockReturnValue({ column: 10, row: 5 });
+    const tileSize = 32;
+    const columns = 20;
+    const rows = 10;
+    const getTileAt = vi.fn((column: number, row: number) => {
+      if (column <= 0 || column >= columns - 1) {
+        return 'wall';
+      }
+
+      if (row <= 0 || row >= rows - 1) {
+        return 'wall';
+      }
+
+      if ((row === 3 || row === 6) && column >= 4 && column <= 7) {
+        return 'wall';
+      }
+
+      return 'floor';
+    });
+
     defaultAreaState = {
       definition: { id: 'central-hub' },
-      tileMap: { tileSize: 32, columns: 20, rows: 10, getClampedTileCoordinate: tileKeyFn },
-      pixelBounds: { width: 640, height: 320 },
-      playerSpawnPosition: { x: 320, y: 160 },
+      tileMap: {
+        tileSize,
+        columns,
+        rows,
+        getClampedTileCoordinate: tileKeyFn,
+        getTileAt,
+      },
+      pixelBounds: { width: columns * tileSize, height: rows * tileSize },
+      playerSpawnPosition: { x: (columns * tileSize) / 2, y: (rows * tileSize) / 2 },
     };
     areaManagerGetStateMock.mockReturnValue(defaultAreaState as any);
     areaManagerUpdateMock.mockReturnValue({ areaChanged: false });
@@ -351,6 +381,8 @@ describe('GameScene player integration', () => {
     performanceMonitorStubs.update.mockClear();
     renderingPreferenceStubs.recordLowFpsEvent.mockClear();
     renderingPreferenceStubs.recordStableFpsEvent.mockClear();
+    stubs.cameraStartFollow.mockClear();
+    stubs.matterFactory.add.rectangle = vi.fn();
   });
 
   function createSnapshot(overrides?: Partial<ReturnType<typeof playerInputUpdateMock>>) {
@@ -418,6 +450,74 @@ describe('GameScene player integration', () => {
     expect(PhysicsSystemMock).toHaveBeenCalledWith(scene);
     expect(physicsRegisterPlayerMock).toHaveBeenCalledWith(kirdyInstance);
     expect(AreaManagerMock).toHaveBeenCalled();
+  });
+
+  it('メインカメラがカービィを追従するよう設定する', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    const snapshot = createSnapshot();
+    playerInputUpdateMock.mockReturnValue(snapshot);
+
+    scene.create();
+
+    expect(stubs.cameraStartFollow).toHaveBeenCalled();
+    expect(stubs.cameraStartFollow.mock.calls[0]?.[0]).toBe(kirdyInstance.sprite);
+  });
+
+  it('地形タイルに対応するコライダーをMatterに生成して物理システムへ登録する', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    const tileSize = 24;
+    const layout: Array<Array<'wall' | 'floor'>> = [
+      ['wall', 'wall', 'wall'],
+      ['wall', 'floor', 'wall'],
+      ['wall', 'wall', 'wall'],
+    ];
+
+    const customTileMap = {
+      tileSize,
+      columns: layout[0].length,
+      rows: layout.length,
+      getClampedTileCoordinate: vi.fn().mockReturnValue({ column: 1, row: 1 }),
+      getTileAt: vi.fn((column: number, row: number) => layout[row]?.[column]),
+    };
+
+    const areaState = {
+      definition: { id: 'central-hub' },
+      tileMap: customTileMap,
+      pixelBounds: { width: layout[0].length * tileSize, height: layout.length * tileSize },
+      playerSpawnPosition: { x: tileSize * 1.5, y: tileSize * 1.5 },
+    };
+
+    areaManagerGetStateMock.mockReturnValue(areaState as any);
+    areaManagerGetLastKnownPositionMock.mockReturnValue(areaState.playerSpawnPosition);
+    areaManagerGetSnapshotMock.mockReturnValue({
+      currentAreaId: 'central-hub',
+      discoveredAreas: ['central-hub'],
+      exploredTiles: {},
+      lastKnownPlayerPosition: { ...areaState.playerSpawnPosition },
+    });
+
+    const createdBodies: unknown[] = [];
+    const rectangleStub = vi.fn(() => {
+      const body = {};
+      createdBodies.push(body);
+      return body;
+    });
+    stubs.matterFactory.add.rectangle = rectangleStub;
+
+    scene.create();
+
+    const expectedSolidTiles = layout.flat().filter((tile) => tile === 'wall').length;
+    expect(rectangleStub).toHaveBeenCalledTimes(expectedSolidTiles);
+    expect(physicsRegisterTerrainMock).toHaveBeenCalledTimes(expectedSolidTiles);
+    createdBodies.forEach((body) => {
+      expect(physicsRegisterTerrainMock).toHaveBeenCalledWith(body);
+    });
   });
 
   it('フレーム毎にパフォーマンスモニターを更新する', () => {
@@ -646,6 +746,38 @@ describe('GameScene player integration', () => {
     const payload = saveManagerSaveMock.mock.calls[0][0];
     expect(payload.player.hp).toBe(4);
     expect(areaManagerGetSnapshotMock).toHaveBeenCalled();
+  });
+
+  it('セーブされる最終位置はエリア境界内にクランプされる', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    const snapshot = createSnapshot();
+    playerInputUpdateMock.mockReturnValue(snapshot);
+
+    scene.create();
+
+    saveManagerSaveMock.mockReset();
+
+    const outOfBoundsX = defaultAreaState.pixelBounds.width + 500;
+    const outOfBoundsY = -250;
+    kirdyInstance.sprite.x = outOfBoundsX;
+    kirdyInstance.sprite.y = outOfBoundsY;
+    kirdyInstance.sprite.body.position.x = outOfBoundsX;
+    kirdyInstance.sprite.body.position.y = outOfBoundsY;
+
+    (scene as any).progressDirty = true;
+
+    playerInputUpdateMock.mockReturnValue(snapshot);
+    scene.update(0, 16);
+
+    expect(saveManagerSaveMock).toHaveBeenCalledTimes(1);
+    const payload = saveManagerSaveMock.mock.calls[0][0];
+    const expectedX = defaultAreaState.pixelBounds.width - 1;
+    const expectedY = 0;
+    expect(payload.area.lastKnownPlayerPosition).toEqual({ x: expectedX, y: expectedY });
+    expect(payload.player.position).toEqual({ x: expectedX, y: expectedY });
   });
 
   it('toggles the world map overlay and populates summaries when opening', () => {

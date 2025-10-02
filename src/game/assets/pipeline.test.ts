@@ -106,6 +106,15 @@ describe('asset pipeline manifest', () => {
     );
   });
 
+  it('クロスプラットフォームのタッチ操作向けvirtual-controlsスプライトを含む', () => {
+    const manifest = createAssetManifest();
+    const asset = manifest.images.find((entry) => entry.key === 'virtual-controls');
+
+    expect(asset).toBeDefined();
+    expect(asset?.url).toBe('images/virtual-controls.png');
+    expect(asset?.fallbackUrl).toBe('images/fallbacks/virtual-controls.png');
+  });
+
   it('ensures every fallback asset file exists under public/assets', () => {
     const manifest = createAssetManifest();
     const baseDir = resolve(
