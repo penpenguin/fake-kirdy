@@ -75,6 +75,100 @@ describe('AreaManager', () => {
     expect(returnResult.transition?.via).toBe(getOpposite(result.transition!.via));
   });
 
+  it('中央ハブから各方角の迷宮エリアへ分岐できる', () => {
+    const cases: Array<{
+      direction: AreaTransitionDirection;
+      move: (area: ReturnType<AreaManager['getCurrentAreaState']>) => { x: number; y: number };
+      expectedArea: typeof AREA_IDS[keyof typeof AREA_IDS];
+    }> = [
+      {
+        direction: 'north',
+        move: (area) => ({ x: area.pixelBounds.width / 2, y: -area.tileMap.tileSize }),
+        expectedArea: AREA_IDS.IceArea,
+      },
+      {
+        direction: 'south',
+        move: (area) => ({
+          x: area.pixelBounds.width / 2,
+          y: area.pixelBounds.height + area.tileMap.tileSize,
+        }),
+        expectedArea: AREA_IDS.ForestArea,
+      },
+      {
+        direction: 'west',
+        move: (area) => ({ x: -area.tileMap.tileSize, y: area.pixelBounds.height / 2 }),
+        expectedArea: AREA_IDS.CaveArea,
+      },
+      {
+        direction: 'east',
+        move: (area) => ({
+          x: area.pixelBounds.width + area.tileMap.tileSize,
+          y: area.pixelBounds.height / 2,
+        }),
+        expectedArea: AREA_IDS.MirrorCorridor,
+      },
+    ];
+
+    for (const testCase of cases) {
+      const localManager = new AreaManager();
+      const hub = localManager.getCurrentAreaState();
+
+      const result = localManager.updatePlayerPosition(testCase.move(hub));
+
+      expect(result.areaChanged).toBe(true);
+      expect(result.transition?.via).toBe(testCase.direction);
+      expect(result.transition?.to).toBe(testCase.expectedArea);
+
+      const branchedArea = localManager.getCurrentAreaState();
+
+      const returnMove = (() => {
+        const tileSize = branchedArea.tileMap.tileSize;
+        const { width, height } = branchedArea.pixelBounds;
+
+        switch (testCase.direction) {
+          case 'north':
+            return { x: width / 2, y: height + tileSize };
+          case 'south':
+            return { x: width / 2, y: -tileSize };
+          case 'east':
+            return { x: -tileSize, y: height / 2 };
+          case 'west':
+            return { x: width + tileSize, y: height / 2 };
+          default:
+            return { x: width / 2, y: height / 2 };
+        }
+      })();
+
+      const returnResult = localManager.updatePlayerPosition(returnMove);
+
+      expect(returnResult.areaChanged).toBe(true);
+      expect(returnResult.transition?.to).toBe(AREA_IDS.CentralHub);
+      expect(returnResult.transition?.via).toBe(getOpposite(testCase.direction));
+    }
+  });
+
+  it('ミラー回廊をさらに探索すると火炎領域へ接続する', () => {
+    const hub = manager.getCurrentAreaState();
+
+    // 東側に移動してミラー回廊へ
+    manager.updatePlayerPosition({
+      x: hub.pixelBounds.width + hub.tileMap.tileSize,
+      y: hub.pixelBounds.height / 2,
+    });
+
+    const mirror = manager.getCurrentAreaState();
+
+    const result = manager.updatePlayerPosition({
+      x: mirror.pixelBounds.width + mirror.tileMap.tileSize,
+      y: mirror.pixelBounds.height / 2,
+    });
+
+    expect(result.areaChanged).toBe(true);
+    expect(result.transition?.from).toBe(AREA_IDS.MirrorCorridor);
+    expect(result.transition?.to).toBe(AREA_IDS.FireArea);
+    expect(result.transition?.via).toBe('east');
+  });
+
   it('探索済みエリア情報を記録し、訪問済みエリアを管理する', () => {
     const centralHub = manager.getCurrentAreaState();
 
@@ -114,6 +208,10 @@ describe('AreaManager', () => {
       expect.arrayContaining([
         { id: AREA_IDS.CentralHub, name: 'Central Hub' },
         { id: AREA_IDS.MirrorCorridor, name: 'Mirror Corridor' },
+        { id: AREA_IDS.IceArea, name: 'Ice Area' },
+        { id: AREA_IDS.FireArea, name: 'Fire Area' },
+        { id: AREA_IDS.ForestArea, name: 'Forest Area' },
+        { id: AREA_IDS.CaveArea, name: 'Cave Area' },
       ]),
     );
   });

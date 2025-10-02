@@ -47,6 +47,10 @@ const DEFAULT_AREA: AreaProgressSnapshot = {
   exploredTiles: {
     [AREA_IDS.CentralHub]: [],
     [AREA_IDS.MirrorCorridor]: [],
+    [AREA_IDS.IceArea]: [],
+    [AREA_IDS.FireArea]: [],
+    [AREA_IDS.ForestArea]: [],
+    [AREA_IDS.CaveArea]: [],
   },
   lastKnownPlayerPosition: { x: 0, y: 0 },
 };

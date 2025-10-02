@@ -1,6 +1,10 @@
 export const AREA_IDS = {
   CentralHub: 'central-hub',
   MirrorCorridor: 'mirror-corridor',
+  IceArea: 'ice-area',
+  FireArea: 'fire-area',
+  ForestArea: 'forest-area',
+  CaveArea: 'cave-area',
 } as const;
 
 export type AreaId = (typeof AREA_IDS)[keyof typeof AREA_IDS];
@@ -553,13 +557,64 @@ function createDefaultAreaDefinitions(): AreaDefinition[] {
   const mirrorCorridorWidth = mirrorCorridorLayout[0].length * tileSize;
   const mirrorCorridorHeight = mirrorCorridorLayout.length * tileSize;
 
+  const iceAreaLayout = [
+    '####################',
+    '#....##......##....#',
+    '#....##......##....#',
+    '#..................#',
+    '#..####......####..#',
+    '#..................#',
+    '####################',
+  ];
+  const iceAreaWidth = iceAreaLayout[0].length * tileSize;
+  const iceAreaHeight = iceAreaLayout.length * tileSize;
+
+  const forestAreaLayout = [
+    '########################',
+    '#......................#',
+    '#..####..######..####..#',
+    '#......................#',
+    '#..####..######..####..#',
+    '#......................#',
+    '########################',
+  ];
+  const forestAreaWidth = forestAreaLayout[0].length * tileSize;
+  const forestAreaHeight = forestAreaLayout.length * tileSize;
+
+  const caveAreaLayout = [
+    '####################',
+    '#..................#',
+    '#..######..######..#',
+    '#..................#',
+    '#..######..######..#',
+    '#..................#',
+    '####################',
+  ];
+  const caveAreaWidth = caveAreaLayout[0].length * tileSize;
+  const caveAreaHeight = caveAreaLayout.length * tileSize;
+
+  const fireAreaLayout = [
+    '########################',
+    '#......................#',
+    '#..####..######..####..#',
+    '#......................#',
+    '#..####..######..####..#',
+    '#......................#',
+    '########################',
+  ];
+  const fireAreaWidth = fireAreaLayout[0].length * tileSize;
+  const fireAreaHeight = fireAreaLayout.length * tileSize;
+
   const centralHub: AreaDefinition = {
     id: AREA_IDS.CentralHub,
     name: 'Central Hub',
     tileSize,
     layout: centralHubLayout,
     neighbors: {
+      north: AREA_IDS.IceArea,
       east: AREA_IDS.MirrorCorridor,
+      south: AREA_IDS.ForestArea,
+      west: AREA_IDS.CaveArea,
     },
     entryPoints: {
       default: { position: { x: centralHubWidth / 2, y: centralHubHeight / 2 } },
@@ -577,6 +632,7 @@ function createDefaultAreaDefinitions(): AreaDefinition[] {
     layout: mirrorCorridorLayout,
     neighbors: {
       west: AREA_IDS.CentralHub,
+      east: AREA_IDS.FireArea,
     },
     entryPoints: {
       default: { position: { x: mirrorCorridorWidth / 2, y: mirrorCorridorHeight / 2 } },
@@ -587,5 +643,73 @@ function createDefaultAreaDefinitions(): AreaDefinition[] {
     },
   };
 
-  return [centralHub, mirrorCorridor];
+  const iceArea: AreaDefinition = {
+    id: AREA_IDS.IceArea,
+    name: 'Ice Area',
+    tileSize,
+    layout: iceAreaLayout,
+    neighbors: {
+      south: AREA_IDS.CentralHub,
+    },
+    entryPoints: {
+      default: { position: { x: iceAreaWidth / 2, y: iceAreaHeight - tileSize * 2 } },
+      south: { position: { x: iceAreaWidth / 2, y: iceAreaHeight - tileSize * 2 } },
+      north: { position: { x: iceAreaWidth / 2, y: tileSize * 2 } },
+      east: { position: { x: iceAreaWidth - tileSize * 2, y: iceAreaHeight / 2 } },
+      west: { position: { x: tileSize * 2, y: iceAreaHeight / 2 } },
+    },
+  };
+
+  const forestArea: AreaDefinition = {
+    id: AREA_IDS.ForestArea,
+    name: 'Forest Area',
+    tileSize,
+    layout: forestAreaLayout,
+    neighbors: {
+      north: AREA_IDS.CentralHub,
+    },
+    entryPoints: {
+      default: { position: { x: forestAreaWidth / 2, y: tileSize } },
+      north: { position: { x: forestAreaWidth / 2, y: tileSize } },
+      south: { position: { x: forestAreaWidth / 2, y: forestAreaHeight - tileSize * 2 } },
+      east: { position: { x: forestAreaWidth - tileSize * 2, y: forestAreaHeight / 2 } },
+      west: { position: { x: tileSize * 2, y: forestAreaHeight / 2 } },
+    },
+  };
+
+  const caveArea: AreaDefinition = {
+    id: AREA_IDS.CaveArea,
+    name: 'Cave Area',
+    tileSize,
+    layout: caveAreaLayout,
+    neighbors: {
+      east: AREA_IDS.CentralHub,
+    },
+    entryPoints: {
+      default: { position: { x: caveAreaWidth - tileSize * 2, y: caveAreaHeight / 2 } },
+      east: { position: { x: caveAreaWidth - tileSize * 2, y: caveAreaHeight / 2 } },
+      west: { position: { x: tileSize * 2, y: caveAreaHeight / 2 } },
+      north: { position: { x: caveAreaWidth / 2, y: tileSize * 2 } },
+      south: { position: { x: caveAreaWidth / 2, y: caveAreaHeight - tileSize * 2 } },
+    },
+  };
+
+  const fireArea: AreaDefinition = {
+    id: AREA_IDS.FireArea,
+    name: 'Fire Area',
+    tileSize,
+    layout: fireAreaLayout,
+    neighbors: {
+      west: AREA_IDS.MirrorCorridor,
+    },
+    entryPoints: {
+      default: { position: { x: tileSize * 2, y: fireAreaHeight / 2 } },
+      west: { position: { x: tileSize * 2, y: fireAreaHeight / 2 } },
+      east: { position: { x: fireAreaWidth - tileSize * 2, y: fireAreaHeight / 2 } },
+      north: { position: { x: fireAreaWidth / 2, y: tileSize } },
+      south: { position: { x: fireAreaWidth / 2, y: fireAreaHeight - tileSize * 2 } },
+    },
+  };
+
+  return [centralHub, mirrorCorridor, iceArea, forestArea, caveArea, fireArea];
 }
