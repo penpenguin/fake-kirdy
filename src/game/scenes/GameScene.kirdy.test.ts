@@ -28,6 +28,16 @@ const stubs = vi.hoisted(() => {
     destroy: vi.fn(),
   }));
 
+  const addImage = vi.fn(() => ({
+    setOrigin: vi.fn().mockReturnThis(),
+    setDepth: vi.fn().mockReturnThis(),
+    setDisplaySize: vi.fn().mockReturnThis(),
+    setActive: vi.fn().mockReturnThis(),
+    setVisible: vi.fn().mockReturnThis(),
+    setFrame: vi.fn().mockReturnThis(),
+    destroy: vi.fn(),
+  }));
+
   const matterFactory = {
     add: {
       existing: vi.fn(),
@@ -43,6 +53,7 @@ const stubs = vi.hoisted(() => {
     public events = events;
     public add = {
       rectangle: addRectangle,
+      image: addImage,
     };
     public cameras = {
       main: {
@@ -52,7 +63,7 @@ const stubs = vi.hoisted(() => {
     };
   }
 
-  return { keyboard, scenePlugin, matterFactory, events, cameraStartFollow, PhaserSceneMock, addRectangle };
+  return { keyboard, scenePlugin, matterFactory, events, cameraStartFollow, PhaserSceneMock, addRectangle, addImage };
 });
 
 vi.mock('phaser', () => ({
@@ -323,6 +334,16 @@ describe('GameScene player integration', () => {
       setDepth: vi.fn().mockReturnThis(),
       destroy: vi.fn(),
     }));
+    stubs.addImage.mockReset();
+    stubs.addImage.mockImplementation(() => ({
+      setOrigin: vi.fn().mockReturnThis(),
+      setDepth: vi.fn().mockReturnThis(),
+      setDisplaySize: vi.fn().mockReturnThis(),
+      setActive: vi.fn().mockReturnThis(),
+      setVisible: vi.fn().mockReturnThis(),
+      setFrame: vi.fn().mockReturnThis(),
+      destroy: vi.fn(),
+    }));
     stubs.matterFactory.add.existing.mockImplementation((gameObject: any) => {
       const collider = gameObject as any;
       collider.setStatic = vi.fn().mockReturnThis();
@@ -565,6 +586,106 @@ describe('GameScene player integration', () => {
       expect(collider.setDepth).toHaveBeenCalledWith(0);
       expect(collider.setName).toHaveBeenCalledWith('Terrain');
     });
+  });
+
+  it('壁タイルに対応する可視タイルを生成し、破棄時にクリーンアップする', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    const tileSize = 24;
+    const layout: Array<Array<'wall' | 'floor'>> = [
+      ['wall', 'wall', 'wall'],
+      ['wall', 'floor', 'wall'],
+      ['wall', 'wall', 'wall'],
+    ];
+
+    const wallCoordinates: Array<{ column: number; row: number }> = [];
+    layout.forEach((rowTiles, rowIndex) => {
+      rowTiles.forEach((tile, columnIndex) => {
+        if (tile === 'wall') {
+          wallCoordinates.push({ column: columnIndex, row: rowIndex });
+        }
+      });
+    });
+
+    const customTileMap = {
+      tileSize,
+      columns: layout[0].length,
+      rows: layout.length,
+      getClampedTileCoordinate: vi.fn().mockReturnValue({ column: 1, row: 1 }),
+      getTileAt: vi.fn((column: number, row: number) => layout[row]?.[column]),
+    };
+
+    const areaState = {
+      definition: { id: 'central-hub' },
+      tileMap: customTileMap,
+      pixelBounds: { width: layout[0].length * tileSize, height: layout.length * tileSize },
+      playerSpawnPosition: { x: tileSize * 1.5, y: tileSize * 1.5 },
+    };
+
+    areaManagerGetStateMock.mockReturnValue(areaState as any);
+    areaManagerGetLastKnownPositionMock.mockReturnValue(areaState.playerSpawnPosition);
+    areaManagerGetSnapshotMock.mockReturnValue({
+      currentAreaId: 'central-hub',
+      discoveredAreas: ['central-hub'],
+      exploredTiles: {},
+      lastKnownPlayerPosition: { ...areaState.playerSpawnPosition },
+    });
+
+    const createdImages: Array<ReturnType<typeof stubs.addImage>> = [];
+    stubs.addImage.mockImplementation((x: number, y: number, textureKey: string, frame: string) => {
+      const image = {
+        x,
+        y,
+        texture: textureKey,
+        frame,
+        setOrigin: vi.fn().mockReturnThis(),
+        setDepth: vi.fn().mockReturnThis(),
+        setDisplaySize: vi.fn().mockReturnThis(),
+        setActive: vi.fn().mockReturnThis(),
+        setVisible: vi.fn().mockReturnThis(),
+        setFrame: vi.fn().mockReturnThis(),
+        destroy: vi.fn(),
+      };
+      createdImages.push(image);
+      return image;
+    });
+
+    scene.create();
+
+    expect(stubs.addImage).toHaveBeenCalledTimes(wallCoordinates.length);
+
+    wallCoordinates.forEach((position, index) => {
+      const centerX = position.column * tileSize + tileSize / 2;
+      const centerY = position.row * tileSize + tileSize / 2;
+      const call = stubs.addImage.mock.calls[index];
+      expect(call?.[0]).toBe(centerX);
+      expect(call?.[1]).toBe(centerY);
+      expect(call?.[2]).toBe('tileset-main');
+      expect(call?.[3]).toBe('wall');
+
+      const image = createdImages[index] as any;
+      expect(image.setOrigin).toHaveBeenCalledWith(0.5, 0.5);
+      expect(image.setDisplaySize).toHaveBeenCalledWith(tileSize, tileSize);
+      expect(image.setDepth).toHaveBeenCalledWith(-50);
+    });
+
+    const terrainTiles = ((scene as any).terrainTiles ?? []) as Array<{ destroy: vi.Mock }>;
+    expect(terrainTiles).toHaveLength(wallCoordinates.length);
+    createdImages.forEach((image) => {
+      expect(terrainTiles).toContain(image);
+    });
+
+    const destroyTerrainVisuals = (scene as any).destroyTerrainVisuals?.bind(scene);
+    expect(destroyTerrainVisuals).toBeDefined();
+
+    destroyTerrainVisuals?.();
+
+    createdImages.forEach((image) => {
+      expect(image.destroy).toHaveBeenCalled();
+    });
+    expect((scene as any).terrainTiles).toHaveLength(0);
   });
 
   it('フレーム毎にパフォーマンスモニターを更新する', () => {

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import Phaser from 'phaser';
 
 const asMock = <T extends (...args: any[]) => any>(fn: T) => fn as unknown as ReturnType<typeof vi.fn>;
 
@@ -28,6 +29,11 @@ vi.mock('phaser', () => {
     image: vi.fn(),
     audio: vi.fn(),
     json: vi.fn(),
+  });
+
+  const createTextureManagerMock = () => ({
+    setDefaultFilter: vi.fn(),
+    get: vi.fn(),
   });
 
   const createKeyboardMock = () => ({
@@ -83,6 +89,7 @@ vi.mock('phaser', () => {
         sprite: vi.fn(() => createMatterSpriteMock()),
       },
     };
+    public textures = createTextureManagerMock();
 
     constructor(_config?: string | Record<string, unknown>) {}
   }
@@ -92,6 +99,7 @@ vi.mock('phaser', () => {
       Scene: PhaserSceneMock,
       AUTO: 'AUTO',
       Scale: { FIT: 'FIT', CENTER_BOTH: 'CENTER_BOTH' },
+      Textures: { FilterMode: { LINEAR: 'LINEAR', NEAREST: 'NEAREST' } },
       Types: {
         Scenes: {
           SettingsConfig: class {},
@@ -233,7 +241,10 @@ describe('Scene registration', () => {
     );
 
     const loadOnceMock = asMock(bootScene.load.once);
-    const [, onComplete] = loadOnceMock.mock.calls[0];
+    const completeCall = loadOnceMock.mock.calls.find(([event]) => event === 'complete');
+    expect(completeCall?.[1]).toBeTypeOf('function');
+
+    const [, onComplete] = completeCall ?? [];
     onComplete?.();
 
     expect(bootScene.scene.start).toHaveBeenCalledWith(SceneKeys.Menu);
@@ -283,6 +294,32 @@ describe('Scene registration', () => {
 
     expect(loadImageMock.mock.calls.length).toBe(initialImageCalls + 1);
     expect(loadStartMock.mock.calls.length).toBe(initialStartCalls + 1);
+  });
+
+  it('BootSceneがタイルセットのフィルタとミップマップ設定を初期化する', () => {
+    const bootScene = new BootScene();
+
+    const texture = {
+      setFilter: vi.fn(),
+      setGenerateMipmaps: vi.fn(),
+    };
+    const texturesGetMock = asMock(bootScene.textures.get);
+    texturesGetMock.mockReturnValue(texture as any);
+
+    bootScene.preload();
+
+    expect(bootScene.textures.setDefaultFilter).toHaveBeenCalledWith(Phaser.Textures.FilterMode.NEAREST);
+
+    const loadOnceMock = asMock(bootScene.load.once);
+    const fileCompleteCall = loadOnceMock.mock.calls.find(([event]) => event === 'filecomplete-image-tileset-main');
+    expect(fileCompleteCall?.[1]).toBeTypeOf('function');
+
+    const [, handler] = fileCompleteCall ?? [];
+    handler?.();
+
+    expect(bootScene.textures.get).toHaveBeenCalledWith('tileset-main');
+    expect(texture.setFilter).toHaveBeenCalledWith(Phaser.Textures.FilterMode.NEAREST);
+    expect(texture.setGenerateMipmaps).toHaveBeenCalledWith(false);
   });
 
   it('menu scene can transition into the main game scene', () => {

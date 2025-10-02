@@ -37,6 +37,21 @@ export const SceneKeys = {
 
 type SceneKey = (typeof SceneKeys)[keyof typeof SceneKeys];
 
+const TERRAIN_TEXTURE_KEY = 'tileset-main';
+const TERRAIN_VISUAL_DEPTH = -50;
+const TERRAIN_FRAME_KEYS = {
+  wall: 'wall',
+  floor: 'floor',
+} as const;
+
+type TerrainTilePlacement = {
+  column: number;
+  row: number;
+  centerX: number;
+  centerY: number;
+  tileSize: number;
+};
+
 function buildConfig(key: SceneKey) {
   return { key } satisfies Phaser.Types.Scenes.SettingsConfig;
 }
@@ -79,6 +94,29 @@ export class BootScene extends Phaser.Scene {
       this.scene.start(SceneKeys.Menu);
       return;
     }
+
+    const textureManager = this.textures as
+      | {
+          setDefaultFilter?: (mode: Phaser.Textures.FilterMode) => void;
+          get?: (
+            key: string,
+          ) =>
+            | {
+                setFilter?: (mode: Phaser.Textures.FilterMode) => void;
+                setGenerateMipmaps?: (value: boolean) => void;
+              }
+            | undefined;
+        }
+      | undefined;
+
+    const nearestFilter = Phaser.Textures?.FilterMode?.NEAREST ?? Phaser.Textures?.FilterMode?.LINEAR;
+    textureManager?.setDefaultFilter?.(nearestFilter);
+
+    loader.once?.('filecomplete-image-tileset-main', () => {
+      const texture = textureManager?.get?.(TERRAIN_TEXTURE_KEY);
+      texture?.setFilter?.(nearestFilter);
+      texture?.setGenerateMipmaps?.(false);
+    });
 
     const manifest = createAssetManifest();
     const { fallbackMap } = queueAssetManifest(loader, manifest);
@@ -197,6 +235,7 @@ export class GameScene extends Phaser.Scene {
   private readonly performanceRecoveryThresholdFps = 55;
   private audioManager?: AudioManager;
   private terrainColliders: Array<Phaser.Physics.Matter.Image | Phaser.Physics.Matter.Sprite> = [];
+  private terrainTiles: Array<Phaser.GameObjects.GameObject & { destroy?: () => void }> = [];
   private cameraFollowConfigured = false;
 
   constructor() {
@@ -308,6 +347,7 @@ export class GameScene extends Phaser.Scene {
     this.hud = new Hud(this);
 
     this.rebuildTerrainColliders();
+    this.buildTerrainVisuals();
 
     const spawn = this.determineSpawnPosition();
     this.pauseKeyHandler = () => this.pauseGame();
@@ -532,6 +572,7 @@ export class GameScene extends Phaser.Scene {
 
     if (result.areaChanged) {
       this.rebuildTerrainColliders();
+      this.buildTerrainVisuals();
       this.configureCamera();
     }
 
@@ -606,6 +647,86 @@ export class GameScene extends Phaser.Scene {
     };
   }
 
+  private collectWallTiles(): TerrainTilePlacement[] {
+    const areaState = this.areaManager?.getCurrentAreaState();
+    const tileMap = areaState?.tileMap as Partial<{
+      tileSize: number;
+      columns: number;
+      rows: number;
+      getTileAt: (column: number, row: number) => string | undefined;
+    }>;
+
+    const columns = Number.isFinite(tileMap?.columns) ? (tileMap!.columns as number) : 0;
+    const rows = Number.isFinite(tileMap?.rows) ? (tileMap!.rows as number) : 0;
+    const tileSize = Number.isFinite(tileMap?.tileSize) ? (tileMap!.tileSize as number) : 32;
+    const getTileAt = typeof tileMap?.getTileAt === 'function' ? tileMap!.getTileAt!.bind(tileMap) : undefined;
+
+    if (!getTileAt || columns <= 0 || rows <= 0 || tileSize <= 0) {
+      return [];
+    }
+
+    const placements: TerrainTilePlacement[] = [];
+    for (let row = 0; row < rows; row += 1) {
+      for (let column = 0; column < columns; column += 1) {
+        const tile = getTileAt(column, row);
+        if (tile !== 'wall') {
+          continue;
+        }
+
+        const centerX = column * tileSize + tileSize / 2;
+        const centerY = row * tileSize + tileSize / 2;
+        placements.push({ column, row, centerX, centerY, tileSize });
+      }
+    }
+
+    return placements;
+  }
+
+  private buildTerrainVisuals() {
+    this.destroyTerrainVisuals();
+
+    const displayFactory = this.add;
+    if (!displayFactory) {
+      return;
+    }
+
+    const placements = this.collectWallTiles();
+    if (placements.length === 0) {
+      return;
+    }
+
+    placements.forEach(({ centerX, centerY, tileSize }) => {
+      let visual = displayFactory.image?.(centerX, centerY, TERRAIN_TEXTURE_KEY, TERRAIN_FRAME_KEYS.wall) as
+        | (Phaser.GameObjects.Image & { destroy?: () => void })
+        | undefined;
+
+      if (!visual && displayFactory.rectangle) {
+        visual = displayFactory.rectangle(centerX, centerY, tileSize, tileSize, 0x4a4a4a, 1) as
+          | (Phaser.GameObjects.Rectangle & { destroy?: () => void })
+          | undefined;
+      }
+
+      if (!visual) {
+        return;
+      }
+
+      visual.setOrigin?.(0.5, 0.5);
+      visual.setDepth?.(TERRAIN_VISUAL_DEPTH);
+      visual.setDisplaySize?.(tileSize, tileSize);
+      visual.setFrame?.(TERRAIN_FRAME_KEYS.wall);
+      visual.setVisible?.(true);
+
+      this.terrainTiles.push(visual);
+    });
+  }
+
+  private destroyTerrainVisuals() {
+    this.terrainTiles.forEach((tile) => {
+      tile.destroy?.();
+    });
+    this.terrainTiles = [];
+  }
+
   private rebuildTerrainColliders() {
     this.destroyTerrainColliders();
 
@@ -625,71 +746,46 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
-    const tileMap = areaState.tileMap as Partial<{
-      tileSize: number;
-      columns: number;
-      rows: number;
-      getTileAt: (column: number, row: number) => string | undefined;
-    }>;
-
-    const columns = Number.isFinite(tileMap?.columns) ? (tileMap!.columns as number) : 0;
-    const rows = Number.isFinite(tileMap?.rows) ? (tileMap!.rows as number) : 0;
-    const tileSize = Number.isFinite(tileMap?.tileSize) ? (tileMap!.tileSize as number) : 32;
-    const getTileAt = typeof tileMap?.getTileAt === 'function' ? tileMap!.getTileAt!.bind(tileMap) : undefined;
-
-    if (!getTileAt || columns <= 0 || rows <= 0 || tileSize <= 0) {
-      return;
-    }
-
-    for (let row = 0; row < rows; row += 1) {
-      for (let column = 0; column < columns; column += 1) {
-        const tile = getTileAt(column, row);
-        if (tile !== 'wall') {
-          continue;
-        }
-
-        const centerX = column * tileSize + tileSize / 2;
-        const centerY = row * tileSize + tileSize / 2;
-
-        // Use an invisible display object so Matter assigns a matching gameObject to the body.
-        const rectangle = displayFactory.rectangle(centerX, centerY, tileSize, tileSize, 0x000000, 0);
-        if (!rectangle) {
-          continue;
-        }
-
-        rectangle.setVisible?.(false);
-        rectangle.setActive?.(false);
-        rectangle.setDepth?.(0);
-
-        const matterObject = attachMatterObject.call(matterFactory, rectangle, { isStatic: true }) as
-          | (Phaser.Physics.Matter.Image & { body?: { gameObject?: any } })
-          | (Phaser.Physics.Matter.Sprite & { body?: { gameObject?: any } })
-          | (Phaser.GameObjects.Rectangle & { body?: { gameObject?: any } })
-          | undefined;
-
-        if (!matterObject) {
-          rectangle.destroy?.();
-          continue;
-        }
-
-        const body = (matterObject as any).body ?? (rectangle as any).body;
-        if (body) {
-          body.gameObject = matterObject;
-          (matterObject as any).body = body;
-        }
-
-        matterObject.setStatic?.(true);
-        matterObject.setIgnoreGravity?.(true);
-        matterObject.setDepth?.(0);
-        matterObject.setName?.('Terrain');
-
-        this.physicsSystem.registerTerrain(matterObject as any);
-        this.terrainColliders.push(matterObject);
+    this.collectWallTiles().forEach(({ centerX, centerY, tileSize }) => {
+      // Use an invisible display object so Matter assigns a matching gameObject to the body.
+      const rectangle = displayFactory.rectangle(centerX, centerY, tileSize, tileSize, 0x000000, 0);
+      if (!rectangle) {
+        return;
       }
-    }
+
+      rectangle.setVisible?.(false);
+      rectangle.setActive?.(false);
+      rectangle.setDepth?.(0);
+
+      const matterObject = attachMatterObject.call(matterFactory, rectangle, { isStatic: true }) as
+        | (Phaser.Physics.Matter.Image & { body?: { gameObject?: any } })
+        | (Phaser.Physics.Matter.Sprite & { body?: { gameObject?: any } })
+        | (Phaser.GameObjects.Rectangle & { body?: { gameObject?: any } })
+        | undefined;
+
+      if (!matterObject) {
+        rectangle.destroy?.();
+        return;
+      }
+
+      const body = (matterObject as any).body ?? (rectangle as any).body;
+      if (body) {
+        body.gameObject = matterObject;
+        (matterObject as any).body = body;
+      }
+
+      matterObject.setStatic?.(true);
+      matterObject.setIgnoreGravity?.(true);
+      matterObject.setDepth?.(0);
+      matterObject.setName?.('Terrain');
+
+      this.physicsSystem!.registerTerrain(matterObject as any);
+      this.terrainColliders.push(matterObject);
+    });
   }
 
   private destroyTerrainColliders() {
+    this.destroyTerrainVisuals();
     this.terrainColliders.forEach((collider) => {
       collider.destroy?.();
     });

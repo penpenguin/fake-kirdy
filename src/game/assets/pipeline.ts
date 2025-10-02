@@ -45,6 +45,7 @@ const IMAGE_ASSETS: ReadonlyArray<ImageAsset> = [
     key: 'tileset-main',
     url: 'images/tileset-main.png',
     fallbackUrl: 'images/fallbacks/tileset-placeholder.png',
+    frameConfig: { frameWidth: 32, frameHeight: 32 },
   },
   {
     key: 'virtual-controls',
