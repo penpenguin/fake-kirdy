@@ -12,9 +12,9 @@ export interface KirdyInputState {
   hoverPressed: boolean;
 }
 
-const MOVE_SPEED = 160;
-const JUMP_SPEED = 260;
-const HOVER_ASCENT_SPEED = -40;
+const MOVE_SPEED = 20;
+const JUMP_SPEED = 40;
+const HOVER_ASCENT_SPEED = -20;
 const GROUND_VELOCITY_TOLERANCE = 1;
 
 type KirdyAnimationKey =
@@ -75,8 +75,16 @@ export class Kirdy {
       this.grounded = false;
       animationKey = 'kirdy-jump';
     } else if (!this.grounded && input.hoverPressed) {
-      const targetVelocityY = Math.min(bodyVelocity.y, HOVER_ASCENT_SPEED);
-      this.sprite.setVelocityY(targetVelocityY);
+      let targetVelocityY = bodyVelocity.y;
+      if (bodyVelocity.y > 0) {
+        targetVelocityY = HOVER_ASCENT_SPEED;
+      } else if (bodyVelocity.y < HOVER_ASCENT_SPEED) {
+        targetVelocityY = HOVER_ASCENT_SPEED;
+      }
+
+      if (targetVelocityY !== bodyVelocity.y) {
+        this.sprite.setVelocityY(targetVelocityY);
+      }
       this.grounded = false;
       animationKey = 'kirdy-hover';
     } else if (!this.grounded) {
@@ -143,6 +151,7 @@ export function createKirdy(scene: Phaser.Scene, spawn: KirdySpawnConfig) {
   sprite.setIgnoreGravity(false);
   sprite.setFrictionAir(0.02);
   sprite.setName('Kirdy');
+  sprite.setScale?.(0.3);
 
   registerAnimations(scene);
 

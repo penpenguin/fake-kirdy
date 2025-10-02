@@ -10,6 +10,7 @@ const stubFactory = vi.hoisted(() => {
     setVelocityX: vi.fn().mockReturnThis(),
     setVelocityY: vi.fn().mockReturnThis(),
     setVelocity: vi.fn().mockReturnThis(),
+    setScale: vi.fn().mockReturnThis(),
     setCollisionCategory: vi.fn().mockReturnThis(),
     setCollidesWith: vi.fn().mockReturnThis(),
     setOnCollide: vi.fn().mockReturnThis(),
@@ -89,6 +90,7 @@ describe('Kirdy basics', () => {
     expect(sprite.setIgnoreGravity).toHaveBeenCalledWith(false);
     expect(sprite.setFrictionAir).toHaveBeenCalledWith(0.02);
     expect(sprite.setName).toHaveBeenCalledWith('Kirdy');
+    expect(sprite.setScale).toHaveBeenCalledWith(0.3);
   });
 
   it('registers only animations that have available frames', () => {
@@ -145,7 +147,7 @@ describe('Kirdy basics', () => {
       hoverPressed: false,
     });
 
-    expect(sprite.setVelocityX).toHaveBeenCalledWith(-160);
+    expect(sprite.setVelocityX).toHaveBeenCalledWith(-20);
     expect(sprite.setFlipX).toHaveBeenCalledWith(true);
 
     sprite.setVelocityX.mockClear();
@@ -158,7 +160,7 @@ describe('Kirdy basics', () => {
       hoverPressed: false,
     });
 
-    expect(sprite.setVelocityX).toHaveBeenCalledWith(160);
+    expect(sprite.setVelocityX).toHaveBeenCalledWith(20);
     expect(sprite.setFlipX).toHaveBeenCalledWith(false);
   });
 
@@ -192,7 +194,7 @@ describe('Kirdy basics', () => {
       hoverPressed: false,
     });
 
-    expect(sprite.setVelocityY).toHaveBeenCalledWith(-260);
+    expect(sprite.setVelocityY).toHaveBeenCalledWith(-40);
 
     sprite.setVelocityY.mockClear();
     sprite.body.velocity.y = -150;
@@ -224,7 +226,7 @@ describe('Kirdy basics', () => {
       hoverPressed: false,
     });
 
-    expect(sprite.setVelocityY).toHaveBeenCalledWith(-260);
+    expect(sprite.setVelocityY).toHaveBeenCalledWith(-40);
   });
 
   it('reverses downward fall when hovering mid-air', () => {
@@ -240,7 +242,24 @@ describe('Kirdy basics', () => {
       hoverPressed: true,
     });
 
-    expect(sprite.setVelocityY).toHaveBeenCalledWith(-40);
+    expect(sprite.setVelocityY).toHaveBeenCalledWith(-20);
+  });
+
+  it('does not accelerate upward when hovering while already rising', () => {
+    const { scene, sprite } = stubFactory.createScene();
+    const kirdy = createKirdy(scene, { x: 0, y: 0 });
+
+    sprite.setVelocityY.mockClear();
+    sprite.body.velocity.y = -10;
+
+    kirdy.update(0, 16, {
+      left: false,
+      right: false,
+      jumpPressed: false,
+      hoverPressed: true,
+    });
+
+    expect(sprite.setVelocityY).not.toHaveBeenCalled();
   });
 
   it('switches animations based on movement state', () => {
