@@ -9,14 +9,8 @@ import {
   type PlayerAction,
   type InputButtonState,
 } from '../input/PlayerInputManager';
-import {
-  createWabbleBee,
-  createDrontoDurt,
-  type Enemy,
-  type EnemySpawn,
-  type WabbleBeeOptions,
-  type DrontoDurtOptions,
-} from '../enemies';
+import { type EnemySpawn, type WabbleBeeOptions, type DrontoDurtOptions } from '../enemies';
+import { EnemyManager } from '../enemies/EnemyManager';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { AreaManager, AREA_IDS, type AreaManagerSnapshot, type Vector2 } from '../world/AreaManager';
 import { MapOverlay, createMapSummaries } from '../ui/MapOverlay';
@@ -207,13 +201,14 @@ export class GameScene extends Phaser.Scene {
   private inhaleSystem?: InhaleSystem;
   private swallowSystem?: SwallowSystem;
   private abilitySystem?: AbilitySystem;
-  private enemies: Enemy[] = [];
-  private readonly maxActiveEnemies = 3;
-  private readonly enemyClusterLimit = 2;
-  private readonly enemySafetyRadius = 96;
+  private enemyManager?: EnemyManager;
   private readonly enemyCullingPadding = 96;
-  private readonly enemySpawnCooldownMs = 1200;
-  private enemySpawnCooldownRemaining = 0;
+  private readonly enemyManagerConfig = {
+    maxActiveEnemies: 3,
+    enemyClusterLimit: 2,
+    enemySafetyRadius: 96,
+    enemySpawnCooldownMs: 1200,
+  } as const;
   private static readonly PLAYER_SPAWN = { x: 160, y: 360 } as const;
   private physicsSystem?: PhysicsSystem;
   private areaManager?: AreaManager;
@@ -378,6 +373,17 @@ export class GameScene extends Phaser.Scene {
       this.abilitySystem = new AbilitySystem(this, this.kirdy, this.physicsSystem, this.audioManager);
     }
 
+    if (this.inhaleSystem && this.physicsSystem) {
+      this.enemyManager = new EnemyManager({
+        scene: this,
+        inhaleSystem: this.inhaleSystem,
+        physicsSystem: this.physicsSystem,
+        getPlayerPosition: () => this.getPlayerPosition(),
+        getCullingBounds: () => this.getCullingBounds(),
+        config: this.enemyManagerConfig,
+      });
+    }
+
     this.events?.on?.('ability-acquired', this.handleAbilityAcquired, this);
     this.events?.on?.('ability-cleared', this.handleAbilityCleared, this);
     this.events?.on?.('enemy-defeated', this.handleEnemyDefeated, this);
@@ -393,7 +399,8 @@ export class GameScene extends Phaser.Scene {
       this.inhaleSystem = undefined;
       this.swallowSystem = undefined;
       this.abilitySystem = undefined;
-      this.enemies = [];
+      this.enemyManager?.destroy();
+      this.enemyManager = undefined;
       this.physicsSystem = undefined;
       this.areaManager = undefined;
       this.destroyTerrainColliders();
@@ -471,7 +478,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.abilitySystem?.update(snapshot.actions);
-    this.updateEnemies(delta);
+    this.enemyManager?.update(delta);
     this.updateAreaState();
 
     if (this.progressDirty) {
@@ -505,63 +512,11 @@ export class GameScene extends Phaser.Scene {
   }
 
   spawnWabbleBee(spawn: EnemySpawn, options: WabbleBeeOptions = {}) {
-    if (!this.canSpawnEnemy()) {
-      return undefined;
-    }
-
-    const enemy = createWabbleBee(this, spawn, this.withBoundPlayerPosition(options));
-    return this.registerEnemy(enemy);
+    return this.enemyManager?.spawnWabbleBee(spawn, options);
   }
 
   spawnDrontoDurt(spawn: EnemySpawn, options: DrontoDurtOptions = {}) {
-    if (!this.canSpawnEnemy()) {
-      return undefined;
-    }
-
-    const enemy = createDrontoDurt(this, spawn, this.withBoundPlayerPosition(options));
-    return this.registerEnemy(enemy);
-  }
-
-  private registerEnemy<T extends Enemy>(enemy: T): T {
-    this.enemies.push(enemy);
-    this.inhaleSystem?.addInhalableTarget(enemy.sprite);
-    this.beginEnemySpawnCooldown();
-    this.physicsSystem?.registerEnemy(enemy);
-    return enemy;
-  }
-
-  private updateEnemies(delta: number) {
-    this.tickEnemySpawnCooldown(delta);
-
-    if (this.enemies.length === 0) {
-      return;
-    }
-
-    const bounds = this.getCullingBounds();
-
-    this.enemies.forEach((enemy) => {
-      if (enemy.isDefeated()) {
-        return;
-      }
-
-      const position = this.getEnemyPosition(enemy);
-      const inView = bounds ? this.isWithinBounds(position, bounds) : true;
-
-      enemy.sprite.setActive?.(inView);
-      enemy.sprite.setVisible?.(inView);
-
-      if (inView) {
-        enemy.update(delta);
-      }
-    });
-
-    const activeEnemies = this.getActiveEnemies();
-    if (activeEnemies.length !== this.enemies.length) {
-      this.enemies = activeEnemies;
-      this.inhaleSystem?.setInhalableTargets(activeEnemies.map((enemy) => enemy.sprite));
-    }
-
-    this.enforceEnemyDensity();
+    return this.enemyManager?.spawnDrontoDurt(spawn, options);
   }
 
   private updateAreaState() {
@@ -593,70 +548,6 @@ export class GameScene extends Phaser.Scene {
     if (this.mapOverlay?.isVisible()) {
       this.refreshMapOverlay();
     }
-  }
-
-  private canSpawnEnemy() {
-    if (this.enemySpawnCooldownRemaining > 0) {
-      return false;
-    }
-
-    return this.getActiveEnemies().length < this.maxActiveEnemies;
-  }
-
-  private getActiveEnemies() {
-    return this.enemies.filter((enemy) => !enemy.isDefeated());
-  }
-
-  private beginEnemySpawnCooldown() {
-    this.enemySpawnCooldownRemaining = this.enemySpawnCooldownMs;
-  }
-
-  private tickEnemySpawnCooldown(delta: number) {
-    if (this.enemySpawnCooldownRemaining <= 0) {
-      return;
-    }
-
-    this.enemySpawnCooldownRemaining = Math.max(0, this.enemySpawnCooldownRemaining - delta);
-  }
-
-  private enforceEnemyDensity() {
-    const playerPosition = this.getPlayerPosition();
-    if (!playerPosition) {
-      return;
-    }
-
-    const activeEnemies = this.getActiveEnemies();
-    if (activeEnemies.length <= this.enemyClusterLimit) {
-      return;
-    }
-
-    const safetyRadiusSq = this.enemySafetyRadius * this.enemySafetyRadius;
-    const nearbyEnemies = activeEnemies
-      .map((enemy) => ({ enemy, position: this.getEnemyPosition(enemy) }))
-      .map((entry) => ({
-        ...entry,
-        distanceSq: this.getDistanceSquared(entry.position, playerPosition),
-      }))
-      .filter((entry) => entry.distanceSq <= safetyRadiusSq);
-
-    if (nearbyEnemies.length <= this.enemyClusterLimit) {
-      return;
-    }
-
-    nearbyEnemies.sort((a, b) => a.distanceSq - b.distanceSq);
-    const overflow = nearbyEnemies.slice(this.enemyClusterLimit);
-
-    overflow.forEach((entry, index) => {
-      this.disperseEnemy(entry.enemy, playerPosition, index, overflow.length);
-    });
-  }
-
-  private getEnemyPosition(enemy: Enemy) {
-    const sprite = enemy.sprite;
-    return {
-      x: sprite.x ?? sprite.body?.position?.x ?? 0,
-      y: sprite.y ?? sprite.body?.position?.y ?? 0,
-    };
   }
 
   private collectWallTiles(): TerrainTilePlacement[] {
@@ -835,56 +726,6 @@ export class GameScene extends Phaser.Scene {
       right: view.x + view.width + padding,
       top: view.y - padding,
       bottom: view.y + view.height + padding,
-    };
-  }
-
-  private isWithinBounds(position: { x: number; y: number }, bounds: { left: number; right: number; top: number; bottom: number }) {
-    return position.x >= bounds.left && position.x <= bounds.right && position.y >= bounds.top && position.y <= bounds.bottom;
-  }
-
-  private getDistanceSquared(a: { x: number; y: number }, b: { x: number; y: number }) {
-    const dx = a.x - b.x;
-    const dy = a.y - b.y;
-    return dx * dx + dy * dy;
-  }
-
-  private disperseEnemy(enemy: Enemy, origin: { x: number; y: number }, index: number, total: number) {
-    const directions = [
-      { x: 1, y: 0 },
-      { x: -1, y: 0 },
-      { x: 0, y: 1 },
-      { x: 0, y: -1 },
-      { x: Math.SQRT1_2, y: Math.SQRT1_2 },
-      { x: -Math.SQRT1_2, y: Math.SQRT1_2 },
-      { x: Math.SQRT1_2, y: -Math.SQRT1_2 },
-      { x: -Math.SQRT1_2, y: -Math.SQRT1_2 },
-    ];
-
-    const direction = directions[index % directions.length];
-    const angleFallback = (index / Math.max(1, total)) * Math.PI * 2;
-    const dx = direction?.x ?? Math.cos(angleFallback);
-    const dy = direction?.y ?? Math.sin(angleFallback);
-
-    const length = Math.hypot(dx, dy) || 1;
-    const normalizedX = dx / length;
-    const normalizedY = dy / length;
-
-    const newX = origin.x + normalizedX * this.enemySafetyRadius;
-    const newY = origin.y + normalizedY * this.enemySafetyRadius;
-
-    enemy.sprite.setPosition?.(newX, newY);
-  }
-
-  private withBoundPlayerPosition<T extends { getPlayerPosition?: () => { x: number; y: number } | undefined }>(
-    options: T,
-  ): T {
-    if (options.getPlayerPosition) {
-      return options;
-    }
-
-    return {
-      ...options,
-      getPlayerPosition: () => this.getPlayerPosition(),
     };
   }
 

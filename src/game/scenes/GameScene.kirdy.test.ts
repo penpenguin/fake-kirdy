@@ -852,7 +852,8 @@ describe('GameScene player integration', () => {
     scene.create();
 
     const firstEnemy = scene.spawnWabbleBee({ x: 48, y: 48 });
-    (scene as any).enemySpawnCooldownRemaining = 0;
+    scene.update(0, 600);
+    scene.update(600, 600);
     const secondEnemy = scene.spawnWabbleBee({ x: 400, y: 400 });
 
     if (!firstEnemy || !secondEnemy) {
