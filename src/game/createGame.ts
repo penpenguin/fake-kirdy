@@ -19,6 +19,7 @@ export function createGame(parent: HTMLElement, options: CreateGameOptions = {})
     parent,
     width: DEFAULT_WIDTH,
     height: DEFAULT_HEIGHT,
+    backgroundColor: 0x808080,
     scene: coreScenes,
     physics: {
       default: 'matter',

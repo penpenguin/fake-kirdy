@@ -82,6 +82,13 @@ describe('createGame', () => {
     expect(config.scene).toBeDefined();
   });
 
+  it('デフォルトで背景色をグレーに設定する', () => {
+    createGame(container);
+
+    const config = (PhaserGameMock as any).lastConfig;
+    expect(config.backgroundColor).toBe(0x808080);
+  });
+
   it('registers the core scenes by default', () => {
     createGame(container);
 
