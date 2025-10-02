@@ -429,6 +429,65 @@ describe('Scene registration', () => {
     expect(audioManagerStubs.toggleMute).toHaveBeenCalled();
   });
 
+  it('ゲームシーンは壁タイルのフレームが存在しない場合に矩形描画へフォールバックする', () => {
+    const gameScene = new GameScene();
+
+    const tileMap = {
+      columns: 1,
+      rows: 1,
+      tileSize: 32,
+      getTileAt: vi.fn(() => 'wall'),
+    };
+
+    const areaManager = {
+      getCurrentAreaState: vi.fn(() => ({ tileMap })),
+    };
+    (gameScene as any).areaManager = areaManager;
+
+    const placements = (gameScene as any).collectWallTiles();
+    expect(placements).toHaveLength(1);
+    tileMap.getTileAt.mockClear();
+
+    const texture = {
+      getFrameNames: vi.fn(() => []),
+      frames: {},
+    };
+    const textures = gameScene.textures as any;
+    textures.exists = vi.fn(() => true);
+    asMock(textures.get).mockReturnValue(texture as any);
+
+    const rectangleVisual = {
+      setOrigin: vi.fn().mockReturnThis(),
+      setDepth: vi.fn().mockReturnThis(),
+      setDisplaySize: vi.fn().mockReturnThis(),
+      setVisible: vi.fn().mockReturnThis(),
+      destroy: vi.fn(),
+    };
+    const imageVisual = {
+      ...rectangleVisual,
+      setFrame: vi.fn(() => {
+        throw new Error('missing frame');
+      }),
+    };
+    expect('setFrame' in imageVisual).toBe(true);
+
+    const addImage = vi.fn(() => imageVisual);
+    const addRectangle = vi.fn(() => rectangleVisual);
+
+    const addFactory = (gameScene as unknown as { add: Record<string, any> }).add;
+    addFactory.image = addImage;
+    addFactory.rectangle = addRectangle;
+
+    expect(addFactory.image).toBe(addImage);
+
+    expect(() => (gameScene as any).buildTerrainVisuals()).not.toThrow();
+    expect(addImage).not.toHaveBeenCalled();
+    expect(addRectangle).toHaveBeenCalledTimes(1);
+    expect(rectangleVisual.setOrigin).toHaveBeenCalledWith(0.5, 0.5);
+    expect(tileMap.getTileAt).toHaveBeenCalledTimes(1);
+    expect((gameScene as any).terrainTiles).toHaveLength(1);
+  });
+
   it('terrain colliders register as matter game objects so physics callbacks can resolve gameObject references', () => {
     const gameScene = new GameScene();
 

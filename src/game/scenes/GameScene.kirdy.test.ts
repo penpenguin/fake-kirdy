@@ -61,6 +61,18 @@ const stubs = vi.hoisted(() => {
     },
   };
 
+  const terrainTexture = {
+    hasFrame: vi.fn((frame: string) => frame === 'wall'),
+    getFrame: vi.fn((frame: string) => (frame === 'wall' ? {} : undefined)),
+    getFrameNames: vi.fn(() => ['wall']),
+    frames: { wall: {} },
+  };
+
+  const textures = {
+    exists: vi.fn((key: string) => key === 'tileset-main'),
+    get: vi.fn((key: string) => (key === 'tileset-main' ? terrainTexture : undefined)),
+  };
+
   const cameraStartFollow = vi.fn();
 
   class PhaserSceneMock {
@@ -72,6 +84,7 @@ const stubs = vi.hoisted(() => {
       rectangle: addRectangle,
       image: addImage,
     };
+    public textures = textures;
     public cameras = {
       main: {
         worldView: { x: 0, y: 0, width: 800, height: 600 },
@@ -80,7 +93,18 @@ const stubs = vi.hoisted(() => {
     };
   }
 
-  return { keyboard, scenePlugin, matterFactory, events, cameraStartFollow, PhaserSceneMock, addRectangle, addImage };
+  return {
+    keyboard,
+    scenePlugin,
+    matterFactory,
+    events,
+    cameraStartFollow,
+    PhaserSceneMock,
+    addRectangle,
+    addImage,
+    textures,
+    terrainTexture,
+  };
 });
 
 vi.mock('phaser', () => ({

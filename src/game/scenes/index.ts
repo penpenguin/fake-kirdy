@@ -636,6 +636,61 @@ export class GameScene extends Phaser.Scene {
     return placements;
   }
 
+  private hasTerrainFrame(frameKey: string): boolean {
+    const textureManager = this.textures as
+      | {
+          exists?: (key: string) => boolean;
+          get?: (
+            key: string,
+          ) =>
+            | {
+                has?: (name: string) => boolean;
+                hasFrame?: (name: string) => boolean;
+                getFrame?: (name: string) => unknown;
+                getFrameNames?: () => string[];
+                frames?: Record<string, unknown>;
+              }
+            | undefined;
+        }
+      | undefined;
+
+    if (!textureManager) {
+      return false;
+    }
+
+    if (typeof textureManager.exists === 'function' && !textureManager.exists(TERRAIN_TEXTURE_KEY)) {
+      return false;
+    }
+
+    const texture = textureManager.get?.(TERRAIN_TEXTURE_KEY);
+    if (!texture) {
+      return false;
+    }
+
+    if (typeof texture.has === 'function') {
+      return texture.has(frameKey);
+    }
+
+    if (typeof texture.hasFrame === 'function') {
+      return texture.hasFrame(frameKey);
+    }
+
+    if (typeof texture.getFrame === 'function') {
+      return Boolean(texture.getFrame(frameKey));
+    }
+
+    const frameNames =
+      typeof texture.getFrameNames === 'function'
+        ? texture.getFrameNames()
+        : Object.keys(texture.frames ?? {});
+
+    if (!Array.isArray(frameNames) || frameNames.length === 0) {
+      return false;
+    }
+
+    return frameNames.includes(frameKey);
+  }
+
   private buildTerrainVisuals() {
     this.destroyTerrainVisuals();
 
@@ -649,11 +704,24 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
+    const terrainFrameAvailable = this.hasTerrainFrame(TERRAIN_FRAME_KEYS.wall);
+
     placements.forEach(({ centerX, centerY, tileSize }) => {
       let visual: Phaser.GameObjects.Image | Phaser.GameObjects.Rectangle | undefined =
-        displayFactory.image?.(centerX, centerY, TERRAIN_TEXTURE_KEY, TERRAIN_FRAME_KEYS.wall) as
-          | Phaser.GameObjects.Image
-          | undefined;
+        undefined;
+
+      if (terrainFrameAvailable) {
+        try {
+          visual = displayFactory.image?.(
+            centerX,
+            centerY,
+            TERRAIN_TEXTURE_KEY,
+            TERRAIN_FRAME_KEYS.wall,
+          ) as Phaser.GameObjects.Image | undefined;
+        } catch (_error) {
+          visual = undefined;
+        }
+      }
 
       if (!visual && displayFactory.rectangle) {
         visual = displayFactory.rectangle(centerX, centerY, tileSize, tileSize, 0x4a4a4a, 1) as
@@ -668,7 +736,7 @@ export class GameScene extends Phaser.Scene {
       visual.setOrigin?.(0.5, 0.5);
       visual.setDepth?.(TERRAIN_VISUAL_DEPTH);
       visual.setDisplaySize?.(tileSize, tileSize);
-      if ('setFrame' in visual) {
+      if (terrainFrameAvailable && 'setFrame' in visual) {
         (visual as Phaser.GameObjects.Image).setFrame?.(TERRAIN_FRAME_KEYS.wall);
       }
       visual.setVisible?.(true);
