@@ -99,12 +99,28 @@ export class Kirdy {
       return;
     }
 
-    if (this.currentAnimation === key) {
+    let targetKey: KirdyAnimationKey = key;
+
+    const animationManager = this.sprite.anims.animationManager;
+    if (animationManager?.exists) {
+      const hasTarget = animationManager.exists(targetKey);
+      const fallbackKey: KirdyAnimationKey = 'kirdy-idle';
+
+      if (!hasTarget) {
+        if (targetKey !== fallbackKey && animationManager.exists(fallbackKey)) {
+          targetKey = fallbackKey;
+        } else {
+          return;
+        }
+      }
+    }
+
+    if (this.currentAnimation === targetKey) {
       return;
     }
 
-    this.sprite.anims.play(key, true);
-    this.currentAnimation = key;
+    this.sprite.anims.play(targetKey, true);
+    this.currentAnimation = targetKey;
   }
 
   setMouthContent(target?: Phaser.Physics.Matter.Sprite) {
@@ -117,7 +133,9 @@ export class Kirdy {
 }
 
 export function createKirdy(scene: Phaser.Scene, spawn: KirdySpawnConfig) {
-  const sprite = scene.matter.add.sprite(spawn.x, spawn.y, 'kirdy', undefined, {
+  const textureKey = resolvePrimaryTextureKey(scene);
+
+  const sprite = scene.matter.add.sprite(spawn.x, spawn.y, textureKey, undefined, {
     label: 'kirdy-body',
   });
 
@@ -132,14 +150,19 @@ export function createKirdy(scene: Phaser.Scene, spawn: KirdySpawnConfig) {
 }
 
 function registerAnimations(scene: Phaser.Scene) {
-  const animations: Array<{ key: KirdyAnimationKey; frameRate: number; repeat: number }> = [
-    { key: 'kirdy-idle', frameRate: 6, repeat: -1 },
-    { key: 'kirdy-run', frameRate: 12, repeat: -1 },
-    { key: 'kirdy-jump', frameRate: 0, repeat: 0 },
-    { key: 'kirdy-hover', frameRate: 8, repeat: -1 },
-    { key: 'kirdy-inhale', frameRate: 10, repeat: -1 },
-    { key: 'kirdy-swallow', frameRate: 12, repeat: 0 },
-    { key: 'kirdy-spit', frameRate: 12, repeat: 0 },
+  const animations: Array<{
+    key: KirdyAnimationKey;
+    frameRate: number;
+    repeat: number;
+    textureCandidates: string[];
+  }> = [
+    { key: 'kirdy-idle', frameRate: 6, repeat: -1, textureCandidates: ['kirdy', 'kirdy-idle'] },
+    { key: 'kirdy-run', frameRate: 12, repeat: -1, textureCandidates: ['kirdy-run', 'kirdy'] },
+    { key: 'kirdy-jump', frameRate: 0, repeat: 0, textureCandidates: ['kirdy-jump', 'kirdy'] },
+    { key: 'kirdy-hover', frameRate: 8, repeat: -1, textureCandidates: ['kirdy-hover', 'kirdy'] },
+    { key: 'kirdy-inhale', frameRate: 10, repeat: -1, textureCandidates: ['kirdy-inhale', 'kirdy'] },
+    { key: 'kirdy-swallow', frameRate: 12, repeat: 0, textureCandidates: ['kirdy-swallow', 'kirdy'] },
+    { key: 'kirdy-spit', frameRate: 12, repeat: 0, textureCandidates: ['kirdy-spit', 'kirdy'] },
   ];
 
   animations.forEach((config) => {
@@ -147,11 +170,79 @@ function registerAnimations(scene: Phaser.Scene) {
       return;
     }
 
+    const frames = resolveFrames(scene, config.textureCandidates);
+    if (frames.length === 0) {
+      return;
+    }
+
     scene.anims?.create?.({
       key: config.key,
-      frames: [],
+      frames,
       frameRate: config.frameRate,
       repeat: config.repeat,
     });
   });
+}
+
+function resolveFrames(
+  scene: Phaser.Scene,
+  textureCandidates: string[],
+): Phaser.Types.Animations.AnimationFrame[] {
+  const textures = (scene as any).textures;
+  if (!textures) {
+    return [];
+  }
+
+  for (const candidate of textureCandidates) {
+    if (typeof textures.exists === 'function' && !textures.exists(candidate)) {
+      continue;
+    }
+
+    const texture = textures.get?.(candidate);
+    if (!texture) {
+      continue;
+    }
+
+    const frameNamesSource =
+      typeof texture.getFrameNames === 'function'
+        ? texture.getFrameNames()
+        : Object.keys(texture.frames ?? {});
+
+    const frameNames = Array.isArray(frameNamesSource) ? [...frameNamesSource] : [];
+
+    if (frameNames.length === 0 && texture.frames && texture.frames.__BASE) {
+      frameNames.push('__BASE');
+    }
+
+    const uniqueNames: string[] = [];
+    const seen = new Set<string>();
+
+    frameNames.forEach((name) => {
+      if (typeof name === 'string' && name.length > 0 && !seen.has(name)) {
+        seen.add(name);
+        uniqueNames.push(name);
+      }
+    });
+
+    if (uniqueNames.length === 0) {
+      continue;
+    }
+
+    return uniqueNames.map((frame) => ({ key: candidate, frame }));
+  }
+
+  return [];
+}
+
+function resolvePrimaryTextureKey(scene: Phaser.Scene): string {
+  const textures = (scene as any).textures;
+  if (textures?.exists?.('kirdy')) {
+    return 'kirdy';
+  }
+
+  if (textures?.exists?.('kirdy-idle')) {
+    return 'kirdy-idle';
+  }
+
+  return 'kirdy';
 }

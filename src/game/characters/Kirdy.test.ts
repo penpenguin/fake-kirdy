@@ -20,6 +20,9 @@ const stubFactory = vi.hoisted(() => {
       isPlaying: false,
       currentAnim: { key: '' },
       stop: vi.fn(),
+      animationManager: {
+        exists: vi.fn().mockReturnValue(true),
+      },
     },
     body: {
       velocity: { x: 0, y: 0 },
@@ -38,14 +41,20 @@ const stubFactory = vi.hoisted(() => {
       exists: vi.fn().mockReturnValue(false),
     };
 
+    const textures = {
+      exists: vi.fn().mockReturnValue(false),
+      get: vi.fn(),
+    };
+
     const scene = {
       matter: {
         add: matterAdd,
       },
       anims,
+      textures,
     } as unknown as Phaser.Scene;
 
-    return { scene, sprite, matterAdd, anims };
+    return { scene, sprite, matterAdd, anims, textures };
   };
 
   return { createScene };
@@ -82,19 +91,47 @@ describe('Kirdy basics', () => {
     expect(sprite.setName).toHaveBeenCalledWith('Kirdy');
   });
 
-  it('registers baseline animations when missing', () => {
-    const { scene, anims } = stubFactory.createScene();
+  it('registers only animations that have available frames', () => {
+    const { scene, anims, textures } = stubFactory.createScene();
+
+    textures.exists.mockImplementation((key: string) => key === 'kirdy-idle');
+    textures.get.mockImplementation(() => ({
+      getFrameNames: () => ['__BASE'],
+      frames: { __BASE: {} },
+    }));
 
     createKirdy(scene, { x: 0, y: 0 });
 
-    const keys = anims.create.mock.calls.map(([config]) => config.key);
-    expect(keys).toEqual(expect.arrayContaining([
-      'kirdy-idle',
-      'kirdy-run',
-      'kirdy-jump',
-      'kirdy-hover',
-      'kirdy-inhale',
-    ]));
+    expect(anims.create).toHaveBeenCalledTimes(1);
+    expect(anims.create).toHaveBeenCalledWith(expect.objectContaining({
+      key: 'kirdy-idle',
+    }));
+
+    const idleCall = anims.create.mock.calls.find(([config]) => config.key === 'kirdy-idle');
+    expect(idleCall?.[0].frames).toEqual([
+      expect.objectContaining({ key: 'kirdy-idle', frame: '__BASE' }),
+    ]);
+  });
+
+  it('registers additional animations when their frames are available', () => {
+    const { scene, anims, textures } = stubFactory.createScene();
+
+    textures.exists.mockReturnValue(true);
+    textures.get.mockImplementation((key: string) => ({
+      getFrameNames: () => [`${key}-0`, `${key}-1`],
+      frames: {
+        [`${key}-0`]: {},
+        [`${key}-1`]: {},
+      },
+    }));
+
+    createKirdy(scene, { x: 0, y: 0 });
+
+    const runCall = anims.create.mock.calls.find(([config]) => config.key === 'kirdy-run');
+    expect(runCall?.[0].frames).toEqual([
+      { key: 'kirdy-run', frame: 'kirdy-run-0' },
+      { key: 'kirdy-run', frame: 'kirdy-run-1' },
+    ]);
   });
 
   it('updates horizontal velocity when moving left or right', () => {
@@ -208,6 +245,7 @@ describe('Kirdy basics', () => {
 
   it('switches animations based on movement state', () => {
     const { scene, sprite } = stubFactory.createScene();
+    sprite.anims.animationManager.exists.mockImplementation(() => true);
     const kirdy = createKirdy(scene, { x: 0, y: 0 });
 
     kirdy.update(0, 16, {
@@ -254,6 +292,45 @@ describe('Kirdy basics', () => {
     });
 
     expect(sprite.anims.play).toHaveBeenCalledWith('kirdy-hover', true);
+  });
+
+  it('skips registering animations without available frames', () => {
+    const { scene, anims, textures } = stubFactory.createScene();
+
+    textures.exists.mockImplementation(() => false);
+    textures.get.mockReturnValue({
+      getFrameNames: () => [],
+      frames: {},
+    });
+
+    createKirdy(scene, { x: 0, y: 0 });
+
+    expect(anims.create).not.toHaveBeenCalled();
+  });
+
+  it('falls back to idle animation when target animation is missing', () => {
+    const { scene, sprite, textures } = stubFactory.createScene();
+
+    textures.exists.mockImplementation((key: string) => key === 'kirdy-idle');
+    textures.get.mockReturnValue({
+      getFrameNames: () => ['__BASE'],
+      frames: { __BASE: {} },
+    });
+
+    const kirdy = createKirdy(scene, { x: 0, y: 0 });
+
+    sprite.anims.animationManager.exists.mockImplementation((key: string) => key === 'kirdy-idle');
+
+    sprite.body.velocity.y = 0;
+
+    kirdy.update(0, 16, {
+      left: false,
+      right: true,
+      jumpPressed: false,
+      hoverPressed: false,
+    });
+
+    expect(sprite.anims.play).toHaveBeenCalledWith('kirdy-idle', true);
   });
 
   it('tracks enemies stored in Kirdy\'s mouth for later actions', () => {
