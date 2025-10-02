@@ -345,6 +345,21 @@ describe('Scene registration', () => {
     expect(menuScene.scene.start).toHaveBeenCalledTimes(2);
   });
 
+  it('menu scene surfaces critical error notices when provided via scene data', () => {
+    const menuScene = new MenuScene();
+
+    menuScene.create({ errorMessage: 'テストエラー発生' });
+
+    const addTextMock = asMock(menuScene.add.text);
+    const errorCall = addTextMock.mock.calls.find(([, , text]) =>
+      typeof text === 'string' && text.includes('テストエラー発生'),
+    );
+
+    expect(errorCall).toBeDefined();
+    const [, , , style] = errorCall ?? [];
+    expect(style).toMatchObject({ color: expect.stringContaining('#ff') });
+  });
+
   it('game scene pauses by launching the pause scene overlay', () => {
     const gameScene = new GameScene();
 

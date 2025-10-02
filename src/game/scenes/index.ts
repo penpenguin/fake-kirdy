@@ -20,6 +20,7 @@ import { createAssetManifest, queueAssetManifest, type AssetFallback } from '../
 import { PerformanceMonitor, type PerformanceMetrics } from '../performance/PerformanceMonitor';
 import { recordLowFpsEvent, recordStableFpsEvent } from '../performance/RenderingModePreference';
 import { AudioManager } from '../audio/AudioManager';
+import { ErrorHandler, type GameError } from '../errors/ErrorHandler';
 
 export const SceneKeys = {
   Boot: 'BootScene',
@@ -174,12 +175,27 @@ export class MenuScene extends Phaser.Scene {
     super(buildConfig(SceneKeys.Menu));
   }
 
-  create() {
+  create(data?: { errorMessage?: string }) {
+    const errorMessage = data?.errorMessage?.trim();
+
+    if (errorMessage && this.add?.text) {
+      const notice = this.add.text(0, -48, errorMessage, {
+        fontSize: '20px',
+        color: '#ff6666',
+        wordWrap: { width: 620 },
+      });
+      notice.setOrigin?.(0, 0);
+      notice.setScrollFactor?.(0, 0);
+      notice.setDepth?.(1000);
+    }
+
     if (this.add?.text) {
-      this.add.text(0, 0, 'Press Space or Tap to Start', {
+      const prompt = this.add.text(0, 0, 'Press Space or Tap to Start', {
         fontSize: '24px',
         color: '#ffffff',
       });
+      prompt.setOrigin?.(0, 0);
+      prompt.setScrollFactor?.(0, 0);
     }
 
     const startHandler = () => this.startGame();
@@ -220,6 +236,7 @@ export class GameScene extends Phaser.Scene {
   private readonly playerMaxHP = 6;
   private readonly scorePerEnemy = 100;
   private isGameOver = false;
+  private runtimeErrorCaptured = false;
   private saveManager?: SaveManager;
   private progressDirty = false;
   private lastSavedTileKey?: string;
@@ -460,30 +477,64 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number) {
-    this.performanceMonitor?.update(delta);
-
-    const snapshot = this.playerInput?.update();
-    if (!snapshot) {
+    if (this.runtimeErrorCaptured) {
       return;
     }
 
-    this.latestInput = snapshot;
-    this.kirdy?.update?.(time, delta, snapshot.kirdy);
-    this.inhaleSystem?.update(snapshot.actions);
-    this.swallowSystem?.update(snapshot.actions);
+    try {
+      this.performanceMonitor?.update(delta);
 
-    const payload = this.swallowSystem?.consumeSwallowedPayload();
-    if (payload) {
-      this.abilitySystem?.applySwallowedPayload(payload);
+      const snapshot = this.playerInput?.update();
+      if (!snapshot) {
+        return;
+      }
+
+      this.latestInput = snapshot;
+      this.kirdy?.update?.(time, delta, snapshot.kirdy);
+      this.inhaleSystem?.update(snapshot.actions);
+      this.swallowSystem?.update(snapshot.actions);
+
+      const payload = this.swallowSystem?.consumeSwallowedPayload();
+      if (payload) {
+        this.abilitySystem?.applySwallowedPayload(payload);
+      }
+
+      this.abilitySystem?.update(snapshot.actions);
+      this.enemyManager?.update(delta);
+      this.updateAreaState();
+
+      if (this.progressDirty) {
+        this.persistProgress();
+      }
+    } catch (error) {
+      this.handleRuntimeFailure(error);
+    }
+  }
+
+  private handleRuntimeFailure(error: unknown) {
+    if (this.runtimeErrorCaptured) {
+      return;
     }
 
-    this.abilitySystem?.update(snapshot.actions);
-    this.enemyManager?.update(delta);
-    this.updateAreaState();
+    this.runtimeErrorCaptured = true;
+    ErrorHandler.handleGameError(this.toGameError(error), this);
+  }
 
-    if (this.progressDirty) {
-      this.persistProgress();
+  private toGameError(error: unknown): GameError {
+    if (error && typeof (error as { type?: unknown }).type === 'string') {
+      return error as GameError;
     }
+
+    if (error instanceof Error) {
+      return {
+        type: 'CRITICAL_GAME_ERROR',
+        message: error.message,
+      } satisfies GameError;
+    }
+
+    return {
+      type: 'CRITICAL_GAME_ERROR',
+    } satisfies GameError;
   }
 
   getPlayerInputSnapshot(): PlayerInputSnapshot | undefined {

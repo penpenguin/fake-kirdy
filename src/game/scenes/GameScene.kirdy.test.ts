@@ -311,6 +311,7 @@ vi.mock('../physics/PhysicsSystem', () => ({
 }));
 
 import { GameScene, SceneKeys } from './index';
+import { ErrorHandler } from '../errors/ErrorHandler';
 
 describe('GameScene player integration', () => {
   let defaultAreaState: any;
@@ -846,6 +847,24 @@ describe('GameScene player integration', () => {
     });
 
     expect(renderingPreferenceStubs.recordStableFpsEvent).toHaveBeenCalled();
+  });
+
+  it('ランタイム例外発生時にエラーハンドラへ処理を委譲してクラッシュを防ぐ', () => {
+    const capturedError = { type: 'CRITICAL_GAME_ERROR', message: 'update crash' } as const;
+    playerInputUpdateMock.mockImplementationOnce(() => {
+      throw capturedError;
+    });
+
+    const handleSpy = vi.spyOn(ErrorHandler, 'handleGameError');
+
+    const scene = new GameScene();
+    scene.create();
+
+    expect(() => scene.update(0, 16)).not.toThrow();
+
+    expect(handleSpy).toHaveBeenCalledWith(capturedError, scene);
+
+    handleSpy.mockRestore();
   });
 
   it('画面外の敵を一時的に非アクティブ化し、戻った際に復帰させる', () => {
