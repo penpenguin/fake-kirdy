@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import type { AbilityType } from '../mechanics/AbilitySystem';
 
 export interface KirdySpawnConfig {
   x: number;
@@ -12,10 +13,27 @@ export interface KirdyInputState {
   hoverPressed: boolean;
 }
 
+export interface KirdyOptions {
+  maxHP?: number;
+  initialHP?: number;
+  score?: number;
+  ability?: AbilityType;
+}
+
+export interface KirdyStatsSnapshot {
+  hp: number;
+  maxHP: number;
+  score: number;
+  ability?: AbilityType;
+}
+
+export type KirdyMoveDirection = 'left' | 'right' | 'none';
+
 const MOVE_SPEED = 20;
 const JUMP_SPEED = 40;
 const HOVER_ASCENT_SPEED = -20;
 const GROUND_VELOCITY_TOLERANCE = 1;
+const DEFAULT_MAX_HP = 6;
 
 type KirdyAnimationKey =
   | 'kirdy-idle'
@@ -32,74 +50,210 @@ export class Kirdy {
   private grounded = false;
   private currentAnimation?: string;
   private mouthContent?: Phaser.Physics.Matter.Sprite;
+  private hitPoints: number;
+  private maxHitPoints: number;
+  private score: number;
+  private currentAbility?: AbilityType;
+  private hovering = false;
 
-  constructor(sprite: Phaser.Physics.Matter.Sprite) {
+  constructor(sprite: Phaser.Physics.Matter.Sprite, options: KirdyOptions = {}) {
     this.sprite = sprite;
+    const normalizedMax = normalizePositive(options.maxHP ?? DEFAULT_MAX_HP, DEFAULT_MAX_HP);
+    this.maxHitPoints = normalizedMax;
+    this.hitPoints = clampInt(options.initialHP ?? normalizedMax, 0, normalizedMax);
+    this.score = Math.max(0, Math.floor(options.score ?? 0));
+    this.currentAbility = options.ability;
+    if (this.currentAbility) {
+      this.sprite.setData?.('equippedAbility', this.currentAbility);
+    }
   }
 
   update(_time: number, _delta: number, input: KirdyInputState) {
+    const direction = this.resolveMoveDirection(input);
     const bodyVelocity = this.sprite.body?.velocity ?? { x: 0, y: 0 };
 
-    const movingLeft = input.left && !input.right;
-    const movingRight = input.right && !input.left;
+    this.move(direction);
+    this.refreshGroundedState(bodyVelocity);
 
+    const wantsToJump = input.jumpPressed && !this.previousJumpPressed;
+
+    if (wantsToJump) {
+      const jumped = this.jump();
+      if (jumped) {
+        this.previousJumpPressed = input.jumpPressed;
+        return;
+      }
+    }
+
+    if (!this.grounded && input.hoverPressed) {
+      this.startHover();
+    } else {
+      this.stopHover();
+    }
+
+    if (this.hovering) {
+      this.playAnimation('kirdy-hover');
+    } else if (!this.grounded) {
+      this.playAnimation('kirdy-jump');
+    } else if (direction !== 'none') {
+      this.playAnimation('kirdy-run');
+    } else {
+      this.playAnimation('kirdy-idle');
+    }
+
+    this.previousJumpPressed = input.jumpPressed;
+  }
+
+  move(direction: KirdyMoveDirection) {
     let velocityX = 0;
-    if (movingLeft) {
+    if (direction === 'left') {
       velocityX = -MOVE_SPEED;
       this.sprite.setFlipX(true);
-    } else if (movingRight) {
+    } else if (direction === 'right') {
       velocityX = MOVE_SPEED;
       this.sprite.setFlipX(false);
     }
 
     this.sprite.setVelocityX(velocityX);
+    return velocityX;
+  }
 
-    const isNearlyStationaryVertically = Math.abs(bodyVelocity.y) <= GROUND_VELOCITY_TOLERANCE;
-    if (isNearlyStationaryVertically && bodyVelocity.y === 0) {
-      this.grounded = true;
+  jump() {
+    if (!this.isGrounded()) {
+      return false;
     }
 
-    if (!isNearlyStationaryVertically && bodyVelocity.y < 0) {
-      this.grounded = false;
+    this.sprite.setVelocityY(-JUMP_SPEED);
+    this.grounded = false;
+    this.hovering = false;
+    this.playAnimation('kirdy-jump');
+    return true;
+  }
+
+  startHover() {
+    const bodyVelocity = this.sprite.body?.velocity ?? { x: 0, y: 0 };
+    let targetVelocityY = bodyVelocity.y;
+
+    if (bodyVelocity.y > 0) {
+      targetVelocityY = HOVER_ASCENT_SPEED;
+    } else if (bodyVelocity.y < HOVER_ASCENT_SPEED) {
+      targetVelocityY = HOVER_ASCENT_SPEED;
     }
 
-    if (bodyVelocity.y > GROUND_VELOCITY_TOLERANCE) {
-      this.grounded = false;
+    if (targetVelocityY !== bodyVelocity.y) {
+      this.sprite.setVelocityY(targetVelocityY);
     }
 
-    const wantsToJump = input.jumpPressed && !this.previousJumpPressed;
-    let animationKey: KirdyAnimationKey | undefined;
+    this.grounded = false;
+    this.hovering = true;
+    this.playAnimation('kirdy-hover');
+  }
 
-    if (wantsToJump && this.grounded) {
-      this.sprite.setVelocityY(-JUMP_SPEED);
-      this.grounded = false;
-      animationKey = 'kirdy-jump';
-    } else if (!this.grounded && input.hoverPressed) {
-      let targetVelocityY = bodyVelocity.y;
-      if (bodyVelocity.y > 0) {
-        targetVelocityY = HOVER_ASCENT_SPEED;
-      } else if (bodyVelocity.y < HOVER_ASCENT_SPEED) {
-        targetVelocityY = HOVER_ASCENT_SPEED;
-      }
+  stopHover() {
+    this.hovering = false;
+  }
 
-      if (targetVelocityY !== bodyVelocity.y) {
-        this.sprite.setVelocityY(targetVelocityY);
-      }
-      this.grounded = false;
-      animationKey = 'kirdy-hover';
-    } else if (!this.grounded) {
-      animationKey = 'kirdy-jump';
-    } else if (velocityX !== 0) {
-      animationKey = 'kirdy-run';
+  inhale() {
+    this.playAnimation('kirdy-inhale');
+  }
+
+  swallow() {
+    this.playAnimation('kirdy-swallow');
+  }
+
+  spit() {
+    this.playAnimation('kirdy-spit');
+  }
+
+  useAbility() {
+    return this.currentAbility;
+  }
+
+  getHP() {
+    return this.hitPoints;
+  }
+
+  getMaxHP() {
+    return this.maxHitPoints;
+  }
+
+  setHP(value: number) {
+    this.hitPoints = clampInt(value, 0, this.maxHitPoints);
+    return this.hitPoints;
+  }
+
+  setMaxHP(value: number) {
+    this.maxHitPoints = normalizePositive(value, this.maxHitPoints);
+    if (this.hitPoints > this.maxHitPoints) {
+      this.hitPoints = this.maxHitPoints;
+    }
+    return this.maxHitPoints;
+  }
+
+  takeDamage(amount: number) {
+    const normalized = Math.max(0, Math.floor(amount));
+    if (normalized <= 0) {
+      return this.hitPoints;
+    }
+
+    this.hitPoints = Math.max(0, this.hitPoints - normalized);
+    return this.hitPoints;
+  }
+
+  heal(amount: number) {
+    const normalized = Math.max(0, Math.floor(amount));
+    if (normalized <= 0) {
+      return this.hitPoints;
+    }
+
+    this.hitPoints = Math.min(this.maxHitPoints, this.hitPoints + normalized);
+    return this.hitPoints;
+  }
+
+  addScore(amount: number) {
+    const normalized = Math.max(0, Math.floor(amount));
+    if (normalized <= 0) {
+      return this.score;
+    }
+
+    this.score += normalized;
+    return this.score;
+  }
+
+  setScore(value: number) {
+    this.score = Math.max(0, Math.floor(value));
+    return this.score;
+  }
+
+  getScore() {
+    return this.score;
+  }
+
+  setAbility(ability?: AbilityType) {
+    this.currentAbility = ability;
+    if (ability) {
+      this.sprite.setData?.('equippedAbility', ability);
     } else {
-      animationKey = 'kirdy-idle';
+      this.sprite.setData?.('equippedAbility', undefined);
     }
+    return this.currentAbility;
+  }
 
-    if (animationKey) {
-      this.playAnimation(animationKey);
-    }
+  clearAbility() {
+    this.setAbility(undefined);
+  }
 
-    this.previousJumpPressed = input.jumpPressed;
+  getAbility() {
+    return this.currentAbility;
+  }
+
+  toStatsSnapshot(): KirdyStatsSnapshot {
+    return {
+      hp: this.hitPoints,
+      maxHP: this.maxHitPoints,
+      score: this.score,
+      ability: this.currentAbility,
+    };
   }
 
   private playAnimation(key: KirdyAnimationKey) {
@@ -138,9 +292,61 @@ export class Kirdy {
   getMouthContent() {
     return this.mouthContent;
   }
+
+  private resolveMoveDirection(input: KirdyInputState): KirdyMoveDirection {
+    if (input.left && !input.right) {
+      return 'left';
+    }
+
+    if (input.right && !input.left) {
+      return 'right';
+    }
+
+    return 'none';
+  }
+
+  private refreshGroundedState(bodyVelocity: { x: number; y: number }) {
+    const physicsGrounded = this.sprite.getData?.('isGrounded');
+    if (physicsGrounded === true) {
+      this.grounded = true;
+      this.hovering = false;
+      return;
+    }
+
+    if (physicsGrounded === false) {
+      this.grounded = false;
+    }
+
+    const isNearlyStationaryVertically = Math.abs(bodyVelocity.y) <= GROUND_VELOCITY_TOLERANCE;
+    if (isNearlyStationaryVertically && bodyVelocity.y === 0) {
+      this.grounded = true;
+      this.hovering = false;
+      return;
+    }
+
+    if (!isNearlyStationaryVertically && bodyVelocity.y < 0) {
+      this.grounded = false;
+      return;
+    }
+
+    if (bodyVelocity.y > GROUND_VELOCITY_TOLERANCE) {
+      this.grounded = false;
+    }
+  }
+
+  private isGrounded() {
+    const physicsGrounded = this.sprite.getData?.('isGrounded');
+    if (physicsGrounded === true) {
+      this.grounded = true;
+    } else if (physicsGrounded === false) {
+      this.grounded = false;
+    }
+
+    return this.grounded;
+  }
 }
 
-export function createKirdy(scene: Phaser.Scene, spawn: KirdySpawnConfig) {
+export function createKirdy(scene: Phaser.Scene, spawn: KirdySpawnConfig, options: KirdyOptions = {}) {
   const textureKey = resolvePrimaryTextureKey(scene);
 
   const sprite = scene.matter.add.sprite(spawn.x, spawn.y, textureKey, undefined, {
@@ -155,7 +361,37 @@ export function createKirdy(scene: Phaser.Scene, spawn: KirdySpawnConfig) {
 
   registerAnimations(scene);
 
-  return new Kirdy(sprite);
+  return new Kirdy(sprite, options);
+}
+
+function clampInt(value: number, min: number, max: number) {
+  if (!Number.isFinite(value)) {
+    return min;
+  }
+
+  const normalized = Math.floor(value);
+  if (normalized < min) {
+    return min;
+  }
+
+  if (normalized > max) {
+    return max;
+  }
+
+  return normalized;
+}
+
+function normalizePositive(value: number, fallback: number) {
+  if (!Number.isFinite(value)) {
+    return Math.max(1, Math.floor(fallback));
+  }
+
+  const normalized = Math.floor(value);
+  if (normalized <= 0) {
+    return Math.max(1, Math.floor(fallback));
+  }
+
+  return normalized;
 }
 
 function registerAnimations(scene: Phaser.Scene) {

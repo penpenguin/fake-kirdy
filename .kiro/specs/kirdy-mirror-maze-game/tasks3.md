@@ -1,6 +1,6 @@
 # 実装問題チェックリスト
 
-- [ ] 1. KirdyキャラクターシステムのAPI差異
+- [x] 1. KirdyキャラクターシステムのAPI差異
   - `Kirdy` クラスがHPや能力を保持せず、`update` 依存の挙動に集約されている。
   - 仕様に示された `move/jump/startHover/inhale/swallow/spit/useAbility` などの明示的メソッドが未提供。
   - プレイヤー体力・スコアが `GameScene` 側に分散し、責務が設計から乖離している。
@@ -29,4 +29,3 @@
   - 仕様に記載の `ErrorHandler.handleGameError` が存在せず、致命的エラー時のメニュー復帰が未対応。
   - BootSceneでのロードリトライ以外の統一的フォールバックがない。
   - 運用要件（安全な状態復帰・ユーザ通知）への準拠が不足している。
-

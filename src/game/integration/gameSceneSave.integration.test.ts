@@ -121,9 +121,21 @@ describe('統合: GameScene と SaveManager', () => {
     const areaManager = new AreaManager(AREA_IDS.CentralHub);
     const playerSprite = new FakeMatterSprite('kirdy').setPosition(320, 192);
 
+    const stats = {
+      hp: 4,
+      maxHP: 6,
+      score: 900,
+      ability: 'ice',
+    } as const;
+
     const kirdyStub = {
       sprite: playerSprite as unknown,
       update: vi.fn(),
+      getHP: vi.fn(() => stats.hp),
+      getMaxHP: vi.fn(() => stats.maxHP),
+      getScore: vi.fn(() => stats.score),
+      getAbility: vi.fn(() => stats.ability),
+      toStatsSnapshot: vi.fn(() => ({ ...stats })),
     };
 
     const playerInputStub = {
@@ -143,9 +155,6 @@ describe('統合: GameScene と SaveManager', () => {
       abilitySystem: { update: vi.fn(), applySwallowedPayload: vi.fn() },
       performanceMonitor: { update: vi.fn() },
       enemies: [],
-      playerHP: 4,
-      playerScore: 900,
-      currentAbility: 'ice',
       progressDirty: true,
     });
 

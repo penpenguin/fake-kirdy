@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { createKirdy, type Kirdy } from '../characters/Kirdy';
+import { createKirdy, type Kirdy, type KirdyOptions } from '../characters/Kirdy';
 import { InhaleSystem } from '../mechanics/InhaleSystem';
 import { AbilitySystem, type AbilityType } from '../mechanics/AbilitySystem';
 import { SwallowSystem, type SwallowedPayload } from '../mechanics/SwallowSystem';
@@ -223,9 +223,6 @@ export class GameScene extends Phaser.Scene {
   private lastAreaSummaryHash?: string;
   private hud?: Hud;
   private readonly playerMaxHP = 6;
-  private playerHP = this.playerMaxHP;
-  private playerScore = 0;
-  private currentAbility?: AbilityType;
   private readonly scorePerEnemy = 100;
   private isGameOver = false;
   private saveManager?: SaveManager;
@@ -243,24 +240,28 @@ export class GameScene extends Phaser.Scene {
   }
 
   private readonly handleAbilityAcquired = (event: { abilityType?: AbilityType }) => {
-    if (!event?.abilityType) {
+    if (!event?.abilityType || !this.kirdy) {
       return;
     }
 
-    this.currentAbility = event.abilityType;
+    this.kirdy.setAbility(event.abilityType);
     this.hud?.updateAbility(event.abilityType);
     this.requestSave();
   };
 
   private readonly handleAbilityCleared = () => {
-    this.currentAbility = undefined;
+    this.kirdy?.clearAbility();
     this.hud?.updateAbility(undefined);
     this.requestSave();
   };
 
   private readonly handleEnemyDefeated = () => {
-    this.playerScore += this.scorePerEnemy;
-    this.hud?.updateScore(this.playerScore);
+    if (!this.kirdy) {
+      return;
+    }
+
+    const updatedScore = this.kirdy.addScore(this.scorePerEnemy);
+    this.hud?.updateScore(updatedScore);
     this.requestSave();
   };
 
@@ -271,10 +272,14 @@ export class GameScene extends Phaser.Scene {
 
     this.isGameOver = true;
     this.scene.pause(SceneKeys.Game);
+    const score = this.kirdy?.getScore() ?? 0;
+    const ability = this.kirdy?.getAbility();
+    const maxHP = this.kirdy?.getMaxHP() ?? this.playerMaxHP;
+
     this.scene.launch(SceneKeys.GameOver, {
-      score: this.playerScore,
-      ability: this.currentAbility,
-      maxHP: this.playerMaxHP,
+      score,
+      ability,
+      maxHP,
     });
     this.requestSave();
   };
@@ -295,7 +300,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   public damagePlayer(amount: number) {
-    if (!Number.isFinite(amount)) {
+    if (!Number.isFinite(amount) || !this.kirdy) {
       return;
     }
 
@@ -304,16 +309,16 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
-    const previous = this.playerHP;
-    this.playerHP = Math.max(0, this.playerHP - normalized);
+    const previous = this.kirdy.getHP();
+    const current = this.kirdy.takeDamage(normalized);
 
-    if (this.playerHP === previous) {
+    if (current === previous) {
       return;
     }
 
-    this.hud?.updateHP({ current: this.playerHP, max: this.playerMaxHP });
+    this.hud?.updateHP({ current, max: this.kirdy.getMaxHP() });
 
-    if (this.playerHP <= 0) {
+    if (current <= 0) {
       this.handlePlayerDefeated();
     }
 
@@ -326,9 +331,6 @@ export class GameScene extends Phaser.Scene {
     this.audioManager = new AudioManager(this);
     this.audioManager.playBgm('bgm-main', { volume: 1 });
 
-    this.playerHP = savedProgress?.player.hp ?? this.playerMaxHP;
-    this.playerScore = savedProgress?.player.score ?? 0;
-    this.currentAbility = undefined;
     this.isGameOver = false;
     this.progressDirty = false;
     this.physicsSystem = new PhysicsSystem(this);
@@ -350,6 +352,13 @@ export class GameScene extends Phaser.Scene {
     this.buildTerrainVisuals();
 
     const spawn = this.determineSpawnPosition();
+    const savedPlayer = savedProgress?.player;
+    const kirdyOptions: KirdyOptions = {
+      maxHP: savedPlayer?.maxHP ?? this.playerMaxHP,
+      initialHP: savedPlayer?.hp ?? savedPlayer?.maxHP ?? this.playerMaxHP,
+      score: savedPlayer?.score ?? 0,
+      ability: savedPlayer?.ability,
+    };
     this.pauseKeyHandler = () => this.pauseGame();
     this.input?.keyboard?.on?.('keydown-ESC', this.pauseKeyHandler);
     this.mapToggleHandler = () => this.toggleMapOverlay();
@@ -357,7 +366,7 @@ export class GameScene extends Phaser.Scene {
       this.input?.keyboard?.on?.('keydown-M', this.mapToggleHandler);
     }
 
-    this.kirdy = createKirdy(this, spawn);
+    this.kirdy = createKirdy(this, spawn, kirdyOptions);
     if (this.kirdy) {
       this.physicsSystem?.registerPlayer(this.kirdy);
       this.configureCamera();
@@ -375,8 +384,6 @@ export class GameScene extends Phaser.Scene {
 
     if (savedProgress?.player.ability) {
       this.abilitySystem?.applySwallowedPayload({ abilityType: savedProgress.player.ability } as SwallowedPayload);
-    } else {
-      this.hud?.updateAbility(undefined);
     }
 
     this.events?.once?.('shutdown', () => {
@@ -406,9 +413,7 @@ export class GameScene extends Phaser.Scene {
       this.events?.off?.('enemy-defeated', this.handleEnemyDefeated, this);
       this.hud?.destroy();
       this.hud = undefined;
-      this.playerHP = this.playerMaxHP;
-      this.playerScore = 0;
-      this.currentAbility = undefined;
+      this.kirdy = undefined;
       this.isGameOver = false;
       this.saveManager = undefined;
       this.progressDirty = false;
@@ -418,8 +423,15 @@ export class GameScene extends Phaser.Scene {
       this.audioManager = undefined;
     });
 
-    this.hud?.updateHP({ current: this.playerHP, max: this.playerMaxHP });
-    this.hud?.updateScore(this.playerScore);
+    if (this.kirdy) {
+      this.hud?.updateHP({ current: this.kirdy.getHP(), max: this.kirdy.getMaxHP() });
+      this.hud?.updateScore(this.kirdy.getScore());
+      this.hud?.updateAbility(this.kirdy.getAbility());
+    } else {
+      this.hud?.updateHP({ current: this.playerMaxHP, max: this.playerMaxHP });
+      this.hud?.updateScore(0);
+      this.hud?.updateAbility(undefined);
+    }
 
     this.initializeExplorationSaveKey();
   }
@@ -987,12 +999,16 @@ export class GameScene extends Phaser.Scene {
     const rawPosition = this.getPlayerPosition() ?? this.areaManager.getLastKnownPlayerPosition();
     const playerPosition = this.clampPositionToArea(rawPosition);
 
+    const playerStats = this.kirdy?.toStatsSnapshot() ?? {
+      hp: this.playerMaxHP,
+      maxHP: this.playerMaxHP,
+      score: 0,
+      ability: undefined,
+    };
+
     const snapshot: GameProgressSnapshot = {
       player: {
-        hp: this.playerHP,
-        maxHP: this.playerMaxHP,
-        score: this.playerScore,
-        ability: this.currentAbility,
+        ...playerStats,
         position: playerPosition,
       },
       area: {

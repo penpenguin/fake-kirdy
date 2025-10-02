@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { AbilityType } from '../mechanics/AbilitySystem';
 
 const stubs = vi.hoisted(() => {
   const keyboard = {
@@ -472,10 +473,95 @@ describe('GameScene player integration', () => {
 
     const sprite = { ...spriteDefaults, ...(overrides.sprite ?? {}) };
 
+    const defaultMaxHP = overrides.maxHP ?? 6;
+    let maxHP = defaultMaxHP;
+    let currentHP = overrides.hp ?? defaultMaxHP;
+    let score = overrides.score ?? 0;
+    let ability: AbilityType | undefined = overrides.ability;
+
     return {
       update: vi.fn(),
       ...overrides,
       sprite,
+      move: overrides.move ?? vi.fn(),
+      jump: overrides.jump ?? vi.fn(() => false),
+      startHover: overrides.startHover ?? vi.fn(() => false),
+      stopHover: overrides.stopHover ?? vi.fn(),
+      takeDamage:
+        overrides.takeDamage ??
+        vi.fn((amount: number) => {
+          const normalized = Math.max(0, Math.floor(amount));
+          if (normalized <= 0) {
+            return currentHP;
+          }
+          currentHP = Math.max(0, currentHP - normalized);
+          return currentHP;
+        }),
+      heal:
+        overrides.heal ??
+        vi.fn((amount: number) => {
+          const normalized = Math.max(0, Math.floor(amount));
+          if (normalized <= 0) {
+            return currentHP;
+          }
+          currentHP = Math.min(maxHP, currentHP + normalized);
+          return currentHP;
+        }),
+      setHP:
+        overrides.setHP ??
+        vi.fn((value: number) => {
+          const normalized = Math.max(0, Math.floor(value));
+          currentHP = Math.min(maxHP, normalized);
+          return currentHP;
+        }),
+      setMaxHP:
+        overrides.setMaxHP ??
+        vi.fn((value: number) => {
+          maxHP = Math.max(1, Math.floor(value));
+          if (currentHP > maxHP) {
+            currentHP = maxHP;
+          }
+          return maxHP;
+        }),
+      getHP: overrides.getHP ?? vi.fn(() => currentHP),
+      getMaxHP: overrides.getMaxHP ?? vi.fn(() => maxHP),
+      addScore:
+        overrides.addScore ??
+        vi.fn((amount: number) => {
+          const normalized = Math.max(0, Math.floor(amount));
+          if (normalized <= 0) {
+            return score;
+          }
+          score += normalized;
+          return score;
+        }),
+      setScore:
+        overrides.setScore ??
+        vi.fn((value: number) => {
+          score = Math.max(0, Math.floor(value));
+          return score;
+        }),
+      getScore: overrides.getScore ?? vi.fn(() => score),
+      setAbility:
+        overrides.setAbility ??
+        vi.fn((next?: AbilityType) => {
+          ability = next;
+          return ability;
+        }),
+      getAbility: overrides.getAbility ?? vi.fn(() => ability),
+      clearAbility:
+        overrides.clearAbility ??
+        vi.fn(() => {
+          ability = undefined;
+        }),
+      toStatsSnapshot:
+        overrides.toStatsSnapshot ??
+        vi.fn(() => ({
+          hp: currentHP,
+          maxHP,
+          score,
+          ability,
+        })),
     };
   }
 
@@ -489,7 +575,7 @@ describe('GameScene player integration', () => {
 
     scene.create();
 
-    expect(createKirdyMock).toHaveBeenCalledWith(scene, defaultAreaState.playerSpawnPosition);
+    expect(createKirdyMock).toHaveBeenCalledWith(scene, defaultAreaState.playerSpawnPosition, expect.anything());
     expect(PlayerInputManagerMock).toHaveBeenCalledWith(scene);
     expect((scene as any).kirdy).toBe(kirdyInstance);
     expect((scene as any).playerInput).toBeDefined();
@@ -881,13 +967,17 @@ describe('GameScene player integration', () => {
     const kirdyInstance = makeKirdyStub();
     createKirdyMock.mockReturnValue(kirdyInstance);
 
+    kirdyInstance.setMaxHP?.(savedSnapshot.player.maxHP);
+    kirdyInstance.setHP?.(savedSnapshot.player.hp);
+    kirdyInstance.setScore?.(savedSnapshot.player.score);
+
     scene.create();
 
     const abilityAcquiredHandler = stubs.events.on.mock.calls.find(([event]) => event === 'ability-acquired')?.[1];
     abilityAcquiredHandler?.({ abilityType: capturedAbility });
 
     expect(saveManagerLoadMock).toHaveBeenCalled();
-    expect(createKirdyMock).toHaveBeenCalledWith(scene, savedSnapshot.area.lastKnownPlayerPosition);
+    expect(createKirdyMock).toHaveBeenCalledWith(scene, savedSnapshot.area.lastKnownPlayerPosition, expect.anything());
     expect(hudUpdateHPMock).toHaveBeenLastCalledWith({ current: 3, max: 6 });
     expect(hudUpdateScoreMock).toHaveBeenCalledWith(450);
     expect(hudUpdateAbilityMock).toHaveBeenCalledWith('ice');
@@ -906,6 +996,8 @@ describe('GameScene player integration', () => {
     saveManagerSaveMock.mockReset();
 
     scene.damagePlayer(2);
+
+    expect(kirdyInstance.takeDamage).toHaveBeenCalledWith(2);
 
     playerInputUpdateMock.mockReturnValue(snapshot);
     scene.update(16, 16);
@@ -1037,7 +1129,8 @@ describe('GameScene player integration', () => {
 
   it('能力イベントを受けてHUDを更新する', () => {
     const scene = new GameScene();
-    createKirdyMock.mockReturnValue(makeKirdyStub());
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
     playerInputUpdateMock.mockReturnValue(createSnapshot());
 
     scene.create();
@@ -1048,6 +1141,7 @@ describe('GameScene player integration', () => {
     abilityAcquiredHandler?.({ abilityType: 'fire' });
 
     expect(hudUpdateAbilityMock).toHaveBeenLastCalledWith('fire');
+    expect(kirdyInstance.setAbility).toHaveBeenCalledWith('fire');
 
     const abilityClearedHandler = stubs.events.on.mock.calls.find(([event]) => event === 'ability-cleared')?.[1];
     expect(abilityClearedHandler).toBeInstanceOf(Function);
@@ -1055,11 +1149,13 @@ describe('GameScene player integration', () => {
     abilityClearedHandler?.({});
 
     expect(hudUpdateAbilityMock).toHaveBeenLastCalledWith(undefined);
+    expect(kirdyInstance.clearAbility).toHaveBeenCalled();
   });
 
   it('敵撃破イベントでスコアを加算してHUDに反映する', () => {
     const scene = new GameScene();
-    createKirdyMock.mockReturnValue(makeKirdyStub());
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
     playerInputUpdateMock.mockReturnValue(createSnapshot());
 
     scene.create();
@@ -1069,9 +1165,11 @@ describe('GameScene player integration', () => {
 
     enemyDefeatedHandler?.({ enemyType: 'wabble-bee' });
     expect(hudUpdateScoreMock).toHaveBeenLastCalledWith(100);
+    expect(kirdyInstance.addScore).toHaveBeenCalledWith(100);
 
     enemyDefeatedHandler?.({ enemyType: 'dronto-durt' });
     expect(hudUpdateScoreMock).toHaveBeenLastCalledWith(200);
+    expect(kirdyInstance.addScore).toHaveBeenLastCalledWith(100);
   });
 
   it('ダメージを受けるとHPを減算しゲームオーバー閾値までHUDを更新する', () => {
