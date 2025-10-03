@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { inflateSync } from 'node:zlib';
 
 import { createAssetManifest, queueAssetManifest } from './pipeline';
 
@@ -24,6 +25,65 @@ function expectCallForAsset(
   expect(call, `Missing loader call for asset ${key}`).toBeDefined();
   expect(call?.[1]).toEqual(expectedSecondArg);
   return call;
+}
+
+const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+
+const PNG_COLOR_CHANNELS: Record<number, number> = {
+  0: 1,
+  2: 3,
+  3: 1,
+  4: 2,
+  6: 4,
+};
+
+function readPngScanlines(absolutePath: string) {
+  const buffer = readFileSync(absolutePath);
+  expect(buffer.subarray(0, 8)).toEqual(PNG_SIGNATURE);
+
+  let offset = 8;
+  let width: number | undefined;
+  let height: number | undefined;
+  let bitDepth: number | undefined;
+  let colorType: number | undefined;
+  const idatChunks: Buffer[] = [];
+
+  while (offset < buffer.length) {
+    const length = buffer.readUInt32BE(offset);
+    offset += 4;
+    const type = buffer.subarray(offset, offset + 4).toString('ascii');
+    offset += 4;
+    const chunk = buffer.subarray(offset, offset + length);
+    offset += length;
+    offset += 4; // Skip CRC
+
+    if (type === 'IHDR') {
+      width = chunk.readUInt32BE(0);
+      height = chunk.readUInt32BE(4);
+      bitDepth = chunk.readUInt8(8);
+      colorType = chunk.readUInt8(9);
+    } else if (type === 'IDAT') {
+      idatChunks.push(chunk);
+    } else if (type === 'IEND') {
+      break;
+    }
+  }
+
+  expect(width).toBeDefined();
+  expect(height).toBeDefined();
+  expect(bitDepth).toBeDefined();
+  expect(colorType).toBeDefined();
+
+  const compressed = Buffer.concat(idatChunks);
+  const scanlines = inflateSync(compressed);
+
+  return {
+    width: width!,
+    height: height!,
+    bitDepth: bitDepth!,
+    colorType: colorType!,
+    scanlines,
+  } as const;
 }
 
 describe('asset pipeline manifest', () => {
@@ -172,5 +232,42 @@ describe('asset pipeline manifest', () => {
     manifest.data
       .filter((asset) => asset.fallbackUrl)
       .forEach((asset) => expectFallbackExists(`assets/${asset.fallbackUrl}`));
+  });
+
+  describe('image asset payload integrity', () => {
+    const manifest = createAssetManifest();
+    const baseDir = resolve(
+      dirname(fileURLToPath(import.meta.url)),
+      '../../../public/assets',
+    );
+
+    const imageEntries = [
+      ...manifest.images.map((asset) => ({
+        label: asset.key,
+        relativePath: asset.url,
+      })),
+      ...manifest.images
+        .filter((asset) => asset.fallbackUrl)
+        .map((asset) => ({
+          label: `${asset.key} fallback`,
+          relativePath: asset.fallbackUrl!,
+        })),
+    ];
+
+    it.each(imageEntries)('%s PNG scanlines match header metadata', ({ label, relativePath }) => {
+      const absolutePath = resolve(baseDir, relativePath);
+      const png = readPngScanlines(absolutePath);
+      const channels = PNG_COLOR_CHANNELS[png.colorType];
+
+      if (channels === undefined) {
+        throw new Error(`Unsupported PNG color type ${png.colorType} in ${label}`);
+      }
+
+      const bitsPerPixel = png.bitDepth * channels;
+      const rowBytes = Math.ceil((bitsPerPixel * png.width) / 8);
+      const expectedLength = png.height * (rowBytes + 1);
+
+      expect(png.scanlines.length).toBe(expectedLength);
+    });
   });
 });
