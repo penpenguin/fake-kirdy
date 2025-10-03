@@ -42,6 +42,85 @@ const TOUCH_DEFAULT_STATE: Record<PlayerTouchControl, boolean> = {
   discard: false,
 };
 
+const VIRTUAL_CONTROL_FRAME_SIZE = 96;
+const VIRTUAL_CONTROL_LAYOUT: Record<PlayerTouchControl, { column: number; row: number }> = {
+  left: { column: 0, row: 0 },
+  right: { column: 1, row: 0 },
+  jump: { column: 2, row: 0 },
+  inhale: { column: 3, row: 0 },
+  swallow: { column: 0, row: 1 },
+  spit: { column: 1, row: 1 },
+  discard: { column: 2, row: 1 },
+};
+
+function textureHasFrame(texture: any, frameKey: string) {
+  if (!texture) {
+    return false;
+  }
+
+  if (typeof texture.has === 'function' && texture.has(frameKey)) {
+    return true;
+  }
+
+  if (typeof texture.hasFrame === 'function' && texture.hasFrame(frameKey)) {
+    return true;
+  }
+
+  if (typeof texture.getFrame === 'function' && texture.getFrame(frameKey)) {
+    return true;
+  }
+
+  const candidates = texture.getFrameNames?.() ?? Object.keys(texture.frames ?? {});
+  return candidates.includes(frameKey);
+}
+
+function ensureVirtualControlFrames(texture: any) {
+  if (!texture) {
+    return;
+  }
+
+  const missing = (Object.keys(VIRTUAL_CONTROL_LAYOUT) as PlayerTouchControl[]).filter(
+    (frameKey) => !textureHasFrame(texture, frameKey),
+  );
+
+  if (missing.length === 0) {
+    return;
+  }
+
+  if (typeof texture.add !== 'function') {
+    return;
+  }
+
+  const baseFrame = texture.frames?.__BASE as { width?: number; height?: number } | undefined;
+  const sourceDimensions = Array.isArray((texture as any).source) ? (texture as any).source[0] : undefined;
+  const totalWidth = baseFrame?.width ?? sourceDimensions?.width;
+  const totalHeight = baseFrame?.height ?? sourceDimensions?.height;
+
+  if (typeof totalWidth !== 'number' || typeof totalHeight !== 'number') {
+    return;
+  }
+
+  missing.forEach((frameKey) => {
+    const layout = VIRTUAL_CONTROL_LAYOUT[frameKey];
+    if (!layout) {
+      return;
+    }
+
+    const cutX = layout.column * VIRTUAL_CONTROL_FRAME_SIZE;
+    const cutY = layout.row * VIRTUAL_CONTROL_FRAME_SIZE;
+
+    if (cutX + VIRTUAL_CONTROL_FRAME_SIZE > totalWidth) {
+      return;
+    }
+
+    if (cutY + VIRTUAL_CONTROL_FRAME_SIZE > totalHeight) {
+      return;
+    }
+
+    texture.add(frameKey, 0, cutX, cutY, VIRTUAL_CONTROL_FRAME_SIZE, VIRTUAL_CONTROL_FRAME_SIZE);
+  });
+}
+
 export class PlayerInputManager {
   private keyboard?: Phaser.Input.Keyboard.KeyboardPlugin;
   private keys = new Map<string, KeyLike>();
@@ -200,10 +279,12 @@ export class PlayerInputManager {
     ];
 
     const controlTexture = textures?.get?.('virtual-controls');
+    ensureVirtualControlFrames(controlTexture);
     const availableFrames = controlTexture?.getFrameNames?.() ?? [];
 
     buttons.forEach(({ control, x, y }) => {
-      const frame = availableFrames.includes(control) ? control : undefined;
+      const frameAvailable = availableFrames.includes(control) || textureHasFrame(controlTexture, control);
+      const frame = frameAvailable ? control : undefined;
       const button = scene.add?.image?.(x, y, 'virtual-controls', frame);
       if (!button) {
         return;
@@ -219,7 +300,7 @@ export class PlayerInputManager {
       };
 
       button.setInteractive?.({ useHandCursor: true });
-      if (!availableFrames.includes(control)) {
+      if (!frameAvailable) {
         button.setDisplaySize?.(96, 96);
       } else {
         button.setDisplaySize?.(80, 80);

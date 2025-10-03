@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type Phaser from 'phaser';
-import { PlayerInputManager, type PlayerInputSnapshot } from './PlayerInputManager';
+import {
+  PlayerInputManager,
+  type PlayerInputSnapshot,
+  type PlayerTouchControl,
+} from './PlayerInputManager';
 
 type KeyMock = {
   isDown: boolean;
@@ -35,14 +39,95 @@ type ContainerMock = ContainerStub & {
   destroy: ReturnType<typeof vi.fn>;
 };
 
-type TextureMock = {
-  getFrameNames: ReturnType<typeof vi.fn>;
+type TextureFrame = {
+  name: string;
+  cutX: number;
+  cutY: number;
+  width: number;
+  height: number;
+};
+
+type MockFunction<Params extends any[] = any[], Result = unknown> = ReturnType<
+  typeof vi.fn<Params, Result>
+>;
+
+type ControlTextureStub = {
+  getFrameNames: MockFunction<[], string[]>;
+  has: MockFunction<[name: string], boolean>;
+  hasFrame: MockFunction<[name: string], boolean>;
+  getFrame: MockFunction<[name: string], TextureFrame | undefined>;
+  add: MockFunction<
+    [name: string, sourceIndex: number, cutX: number, cutY: number, width: number, height: number],
+    TextureFrame
+  >;
+  frames: Record<string, TextureFrame>;
+  source: Array<{ width: number; height: number }>;
 };
 
 type TextureManagerStub = {
   exists: ReturnType<typeof vi.fn>;
   get: ReturnType<typeof vi.fn>;
 };
+
+const REQUIRED_CONTROL_FRAMES: PlayerTouchControl[] = [
+  'left',
+  'right',
+  'jump',
+  'inhale',
+  'swallow',
+  'spit',
+  'discard',
+];
+
+function createControlTextureStub(options?: { initialFrames?: PlayerTouchControl[] }): ControlTextureStub {
+  const frameSize = 96;
+  const columns = 4;
+  const rows = 2;
+  const width = frameSize * columns;
+  const height = frameSize * rows;
+  const initialFrames = options?.initialFrames ?? REQUIRED_CONTROL_FRAMES;
+
+  const frameSet = new Set<string>(initialFrames);
+  const frames: Record<string, TextureFrame> = {
+    __BASE: { name: '__BASE', cutX: 0, cutY: 0, width, height },
+  };
+
+  initialFrames.forEach((frame, index) => {
+    const column = index % columns;
+    const row = Math.floor(index / columns);
+    frames[frame] = {
+      name: frame,
+      cutX: column * frameSize,
+      cutY: row * frameSize,
+      width: frameSize,
+      height: frameSize,
+    };
+  });
+
+  const add = vi.fn<
+    [string, number, number, number, number, number],
+    TextureFrame
+  >((name, _sourceIndex, cutX, cutY, widthArg, heightArg) => {
+    frameSet.add(name);
+    frames[name] = { name, cutX, cutY, width: widthArg, height: heightArg };
+    return frames[name];
+  });
+
+  const getFrameNames = vi.fn<[], string[]>(() => Array.from(frameSet));
+  const has = vi.fn<[string], boolean>((name) => frameSet.has(name));
+  const hasFrame = vi.fn<[string], boolean>((name) => frameSet.has(name));
+  const getFrame = vi.fn<[string], TextureFrame | undefined>((name) => frames[name]);
+
+  return {
+    getFrameNames,
+    has,
+    hasFrame,
+    getFrame,
+    add,
+    frames,
+    source: [{ width, height }],
+  };
+}
 
 interface SceneStub {
   input: { keyboard: KeyboardStub };
@@ -66,10 +151,10 @@ type SceneFactoryResult = {
     destroy: ReturnType<typeof vi.fn>;
   }>;
   container?: ContainerMock;
-  controlTexture: TextureMock;
+  controlTexture: ControlTextureStub;
 };
 
-function createSceneStub(): SceneFactoryResult {
+function createSceneStub(options?: { initialControlFrames?: PlayerTouchControl[] }): SceneFactoryResult {
   const keyStore: Record<string, KeyMock> = {};
 
   const keyboard: KeyboardStub = {
@@ -85,9 +170,7 @@ function createSceneStub(): SceneFactoryResult {
   const recordedButtons: SceneFactoryResult['recordedButtons'] = [];
   let containerInstance: ContainerMock | undefined;
 
-  const controlTexture: TextureMock = {
-    getFrameNames: vi.fn().mockReturnValue(['left', 'right', 'jump', 'inhale', 'swallow', 'spit', 'discard']),
-  };
+  const controlTexture = createControlTextureStub({ initialFrames: options?.initialControlFrames });
 
   const textures: TextureManagerStub = {
     exists: vi.fn().mockReturnValue(true),
@@ -301,18 +384,24 @@ describe('PlayerInputManager', () => {
     sceneFactory.recordedButtons.forEach((button) => {
       expect(button.setDisplaySize).toHaveBeenCalledWith(80, 80);
       expect(button.setName).toHaveBeenCalledWith(expect.stringMatching(/^touch-/));
+      expect(button.control).toBeDefined();
     });
   });
 
-  it('named frameが無い場合でも仮想ボタンを表示できるよう拡大扱いにする', () => {
-    sceneFactory.controlTexture.getFrameNames.mockReturnValue([]);
+  it('spritesheetメタデータが無くても仮想ボタン用フレームを補完する', () => {
+    sceneFactory = createSceneStub({ initialControlFrames: [] });
 
     createManager();
 
     expect(sceneFactory.recordedButtons).toHaveLength(7);
     sceneFactory.recordedButtons.forEach((button) => {
-      expect(button.control).toBeUndefined();
-      expect(button.setDisplaySize).toHaveBeenCalledWith(96, 96);
+      expect(button.control).toBeDefined();
+      expect(button.setDisplaySize).toHaveBeenCalledWith(80, 80);
+    });
+
+    const addedFrames = sceneFactory.controlTexture.add.mock.calls.map((args) => args[0]);
+    REQUIRED_CONTROL_FRAMES.forEach((frame) => {
+      expect(addedFrames).toContain(frame);
     });
   });
 
