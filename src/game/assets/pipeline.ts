@@ -37,6 +37,58 @@ const DEFAULT_PATH = 'assets/';
 
 const IMAGE_ASSETS: ReadonlyArray<ImageAsset> = [
   {
+    key: 'kirdy',
+    url: 'images/kirdy.png',
+  },
+  {
+    key: 'kirdy-run',
+    url: 'images/kirdy-run.png',
+  },
+  {
+    key: 'kirdy-jump',
+    url: 'images/kirdy-jump.png',
+  },
+  {
+    key: 'kirdy-hover',
+    url: 'images/kirdy-hover.png',
+  },
+  {
+    key: 'kirdy-inhale',
+    url: 'images/kirdy-inhale.png',
+  },
+  {
+    key: 'kirdy-swallow',
+    url: 'images/kirdy-swallow.png',
+  },
+  {
+    key: 'kirdy-spit',
+    url: 'images/kirdy-spit.png',
+  },
+  {
+    key: 'fire-attack',
+    url: 'images/fire-attack.png',
+  },
+  {
+    key: 'ice-attack',
+    url: 'images/ice-attack.png',
+  },
+  {
+    key: 'sword-slash',
+    url: 'images/sword-slash.png',
+  },
+  {
+    key: 'star-bullet',
+    url: 'images/star-bullet.png',
+  },
+  {
+    key: 'wabble-bee',
+    url: 'images/wabble-bee.png',
+  },
+  {
+    key: 'dronto-durt',
+    url: 'images/dronto-durt.png',
+  },
+  {
     key: 'kirdy-idle',
     url: 'images/kirdy-idle.png',
     fallbackUrl: 'images/fallbacks/kirdy-placeholder.png',
