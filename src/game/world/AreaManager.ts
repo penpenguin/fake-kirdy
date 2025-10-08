@@ -67,6 +67,7 @@ interface AreaDerivedData {
   tileMap: TileMap;
   pixelBounds: { width: number; height: number };
   totalWalkableTiles: number;
+  doorDirections: Map<string, AreaTransitionDirection>;
 }
 
 export interface LoadedArea {
@@ -245,7 +246,8 @@ export class AreaManager {
     const areaId = this.currentArea.definition.id;
     this.markExplored(areaId, position);
 
-    const transitionDirection = this.detectBoundaryCross(position);
+    const transitionDirection =
+      this.detectDoorTransition(position) ?? this.detectBoundaryCross(position);
     if (!transitionDirection) {
       return { areaChanged: false };
     }
@@ -367,6 +369,36 @@ export class AreaManager {
     }
 
     return definition.entryPoints.default.position;
+  }
+
+  private detectDoorTransition(position: Vector2): AreaTransitionDirection | undefined {
+    const { definition } = this.currentArea;
+    const derived = this.getAreaDerivedData(definition.id);
+    const coordinate = derived.tileMap.getClampedTileCoordinate(position);
+
+    if (!coordinate) {
+      return undefined;
+    }
+
+    const tile = derived.tileMap.getTileAt(coordinate.column, coordinate.row);
+    if (tile !== 'door') {
+      return undefined;
+    }
+
+    const doorKey = `${coordinate.column},${coordinate.row}`;
+    const direction =
+      derived.doorDirections.get(doorKey) ??
+      inferDoorDirectionForTile(coordinate.column, coordinate.row, derived.tileMap);
+
+    if (!direction) {
+      return undefined;
+    }
+
+    if (!definition.neighbors[direction]) {
+      return undefined;
+    }
+
+    return direction;
   }
 
   private detectBoundaryCross(position: Vector2): AreaTransitionDirection | undefined {
@@ -512,15 +544,59 @@ export class AreaManager {
     }
 
     const tileMap = new TileMap(definition.layout, definition.tileSize);
+    const doorDirections = new Map<string, AreaTransitionDirection>();
+
+    for (let row = 0; row < tileMap.rows; row += 1) {
+      for (let column = 0; column < tileMap.columns; column += 1) {
+        if (tileMap.getTileAt(column, row) !== 'door') {
+          continue;
+        }
+
+        const direction = inferDoorDirectionForTile(column, row, tileMap);
+        if (!direction) {
+          continue;
+        }
+
+        doorDirections.set(`${column},${row}`, direction);
+      }
+    }
+
     const derived: AreaDerivedData = {
       tileMap,
       pixelBounds: { width: tileMap.getPixelWidth(), height: tileMap.getPixelHeight() },
       totalWalkableTiles: tileMap.totalWalkableTiles,
+      doorDirections,
     };
 
     this.areaCache.set(areaId, derived);
     return derived;
   }
+}
+
+function inferDoorDirectionForTile(
+  column: number,
+  row: number,
+  tileMap: TileMap,
+): AreaTransitionDirection | undefined {
+  const edgeOffset = 1;
+
+  if (row <= edgeOffset) {
+    return 'north';
+  }
+
+  if (row >= tileMap.rows - 1 - edgeOffset) {
+    return 'south';
+  }
+
+  if (column <= edgeOffset) {
+    return 'west';
+  }
+
+  if (column >= tileMap.columns - 1 - edgeOffset) {
+    return 'east';
+  }
+
+  return undefined;
 }
 
 function clampToBounds(position: Vector2, bounds: { width: number; height: number }): Vector2 {
@@ -536,21 +612,21 @@ function clampToBounds(position: Vector2, bounds: { width: number; height: numbe
 function createDefaultAreaDefinitions(): AreaDefinition[] {
   const centralHubLayout = [
     '####################',
-    '#..................#',
-    '#..................#',
-    '#....####..####....#',
-    '#..................#',
+    '#.........D........#',
     '#..................#',
     '#....####..####....#',
     '#..................#',
+    '#D................D#',
+    '#....####..####....#',
     '#..................#',
+    '#.........D........#',
     '####################',
   ];
 
   const mirrorCorridorLayout = [
     '####################',
     '#..................#',
-    '#..................#',
+    '#D................D#',
     '#..................#',
     '####################',
   ];
@@ -567,7 +643,7 @@ function createDefaultAreaDefinitions(): AreaDefinition[] {
     '#....##......##....#',
     '#..................#',
     '#..####......####..#',
-    '#..................#',
+    '#.........D........#',
     '####################',
   ];
   const iceAreaWidth = iceAreaLayout[0].length * tileSize;
@@ -575,7 +651,7 @@ function createDefaultAreaDefinitions(): AreaDefinition[] {
 
   const forestAreaLayout = [
     '########################',
-    '#......................#',
+    '#...........D..........#',
     '#..####..######..####..#',
     '#......................#',
     '#..####..######..####..#',
@@ -589,7 +665,7 @@ function createDefaultAreaDefinitions(): AreaDefinition[] {
     '####################',
     '#..................#',
     '#..######..######..#',
-    '#..................#',
+    '#.................D#',
     '#..######..######..#',
     '#..................#',
     '####################',
@@ -601,7 +677,7 @@ function createDefaultAreaDefinitions(): AreaDefinition[] {
     '########################',
     '#......................#',
     '#..####..######..####..#',
-    '#......................#',
+    '#D.....................#',
     '#..####..######..####..#',
     '#......................#',
     '########################',
@@ -622,10 +698,10 @@ function createDefaultAreaDefinitions(): AreaDefinition[] {
     },
     entryPoints: {
       default: { position: { x: centralHubWidth / 2, y: centralHubHeight / 2 } },
-      east: { position: { x: centralHubWidth - tileSize * 2, y: centralHubHeight / 2 } },
+      east: { position: { x: centralHubWidth - tileSize * 3, y: centralHubHeight / 2 } },
       west: { position: { x: tileSize * 2, y: centralHubHeight / 2 } },
       north: { position: { x: centralHubWidth / 2, y: tileSize * 2 } },
-      south: { position: { x: centralHubWidth / 2, y: centralHubHeight - tileSize * 2 } },
+      south: { position: { x: centralHubWidth / 2, y: centralHubHeight - tileSize * 3 } },
     },
   };
 
@@ -641,7 +717,7 @@ function createDefaultAreaDefinitions(): AreaDefinition[] {
     entryPoints: {
       default: { position: { x: mirrorCorridorWidth / 2, y: mirrorCorridorHeight / 2 } },
       west: { position: { x: tileSize * 2, y: mirrorCorridorHeight / 2 } },
-      east: { position: { x: mirrorCorridorWidth - tileSize * 2, y: mirrorCorridorHeight / 2 } },
+      east: { position: { x: mirrorCorridorWidth - tileSize * 3, y: mirrorCorridorHeight / 2 } },
       north: { position: { x: mirrorCorridorWidth / 2, y: tileSize } },
       south: { position: { x: mirrorCorridorWidth / 2, y: mirrorCorridorHeight - tileSize } },
     },
@@ -656,8 +732,8 @@ function createDefaultAreaDefinitions(): AreaDefinition[] {
       south: AREA_IDS.CentralHub,
     },
     entryPoints: {
-      default: { position: { x: iceAreaWidth / 2, y: iceAreaHeight - tileSize * 2 } },
-      south: { position: { x: iceAreaWidth / 2, y: iceAreaHeight - tileSize * 2 } },
+      default: { position: { x: iceAreaWidth / 2, y: iceAreaHeight - tileSize * 3 } },
+      south: { position: { x: iceAreaWidth / 2, y: iceAreaHeight - tileSize * 3 } },
       north: { position: { x: iceAreaWidth / 2, y: tileSize * 2 } },
       east: { position: { x: iceAreaWidth - tileSize * 2, y: iceAreaHeight / 2 } },
       west: { position: { x: tileSize * 2, y: iceAreaHeight / 2 } },
@@ -673,8 +749,8 @@ function createDefaultAreaDefinitions(): AreaDefinition[] {
       north: AREA_IDS.CentralHub,
     },
     entryPoints: {
-      default: { position: { x: forestAreaWidth / 2, y: tileSize } },
-      north: { position: { x: forestAreaWidth / 2, y: tileSize } },
+      default: { position: { x: forestAreaWidth / 2, y: tileSize * 3 } },
+      north: { position: { x: forestAreaWidth / 2, y: tileSize * 3 } },
       south: { position: { x: forestAreaWidth / 2, y: forestAreaHeight - tileSize * 2 } },
       east: { position: { x: forestAreaWidth - tileSize * 2, y: forestAreaHeight / 2 } },
       west: { position: { x: tileSize * 2, y: forestAreaHeight / 2 } },
@@ -690,8 +766,8 @@ function createDefaultAreaDefinitions(): AreaDefinition[] {
       east: AREA_IDS.CentralHub,
     },
     entryPoints: {
-      default: { position: { x: caveAreaWidth - tileSize * 2, y: caveAreaHeight / 2 } },
-      east: { position: { x: caveAreaWidth - tileSize * 2, y: caveAreaHeight / 2 } },
+      default: { position: { x: caveAreaWidth - tileSize * 3, y: caveAreaHeight / 2 } },
+      east: { position: { x: caveAreaWidth - tileSize * 3, y: caveAreaHeight / 2 } },
       west: { position: { x: tileSize * 2, y: caveAreaHeight / 2 } },
       north: { position: { x: caveAreaWidth / 2, y: tileSize * 2 } },
       south: { position: { x: caveAreaWidth / 2, y: caveAreaHeight - tileSize * 2 } },
@@ -709,7 +785,7 @@ function createDefaultAreaDefinitions(): AreaDefinition[] {
     entryPoints: {
       default: { position: { x: tileSize * 2, y: fireAreaHeight / 2 } },
       west: { position: { x: tileSize * 2, y: fireAreaHeight / 2 } },
-      east: { position: { x: fireAreaWidth - tileSize * 2, y: fireAreaHeight / 2 } },
+      east: { position: { x: fireAreaWidth - tileSize * 3, y: fireAreaHeight / 2 } },
       north: { position: { x: fireAreaWidth / 2, y: tileSize } },
       south: { position: { x: fireAreaWidth / 2, y: fireAreaHeight - tileSize * 2 } },
     },

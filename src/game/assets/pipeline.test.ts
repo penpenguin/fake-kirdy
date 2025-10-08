@@ -187,6 +187,7 @@ describe('asset pipeline manifest', () => {
       { key: 'star-bullet', path: 'images/star-bullet.png' },
       { key: 'wabble-bee', path: 'images/wabble-bee.png' },
       { key: 'dronto-durt', path: 'images/dronto-durt.png' },
+      { key: 'wall-texture', path: 'images/wall-texture.png' },
     ];
 
     expectedAssets.forEach(({ key, path }) => {

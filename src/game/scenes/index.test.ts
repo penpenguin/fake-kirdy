@@ -314,13 +314,23 @@ describe('Scene registration', () => {
     expect(textureManager.setDefaultFilter).toHaveBeenCalledWith(Phaser.Textures.FilterMode.NEAREST);
 
     const loadOnceMock = asMock(bootScene.load.once);
-    const fileCompleteCall = loadOnceMock.mock.calls.find(([event]) => event === 'filecomplete-image-tileset-main');
-    expect(fileCompleteCall?.[1]).toBeTypeOf('function');
+    const tilesetCall = loadOnceMock.mock.calls.find(
+      ([event]) => event === 'filecomplete-image-tileset-main',
+    );
+    const wallTextureCall = loadOnceMock.mock.calls.find(
+      ([event]) => event === 'filecomplete-image-wall-texture',
+    );
+    expect(tilesetCall?.[1]).toBeTypeOf('function');
+    expect(wallTextureCall?.[1]).toBeTypeOf('function');
 
-    const [, handler] = fileCompleteCall ?? [];
-    handler?.();
+    const [, tilesetHandler] = tilesetCall ?? [];
+    const [, wallTextureHandler] = wallTextureCall ?? [];
+
+    tilesetHandler?.();
+    wallTextureHandler?.();
 
     expect(bootScene.textures.get).toHaveBeenCalledWith('tileset-main');
+    expect(bootScene.textures.get).toHaveBeenCalledWith('wall-texture');
     expect(texture.setFilter).toHaveBeenCalledWith(Phaser.Textures.FilterMode.NEAREST);
     expect(texture.setGenerateMipmaps).toHaveBeenCalledWith(false);
   });
@@ -453,7 +463,7 @@ describe('Scene registration', () => {
       frames: {},
     };
     const textures = gameScene.textures as any;
-    textures.exists = vi.fn(() => true);
+    textures.exists = vi.fn((key: string) => key !== 'wall-texture');
     asMock(textures.get).mockReturnValue(texture as any);
 
     const rectangleVisual = {
@@ -484,7 +494,7 @@ describe('Scene registration', () => {
     expect(addImage).not.toHaveBeenCalled();
     expect(addRectangle).toHaveBeenCalledTimes(1);
     expect(rectangleVisual.setOrigin).toHaveBeenCalledWith(0.5, 0.5);
-    expect(tileMap.getTileAt).toHaveBeenCalledTimes(1);
+    expect(tileMap.getTileAt).toHaveBeenCalledTimes(2);
     expect((gameScene as any).terrainTiles).toHaveLength(1);
   });
 

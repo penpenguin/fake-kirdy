@@ -18,6 +18,56 @@ function getOpposite(direction: AreaTransitionDirection): AreaTransitionDirectio
   return opposites[direction];
 }
 
+function getDoorWorldPosition(
+  area: ReturnType<AreaManager['getCurrentAreaState']>,
+  direction: AreaTransitionDirection,
+) {
+  const { tileMap } = area;
+  const { columns, rows, tileSize } = tileMap;
+
+  for (let row = 0; row < rows; row += 1) {
+    for (let column = 0; column < columns; column += 1) {
+      if (tileMap.getTileAt(column, row) !== 'door') {
+        continue;
+      }
+
+      if (!isDoorCoordinateForDirection(column, row, tileMap, direction)) {
+        continue;
+      }
+
+      return {
+        x: column * tileSize + tileSize / 2,
+        y: row * tileSize + tileSize / 2,
+      } as const;
+    }
+  }
+
+  throw new Error(`Door for direction ${direction} not found`);
+}
+
+function isDoorCoordinateForDirection(
+  column: number,
+  row: number,
+  tileMap: ReturnType<AreaManager['getCurrentAreaState']>['tileMap'],
+  direction: AreaTransitionDirection,
+) {
+  const edgeOffset = 1;
+  switch (direction) {
+    case 'north':
+      return row <= edgeOffset;
+    case 'south':
+      return row >= tileMap.rows - 1 - edgeOffset;
+    case 'west':
+      return column <= edgeOffset;
+    case 'east':
+      return column >= tileMap.columns - 1 - edgeOffset;
+    default: {
+      const _never: never = direction;
+      return _never;
+    }
+  }
+}
+
 describe('AreaManager', () => {
   let manager: AreaManager;
 
@@ -43,14 +93,27 @@ describe('AreaManager', () => {
     expect(interiorTile).toBe('floor');
   });
 
-  it('エリア境界を超えたときに隣接エリアへ遷移する', () => {
-    const initial = manager.getCurrentAreaState();
-    const y = (initial.tileMap.tileSize * initial.tileMap.rows) / 2;
+  it('中央ハブのエリア切替地点はドアタイルとして識別できる', () => {
+    const current = manager.getCurrentAreaState();
+    const tileMap = current.tileMap;
 
-    const result = manager.updatePlayerPosition({
-      x: initial.pixelBounds.width + initial.tileMap.tileSize,
-      y,
+    const doorCoordinates = [
+      { column: 1, row: Math.floor(tileMap.rows / 2) },
+      { column: tileMap.columns - 2, row: Math.floor(tileMap.rows / 2) },
+      { column: Math.floor(tileMap.columns / 2), row: 1 },
+      { column: Math.floor(tileMap.columns / 2), row: tileMap.rows - 2 },
+    ];
+
+    doorCoordinates.forEach(({ column, row }) => {
+      expect(tileMap.getTileAt(column, row)).toBe('door');
     });
+  });
+
+  it('ドアタイルを踏むと隣接エリアへ遷移する', () => {
+    const initial = manager.getCurrentAreaState();
+    const eastDoorPosition = getDoorWorldPosition(initial, 'east');
+
+    const result = manager.updatePlayerPosition(eastDoorPosition);
 
     expect(result.areaChanged).toBe(true);
     expect(result.transition?.from).toBe(AREA_IDS.CentralHub);
@@ -64,10 +127,8 @@ describe('AreaManager', () => {
     expect(entryPoint).toEqual(result.transition?.entryPosition);
 
     // 新エリアで反対方向に戻ると中央ハブに帰る
-    const returnResult = manager.updatePlayerPosition({
-      x: -initial.tileMap.tileSize,
-      y: entryPoint.y,
-    });
+    const returnDoorPosition = getDoorWorldPosition(current, getOpposite(result.transition!.via));
+    const returnResult = manager.updatePlayerPosition(returnDoorPosition);
 
     expect(returnResult.areaChanged).toBe(true);
     expect(returnResult.transition?.from).toBe(current.definition.id);
@@ -78,33 +139,22 @@ describe('AreaManager', () => {
   it('中央ハブから各方角の迷宮エリアへ分岐できる', () => {
     const cases: Array<{
       direction: AreaTransitionDirection;
-      move: (area: ReturnType<AreaManager['getCurrentAreaState']>) => { x: number; y: number };
       expectedArea: typeof AREA_IDS[keyof typeof AREA_IDS];
     }> = [
       {
         direction: 'north',
-        move: (area) => ({ x: area.pixelBounds.width / 2, y: -area.tileMap.tileSize }),
         expectedArea: AREA_IDS.IceArea,
       },
       {
         direction: 'south',
-        move: (area) => ({
-          x: area.pixelBounds.width / 2,
-          y: area.pixelBounds.height + area.tileMap.tileSize,
-        }),
         expectedArea: AREA_IDS.ForestArea,
       },
       {
         direction: 'west',
-        move: (area) => ({ x: -area.tileMap.tileSize, y: area.pixelBounds.height / 2 }),
         expectedArea: AREA_IDS.CaveArea,
       },
       {
         direction: 'east',
-        move: (area) => ({
-          x: area.pixelBounds.width + area.tileMap.tileSize,
-          y: area.pixelBounds.height / 2,
-        }),
         expectedArea: AREA_IDS.MirrorCorridor,
       },
     ];
@@ -113,7 +163,9 @@ describe('AreaManager', () => {
       const localManager = new AreaManager();
       const hub = localManager.getCurrentAreaState();
 
-      const result = localManager.updatePlayerPosition(testCase.move(hub));
+      const result = localManager.updatePlayerPosition(
+        getDoorWorldPosition(hub, testCase.direction),
+      );
 
       expect(result.areaChanged).toBe(true);
       expect(result.transition?.via).toBe(testCase.direction);
@@ -121,25 +173,9 @@ describe('AreaManager', () => {
 
       const branchedArea = localManager.getCurrentAreaState();
 
-      const returnMove = (() => {
-        const tileSize = branchedArea.tileMap.tileSize;
-        const { width, height } = branchedArea.pixelBounds;
-
-        switch (testCase.direction) {
-          case 'north':
-            return { x: width / 2, y: height + tileSize };
-          case 'south':
-            return { x: width / 2, y: -tileSize };
-          case 'east':
-            return { x: -tileSize, y: height / 2 };
-          case 'west':
-            return { x: width + tileSize, y: height / 2 };
-          default:
-            return { x: width / 2, y: height / 2 };
-        }
-      })();
-
-      const returnResult = localManager.updatePlayerPosition(returnMove);
+      const returnResult = localManager.updatePlayerPosition(
+        getDoorWorldPosition(branchedArea, getOpposite(testCase.direction)),
+      );
 
       expect(returnResult.areaChanged).toBe(true);
       expect(returnResult.transition?.to).toBe(AREA_IDS.CentralHub);
@@ -150,23 +186,32 @@ describe('AreaManager', () => {
   it('ミラー回廊をさらに探索すると火炎領域へ接続する', () => {
     const hub = manager.getCurrentAreaState();
 
-    // 東側に移動してミラー回廊へ
-    manager.updatePlayerPosition({
-      x: hub.pixelBounds.width + hub.tileMap.tileSize,
-      y: hub.pixelBounds.height / 2,
-    });
+    // 東側のドアに乗ってミラー回廊へ
+    manager.updatePlayerPosition(getDoorWorldPosition(hub, 'east'));
 
     const mirror = manager.getCurrentAreaState();
 
-    const result = manager.updatePlayerPosition({
-      x: mirror.pixelBounds.width + mirror.tileMap.tileSize,
-      y: mirror.pixelBounds.height / 2,
-    });
+    const result = manager.updatePlayerPosition(getDoorWorldPosition(mirror, 'east'));
 
     expect(result.areaChanged).toBe(true);
     expect(result.transition?.from).toBe(AREA_IDS.MirrorCorridor);
     expect(result.transition?.to).toBe(AREA_IDS.FireArea);
     expect(result.transition?.via).toBe('east');
+  });
+
+  it('森林エリアのスポーン地点は床タイルになる', () => {
+    const hub = manager.getCurrentAreaState();
+    const doorToForest = getDoorWorldPosition(hub, 'south');
+
+    const transition = manager.updatePlayerPosition(doorToForest);
+
+    expect(transition.areaChanged).toBe(true);
+    expect(transition.transition?.to).toBe(AREA_IDS.ForestArea);
+
+    const forest = manager.getCurrentAreaState();
+    const spawnTile = forest.tileMap.getTileAtWorldPosition(forest.playerSpawnPosition);
+
+    expect(spawnTile).toBe('floor');
   });
 
   it('探索済みエリア情報を記録し、訪問済みエリアを管理する', () => {
@@ -189,10 +234,7 @@ describe('AreaManager', () => {
     expect(manager.getDiscoveredAreas()).toContain(AREA_IDS.CentralHub);
 
     // エリア遷移で新エリアも発見済みに追加
-    const transition = manager.updatePlayerPosition({
-      x: centralHub.pixelBounds.width + centralHub.tileMap.tileSize,
-      y: centralHub.tileMap.tileSize * 4,
-    });
+    const transition = manager.updatePlayerPosition(getDoorWorldPosition(centralHub, 'east'));
 
     expect(transition.areaChanged).toBe(true);
     if (transition.transition) {
@@ -221,7 +263,7 @@ describe('AreaManager', () => {
 
     manager.updatePlayerPosition({ x: centralHub.tileMap.tileSize * 2, y: centralHub.tileMap.tileSize * 3 });
     manager.updatePlayerPosition({ x: centralHub.tileMap.tileSize * 7, y: centralHub.tileMap.tileSize * 3 });
-    manager.updatePlayerPosition({ x: centralHub.pixelBounds.width + centralHub.tileMap.tileSize, y: centralHub.tileMap.tileSize * 5 });
+    manager.updatePlayerPosition(getDoorWorldPosition(manager.getCurrentAreaState(), 'east'));
 
     const snapshot = manager.getPersistenceSnapshot();
 

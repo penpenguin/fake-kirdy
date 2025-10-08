@@ -69,7 +69,9 @@ const stubs = vi.hoisted(() => {
   };
 
   const textures = {
-    exists: vi.fn((key: string) => key === 'tileset-main'),
+    exists: vi.fn(
+      (key: string) => key === 'tileset-main' || key === 'door-marker' || key === 'wall-texture',
+    ),
     get: vi.fn((key: string) => (key === 'tileset-main' ? terrainTexture : undefined)),
   };
 
@@ -765,7 +767,13 @@ describe('GameScene player integration', () => {
       lastKnownPlayerPosition: { ...areaState.playerSpawnPosition },
     });
 
-    const createdImages: Array<ReturnType<typeof stubs.addImage>> = [];
+    const createdImages: Array<{
+      x: number;
+      y: number;
+      textureKey: string;
+      frame: string | undefined;
+      instance: ReturnType<typeof stubs.addImage>;
+    }> = [];
     stubs.addImage.mockImplementation((x: number, y: number, textureKey: string, frame?: string) => {
       const image = {
         x,
@@ -780,35 +788,40 @@ describe('GameScene player integration', () => {
         setFrame: vi.fn().mockReturnThis(),
         destroy: vi.fn(),
       };
-      createdImages.push(image);
+      createdImages.push({
+        x,
+        y,
+        textureKey,
+        frame,
+        instance: image,
+      });
       return image;
     });
 
     scene.create();
 
-    expect(stubs.addImage).toHaveBeenCalledTimes(wallCoordinates.length);
+    const wallImages = createdImages.filter((entry) => entry.textureKey === 'wall-texture');
+    expect(wallImages).toHaveLength(wallCoordinates.length);
 
-    wallCoordinates.forEach((position, index) => {
+    wallCoordinates.forEach((position) => {
       const centerX = position.column * tileSize + tileSize / 2;
       const centerY = position.row * tileSize + tileSize / 2;
-      const call = stubs.addImage.mock.calls[index];
-      expect(call?.[0]).toBe(centerX);
-      expect(call?.[1]).toBe(centerY);
-      expect(call?.[2]).toBe('tileset-main');
-      expect(call?.[3]).toBe('wall');
+      const entry = wallImages.find((image) => image.x === centerX && image.y === centerY);
 
-      const image = createdImages[index] as any;
+      expect(entry).toBeDefined();
+      const image = entry?.instance as any;
       expect(image.setOrigin).toHaveBeenCalledWith(0.5, 0.5);
       expect(image.setDisplaySize).toHaveBeenCalledWith(tileSize, tileSize);
       expect(image.setDepth).toHaveBeenCalledWith(-50);
+      expect(image.setFrame).not.toHaveBeenCalled();
     });
 
     const terrainTiles = ((scene as any).terrainTiles ?? []) as Array<
       { destroy: ReturnType<typeof vi.fn> }
     >;
     expect(terrainTiles).toHaveLength(wallCoordinates.length);
-    createdImages.forEach((image) => {
-      expect(terrainTiles).toContain(image);
+    wallImages.forEach((image) => {
+      expect(terrainTiles).toContain(image.instance as any);
     });
 
     const destroyTerrainVisuals = (scene as any).destroyTerrainVisuals?.bind(scene);
@@ -817,9 +830,98 @@ describe('GameScene player integration', () => {
     destroyTerrainVisuals?.();
 
     createdImages.forEach((image) => {
-      expect(image.destroy).toHaveBeenCalled();
+      expect(image.instance.destroy).toHaveBeenCalled();
     });
     expect((scene as any).terrainTiles).toHaveLength(0);
+  });
+
+  it('エリア切替用ドアタイルを視覚的に強調表示する', () => {
+    const tileSize = defaultAreaState.tileMap.tileSize;
+    const columns = defaultAreaState.tileMap.columns;
+    const rows = defaultAreaState.tileMap.rows;
+
+    const doorCoordinates = [
+      { column: 1, row: Math.floor(rows / 2) },
+      { column: columns - 2, row: Math.floor(rows / 2) },
+      { column: Math.floor(columns / 2), row: 1 },
+      { column: Math.floor(columns / 2), row: rows - 2 },
+    ];
+
+    const doorKey = new Set(doorCoordinates.map(({ column, row }) => `${column},${row}`));
+    const originalGetTileAt = defaultAreaState.tileMap.getTileAt;
+    const getTileAt = vi.fn((column: number, row: number) => {
+      if (doorKey.has(`${column},${row}`)) {
+        return 'door';
+      }
+
+      return originalGetTileAt(column, row);
+    });
+
+    const areaStateWithDoors = {
+      ...defaultAreaState,
+      tileMap: {
+        ...defaultAreaState.tileMap,
+        getTileAt,
+      },
+    };
+
+    areaManagerGetStateMock.mockReturnValue(areaStateWithDoors as any);
+
+    const createdImages: Array<{
+      x: number;
+      y: number;
+      textureKey: string;
+      frame: string | undefined;
+      instance: {
+        setOrigin: ReturnType<typeof vi.fn>;
+        setDepth: ReturnType<typeof vi.fn>;
+        setDisplaySize: ReturnType<typeof vi.fn>;
+        setVisible: ReturnType<typeof vi.fn>;
+        setActive: ReturnType<typeof vi.fn>;
+        setFrame: ReturnType<typeof vi.fn>;
+        setAlpha?: ReturnType<typeof vi.fn>;
+        destroy: ReturnType<typeof vi.fn>;
+      };
+    }> = [];
+
+    stubs.addImage.mockImplementation((x: number, y: number, textureKey: string, frame?: string) => {
+      const image = {
+        setOrigin: vi.fn().mockReturnThis(),
+        setDepth: vi.fn().mockReturnThis(),
+        setDisplaySize: vi.fn().mockReturnThis(),
+        setVisible: vi.fn().mockReturnThis(),
+        setActive: vi.fn().mockReturnThis(),
+        setFrame: vi.fn().mockReturnThis(),
+        destroy: vi.fn(),
+      };
+      createdImages.push({ x, y, textureKey, frame, instance: image });
+      return image;
+    });
+
+    const scene = new GameScene();
+    scene.create();
+
+    const doorMarkers = ((scene as any).terrainTransitionMarkers ?? []) as Array<{ destroy?: () => void }>;
+    expect(doorMarkers).toHaveLength(doorCoordinates.length);
+
+    const DOOR_TEXTURE_KEY = 'door-marker';
+    const doorImages = createdImages.filter((entry) => entry.textureKey === DOOR_TEXTURE_KEY);
+    expect(doorImages).toHaveLength(doorCoordinates.length);
+
+    doorCoordinates.forEach(({ column, row }) => {
+      const centerX = column * tileSize + tileSize / 2;
+      const centerY = row * tileSize + tileSize / 2;
+      const imageEntry = doorImages.find((entry) => entry.x === centerX && entry.y === centerY);
+
+      expect(imageEntry).toBeDefined();
+      const image = imageEntry?.instance;
+      expect(image?.setOrigin).toHaveBeenCalledWith(0.5, 0.5);
+      expect(image?.setDepth).toHaveBeenCalledWith(-46);
+      expect(image?.setDisplaySize).toHaveBeenCalledWith(tileSize, tileSize);
+      expect(image?.setVisible).toHaveBeenCalledWith(true);
+      expect(image?.setActive).toHaveBeenCalledWith(true);
+      expect(doorMarkers).toContain(image as any);
+    });
   });
 
   it('フレーム毎にパフォーマンスモニターを更新する', () => {
@@ -973,12 +1075,18 @@ describe('GameScene player integration', () => {
 
     scene.create();
 
-    // move Kirdy beyond bounds to trigger transition
-    kirdyInstance.sprite.x = defaultAreaState.pixelBounds.width + 10;
-    kirdyInstance.sprite.y = defaultAreaState.playerSpawnPosition.y;
+    // move Kirdy onto the eastern door tile to trigger transition
+    const tileSize = defaultAreaState.tileMap.tileSize;
+    const doorColumn = defaultAreaState.tileMap.columns - 2;
+    const doorRow = Math.floor(defaultAreaState.tileMap.rows / 2);
+    const doorX = doorColumn * tileSize + tileSize / 2;
+    const doorY = doorRow * tileSize + tileSize / 2;
+
+    kirdyInstance.sprite.x = doorX;
+    kirdyInstance.sprite.y = doorY;
     if (kirdyInstance.sprite.body?.position) {
-      kirdyInstance.sprite.body.position.x = kirdyInstance.sprite.x;
-      kirdyInstance.sprite.body.position.y = kirdyInstance.sprite.y;
+      kirdyInstance.sprite.body.position.x = doorX;
+      kirdyInstance.sprite.body.position.y = doorY;
     }
 
     scene.update(0, 16);

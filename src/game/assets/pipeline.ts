@@ -100,6 +100,14 @@ const IMAGE_ASSETS: ReadonlyArray<ImageAsset> = [
     frameConfig: { frameWidth: 32, frameHeight: 32 },
   },
   {
+    key: 'wall-texture',
+    url: 'images/wall-texture.png',
+  },
+  {
+    key: 'door-marker',
+    url: 'images/door-marker.png',
+  },
+  {
     key: 'virtual-controls',
     url: 'images/virtual-controls.png',
     fallbackUrl: 'images/fallbacks/virtual-controls.png',

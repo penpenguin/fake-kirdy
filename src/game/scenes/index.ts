@@ -33,11 +33,16 @@ export const SceneKeys = {
 type SceneKey = (typeof SceneKeys)[keyof typeof SceneKeys];
 
 const TERRAIN_TEXTURE_KEY = 'tileset-main';
+const WALL_TEXTURE_KEY = 'wall-texture';
 const TERRAIN_VISUAL_DEPTH = -50;
 const TERRAIN_FRAME_KEYS = {
   wall: 'wall',
   floor: 'floor',
 } as const;
+const DOOR_TEXTURE_KEY = 'door-marker';
+const DOOR_MARKER_COLOR = 0xffdd66;
+const DOOR_MARKER_ALPHA = 0.8;
+const DOOR_MARKER_DEPTH = TERRAIN_VISUAL_DEPTH + 4;
 
 type TerrainTilePlacement = {
   column: number;
@@ -107,10 +112,18 @@ export class BootScene extends Phaser.Scene {
     const nearestFilter = Phaser.Textures?.FilterMode?.NEAREST ?? Phaser.Textures?.FilterMode?.LINEAR;
     textureManager?.setDefaultFilter?.(nearestFilter);
 
-    loader.once?.('filecomplete-image-tileset-main', () => {
-      const texture = textureManager?.get?.(TERRAIN_TEXTURE_KEY);
+    const applyPixelArtSettings = (textureKey: string) => {
+      const texture = textureManager?.get?.(textureKey);
       texture?.setFilter?.(nearestFilter);
       texture?.setGenerateMipmaps?.(false);
+    };
+
+    loader.once?.('filecomplete-image-tileset-main', () => {
+      applyPixelArtSettings(TERRAIN_TEXTURE_KEY);
+    });
+
+    loader.once?.('filecomplete-image-wall-texture', () => {
+      applyPixelArtSettings(WALL_TEXTURE_KEY);
     });
 
     const manifest = createAssetManifest();
@@ -245,6 +258,7 @@ export class GameScene extends Phaser.Scene {
   private audioManager?: AudioManager;
   private terrainColliders: Array<Phaser.Physics.Matter.Image | Phaser.Physics.Matter.Sprite> = [];
   private terrainTiles: Array<Phaser.GameObjects.GameObject & { destroy?: () => void }> = [];
+  private terrainTransitionMarkers: Array<Phaser.GameObjects.GameObject & { destroy?: () => void }> = [];
   private cameraFollowConfigured = false;
 
   constructor() {
@@ -636,6 +650,41 @@ export class GameScene extends Phaser.Scene {
     return placements;
   }
 
+  private collectDoorTiles(): TerrainTilePlacement[] {
+    const areaState = this.areaManager?.getCurrentAreaState();
+    const tileMap = areaState?.tileMap as Partial<{
+      tileSize: number;
+      columns: number;
+      rows: number;
+      getTileAt: (column: number, row: number) => string | undefined;
+    }>;
+
+    const columns = Number.isFinite(tileMap?.columns) ? (tileMap!.columns as number) : 0;
+    const rows = Number.isFinite(tileMap?.rows) ? (tileMap!.rows as number) : 0;
+    const tileSize = Number.isFinite(tileMap?.tileSize) ? (tileMap!.tileSize as number) : 32;
+    const getTileAt = typeof tileMap?.getTileAt === 'function' ? tileMap!.getTileAt!.bind(tileMap) : undefined;
+
+    if (!getTileAt || columns <= 0 || rows <= 0 || tileSize <= 0) {
+      return [];
+    }
+
+    const placements: TerrainTilePlacement[] = [];
+    for (let row = 0; row < rows; row += 1) {
+      for (let column = 0; column < columns; column += 1) {
+        const tile = getTileAt(column, row);
+        if (tile !== 'door') {
+          continue;
+        }
+
+        const centerX = column * tileSize + tileSize / 2;
+        const centerY = row * tileSize + tileSize / 2;
+        placements.push({ column, row, centerX, centerY, tileSize });
+      }
+    }
+
+    return placements;
+  }
+
   private hasTerrainFrame(frameKey: string): boolean {
     const textureManager = this.textures as
       | {
@@ -699,18 +748,31 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
-    const placements = this.collectWallTiles();
-    if (placements.length === 0) {
-      return;
-    }
+    const wallPlacements = this.collectWallTiles();
+    const doorPlacements = this.collectDoorTiles();
 
+    const textureManager = this.textures as { exists?: (key: string) => boolean } | undefined;
+    const wallTextureAvailable = Boolean(textureManager?.exists?.(WALL_TEXTURE_KEY));
     const terrainFrameAvailable = this.hasTerrainFrame(TERRAIN_FRAME_KEYS.wall);
+    const doorTextureAvailable = Boolean(textureManager?.exists?.(DOOR_TEXTURE_KEY));
 
-    placements.forEach(({ centerX, centerY, tileSize }) => {
-      let visual: Phaser.GameObjects.Image | Phaser.GameObjects.Rectangle | undefined =
-        undefined;
+    wallPlacements.forEach(({ centerX, centerY, tileSize }) => {
+      let visual: Phaser.GameObjects.Image | Phaser.GameObjects.Rectangle | undefined = undefined;
+      let usedTerrainFrame = false;
 
-      if (terrainFrameAvailable) {
+      if (wallTextureAvailable) {
+        try {
+          visual = displayFactory.image?.(
+            centerX,
+            centerY,
+            WALL_TEXTURE_KEY,
+          ) as Phaser.GameObjects.Image | undefined;
+        } catch (_error) {
+          visual = undefined;
+        }
+      }
+
+      if (!visual && terrainFrameAvailable) {
         try {
           visual = displayFactory.image?.(
             centerX,
@@ -718,8 +780,10 @@ export class GameScene extends Phaser.Scene {
             TERRAIN_TEXTURE_KEY,
             TERRAIN_FRAME_KEYS.wall,
           ) as Phaser.GameObjects.Image | undefined;
+          usedTerrainFrame = Boolean(visual);
         } catch (_error) {
           visual = undefined;
+          usedTerrainFrame = false;
         }
       }
 
@@ -736,12 +800,64 @@ export class GameScene extends Phaser.Scene {
       visual.setOrigin?.(0.5, 0.5);
       visual.setDepth?.(TERRAIN_VISUAL_DEPTH);
       visual.setDisplaySize?.(tileSize, tileSize);
-      if (terrainFrameAvailable && 'setFrame' in visual) {
+      if (usedTerrainFrame && 'setFrame' in visual) {
         (visual as Phaser.GameObjects.Image).setFrame?.(TERRAIN_FRAME_KEYS.wall);
       }
       visual.setVisible?.(true);
 
       this.terrainTiles.push(visual as Phaser.GameObjects.GameObject & { destroy?: () => void });
+    });
+
+    doorPlacements.forEach(({ centerX, centerY, tileSize }) => {
+      let marker: Phaser.GameObjects.Rectangle | Phaser.GameObjects.Image | undefined;
+      let usedDoorTexture = false;
+
+      if (doorTextureAvailable) {
+        try {
+          marker = displayFactory.image?.(
+            centerX,
+            centerY,
+            DOOR_TEXTURE_KEY,
+          ) as Phaser.GameObjects.Image | undefined;
+          usedDoorTexture = Boolean(marker);
+        } catch (_error) {
+          marker = undefined;
+          usedDoorTexture = false;
+        }
+      }
+
+      if (!marker) {
+        try {
+          marker = displayFactory.rectangle?.(
+            centerX,
+            centerY,
+            tileSize,
+            tileSize,
+            DOOR_MARKER_COLOR,
+            DOOR_MARKER_ALPHA,
+          ) as Phaser.GameObjects.Rectangle | undefined;
+        } catch (_error) {
+          marker = undefined;
+        }
+      }
+
+      if (!marker) {
+        return;
+      }
+
+      marker.setOrigin?.(0.5, 0.5);
+      marker.setDepth?.(DOOR_MARKER_DEPTH);
+      marker.setDisplaySize?.(tileSize, tileSize);
+      marker.setVisible?.(true);
+      marker.setActive?.(true);
+
+      if (!usedDoorTexture) {
+        marker.setAlpha?.(DOOR_MARKER_ALPHA);
+      }
+
+      this.terrainTransitionMarkers.push(
+        marker as Phaser.GameObjects.GameObject & { destroy?: () => void },
+      );
     });
   }
 
@@ -750,6 +866,10 @@ export class GameScene extends Phaser.Scene {
       tile.destroy?.();
     });
     this.terrainTiles = [];
+    this.terrainTransitionMarkers.forEach((marker) => {
+      marker.destroy?.();
+    });
+    this.terrainTransitionMarkers = [];
   }
 
   private rebuildTerrainColliders() {
