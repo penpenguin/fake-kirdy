@@ -22,28 +22,23 @@ const stubs = vi.hoisted(() => {
     start: vi.fn(),
   };
 
-  const addRectangle = vi.fn(
-    (
-      _x: number,
-      _y: number,
-      _width: number,
-      _height: number,
-      _color?: number,
-      _alpha?: number,
-    ) => ({
-      setVisible: vi.fn().mockReturnThis(),
-      setActive: vi.fn().mockReturnThis(),
-      setDepth: vi.fn().mockReturnThis(),
-      destroy: vi.fn(),
-    }),
-  );
+  const addRectangleMock = vi.fn();
+  const addImageMock = vi.fn();
+  const addTextMock = vi.fn();
+  const addContainerMock = vi.fn();
 
-  const addImage = vi.fn((
-    _x: number,
-    _y: number,
-    _texture: string,
-    _frame?: string,
-  ) => ({
+  const createDisplayRectangle = () => ({
+    setVisible: vi.fn().mockReturnThis(),
+    setActive: vi.fn().mockReturnThis(),
+    setDepth: vi.fn().mockReturnThis(),
+    setScrollFactor: vi.fn().mockReturnThis(),
+    setOrigin: vi.fn().mockReturnThis(),
+    setScale: vi.fn().mockReturnThis(),
+    setFillStyle: vi.fn().mockReturnThis(),
+    destroy: vi.fn(),
+  });
+
+  const createDisplayImage = () => ({
     setOrigin: vi.fn().mockReturnThis(),
     setDepth: vi.fn().mockReturnThis(),
     setDisplaySize: vi.fn().mockReturnThis(),
@@ -51,7 +46,53 @@ const stubs = vi.hoisted(() => {
     setVisible: vi.fn().mockReturnThis(),
     setFrame: vi.fn().mockReturnThis(),
     destroy: vi.fn(),
-  }));
+  });
+
+  const createDisplayText = () => ({
+    setScrollFactor: vi.fn().mockReturnThis(),
+    setDepth: vi.fn().mockReturnThis(),
+    setText: vi.fn().mockReturnThis(),
+    destroy: vi.fn(),
+  });
+
+  const createDisplayContainer = () => {
+    const containerChildren: any[] = [];
+    const container: any = {
+      add: vi.fn((items: any[]) => {
+        containerChildren.push(...items);
+        return container;
+      }),
+      setScrollFactor: vi.fn().mockReturnThis(),
+      setDepth: vi.fn().mockReturnThis(),
+      setVisible: vi.fn().mockReturnThis(),
+      destroy: vi.fn(),
+      list: containerChildren,
+    };
+    return container;
+  };
+
+  const createDisplayList = () => {
+    const listeners: Array<(child: any) => void> = [];
+    return {
+      list: [] as any[],
+      on: vi.fn((event: string, handler: (child: any) => void) => {
+        if (event === 'add') {
+          listeners.push(handler);
+        }
+      }),
+      off: vi.fn((event: string, handler: (child: any) => void) => {
+        if (event === 'add') {
+          const index = listeners.indexOf(handler);
+          if (index >= 0) {
+            listeners.splice(index, 1);
+          }
+        }
+      }),
+      emitAdd: (child: any) => {
+        listeners.slice().forEach((listener) => listener(child));
+      },
+    };
+  };
 
   const matterFactory = {
     add: {
@@ -76,22 +117,64 @@ const stubs = vi.hoisted(() => {
   };
 
   const cameraStartFollow = vi.fn();
+  const cameraSetViewport = vi.fn();
+  const cameraIgnore = vi.fn();
+  const hudCameraIgnore = vi.fn();
+  const hudCameraSetScroll = vi.fn().mockReturnThis();
+  const camerasAdd = vi.fn(() => ({
+    setScroll: hudCameraSetScroll,
+    ignore: hudCameraIgnore,
+    destroy: vi.fn(),
+  }));
 
   class PhaserSceneMock {
     public input = { keyboard };
     public matter = matterFactory;
     public scene = scenePlugin;
-    public events = events;
+   public events = events;
+   public scale = { width: 800, height: 600 };
+    public children = createDisplayList();
     public add = {
-      rectangle: addRectangle,
-      image: addImage,
+      rectangle: (...args: unknown[]) => {
+        const result = addRectangleMock(...args as any);
+        const rect = result ?? createDisplayRectangle();
+        this.children.list.push(rect);
+        this.children.emitAdd(rect);
+        return rect;
+      },
+      image: (...args: unknown[]) => {
+        const result = addImageMock(...args as any);
+        const image = result ?? createDisplayImage();
+        this.children.list.push(image);
+        this.children.emitAdd(image);
+        return image;
+      },
+      text: (...args: unknown[]) => {
+        const result = addTextMock(...args as any);
+        const text = result ?? createDisplayText();
+        this.children.list.push(text);
+        this.children.emitAdd(text);
+        return text;
+      },
+      container: (...args: unknown[]) => {
+        const result = addContainerMock(...args as any);
+        const container = result ?? createDisplayContainer();
+        this.children.list.push(container as any);
+        this.children.emitAdd(container as any);
+        return container;
+      },
     };
     public textures = textures;
     public cameras = {
       main: {
         worldView: { x: 0, y: 0, width: 800, height: 600 },
         startFollow: cameraStartFollow,
+        setViewport: cameraSetViewport,
+        ignore: cameraIgnore,
+        setBounds: vi.fn(),
       },
+      add: camerasAdd,
+      remove: vi.fn(),
     };
   }
 
@@ -101,9 +184,17 @@ const stubs = vi.hoisted(() => {
     matterFactory,
     events,
     cameraStartFollow,
+    cameraSetViewport,
+    cameraIgnore,
+    hudCameraIgnore,
+    hudCameraSetScroll,
+    camerasAdd,
+    addRectangleMock,
+    addImageMock,
+    addTextMock,
+    addContainerMock,
+    childrenCreateList: createDisplayList,
     PhaserSceneMock,
-    addRectangle,
-    addImage,
     textures,
     terrainTexture,
   };
@@ -321,12 +412,22 @@ const hudUpdateAbilityMock = vi.hoisted(() => vi.fn());
 const hudUpdateScoreMock = vi.hoisted(() => vi.fn());
 const hudDestroyMock = vi.hoisted(() => vi.fn());
 const HudMock = vi.hoisted(() =>
-  vi.fn(() => ({
-    updateHP: hudUpdateHPMock,
-    updateAbility: hudUpdateAbilityMock,
-    updateScore: hudUpdateScoreMock,
-    destroy: hudDestroyMock,
-  })),
+  vi.fn((scene: any) => {
+    const root = {
+      setScrollFactor: vi.fn().mockReturnThis(),
+      setDepth: vi.fn().mockReturnThis(),
+      setVisible: vi.fn().mockReturnThis(),
+      destroy: vi.fn(),
+    };
+    scene?.children?.list?.push?.(root);
+    scene?.children?.emitAdd?.(root);
+    return {
+      updateHP: hudUpdateHPMock,
+      updateAbility: hudUpdateAbilityMock,
+      updateScore: hudUpdateScoreMock,
+      destroy: hudDestroyMock,
+    };
+  }),
 );
 
 vi.mock('../ui/Hud', () => ({
@@ -352,6 +453,7 @@ vi.mock('../physics/PhysicsSystem', () => ({
   PhysicsSystem: PhysicsSystemMock,
 }));
 
+import { HUD_SAFE_AREA_HEIGHT, HUD_WORLD_MARGIN } from '../ui/hud-layout';
 import { GameScene, SceneKeys } from './index';
 import { ErrorHandler } from '../errors/ErrorHandler';
 
@@ -369,6 +471,12 @@ describe('GameScene player integration', () => {
     stubs.scenePlugin.pause.mockClear();
     stubs.scenePlugin.stop.mockClear();
     stubs.scenePlugin.start.mockClear();
+    stubs.cameraSetViewport.mockClear();
+    stubs.cameraIgnore.mockClear();
+    stubs.camerasAdd.mockClear();
+    stubs.hudCameraIgnore.mockClear();
+    stubs.hudCameraSetScroll.mockClear();
+    stubs.cameraStartFollow.mockClear();
     physicsRegisterPlayerMock.mockClear();
     physicsRegisterTerrainMock.mockClear();
     physicsRegisterEnemyMock.mockClear();
@@ -376,23 +484,10 @@ describe('GameScene player integration', () => {
     PhysicsSystemMock.mockClear();
     AreaManagerMock.mockClear();
     stubs.matterFactory.add.existing.mockReset();
-    stubs.addRectangle.mockReset();
-    stubs.addRectangle.mockImplementation(() => ({
-      setVisible: vi.fn().mockReturnThis(),
-      setActive: vi.fn().mockReturnThis(),
-      setDepth: vi.fn().mockReturnThis(),
-      destroy: vi.fn(),
-    }));
-    stubs.addImage.mockReset();
-    stubs.addImage.mockImplementation(() => ({
-      setOrigin: vi.fn().mockReturnThis(),
-      setDepth: vi.fn().mockReturnThis(),
-      setDisplaySize: vi.fn().mockReturnThis(),
-      setActive: vi.fn().mockReturnThis(),
-      setVisible: vi.fn().mockReturnThis(),
-      setFrame: vi.fn().mockReturnThis(),
-      destroy: vi.fn(),
-    }));
+    stubs.addRectangleMock.mockReset();
+    stubs.addImageMock.mockReset();
+    stubs.addTextMock.mockReset();
+    stubs.addContainerMock.mockReset();
     stubs.matterFactory.add.existing.mockImplementation((gameObject: any) => {
       const collider = gameObject as any;
       collider.setStatic = vi.fn().mockReturnThis();
@@ -478,7 +573,6 @@ describe('GameScene player integration', () => {
     performanceMonitorStubs.update.mockClear();
     renderingPreferenceStubs.recordLowFpsEvent.mockClear();
     renderingPreferenceStubs.recordStableFpsEvent.mockClear();
-    stubs.cameraStartFollow.mockClear();
     stubs.matterFactory.add.rectangle = vi.fn();
   });
 
@@ -644,8 +738,15 @@ describe('GameScene player integration', () => {
 
     scene.create();
 
-    expect(stubs.cameraStartFollow).toHaveBeenCalled();
-    expect(stubs.cameraStartFollow.mock.calls[0]?.[0]).toBe(kirdyInstance.sprite);
+    expect(stubs.cameraSetViewport).toHaveBeenCalledWith(0, 0, 800, 600);
+    expect(stubs.cameraStartFollow).toHaveBeenCalledWith(
+      kirdyInstance.sprite,
+      true,
+      0.1,
+      0.1,
+      0,
+      -(HUD_SAFE_AREA_HEIGHT + HUD_WORLD_MARGIN),
+    );
   });
 
   it('地形タイルに対応するコライダーをMatterに生成して物理システムへ登録する', () => {
@@ -684,7 +785,7 @@ describe('GameScene player integration', () => {
       lastKnownPlayerPosition: { ...areaState.playerSpawnPosition },
     });
 
-    stubs.addRectangle.mockImplementation(() => {
+    stubs.addRectangleMock.mockImplementation(() => {
       const rectangle = {
         setVisible: vi.fn().mockReturnThis(),
         setActive: vi.fn().mockReturnThis(),
@@ -709,7 +810,7 @@ describe('GameScene player integration', () => {
     scene.create();
 
     const expectedSolidTiles = layout.flat().filter((tile) => tile === 'wall').length;
-    expect(stubs.addRectangle).toHaveBeenCalledTimes(expectedSolidTiles);
+    expect(stubs.addRectangleMock).toHaveBeenCalledTimes(expectedSolidTiles);
     expect(stubs.matterFactory.add.existing).toHaveBeenCalledTimes(expectedSolidTiles);
     expect(physicsRegisterTerrainMock).toHaveBeenCalledTimes(expectedSolidTiles);
     createdColliders.forEach((collider) => {
@@ -772,9 +873,9 @@ describe('GameScene player integration', () => {
       y: number;
       textureKey: string;
       frame: string | undefined;
-      instance: ReturnType<typeof stubs.addImage>;
+      instance: ReturnType<typeof stubs.addImageMock>;
     }> = [];
-    stubs.addImage.mockImplementation((x: number, y: number, textureKey: string, frame?: string) => {
+    stubs.addImageMock.mockImplementation((x: number, y: number, textureKey: string, frame?: string) => {
       const image = {
         x,
         y,
@@ -884,7 +985,7 @@ describe('GameScene player integration', () => {
       };
     }> = [];
 
-    stubs.addImage.mockImplementation((x: number, y: number, textureKey: string, frame?: string) => {
+    stubs.addImageMock.mockImplementation((x: number, y: number, textureKey: string, frame?: string) => {
       const image = {
         setOrigin: vi.fn().mockReturnThis(),
         setDepth: vi.fn().mockReturnThis(),

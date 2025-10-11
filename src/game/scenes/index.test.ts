@@ -54,6 +54,7 @@ vi.mock('phaser', () => {
     setOrigin: vi.fn().mockReturnThis(),
     setScrollFactor: vi.fn().mockReturnThis(),
     setDepth: vi.fn().mockReturnThis(),
+    setPosition: vi.fn().mockReturnThis(),
     setInteractive: vi.fn().mockReturnThis(),
     on: vi.fn().mockReturnThis(),
     off: vi.fn().mockReturnThis(),
@@ -65,6 +66,7 @@ vi.mock('phaser', () => {
     public scene = createScenePluginMock();
     public events = createEventEmitterMock();
     public load = createLoaderMock();
+    public scale = { width: 800, height: 600 };
     public input = {
       keyboard: createKeyboardMock(),
       on: vi.fn(),
@@ -356,6 +358,30 @@ describe('Scene registration', () => {
     pointerHandler?.();
 
     expect(menuScene.scene.start).toHaveBeenCalledTimes(2);
+  });
+
+  it('menu scene displays controls guidance and centers the start prompt', () => {
+    const menuScene = new MenuScene();
+
+    menuScene.create();
+
+    const addTextMock = asMock(menuScene.add.text);
+    const promptCallIndex = addTextMock.mock.calls.findIndex(
+      ([, , text]) => text === 'Press Space or Tap to Start',
+    );
+    expect(promptCallIndex).toBeGreaterThanOrEqual(0);
+
+    const prompt = addTextMock.mock.results[promptCallIndex]?.value;
+    expect(prompt?.setOrigin).toHaveBeenCalledWith(0.5, 0.5);
+    expect(prompt?.setPosition).toHaveBeenCalledWith(400, 300);
+
+    const controlsCall = addTextMock.mock.calls.find(
+      ([, , text]) => typeof text === 'string' && text.includes('Controls:'),
+    );
+    expect(controlsCall).toBeTruthy();
+    const controlsText = controlsCall?.[2];
+    expect(controlsText).toContain('Left/Right or A/D');
+    expect(controlsText).toContain('Touch:');
   });
 
   it('menu scene surfaces critical error notices when provided via scene data', () => {

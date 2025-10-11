@@ -15,6 +15,7 @@ import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { AreaManager, AREA_IDS, type AreaManagerSnapshot, type Vector2 } from '../world/AreaManager';
 import { MapOverlay, createMapSummaries } from '../ui/MapOverlay';
 import { Hud } from '../ui/Hud';
+import { HUD_SAFE_AREA_HEIGHT, HUD_WORLD_MARGIN } from '../ui/hud-layout';
 import { SaveManager, type GameProgressSnapshot, DEFAULT_SETTINGS, type GameSettingsSnapshot } from '../save/SaveManager';
 import { createAssetManifest, queueAssetManifest, type AssetFallback } from '../assets/pipeline';
 import { PerformanceMonitor, type PerformanceMetrics } from '../performance/PerformanceMonitor';
@@ -203,12 +204,35 @@ export class MenuScene extends Phaser.Scene {
     }
 
     if (this.add?.text) {
-      const prompt = this.add.text(0, 0, 'Press Space or Tap to Start', {
+      const width = this.scale?.width ?? 800;
+      const height = this.scale?.height ?? 600;
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const prompt = this.add.text(centerX, centerY, 'Press Space or Tap to Start', {
         fontSize: '24px',
         color: '#ffffff',
+        align: 'center',
       });
-      prompt.setOrigin?.(0, 0);
+      prompt.setOrigin?.(0.5, 0.5);
+      prompt.setPosition?.(centerX, centerY);
       prompt.setScrollFactor?.(0, 0);
+      prompt.setDepth?.(100);
+
+      const controlsLines = [
+        'Controls: Left/Right or A/D to move, Space to jump or hover',
+        'C inhale, S swallow, Z spit, X discard',
+        'Touch: use on-screen buttons',
+      ];
+      const instructions = this.add.text(centerX, centerY + 72, controlsLines.join('\n'), {
+        fontSize: '16px',
+        color: '#ffffff',
+        align: 'center',
+      });
+      instructions.setOrigin?.(0.5, 0);
+      instructions.setScrollFactor?.(0, 0);
+      instructions.setDepth?.(100);
+      instructions.setLineSpacing?.(2);
+      instructions.setWordWrapWidth?.(Math.min(width - 32, 620), true);
     }
 
     const startHandler = () => this.startGame();
@@ -959,14 +983,20 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
+    const width = this.scale?.width ?? 800;
+    const height = this.scale?.height ?? 600;
+    camera.setViewport?.(0, 0, width, height);
+
     if (!this.cameraFollowConfigured) {
-      camera.startFollow?.(sprite, true, 0.1, 0.1);
+      const followOffsetY = -(HUD_SAFE_AREA_HEIGHT + HUD_WORLD_MARGIN);
+      camera.startFollow?.(sprite, true, 0.1, 0.1, 0, followOffsetY);
       this.cameraFollowConfigured = true;
     }
 
     const bounds = this.areaManager?.getCurrentAreaState()?.pixelBounds;
     if (Number.isFinite(bounds?.width) && Number.isFinite(bounds?.height)) {
-      camera.setBounds?.(0, 0, bounds!.width as number, bounds!.height as number);
+      const safeMargin = HUD_SAFE_AREA_HEIGHT + HUD_WORLD_MARGIN;
+      camera.setBounds?.(0, -safeMargin, bounds!.width as number, (bounds!.height as number) + safeMargin);
     }
   }
 

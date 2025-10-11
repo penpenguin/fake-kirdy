@@ -1,5 +1,6 @@
 import type Phaser from 'phaser';
 import type { AbilityType } from '../mechanics/AbilitySystem';
+import { HUD_SAFE_AREA_HEIGHT } from './hud-layout';
 
 export interface HudHPState {
   current: number;
@@ -10,12 +11,13 @@ const SCORE_DIGITS = 6;
 
 export class Hud {
   private container?: Phaser.GameObjects.Container;
+  private background?: Phaser.GameObjects.Rectangle;
+  private border?: Phaser.GameObjects.Rectangle;
   private hpBar?: Phaser.GameObjects.Rectangle;
   private hpFill?: Phaser.GameObjects.Rectangle;
   private hpLabel?: Phaser.GameObjects.Text;
   private abilityLabel?: Phaser.GameObjects.Text;
   private scoreLabel?: Phaser.GameObjects.Text;
-  private controlsLabel?: Phaser.GameObjects.Text;
 
   constructor(private readonly scene: Phaser.Scene) {
     const { add } = scene;
@@ -31,53 +33,54 @@ export class Hud {
     const padding = 16;
     const hpBarWidth = 180;
     const hpBarHeight = 16;
+    const backgroundWidth = this.scene.scale?.width ?? 800;
+    const backgroundHeight = HUD_SAFE_AREA_HEIGHT;
+
+    const background = add.rectangle(0, 0, backgroundWidth, backgroundHeight, 0x121212, 1);
+    background.setOrigin?.(0, 0);
+    background.setScrollFactor?.(0, 0);
+    background.setDepth?.(0);
+
+    const borderHeight = 2;
+    const border = add.rectangle(0, backgroundHeight - borderHeight, backgroundWidth, borderHeight, 0x000000, 1);
+    border.setOrigin?.(0, 0);
+    border.setScrollFactor?.(0, 0);
+    border.setDepth?.(1);
 
     const hpBar = add.rectangle(padding, padding, hpBarWidth, hpBarHeight, 0x000000, 0.4);
     hpBar.setOrigin?.(0, 0.5);
     hpBar.setScrollFactor?.(0, 0);
-    hpBar.setDepth?.(1);
+    hpBar.setDepth?.(2);
 
     const hpFill = add.rectangle(padding, padding, hpBarWidth, hpBarHeight, 0xff6bc5, 0.9);
     hpFill.setOrigin?.(0, 0.5);
     hpFill.setScrollFactor?.(0, 0);
-    hpFill.setDepth?.(2);
+    hpFill.setDepth?.(3);
 
     const labelStyle = { fontSize: '14px', color: '#ffffff' } satisfies Phaser.Types.GameObjects.Text.TextStyle;
     const hpLabel = add.text(padding, padding - 18, 'HP 0 / 0', labelStyle);
     hpLabel.setScrollFactor?.(0, 0);
-    hpLabel.setDepth?.(3);
+    hpLabel.setDepth?.(4);
 
     const abilityLabel = add.text(padding, padding + 18, 'Ability: None', labelStyle);
     abilityLabel.setScrollFactor?.(0, 0);
-    abilityLabel.setDepth?.(3);
+    abilityLabel.setDepth?.(4);
 
     const scoreX = padding + hpBarWidth + 24;
     const scoreLabel = add.text(scoreX, padding - 2, 'Score: 000000', labelStyle);
     scoreLabel.setScrollFactor?.(0, 0);
-    scoreLabel.setDepth?.(3);
+    scoreLabel.setDepth?.(4);
 
-    const controlsLines = [
-      'Controls: Left/Right or A/D to move, Space to jump or hover',
-      'C inhale, S swallow, Z spit, X discard',
-      'Touch: use on-screen buttons',
-    ];
-    const controlsLabel = add.text(padding, padding + 48, '', labelStyle);
-    controlsLabel.setScrollFactor?.(0, 0);
-    controlsLabel.setDepth?.(3);
-    controlsLabel.setLineSpacing?.(2);
-    const wrapWidth = (this.scene.scale?.width ?? 800) - padding * 2;
-    controlsLabel.setWordWrapWidth?.(wrapWidth, true);
-    controlsLabel.setText?.(controlsLines.join('\n'));
-
-    container.add?.([hpBar, hpFill, hpLabel, abilityLabel, scoreLabel, controlsLabel] as any);
+    container.add?.([background, border, hpBar, hpFill, hpLabel, abilityLabel, scoreLabel] as any);
 
     this.container = container;
+    this.background = background;
+    this.border = border;
     this.hpBar = hpBar;
     this.hpFill = hpFill;
     this.hpLabel = hpLabel;
     this.abilityLabel = abilityLabel;
     this.scoreLabel = scoreLabel;
-    this.controlsLabel = controlsLabel;
   }
 
   updateHP(state: HudHPState) {
@@ -114,19 +117,22 @@ export class Hud {
   }
 
   destroy() {
+    this.background?.destroy?.();
     this.hpLabel?.destroy?.();
     this.abilityLabel?.destroy?.();
     this.scoreLabel?.destroy?.();
-    this.controlsLabel?.destroy?.();
     this.hpFill?.destroy?.();
     this.hpBar?.destroy?.();
+    this.border?.destroy?.();
     this.container?.destroy?.();
+    this.background = undefined;
+    this.border = undefined;
     this.hpLabel = undefined;
     this.abilityLabel = undefined;
     this.scoreLabel = undefined;
-    this.controlsLabel = undefined;
     this.hpFill = undefined;
     this.hpBar = undefined;
     this.container = undefined;
   }
+
 }
