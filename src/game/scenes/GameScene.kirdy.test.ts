@@ -536,6 +536,11 @@ describe('GameScene player integration', () => {
 
       return 'floor';
     });
+    const getTileAtWorldPosition = vi.fn((position: { x: number; y: number }) => {
+      const column = Math.floor(position.x / tileSize);
+      const row = Math.floor(position.y / tileSize);
+      return getTileAt(column, row);
+    });
 
     defaultAreaState = {
       definition: { id: 'central-hub' },
@@ -545,6 +550,7 @@ describe('GameScene player integration', () => {
         rows,
         getClampedTileCoordinate: tileKeyFn,
         getTileAt,
+        getTileAtWorldPosition,
       },
       pixelBounds: { width: columns * tileSize, height: rows * tileSize },
       playerSpawnPosition: { x: (columns * tileSize) / 2, y: (rows * tileSize) / 2 },
@@ -1683,6 +1689,39 @@ describe('GameScene player integration', () => {
         exploration: { visitedTiles: 0, totalTiles: 0, completion: 0 },
       },
     ]);
+  });
+
+  it('壁タイル内に侵入したプレイヤーを直前の安全位置へ戻す', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    const snapshot = createSnapshot();
+    playerInputUpdateMock.mockReturnValue(snapshot);
+
+    scene.create();
+
+    scene.update(0, 16);
+
+    kirdyInstance.sprite.setPosition.mockClear();
+    kirdyInstance.sprite.setVelocity.mockClear();
+
+    const tileSize = defaultAreaState.tileMap.tileSize;
+    const wallColumn = 0;
+    const wallRow = 0;
+    const wallX = wallColumn * tileSize + tileSize / 2;
+    const wallY = wallRow * tileSize + tileSize / 2;
+
+    kirdyInstance.sprite.x = wallX;
+    kirdyInstance.sprite.y = wallY;
+    kirdyInstance.sprite.body.position.x = wallX;
+    kirdyInstance.sprite.body.position.y = wallY;
+
+    scene.update(16, 16);
+
+    const spawn = defaultAreaState.playerSpawnPosition;
+    expect(kirdyInstance.sprite.setPosition).toHaveBeenCalledWith(spawn.x, spawn.y);
+    expect(kirdyInstance.sprite.setVelocity).toHaveBeenCalledWith(0, 0);
   });
 
   it('spawns a Wabble Bee enemy and adds it to the update loop and inhale targets', () => {

@@ -277,6 +277,7 @@ export class GameScene extends Phaser.Scene {
   private saveManager?: SaveManager;
   private progressDirty = false;
   private lastSavedTileKey?: string;
+  private lastSafePlayerPosition?: Vector2;
   private performanceMonitor?: PerformanceMonitor;
   private readonly performanceRecoveryThresholdFps = 55;
   private audioManager?: AudioManager;
@@ -418,6 +419,7 @@ export class GameScene extends Phaser.Scene {
 
     this.kirdy = createKirdy(this, spawn, kirdyOptions);
     if (this.kirdy) {
+      this.lastSafePlayerPosition = { x: spawn.x, y: spawn.y };
       this.physicsSystem?.registerPlayer(this.kirdy);
       this.configureCamera();
     }
@@ -480,6 +482,7 @@ export class GameScene extends Phaser.Scene {
       this.saveManager = undefined;
       this.progressDirty = false;
       this.lastSavedTileKey = undefined;
+      this.lastSafePlayerPosition = undefined;
       this.performanceMonitor = undefined;
       this.audioManager?.stopBgm();
       this.audioManager = undefined;
@@ -618,12 +621,26 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
+    this.recordSafePlayerPosition(playerPosition);
+
     const result = this.areaManager.updatePlayerPosition(playerPosition);
 
     if (result.areaChanged && result.transition) {
       const { entryPosition } = result.transition;
       this.kirdy.sprite.setPosition?.(entryPosition.x, entryPosition.y);
       this.kirdy.sprite.setVelocity?.(0, 0);
+      if (this.kirdy.sprite.body) {
+        const body = this.kirdy.sprite.body as { position?: { x?: number; y?: number }; velocity?: { x?: number; y?: number } };
+        if (body.position) {
+          body.position.x = entryPosition.x;
+          body.position.y = entryPosition.y;
+        }
+        if (body.velocity) {
+          body.velocity.x = 0;
+          body.velocity.y = 0;
+        }
+      }
+      this.lastSafePlayerPosition = { x: entryPosition.x, y: entryPosition.y };
     }
 
     if (result.areaChanged) {
@@ -633,6 +650,10 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.trackExplorationProgress(result.areaChanged);
+
+    if (!result.areaChanged) {
+      this.enforceWalkablePlayerPosition();
+    }
 
     if (this.mapOverlay?.isVisible()) {
       this.refreshMapOverlay();
@@ -1026,6 +1047,87 @@ export class GameScene extends Phaser.Scene {
       x: sprite.x ?? sprite.body?.position?.x ?? 0,
       y: sprite.y ?? sprite.body?.position?.y ?? 0,
     };
+  }
+
+  private recordSafePlayerPosition(position: Vector2) {
+    const tile = this.getTerrainTileAt(position);
+    if (tile === 'floor' || tile === 'door') {
+      this.lastSafePlayerPosition = { x: position.x, y: position.y };
+    }
+  }
+
+  private enforceWalkablePlayerPosition(): Vector2 | undefined {
+    if (!this.kirdy) {
+      return undefined;
+    }
+
+    const currentPosition = this.getPlayerPosition();
+    if (!currentPosition) {
+      return undefined;
+    }
+
+    const tile = this.getTerrainTileAt(currentPosition);
+    if (tile === 'floor' || tile === 'door') {
+      this.lastSafePlayerPosition = { x: currentPosition.x, y: currentPosition.y };
+      return currentPosition;
+    }
+
+    const fallback =
+      this.lastSafePlayerPosition ??
+      this.areaManager?.getCurrentAreaState()?.playerSpawnPosition ??
+      currentPosition;
+
+    this.kirdy.sprite.setPosition?.(fallback.x, fallback.y);
+    this.kirdy.sprite.setVelocity?.(0, 0);
+
+    const body = this.kirdy.sprite.body as
+      | {
+          position?: { x?: number; y?: number };
+          velocity?: { x?: number; y?: number };
+        }
+      | undefined;
+
+    if (body?.position) {
+      body.position.x = fallback.x;
+      body.position.y = fallback.y;
+    }
+
+    if (body?.velocity) {
+      body.velocity.x = 0;
+      body.velocity.y = 0;
+    }
+
+    this.lastSafePlayerPosition = { x: fallback.x, y: fallback.y };
+    return { x: fallback.x, y: fallback.y };
+  }
+
+  private getTerrainTileAt(position: Vector2): string | undefined {
+    const areaState = this.areaManager?.getCurrentAreaState();
+    const tileMap = areaState?.tileMap as Partial<{
+      getTileAtWorldPosition: (point: Vector2) => string | undefined;
+      getTileAt: (column: number, row: number) => string | undefined;
+      tileSize: number;
+    }>;
+
+    if (!tileMap) {
+      return undefined;
+    }
+
+    if (typeof tileMap.getTileAtWorldPosition === 'function') {
+      return tileMap.getTileAtWorldPosition(position);
+    }
+
+    if (typeof tileMap.getTileAt === 'function' && Number.isFinite(tileMap.tileSize)) {
+      const tileSize = tileMap.tileSize as number;
+      if (tileSize <= 0) {
+        return undefined;
+      }
+      const column = Math.floor(position.x / tileSize);
+      const row = Math.floor(position.y / tileSize);
+      return tileMap.getTileAt(column, row);
+    }
+
+    return undefined;
   }
 
   private initializeSaveManager(): GameProgressSnapshot | undefined {
