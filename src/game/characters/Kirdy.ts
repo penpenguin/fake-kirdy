@@ -29,9 +29,9 @@ export interface KirdyStatsSnapshot {
 
 export type KirdyMoveDirection = 'left' | 'right' | 'none';
 
-const MOVE_SPEED = 20;
-const JUMP_SPEED = 40;
-const HOVER_ASCENT_SPEED = -20;
+const MOVE_SPEED = 10;
+const JUMP_SPEED = 20;
+const HOVER_ASCENT_SPEED = -10;
 const GROUND_VELOCITY_TOLERANCE = 1;
 const DEFAULT_MAX_HP = 6;
 
@@ -85,6 +85,8 @@ export class Kirdy {
       }
     }
 
+    const verticalVelocity = this.sprite.body?.velocity?.y ?? 0;
+
     if (!this.grounded && input.hoverPressed) {
       this.startHover();
     } else {
@@ -123,25 +125,21 @@ export class Kirdy {
       return false;
     }
 
+    this.stopHover();
     this.sprite.setVelocityY(-JUMP_SPEED);
     this.grounded = false;
-    this.hovering = false;
     this.playAnimation('kirdy-jump');
     return true;
   }
 
   startHover() {
-    const bodyVelocity = this.sprite.body?.velocity ?? { x: 0, y: 0 };
-    let targetVelocityY = bodyVelocity.y;
-
-    if (bodyVelocity.y > 0) {
-      targetVelocityY = HOVER_ASCENT_SPEED;
-    } else if (bodyVelocity.y < HOVER_ASCENT_SPEED) {
-      targetVelocityY = HOVER_ASCENT_SPEED;
+    if (!this.hovering) {
+      this.sprite.setIgnoreGravity?.(true);
     }
 
-    if (targetVelocityY !== bodyVelocity.y) {
-      this.sprite.setVelocityY(targetVelocityY);
+    const bodyVelocity = this.sprite.body?.velocity ?? { x: 0, y: 0 };
+    if (bodyVelocity.y !== HOVER_ASCENT_SPEED) {
+      this.sprite.setVelocityY(HOVER_ASCENT_SPEED);
     }
 
     this.grounded = false;
@@ -150,6 +148,10 @@ export class Kirdy {
   }
 
   stopHover() {
+    if (this.hovering) {
+      this.sprite.setIgnoreGravity?.(false);
+    }
+
     this.hovering = false;
   }
 
@@ -309,7 +311,7 @@ export class Kirdy {
     const physicsGrounded = this.sprite.getData?.('isGrounded');
     if (physicsGrounded === true) {
       this.grounded = true;
-      this.hovering = false;
+      this.stopHover();
       return;
     }
 
@@ -320,7 +322,7 @@ export class Kirdy {
     const isNearlyStationaryVertically = Math.abs(bodyVelocity.y) <= GROUND_VELOCITY_TOLERANCE;
     if (isNearlyStationaryVertically && bodyVelocity.y === 0) {
       this.grounded = true;
-      this.hovering = false;
+      this.stopHover();
       return;
     }
 
@@ -355,6 +357,8 @@ export function createKirdy(scene: Phaser.Scene, spawn: KirdySpawnConfig, option
 
   sprite.setFixedRotation();
   sprite.setIgnoreGravity(false);
+  sprite.setFriction?.(0, 0, 0);
+  sprite.setFrictionStatic?.(0);
   sprite.setFrictionAir(0.02);
   sprite.setName('Kirdy');
   sprite.setScale?.(0.3);

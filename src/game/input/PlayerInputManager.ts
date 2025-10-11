@@ -22,7 +22,7 @@ const MOVEMENT_KEY_CODES = {
   left: ['LEFT', 'A'],
   right: ['RIGHT', 'D'],
   jump: ['SPACE', 'UP', 'W'],
-  hover: ['SPACE'],
+  hover: ['SPACE', 'UP', 'W'],
 };
 
 const ACTION_KEY_CODES: Record<PlayerAction, string[]> = {

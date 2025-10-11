@@ -69,6 +69,8 @@ export class PhysicsSystem {
 
   registerTerrain(terrain: MatterGameObject) {
     terrain.setStatic?.(true);
+    terrain.setFriction?.(0, 0, 0);
+    terrain.setFrictionStatic?.(0);
     terrain.setCollisionCategory?.(PhysicsCategory.Terrain);
     terrain.setCollidesWith?.(PhysicsCategory.Player | PhysicsCategory.PlayerAttack | PhysicsCategory.Enemy);
     this.terrainObjects.add(terrain);

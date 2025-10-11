@@ -67,6 +67,8 @@ describe('PhysicsSystem', () => {
     expect(terrainSprite.setCollidesWith).toHaveBeenCalledWith(
       PhysicsCategory.Player | PhysicsCategory.PlayerAttack | PhysicsCategory.Enemy,
     );
+    expect(terrainSprite.setFriction).toHaveBeenCalledWith(0, 0, 0);
+    expect(terrainSprite.setFrictionStatic).toHaveBeenCalledWith(0);
 
     const collisionHandler = getCollisionStartHandler(worldOn);
     expect(collisionHandler).toBeDefined();
@@ -231,6 +233,8 @@ function createSpriteStub() {
     setOnCollide: vi.fn().mockReturnThis(),
     setOnCollideEnd: vi.fn().mockReturnThis(),
     setStatic: vi.fn().mockReturnThis(),
+    setFriction: vi.fn().mockReturnThis(),
+    setFrictionStatic: vi.fn().mockReturnThis(),
     setData: vi.fn().mockReturnThis(),
     destroy: vi.fn(),
     getData: vi.fn(),

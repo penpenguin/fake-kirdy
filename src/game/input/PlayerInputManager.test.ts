@@ -331,6 +331,26 @@ describe('PlayerInputManager', () => {
     expect(snapshot.actions.inhale.justPressed).toBe(false);
   });
 
+  it('treats UP と W の長押しでもホバリング入力を有効にする', () => {
+    const manager = createManager();
+    const upKey = sceneFactory.keyStore['UP'];
+    const wKey = sceneFactory.keyStore['W'];
+
+    expect(upKey).toBeDefined();
+    expect(wKey).toBeDefined();
+
+    upKey.isDown = true;
+    let snapshot = manager.update();
+    expect(snapshot.kirdy.jumpPressed).toBe(true);
+    expect(snapshot.kirdy.hoverPressed).toBe(true);
+
+    upKey.isDown = false;
+    wKey.isDown = true;
+    snapshot = manager.update();
+    expect(snapshot.kirdy.jumpPressed).toBe(true);
+    expect(snapshot.kirdy.hoverPressed).toBe(true);
+  });
+
   it('can be driven by simulated touch controls', () => {
     const manager = createManager();
 
