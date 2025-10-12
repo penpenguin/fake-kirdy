@@ -24,14 +24,18 @@ type TestEnemy = Enemy & {
 };
 
 const createWabbleBeeMock = vi.hoisted(() => vi.fn());
+const createFrostWabbleMock = vi.hoisted(() => vi.fn());
 const createDrontoDurtMock = vi.hoisted(() => vi.fn());
+const createGlacioDurtMock = vi.hoisted(() => vi.fn());
 
 vi.mock('./index', async (importOriginal) => {
   const actual = await importOriginal<typeof import('./index')>();
   return {
     ...actual,
     createWabbleBee: createWabbleBeeMock,
+    createFrostWabble: createFrostWabbleMock,
     createDrontoDurt: createDrontoDurtMock,
+    createGlacioDurt: createGlacioDurtMock,
   };
 });
 
@@ -47,6 +51,8 @@ describe('EnemyManager', () => {
     sprite.setActive = vi.fn(() => sprite);
     sprite.setVisible = vi.fn(() => sprite);
     sprite.setVelocity = vi.fn(() => sprite);
+    sprite.setTint = vi.fn(() => sprite);
+    sprite.clearTint = vi.fn(() => sprite);
     sprite.setPosition = vi.fn((x?: number, y?: number) => {
       if (Number.isFinite(x)) {
         sprite.x = x as number;
@@ -91,7 +97,9 @@ describe('EnemyManager', () => {
     vi.clearAllMocks();
 
     createWabbleBeeMock.mockReset();
+    createFrostWabbleMock.mockReset();
     createDrontoDurtMock.mockReset();
+    createGlacioDurtMock.mockReset();
 
     const module = await import('./EnemyManager');
     EnemyManager = module.EnemyManager;
@@ -134,6 +142,22 @@ describe('EnemyManager', () => {
 
     expect(result).toBe(enemy);
     expect(createWabbleBeeMock).toHaveBeenCalledWith(scene, spawn, expect.objectContaining({
+      getPlayerPosition: expect.any(Function),
+    }));
+    expect(inhaleSystem.addInhalableTarget).toHaveBeenCalledWith(enemy.sprite);
+    expect(physicsSystem.registerEnemy).toHaveBeenCalledWith(enemy);
+  });
+
+  it('spawns a Frost Wabble and registers it with dependencies', () => {
+    const enemy = makeEnemy();
+    enemy.getEnemyType.mockReturnValue('frost-wabble');
+    createFrostWabbleMock.mockReturnValueOnce(enemy);
+
+    const spawn = makeSpawn(140, 260);
+    const result = manager.spawnFrostWabble(spawn);
+
+    expect(result).toBe(enemy);
+    expect(createFrostWabbleMock).toHaveBeenCalledWith(scene, spawn, expect.objectContaining({
       getPlayerPosition: expect.any(Function),
     }));
     expect(inhaleSystem.addInhalableTarget).toHaveBeenCalledWith(enemy.sprite);
@@ -194,6 +218,22 @@ describe('EnemyManager', () => {
 
     const reopened = manager.spawnWabbleBee(makeSpawn(64, 0));
     expect(reopened).toBe(enemy4);
+  });
+
+  it('spawns a Glacio Durt variant through the dedicated factory', () => {
+    const enemy = makeEnemy();
+    enemy.getEnemyType.mockReturnValue('glacio-durt');
+    createGlacioDurtMock.mockReturnValueOnce(enemy);
+
+    const spawn = makeSpawn(220, 320);
+    const result = manager.spawnGlacioDurt(spawn);
+
+    expect(result).toBe(enemy);
+    expect(createGlacioDurtMock).toHaveBeenCalledWith(scene, spawn, expect.objectContaining({
+      getPlayerPosition: expect.any(Function),
+    }));
+    expect(inhaleSystem.addInhalableTarget).toHaveBeenCalledWith(enemy.sprite);
+    expect(physicsSystem.registerEnemy).toHaveBeenCalledWith(enemy);
   });
 
   it('disperses enemies that cluster too close to the player', () => {

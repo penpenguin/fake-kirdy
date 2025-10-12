@@ -2,9 +2,17 @@ import type Phaser from 'phaser';
 import type { AbilityType } from '../mechanics/AbilitySystem';
 import { KIRDY_MOVE_SPEED } from '../characters/Kirdy';
 
-const DEFAULT_ENEMY_SPEED = Math.max(1, KIRDY_MOVE_SPEED / 2);
+const DEFAULT_ENEMY_SPEED = Math.max(1, KIRDY_MOVE_SPEED * 0.4);
+const WABBLE_CHASE_SPEED = DEFAULT_ENEMY_SPEED * 1.125;
+const FROST_WABBLE_PATROL_SPEED = DEFAULT_ENEMY_SPEED * 0.9;
+const FROST_WABBLE_CHASE_SPEED = DEFAULT_ENEMY_SPEED;
+const DRONTO_CHARGE_SPEED = DEFAULT_ENEMY_SPEED * 1.125;
+const GLACIO_DURT_CHARGE_SPEED = DEFAULT_ENEMY_SPEED * 0.95;
 
-export type EnemyType = 'wabble-bee' | 'dronto-durt';
+export type EnemyType = 'wabble-bee' | 'dronto-durt' | 'frost-wabble' | 'glacio-durt';
+
+type WabbleBeeEnemyType = Extract<EnemyType, 'wabble-bee' | 'frost-wabble'>;
+type DrontoDurtEnemyType = Extract<EnemyType, 'dronto-durt' | 'glacio-durt'>;
 
 export interface EnemySpawn {
   x: number;
@@ -42,6 +50,20 @@ export interface Enemy {
 interface BaseEnemyConfig extends EnemyCommonOptions {
   defaultHP: number;
   defaultAbility?: AbilityType;
+}
+
+interface WabbleBeeVariantConfig {
+  enemyType: WabbleBeeEnemyType;
+  displayName: string;
+  defaultAbility: AbilityType;
+  tint?: number;
+}
+
+interface DrontoDurtVariantConfig {
+  enemyType: DrontoDurtEnemyType;
+  displayName: string;
+  defaultAbility: AbilityType;
+  tint?: number;
 }
 
 abstract class BaseEnemy implements Enemy {
@@ -156,12 +178,19 @@ class WabbleBee extends BaseEnemy {
   private disperseRecoveryMs = 0;
   private readonly disperseChaseLockMs = 2000;
 
-  constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, spawn: EnemySpawn, options: WabbleBeeOptions = {}) {
-    super(scene, sprite, 'wabble-bee', {
+  constructor(
+    scene: Phaser.Scene,
+    sprite: Phaser.Physics.Matter.Sprite,
+    spawn: EnemySpawn,
+    options: WabbleBeeOptions = {},
+    variant: WabbleBeeVariantConfig = { enemyType: 'wabble-bee', displayName: 'Wabble Bee', defaultAbility: 'fire' },
+  ) {
+    const resolvedAbility = options.abilityType ?? variant.defaultAbility;
+    super(scene, sprite, variant.enemyType, {
       defaultHP: Math.max(1, options.maxHP ?? 3),
-      defaultAbility: options.abilityType ?? 'fire',
+      defaultAbility: resolvedAbility,
       getPlayerPosition: options.getPlayerPosition,
-      abilityType: options.abilityType,
+      abilityType: resolvedAbility,
       maxHP: options.maxHP,
     });
 
@@ -169,7 +198,14 @@ class WabbleBee extends BaseEnemy {
     this.patrolRadius = options.patrolRadius ?? 64;
     this.patrolSpeed = options.patrolSpeed ?? DEFAULT_ENEMY_SPEED;
     this.detectionRange = options.detectionRange ?? 160;
-    this.chaseSpeed = options.chaseSpeed ?? DEFAULT_ENEMY_SPEED;
+    this.chaseSpeed = options.chaseSpeed ?? WABBLE_CHASE_SPEED;
+
+    sprite.setName?.(variant.displayName);
+    if (variant.tint !== undefined) {
+      sprite.setTint?.(variant.tint);
+    } else {
+      sprite.clearTint?.();
+    }
   }
 
   protected updateAI(_delta: number) {
@@ -219,19 +255,33 @@ class DrontoDurt extends BaseEnemy {
   private readonly detectionRange: number;
   private readonly chargeSpeed: number;
 
-  constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, spawn: EnemySpawn, options: DrontoDurtOptions = {}) {
-    super(scene, sprite, 'dronto-durt', {
+  constructor(
+    scene: Phaser.Scene,
+    sprite: Phaser.Physics.Matter.Sprite,
+    spawn: EnemySpawn,
+    options: DrontoDurtOptions = {},
+    variant: DrontoDurtVariantConfig = { enemyType: 'dronto-durt', displayName: 'Dronto Durt', defaultAbility: 'sword' },
+  ) {
+    const resolvedAbility = options.abilityType ?? variant.defaultAbility;
+    super(scene, sprite, variant.enemyType, {
       defaultHP: Math.max(1, options.maxHP ?? 4),
-      defaultAbility: options.abilityType ?? 'sword',
+      defaultAbility: resolvedAbility,
       getPlayerPosition: options.getPlayerPosition,
-      abilityType: options.abilityType,
+      abilityType: resolvedAbility,
       maxHP: options.maxHP,
     });
 
     this.detectionRange = options.detectionRange ?? 200;
-    this.chargeSpeed = options.chargeSpeed ?? DEFAULT_ENEMY_SPEED;
+    this.chargeSpeed = options.chargeSpeed ?? DRONTO_CHARGE_SPEED;
     // keep spawn reference to align y on ground if needed later
     void spawn; // avoids unused parameter linting
+
+    sprite.setName?.(variant.displayName);
+    if (variant.tint !== undefined) {
+      sprite.setTint?.(variant.tint);
+    } else {
+      sprite.clearTint?.();
+    }
   }
 
   protected updateAI(_delta: number) {
@@ -266,12 +316,7 @@ function ensureSprite<T extends Phaser.Physics.Matter.Sprite | undefined>(
   return sprite;
 }
 
-export function createWabbleBee(scene: Phaser.Scene, spawn: EnemySpawn, options: WabbleBeeOptions = {}) {
-  const sprite = ensureSprite(
-    scene.matter?.add?.sprite?.(spawn.x, spawn.y, 'wabble-bee'),
-    'wabble-bee',
-  );
-
+function configureWabbleSprite(sprite: Phaser.Physics.Matter.Sprite) {
   sprite.setOrigin?.(0.5, 0.5);
   if (typeof sprite.setBody === 'function') {
     sprite.setBody?.({
@@ -286,17 +331,9 @@ export function createWabbleBee(scene: Phaser.Scene, spawn: EnemySpawn, options:
   sprite.setIgnoreGravity?.(true);
   sprite.setFixedRotation?.();
   sprite.setFrictionAir?.(0.02);
-  sprite.setName?.('Wabble Bee');
-
-  return new WabbleBee(scene, sprite, spawn, options);
 }
 
-export function createDrontoDurt(scene: Phaser.Scene, spawn: EnemySpawn, options: DrontoDurtOptions = {}) {
-  const sprite = ensureSprite(
-    scene.matter?.add?.sprite?.(spawn.x, spawn.y, 'dronto-durt'),
-    'dronto-durt',
-  );
-
+function configureDrontoSprite(sprite: Phaser.Physics.Matter.Sprite) {
   sprite.setOrigin?.(0.5, 0.5);
   if (typeof sprite.setBody === 'function') {
     sprite.setBody?.({
@@ -311,7 +348,81 @@ export function createDrontoDurt(scene: Phaser.Scene, spawn: EnemySpawn, options
   sprite.setIgnoreGravity?.(false);
   sprite.setFixedRotation?.();
   sprite.setFrictionAir?.(0.05);
-  sprite.setName?.('Dronto Durt');
+}
 
-  return new DrontoDurt(scene, sprite, spawn, options);
+export function createWabbleBee(scene: Phaser.Scene, spawn: EnemySpawn, options: WabbleBeeOptions = {}) {
+  const sprite = ensureSprite(
+    scene.matter?.add?.sprite?.(spawn.x, spawn.y, 'wabble-bee'),
+    'wabble-bee',
+  );
+
+  configureWabbleSprite(sprite);
+
+  return new WabbleBee(scene, sprite, spawn, options, {
+    enemyType: 'wabble-bee',
+    displayName: 'Wabble Bee',
+    defaultAbility: 'fire',
+  });
+}
+
+export function createDrontoDurt(scene: Phaser.Scene, spawn: EnemySpawn, options: DrontoDurtOptions = {}) {
+  const sprite = ensureSprite(
+    scene.matter?.add?.sprite?.(spawn.x, spawn.y, 'dronto-durt'),
+    'dronto-durt',
+  );
+
+  configureDrontoSprite(sprite);
+
+  return new DrontoDurt(scene, sprite, spawn, options, {
+    enemyType: 'dronto-durt',
+    displayName: 'Dronto Durt',
+    defaultAbility: 'sword',
+  });
+}
+
+export function createFrostWabble(scene: Phaser.Scene, spawn: EnemySpawn, options: WabbleBeeOptions = {}) {
+  const sprite = ensureSprite(
+    scene.matter?.add?.sprite?.(spawn.x, spawn.y, 'wabble-bee'),
+    'frost-wabble',
+  );
+
+  configureWabbleSprite(sprite);
+
+  const frostOptions: WabbleBeeOptions = {
+    ...options,
+    abilityType: options.abilityType ?? 'ice',
+    patrolSpeed: options.patrolSpeed ?? FROST_WABBLE_PATROL_SPEED,
+    chaseSpeed: options.chaseSpeed ?? FROST_WABBLE_CHASE_SPEED,
+    detectionRange: options.detectionRange ?? 200,
+  };
+
+  return new WabbleBee(scene, sprite, spawn, frostOptions, {
+    enemyType: 'frost-wabble',
+    displayName: 'Frost Wabble',
+    defaultAbility: 'ice',
+    tint: 0x7fe9ff,
+  });
+}
+
+export function createGlacioDurt(scene: Phaser.Scene, spawn: EnemySpawn, options: DrontoDurtOptions = {}) {
+  const sprite = ensureSprite(
+    scene.matter?.add?.sprite?.(spawn.x, spawn.y, 'dronto-durt'),
+    'glacio-durt',
+  );
+
+  configureDrontoSprite(sprite);
+
+  const glacioOptions: DrontoDurtOptions = {
+    ...options,
+    abilityType: options.abilityType ?? 'ice',
+    detectionRange: options.detectionRange ?? 220,
+    chargeSpeed: options.chargeSpeed ?? GLACIO_DURT_CHARGE_SPEED,
+  };
+
+  return new DrontoDurt(scene, sprite, spawn, glacioOptions, {
+    enemyType: 'glacio-durt',
+    displayName: 'Glacio Durt',
+    defaultAbility: 'ice',
+    tint: 0x9fd8ff,
+  });
 }

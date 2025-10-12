@@ -69,6 +69,7 @@ const DEFAULT_AREA: AreaProgressSnapshot = {
     [AREA_IDS.FireArea]: [],
     [AREA_IDS.ForestArea]: [],
     [AREA_IDS.CaveArea]: [],
+    [AREA_IDS.GoalSanctum]: [],
   },
   lastKnownPlayerPosition: { x: 0, y: 0 },
   completedAreas: [],

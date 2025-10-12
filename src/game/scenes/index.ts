@@ -680,8 +680,16 @@ export class GameScene extends Phaser.Scene {
     return this.enemyManager?.spawnWabbleBee(spawn, options);
   }
 
+  spawnFrostWabble(spawn: EnemySpawn, options: WabbleBeeOptions = {}) {
+    return this.enemyManager?.spawnFrostWabble(spawn, options);
+  }
+
   spawnDrontoDurt(spawn: EnemySpawn, options: DrontoDurtOptions = {}) {
     return this.enemyManager?.spawnDrontoDurt(spawn, options);
+  }
+
+  spawnGlacioDurt(spawn: EnemySpawn, options: DrontoDurtOptions = {}) {
+    return this.enemyManager?.spawnGlacioDurt(spawn, options);
   }
 
   private initializeEnemyManager() {
@@ -897,6 +905,10 @@ export class GameScene extends Phaser.Scene {
 
   private spawnEnemyByType(type: EnemyType, spawn: EnemySpawn) {
     switch (type) {
+      case 'frost-wabble':
+        return this.spawnFrostWabble(spawn);
+      case 'glacio-durt':
+        return this.spawnGlacioDurt(spawn);
       case 'dronto-durt':
         return this.spawnDrontoDurt(spawn);
       case 'wabble-bee':

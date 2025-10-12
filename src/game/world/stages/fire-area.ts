@@ -4,7 +4,7 @@ const tileSize = 32;
 
 const layout = [
   '########################',
-  '#......................#',
+  '#..........D...........#',
   '#..####..######..####..#',
   '#D.....................#',
   '#..####..######..####..#',
@@ -22,12 +22,13 @@ export const fireArea: AreaDefinition = {
   layout,
   neighbors: {
     west: 'mirror-corridor',
+    north: 'goal-sanctum',
   },
   entryPoints: {
     default: { position: { x: tileSize * 2, y: height / 2 } },
     west: { position: { x: tileSize * 2, y: height / 2 } },
     east: { position: { x: width - tileSize * 3, y: height / 2 } },
-    north: { position: { x: width / 2, y: tileSize } },
+    north: { position: { x: width / 2, y: tileSize }, facing: 'north' },
     south: { position: { x: width / 2, y: height - tileSize * 2 } },
   },
   enemySpawns: {
@@ -35,7 +36,8 @@ export const fireArea: AreaDefinition = {
     maxActive: 3,
     entries: [
       { type: 'wabble-bee', limit: 1 },
-      { type: 'dronto-durt', limit: 2 },
+      { type: 'dronto-durt', limit: 1 },
+      { type: 'glacio-durt', limit: 1 },
     ],
   },
 };

@@ -86,6 +86,25 @@ describe('PhysicsSystem', () => {
     expect(playerSprite.setData).toHaveBeenCalledWith('isGrounded', true);
   });
 
+  it('registers enemy collision categories including terrain', () => {
+    const system = new PhysicsSystem(scene);
+    const playerSprite = createSpriteStub();
+    system.registerPlayer({ sprite: playerSprite } as any);
+
+    const enemySprite = createSpriteStub();
+    const enemy = {
+      sprite: enemySprite,
+      takeDamage: vi.fn(),
+      isDefeated: vi.fn().mockReturnValue(false),
+    };
+    system.registerEnemy(enemy as any);
+
+    expect(enemySprite.setCollisionCategory).toHaveBeenCalledWith(PhysicsCategory.Enemy);
+    expect(enemySprite.setCollidesWith).toHaveBeenCalledWith(
+      PhysicsCategory.Player | PhysicsCategory.PlayerAttack | PhysicsCategory.Terrain,
+    );
+  });
+
   it('emits an event when the player collides with an enemy', () => {
     const system = new PhysicsSystem(scene);
     const playerSprite = createSpriteStub();

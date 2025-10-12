@@ -4,38 +4,38 @@ const tileSize = 32;
 
 const layout = [
   '####################',
-  '#....##......##....#',
-  '#....##......##....#',
+  '#.............D....#',
   '#..................#',
-  '#..####......####..#',
-  '#.........D........#',
+  '#......####........#',
+  '#..................#',
+  '#....D.............#',
   '####################',
 ];
 
 const width = layout[0].length * tileSize;
 const height = layout.length * tileSize;
 
-export const iceArea: AreaDefinition = {
-  id: 'ice-area',
-  name: 'Ice Area',
+export const goalSanctum: AreaDefinition = {
+  id: 'goal-sanctum',
+  name: 'Goal Sanctum',
   tileSize,
   layout,
   neighbors: {
-    south: 'central-hub',
+    south: 'fire-area',
   },
   entryPoints: {
-    default: { position: { x: width / 2, y: height - tileSize * 3 } },
-    south: { position: { x: width / 2, y: height - tileSize * 3 } },
+    default: { position: { x: width / 2, y: height - tileSize * 2 } },
+    south: { position: { x: width / 2, y: height - tileSize * 2 }, facing: 'south' },
     north: { position: { x: width / 2, y: tileSize * 2 } },
-    east: { position: { x: width - tileSize * 2, y: height / 2 } },
+    east: { position: { x: width - tileSize * 3, y: height / 2 } },
     west: { position: { x: tileSize * 2, y: height / 2 } },
   },
   enemySpawns: {
-    baseline: 3,
-    maxActive: 3,
+    baseline: 1,
+    maxActive: 2,
     entries: [
-      { type: 'frost-wabble', limit: 2 },
       { type: 'glacio-durt', limit: 1 },
+      { type: 'frost-wabble', limit: 1 },
     ],
   },
 };

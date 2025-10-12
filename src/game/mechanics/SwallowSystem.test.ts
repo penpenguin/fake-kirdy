@@ -213,6 +213,28 @@ describe('SwallowSystem', () => {
     expect(inhaleSystem.releaseCapturedTarget).toHaveBeenCalled();
   });
 
+  it('skips projectile spawning gracefully when Matter sprite creation fails', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    addSprite.mockImplementation(() => {
+      throw new Error('texture missing');
+    });
+
+    const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any, physicsSystem as any);
+
+    expect(() =>
+      system.update(
+        buildActions({
+          spit: { isDown: true, justPressed: true },
+        }),
+      ),
+    ).not.toThrow();
+
+    expect(physicsSystem.registerPlayerAttack).not.toHaveBeenCalled();
+    expect(inhaleSystem.releaseCapturedTarget).toHaveBeenCalled();
+
+    warnSpy.mockRestore();
+  });
+
   it('syncs swallowed ability payload safely when textures lack atlas frames', () => {
     target.getData.mockReturnValueOnce('fire');
 

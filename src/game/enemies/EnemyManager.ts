@@ -1,5 +1,5 @@
 import type Phaser from 'phaser';
-import { createDrontoDurt, createWabbleBee } from './index';
+import { createDrontoDurt, createFrostWabble, createGlacioDurt, createWabbleBee } from './index';
 import type { DrontoDurtOptions, Enemy, EnemySpawn, EnemyType, WabbleBeeOptions } from './index';
 
 type Bounds = { left: number; right: number; top: number; bottom: number };
@@ -81,12 +81,30 @@ export class EnemyManager {
     return this.registerEnemy(enemy);
   }
 
+  spawnFrostWabble(spawn: EnemySpawn, options: WabbleBeeOptions = {}) {
+    if (!this.canSpawnEnemy()) {
+      return undefined;
+    }
+
+    const enemy = createFrostWabble(this.scene, spawn, this.withPlayerPosition(options));
+    return this.registerEnemy(enemy);
+  }
+
   spawnDrontoDurt(spawn: EnemySpawn, options: DrontoDurtOptions = {}) {
     if (!this.canSpawnEnemy()) {
       return undefined;
     }
 
     const enemy = createDrontoDurt(this.scene, spawn, this.withPlayerPosition(options));
+    return this.registerEnemy(enemy);
+  }
+
+  spawnGlacioDurt(spawn: EnemySpawn, options: DrontoDurtOptions = {}) {
+    if (!this.canSpawnEnemy()) {
+      return undefined;
+    }
+
+    const enemy = createGlacioDurt(this.scene, spawn, this.withPlayerPosition(options));
     return this.registerEnemy(enemy);
   }
 

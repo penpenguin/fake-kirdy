@@ -85,7 +85,7 @@ export class PhysicsSystem {
   registerEnemy(enemy: Enemy) {
     const sprite = enemy.sprite as MatterGameObject;
     sprite.setCollisionCategory?.(PhysicsCategory.Enemy);
-    sprite.setCollidesWith?.(PhysicsCategory.Player | PhysicsCategory.PlayerAttack);
+    sprite.setCollidesWith?.(PhysicsCategory.Player | PhysicsCategory.PlayerAttack | PhysicsCategory.Terrain);
     this.enemyByObject.set(sprite, enemy);
   }
 

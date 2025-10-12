@@ -18,6 +18,8 @@ const spriteFactory = vi.hoisted(() => () => ({
   setScale: vi.fn().mockReturnThis(),
   setBody: vi.fn().mockReturnThis(),
   setRectangle: vi.fn().mockReturnThis(),
+  setTint: vi.fn().mockReturnThis(),
+  clearTint: vi.fn().mockReturnThis(),
   destroy: vi.fn(),
 }));
 
@@ -82,7 +84,7 @@ describe('enemy system', () => {
   it('uses Kirdy move speed for default Wabble Bee patrols', async () => {
     const { createWabbleBee } = await import('./index');
     const { KIRDY_MOVE_SPEED } = await import('../characters/Kirdy');
-    const expectedSpeed = KIRDY_MOVE_SPEED / 2;
+    const expectedSpeed = KIRDY_MOVE_SPEED * 0.4;
 
     const enemy = createWabbleBee(scene, { x: 160, y: 200 }, {
       getPlayerPosition: () => undefined,
@@ -143,7 +145,7 @@ describe('enemy system', () => {
   it('uses Kirdy move speed for default Wabble Bee chases', async () => {
     const { createWabbleBee } = await import('./index');
     const { KIRDY_MOVE_SPEED } = await import('../characters/Kirdy');
-    const expectedSpeed = KIRDY_MOVE_SPEED / 2;
+    const expectedSpeed = KIRDY_MOVE_SPEED * 0.45;
 
     const enemy = createWabbleBee(scene, { x: 200, y: 200 }, {
       getPlayerPosition: () => ({ x: 120, y: 200 }),
@@ -255,7 +257,7 @@ describe('enemy system', () => {
   it('uses Kirdy move speed for default Dronto Durt charges', async () => {
     const { createDrontoDurt } = await import('./index');
     const { KIRDY_MOVE_SPEED } = await import('../characters/Kirdy');
-    const expectedSpeed = KIRDY_MOVE_SPEED / 2;
+    const expectedSpeed = KIRDY_MOVE_SPEED * 0.45;
 
     const enemy = createDrontoDurt(scene, { x: 240, y: 240 }, {
       getPlayerPosition: () => ({ x: 200, y: 240 }),

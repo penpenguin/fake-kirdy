@@ -149,8 +149,15 @@ export class SwallowSystem {
       projectile.setPosition?.(x, y);
       projectile.setData?.('pooledProjectile', true);
       return projectile;
-    } catch {
-      const fallback = this.scene.matter?.add?.sprite?.(x, y, STAR_PROJECTILE_TEXTURE);
+    } catch (error) {
+      let fallback: Phaser.Physics.Matter.Sprite | undefined;
+      try {
+        fallback = this.scene.matter?.add?.sprite?.(x, y, STAR_PROJECTILE_TEXTURE) ?? undefined;
+      } catch (creationError) {
+        console.warn('[SwallowSystem] failed to spawn star projectile', { error, creationError });
+        return undefined;
+      }
+
       if (fallback) {
         fallback.setIgnoreGravity?.(true);
         fallback.setFixedRotation?.();

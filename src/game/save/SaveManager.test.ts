@@ -27,6 +27,7 @@ function createExploredTiles(overrides: Partial<Record<AreaId, string[]>> = {}):
     [AREA_IDS.FireArea]: [],
     [AREA_IDS.ForestArea]: [],
     [AREA_IDS.CaveArea]: [],
+    [AREA_IDS.GoalSanctum]: [],
     ...overrides,
   };
 }
