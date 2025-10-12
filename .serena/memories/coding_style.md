@@ -1,0 +1,4 @@
+- TypeScript ES modules with explicit return types for exports; prefer const, camelCase for values and PascalCase for types/classes; filenames kebab-case unless mirroring upstream.
+- Phaser factories stay side-effect free; limit direct DOM access to entrypoints like src/main.ts.
+- Follow Takuto Wada style TDD: smallest failing spec, production code minimal for current tests, refactor after green.
+- Use 2-space indentation; keep imports logically ordered; leave existing ASCII style untouched unless required.

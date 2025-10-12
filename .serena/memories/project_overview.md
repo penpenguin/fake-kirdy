@@ -1,0 +1,3 @@
+- Purpose: Browser-based parody action platformer starring Kirdy; aims to implement movement, enemy ability absorption, maze exploration per docs/requirements.md.
+- Tech stack: TypeScript + Vite; Phaser 3.80 and Matter.js for gameplay; Vitest + jsdom for testing; TSC for type checking.
+- Structure: Runtime code under src/ (entrypoint src/main.ts, gameplay modules in src/game/**, shared types in src/types); tests colocated next to modules or under test/ for tooling; static assets in public/; docs/ hosts design and requirement specs; dist/ is build output (do not edit).

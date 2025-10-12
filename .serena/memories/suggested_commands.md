@@ -1,0 +1,6 @@
+- `npm run dev`: start Vite dev server at http://localhost:5173.
+- `npm run build`: create production bundle in dist/.
+- `npm run preview`: serve built bundle for smoke tests.
+- `npm run test`: run Vitest suite plus typecheck (`npm run check:typecheck && npm run check:test`).
+- `npm run check:test`: execute Vitest once; add `:watch` to keep red→green loop tight.
+- `npm run check:typecheck`: run TypeScript `tsc --noEmit` to validate types.

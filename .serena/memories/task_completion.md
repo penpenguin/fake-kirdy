@@ -1,0 +1,3 @@
+- Run `npm run test` and `npm run build` locally before requesting review.
+- Follow Takuto Wada TDD history: commit small increments (test, implementation, refactor) with short imperative subjects referencing relevant spec/task.
+- Update docs/ scope or gameplay specs when behavior changes; include media for visual updates; highlight any deferred work.
