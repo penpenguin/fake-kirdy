@@ -9,12 +9,18 @@ import {
   type PlayerAction,
   type InputButtonState,
 } from '../input/PlayerInputManager';
-import { type EnemySpawn, type WabbleBeeOptions, type DrontoDurtOptions } from '../enemies';
+import { type EnemySpawn, type WabbleBeeOptions, type DrontoDurtOptions, type EnemyType } from '../enemies';
 import { EnemyManager } from '../enemies/EnemyManager';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
-import { AreaManager, AREA_IDS, type AreaManagerSnapshot, type Vector2 } from '../world/AreaManager';
+import {
+  AreaManager,
+  AREA_IDS,
+  type AreaManagerSnapshot,
+  type Vector2,
+  type AreaEnemySpawnConfig,
+} from '../world/AreaManager';
 import { MapOverlay, createMapSummaries } from '../ui/MapOverlay';
-import { Hud } from '../ui/Hud';
+import { Hud, type HudHPState } from '../ui/Hud';
 import { HUD_SAFE_AREA_HEIGHT, HUD_WORLD_MARGIN } from '../ui/hud-layout';
 import { SaveManager, type GameProgressSnapshot, DEFAULT_SETTINGS, type GameSettingsSnapshot } from '../save/SaveManager';
 import { createAssetManifest, queueAssetManifest, type AssetFallback } from '../assets/pipeline';
@@ -51,6 +57,17 @@ type TerrainTilePlacement = {
   centerX: number;
   centerY: number;
   tileSize: number;
+};
+
+type StageEnemySpawnEntry = {
+  type: EnemyType;
+  limit: number;
+};
+
+type StageEnemySpawnPlan = {
+  baseline: number;
+  maxActive: number;
+  entries: StageEnemySpawnEntry[];
 };
 
 function buildConfig(key: SceneKey) {
@@ -260,13 +277,16 @@ export class GameScene extends Phaser.Scene {
   private enemyAutoSpawnTimer = 0;
   private enemyAutoSpawnEnabled = true;
   private enemyBaselinePopulation = 0;
+  private enemySpawnPlan?: StageEnemySpawnPlan;
+  private nextEnemyTypeIndex = 0;
   private readonly enemyCullingPadding = 96;
-  private readonly enemyManagerConfig = {
+  private readonly defaultEnemyManagerConfig = {
     maxActiveEnemies: 3,
     enemyClusterLimit: 2,
     enemySafetyRadius: 96,
     enemySpawnCooldownMs: 1200,
-  } as const;
+  };
+  private enemyManagerConfig = { ...this.defaultEnemyManagerConfig };
   private static readonly PLAYER_SPAWN = { x: 160, y: 360 } as const;
   private physicsSystem?: PhysicsSystem;
   private areaManager?: AreaManager;
@@ -275,6 +295,7 @@ export class GameScene extends Phaser.Scene {
   private pauseKeyHandler?: () => void;
   private lastAreaSummaryHash?: string;
   private hud?: Hud;
+  private lastHudHp?: HudHPState;
   private readonly playerMaxHP = 6;
   private readonly scorePerEnemy = 100;
   private isGameOver = false;
@@ -355,6 +376,29 @@ export class GameScene extends Phaser.Scene {
     this.events?.emit?.('performance:low-fps', metrics);
   }
 
+  private applyHudHp(state: HudHPState) {
+    if (!this.hud) {
+      return;
+    }
+
+    this.hud.updateHP(state);
+    this.lastHudHp = { current: state.current, max: state.max };
+  }
+
+  private syncHudHpWithPlayer() {
+    if (!this.hud || !this.kirdy) {
+      this.lastHudHp = undefined;
+      return;
+    }
+
+    const current = this.kirdy.getHP();
+    const max = this.kirdy.getMaxHP();
+
+    if (!this.lastHudHp || this.lastHudHp.current !== current || this.lastHudHp.max !== max) {
+      this.applyHudHp({ current, max });
+    }
+  }
+
   public damagePlayer(amount: number) {
     if (!Number.isFinite(amount) || !this.kirdy) {
       return;
@@ -372,7 +416,7 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
-    this.hud?.updateHP({ current, max: this.kirdy.getMaxHP() });
+    this.applyHudHp({ current, max: this.kirdy.getMaxHP() });
 
     if (current <= 0) {
       this.handlePlayerDefeated();
@@ -500,6 +544,7 @@ export class GameScene extends Phaser.Scene {
       this.events?.off?.('enemy-defeated', this.handleEnemyDefeated, this);
       this.hud?.destroy();
       this.hud = undefined;
+      this.lastHudHp = undefined;
       this.kirdy = undefined;
       if (this.isGameOver) {
         this.saveManager?.clear();
@@ -515,11 +560,11 @@ export class GameScene extends Phaser.Scene {
     });
 
     if (this.kirdy) {
-      this.hud?.updateHP({ current: this.kirdy.getHP(), max: this.kirdy.getMaxHP() });
+      this.applyHudHp({ current: this.kirdy.getHP(), max: this.kirdy.getMaxHP() });
       this.hud?.updateScore(this.kirdy.getScore());
       this.hud?.updateAbility(this.kirdy.getAbility());
     } else {
-      this.hud?.updateHP({ current: this.playerMaxHP, max: this.playerMaxHP });
+      this.applyHudHp({ current: this.playerMaxHP, max: this.playerMaxHP });
       this.hud?.updateScore(0);
       this.hud?.updateAbility(undefined);
     }
@@ -570,6 +615,7 @@ export class GameScene extends Phaser.Scene {
       this.enemyManager?.update(delta);
       this.maintainEnemyPopulation(delta);
       this.updateAreaState();
+      this.syncHudHpWithPlayer();
 
       if (this.progressDirty) {
         this.persistProgress();
@@ -643,6 +689,11 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
+    const areaState = this.areaManager?.getCurrentAreaState();
+    this.enemySpawnPlan = this.buildEnemySpawnPlan(areaState?.definition?.enemySpawns);
+    this.nextEnemyTypeIndex = 0;
+    this.enemyManagerConfig = this.createEnemyManagerConfig(this.enemySpawnPlan);
+
     if (this.enemyManager) {
       this.enemyManager.destroy();
       this.enemyManager = undefined;
@@ -659,7 +710,13 @@ export class GameScene extends Phaser.Scene {
 
     this.enemyManager.resetSpawnCooldown();
     this.enemySpawnPoints = this.collectInitialEnemySpawns();
-    this.enemyBaselinePopulation = Math.min(this.enemyManagerConfig.maxActiveEnemies, this.enemySpawnPoints.length);
+    const spawnCapacity = this.enemySpawnPoints.length;
+    const plannedBaseline = this.enemySpawnPlan?.baseline ?? this.enemyManagerConfig.maxActiveEnemies;
+    this.enemyBaselinePopulation = Math.min(
+      this.enemyManagerConfig.maxActiveEnemies,
+      spawnCapacity,
+      plannedBaseline,
+    );
     this.nextEnemySpawnIndex = 0;
     this.enemyAutoSpawnTimer = 0;
   }
@@ -763,6 +820,91 @@ export class GameScene extends Phaser.Scene {
     return spawns.slice(0, this.enemyManagerConfig.maxActiveEnemies);
   }
 
+  private buildEnemySpawnPlan(config?: AreaEnemySpawnConfig | null): StageEnemySpawnPlan | undefined {
+    if (!config) {
+      return undefined;
+    }
+
+    const entries = (config.entries ?? [])
+      .map((entry) => ({
+        type: entry.type,
+        limit: Math.max(0, Math.floor(entry.limit ?? 0)),
+      }))
+      .filter((entry) => entry.limit > 0);
+
+    if (entries.length === 0) {
+      return undefined;
+    }
+
+    const totalLimit = entries.reduce((sum, entry) => sum + entry.limit, 0);
+    if (totalLimit <= 0) {
+      return undefined;
+    }
+
+    const requestedBaseline = Math.max(0, Math.floor(config.baseline ?? 0));
+    const requestedMaxActive = Math.max(0, Math.floor(config.maxActive ?? requestedBaseline));
+    if (requestedBaseline <= 0 || requestedMaxActive <= 0) {
+      return undefined;
+    }
+
+    const sanitizedMaxActive = Math.max(1, Math.min(totalLimit, requestedMaxActive));
+    const sanitizedBaseline = Math.max(1, Math.min(totalLimit, Math.min(requestedBaseline, sanitizedMaxActive)));
+
+    return {
+      baseline: sanitizedBaseline,
+      maxActive: sanitizedMaxActive,
+      entries,
+    };
+  }
+
+  private createEnemyManagerConfig(plan?: StageEnemySpawnPlan) {
+    const maxActive = Math.max(1, plan?.maxActive ?? this.defaultEnemyManagerConfig.maxActiveEnemies);
+    const clusterLimit = Math.min(this.defaultEnemyManagerConfig.enemyClusterLimit, maxActive);
+    return {
+      ...this.defaultEnemyManagerConfig,
+      maxActiveEnemies: maxActive,
+      enemyClusterLimit: clusterLimit,
+    };
+  }
+
+  private spawnEnemyAccordingToPlan(spawn: EnemySpawn) {
+    if (!this.enemySpawnPlan || this.enemySpawnPlan.entries.length === 0) {
+      return this.spawnWabbleBee(spawn);
+    }
+
+    if (!this.enemyManager) {
+      return undefined;
+    }
+
+    const totalTypes = this.enemySpawnPlan.entries.length;
+    for (let offset = 0; offset < totalTypes; offset += 1) {
+      const index = (this.nextEnemyTypeIndex + offset) % totalTypes;
+      const entry = this.enemySpawnPlan.entries[index];
+      const activeCount = this.enemyManager.getActiveEnemyCountByType(entry.type);
+      if (activeCount >= entry.limit) {
+        continue;
+      }
+
+      const enemy = this.spawnEnemyByType(entry.type, spawn);
+      if (enemy) {
+        this.nextEnemyTypeIndex = index + 1;
+        return enemy;
+      }
+    }
+
+    return undefined;
+  }
+
+  private spawnEnemyByType(type: EnemyType, spawn: EnemySpawn) {
+    switch (type) {
+      case 'dronto-durt':
+        return this.spawnDrontoDurt(spawn);
+      case 'wabble-bee':
+      default:
+        return this.spawnWabbleBee(spawn);
+    }
+  }
+
   private maintainEnemyPopulation(delta: number) {
     if (!this.enemyManager || !this.enemyAutoSpawnEnabled) {
       return;
@@ -798,7 +940,7 @@ export class GameScene extends Phaser.Scene {
         break;
       }
 
-      const enemy = this.spawnWabbleBee(spawn);
+      const enemy = this.spawnEnemyAccordingToPlan(spawn);
       if (!enemy) {
         break;
       }

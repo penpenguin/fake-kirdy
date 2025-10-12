@@ -56,6 +56,105 @@ const abilityCatalogue: Record<AbilityType, AbilityMetadata> = {
 
 Object.freeze(abilityCatalogue);
 
+const abilityTextureFallbacks: Record<AbilityType, readonly string[]> = {
+  fire: ['kirdy-fire'],
+  ice: ['kirdy-ice'],
+  sword: ['kirdy-sword'],
+};
+
+const BASE_TEXTURE_FALLBACKS = ['kirdy-idle'] as const;
+
+type TextureEntry = {
+  has?: (frame: string) => boolean;
+  hasFrame?: (frame: string) => boolean;
+  frames?: Record<string, unknown>;
+};
+
+type TextureManagerLike = {
+  exists?: (key: string) => boolean;
+  get?: (key: string) => TextureEntry | undefined;
+};
+
+function textureHasFrame(texture: TextureEntry | undefined, frame: string) {
+  if (!texture || !frame) {
+    return false;
+  }
+
+  if (typeof texture.hasFrame === 'function' && texture.hasFrame(frame)) {
+    return true;
+  }
+
+  if (typeof texture.has === 'function' && texture.has(frame)) {
+    return true;
+  }
+
+  if (texture.frames && Object.prototype.hasOwnProperty.call(texture.frames, frame)) {
+    return true;
+  }
+
+  return false;
+}
+
+function attemptSetTexture(
+  sprite: { setTexture?: (key: string, frame?: string) => unknown },
+  key: string,
+  frame?: string,
+) {
+  try {
+    if (frame !== undefined) {
+      sprite.setTexture?.(key, frame);
+    } else {
+      sprite.setTexture?.(key);
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function trySetKirdyTexture(
+  context: AbilityContext,
+  key: string,
+  frame?: string,
+  fallbackKeys: readonly string[] = [],
+) {
+  const sprite = context.kirdy.sprite;
+  const textures = context.scene?.textures as TextureManagerLike | undefined;
+  const attempts: Array<{ key: string; frame?: string }> = [];
+
+  if (key) {
+    attempts.push({ key, frame });
+  }
+
+  fallbackKeys.forEach((fallback) => {
+    if (fallback) {
+      attempts.push({ key: fallback });
+    }
+  });
+
+  if (key) {
+    attempts.push({ key });
+  }
+
+  for (const attempt of attempts) {
+    const hasTexture = textures?.exists?.(attempt.key);
+    if (textures?.exists && hasTexture === false) {
+      continue;
+    }
+
+    if (attempt.frame) {
+      const texture = textures?.get?.(attempt.key);
+      if (textures && texture && !textureHasFrame(texture, attempt.frame)) {
+        continue;
+      }
+    }
+
+    if (attemptSetTexture(sprite, attempt.key, attempt.frame)) {
+      return;
+    }
+  }
+}
+
 function playAbilitySound(context: AbilityContext, key: string) {
   if (context.audioManager) {
     context.audioManager.playSfx(key);
@@ -68,13 +167,13 @@ function playAbilitySound(context: AbilityContext, key: string) {
 const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
   fire: {
     ...abilityCatalogue.fire,
-    onAcquire: ({ kirdy }) => {
-      kirdy.sprite.setTint?.(hexToTint(abilityCatalogue.fire.color));
-      kirdy.sprite.setTexture?.('kirdy', 'fire');
+    onAcquire: (context) => {
+      context.kirdy.sprite.setTint?.(hexToTint(abilityCatalogue.fire.color));
+      trySetKirdyTexture(context, 'kirdy', 'fire', abilityTextureFallbacks.fire);
     },
-    onRemove: ({ kirdy }) => {
-      kirdy.sprite.clearTint?.();
-      kirdy.sprite.setTexture?.('kirdy');
+    onRemove: (context) => {
+      context.kirdy.sprite.clearTint?.();
+      trySetKirdyTexture(context, 'kirdy', undefined, BASE_TEXTURE_FALLBACKS);
     },
     performAttack: (context) => {
       const { scene, kirdy, physicsSystem } = context;
@@ -104,13 +203,13 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
   },
   ice: {
     ...abilityCatalogue.ice,
-    onAcquire: ({ kirdy }) => {
-      kirdy.sprite.setTint?.(hexToTint(abilityCatalogue.ice.color));
-      kirdy.sprite.setTexture?.('kirdy', 'ice');
+    onAcquire: (context) => {
+      context.kirdy.sprite.setTint?.(hexToTint(abilityCatalogue.ice.color));
+      trySetKirdyTexture(context, 'kirdy', 'ice', abilityTextureFallbacks.ice);
     },
-    onRemove: ({ kirdy }) => {
-      kirdy.sprite.clearTint?.();
-      kirdy.sprite.setTexture?.('kirdy');
+    onRemove: (context) => {
+      context.kirdy.sprite.clearTint?.();
+      trySetKirdyTexture(context, 'kirdy', undefined, BASE_TEXTURE_FALLBACKS);
     },
     performAttack: (context) => {
       const { scene, kirdy, physicsSystem } = context;
@@ -140,13 +239,13 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
   },
   sword: {
     ...abilityCatalogue.sword,
-    onAcquire: ({ kirdy }) => {
-      kirdy.sprite.setTint?.(hexToTint(abilityCatalogue.sword.color));
-      kirdy.sprite.setTexture?.('kirdy', 'sword');
+    onAcquire: (context) => {
+      context.kirdy.sprite.setTint?.(hexToTint(abilityCatalogue.sword.color));
+      trySetKirdyTexture(context, 'kirdy', 'sword', abilityTextureFallbacks.sword);
     },
-    onRemove: ({ kirdy }) => {
-      kirdy.sprite.clearTint?.();
-      kirdy.sprite.setTexture?.('kirdy');
+    onRemove: (context) => {
+      context.kirdy.sprite.clearTint?.();
+      trySetKirdyTexture(context, 'kirdy', undefined, BASE_TEXTURE_FALLBACKS);
     },
     performAttack: (context) => {
       const { scene, kirdy, physicsSystem } = context;
@@ -186,7 +285,11 @@ export class AbilitySystem {
     }
 
     definition.performAttack?.(context);
-    context.kirdy.sprite.anims?.play?.(`kirdy-${ability.type}-attack`, true);
+    const animationKey = `kirdy-${ability.type}-attack`;
+    const animations = context.scene?.anims as Partial<{ exists: (key: string) => boolean }> | undefined;
+    if (!animations?.exists || animations.exists(animationKey)) {
+      context.kirdy.sprite.anims?.play?.(animationKey, true);
+    }
   }
 
   private static extractAbilityType(source: AbilitySource): AbilityType | undefined {

@@ -1,6 +1,6 @@
 import type Phaser from 'phaser';
 import { createDrontoDurt, createWabbleBee } from './index';
-import type { DrontoDurtOptions, Enemy, EnemySpawn, WabbleBeeOptions } from './index';
+import type { DrontoDurtOptions, Enemy, EnemySpawn, EnemyType, WabbleBeeOptions } from './index';
 
 type Bounds = { left: number; right: number; top: number; bottom: number };
 
@@ -149,6 +149,16 @@ export class EnemyManager {
 
   getActiveEnemyCount() {
     return this.enemies.reduce((count, enemy) => (enemy.isDefeated() ? count : count + 1), 0);
+  }
+
+  getActiveEnemyCountByType(type: EnemyType) {
+    return this.enemies.reduce((count, enemy) => {
+      if (enemy.isDefeated()) {
+        return count;
+      }
+
+      return enemy.getEnemyType() === type ? count + 1 : count;
+    }, 0);
   }
 
   private canSpawnEnemy() {

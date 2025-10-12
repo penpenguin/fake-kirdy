@@ -29,6 +29,9 @@ let particleManager: {
   destroy: ReturnType<typeof vi.fn>;
   setDepth: ReturnType<typeof vi.fn>;
 };
+let textureManager: {
+  exists: ReturnType<typeof vi.fn>;
+};
 let kirdy: {
   sprite: {
     anims: { play: ReturnType<typeof vi.fn> };
@@ -53,6 +56,10 @@ beforeEach(() => {
 
   addParticles = vi.fn().mockReturnValue(particleManager);
 
+  textureManager = {
+    exists: vi.fn().mockReturnValue(true),
+  };
+
   scene = {
     sound: {
       play: playSound,
@@ -60,6 +67,7 @@ beforeEach(() => {
     add: {
       particles: addParticles,
     },
+    textures: textureManager,
   } as unknown as Phaser.Scene;
 
   kirdy = {
@@ -161,6 +169,34 @@ describe('InhaleSystem core behavior', () => {
 
     expect(particleManager.stop).toHaveBeenCalled();
     expect(particleManager.destroy).toHaveBeenCalled();
+  });
+
+  it('falls back to the inhale texture when the sparkle particle is missing', () => {
+    textureManager.exists.mockImplementation((key: string) => key !== 'inhale-sparkle');
+    const system = new InhaleSystem(scene, kirdy as any);
+
+    system.update(
+      buildActions({
+        inhale: { isDown: true, justPressed: true },
+      }),
+    );
+
+    expect(addParticles).toHaveBeenCalledWith(0, 0, 'kirdy-inhale');
+  });
+
+  it('skips the inhale particle effect when no textures are available', () => {
+    textureManager.exists.mockReturnValue(false);
+    addParticles.mockClear();
+
+    const system = new InhaleSystem(scene, kirdy as any);
+
+    system.update(
+      buildActions({
+        inhale: { isDown: true, justPressed: true },
+      }),
+    );
+
+    expect(addParticles).not.toHaveBeenCalled();
   });
 });
 

@@ -20,6 +20,16 @@ function buildActions(
   return base;
 }
 
+function createTextureDescriptor(frames: string[] = []) {
+  const frameSet = new Set(frames);
+  return {
+    hasFrame: vi.fn((frame: string) => frameSet.has(frame)),
+    has: vi.fn((frame: string) => frameSet.has(frame)),
+    getFrame: vi.fn((frame: string) => (frameSet.has(frame) ? {} : undefined)),
+    frames: Object.fromEntries(frames.map((frame) => [frame, {}])),
+  };
+}
+
 type ProjectileStub = {
   setVelocityX: ReturnType<typeof vi.fn>;
   setIgnoreGravity: ReturnType<typeof vi.fn>;
@@ -53,6 +63,11 @@ describe('AbilitySystem', () => {
       anims: { play: ReturnType<typeof vi.fn> };
     };
   };
+  let textureDescriptors: Record<string, ReturnType<typeof createTextureDescriptor>>;
+  let textureManager: any;
+  let sceneAnims: {
+    exists: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     projectile = {
@@ -74,11 +89,30 @@ describe('AbilitySystem', () => {
       destroyProjectile: vi.fn(),
     };
 
+    textureDescriptors = {
+      kirdy: createTextureDescriptor(['fire', 'ice', 'sword']),
+      'kirdy-fire': createTextureDescriptor([]),
+      'kirdy-ice': createTextureDescriptor([]),
+      'kirdy-sword': createTextureDescriptor([]),
+      'kirdy-idle': createTextureDescriptor([]),
+    };
+
+    textureManager = {
+      exists: vi.fn((key: string) => Object.prototype.hasOwnProperty.call(textureDescriptors, key)),
+      get: vi.fn((key: string) => textureDescriptors[key]),
+    };
+
+    sceneAnims = {
+      exists: vi.fn().mockReturnValue(true),
+    };
+
     scene = {
       matter: { add: { sprite: addSprite } },
       time: { delayedCall },
       sound: { play: playSound },
       events: { emit: eventsEmit },
+      textures: textureManager,
+      anims: sceneAnims,
     } as unknown as Phaser.Scene;
 
     kirdy = {
@@ -147,6 +181,30 @@ describe('AbilitySystem', () => {
     expect(system.getCurrentAbilityType()).toBe('fire');
   });
 
+  it('falls back to an ability texture when the base frame is missing', () => {
+    textureDescriptors.kirdy = createTextureDescriptor([]);
+
+    const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
+
+    system.applySwallowedPayload({ abilityType: 'fire' });
+
+    expect(kirdy.sprite.setTexture).toHaveBeenCalledWith('kirdy-fire');
+    expect(kirdy.sprite.setTexture).not.toHaveBeenCalledWith('kirdy', 'fire');
+  });
+
+  it('uses the idle texture when clearing an ability without the base texture', () => {
+    const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
+    system.applySwallowedPayload({ abilityType: 'fire' });
+
+    kirdy.sprite.setTexture.mockClear();
+    delete textureDescriptors.kirdy;
+
+    system.applySwallowedPayload({ abilityType: 'ice' });
+
+    expect(kirdy.sprite.setTexture.mock.calls[0]).toEqual(['kirdy-idle']);
+    expect(kirdy.sprite.setTexture.mock.calls[1]).toEqual(['kirdy-ice']);
+  });
+
   it('notifies listeners when a new ability is acquired', () => {
     const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
 
@@ -199,6 +257,35 @@ describe('AbilitySystem', () => {
 
     expect(audioManager.playSfx).toHaveBeenCalledWith('ability-fire-attack');
     expect(playSound).not.toHaveBeenCalled();
+  });
+
+  it('plays the ability attack animation when available', () => {
+    const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
+    system.applySwallowedPayload({ abilityType: 'fire' });
+
+    system.update(
+      buildActions({
+        spit: { isDown: true, justPressed: true },
+      }),
+    );
+
+    expect(sceneAnims.exists).toHaveBeenCalledWith('kirdy-fire-attack');
+    expect(kirdy.sprite.anims.play).toHaveBeenCalledWith('kirdy-fire-attack', true);
+  });
+
+  it('skips playing the ability attack animation when missing', () => {
+    sceneAnims.exists.mockImplementation((key: string) => key !== 'kirdy-fire-attack');
+    const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
+    system.applySwallowedPayload({ abilityType: 'fire' });
+    kirdy.sprite.anims.play.mockClear();
+
+    system.update(
+      buildActions({
+        spit: { isDown: true, justPressed: true },
+      }),
+    );
+
+    expect(kirdy.sprite.anims.play).not.toHaveBeenCalledWith('kirdy-fire-attack', true);
   });
 
   it('launches ice shards in the faced direction', () => {

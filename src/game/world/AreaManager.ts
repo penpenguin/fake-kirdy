@@ -1,3 +1,6 @@
+import type { EnemyType } from '../enemies';
+import { STAGE_DEFINITIONS, cloneStageDefinition } from './stages';
+
 export const AREA_IDS = {
   CentralHub: 'central-hub',
   MirrorCorridor: 'mirror-corridor',
@@ -17,6 +20,17 @@ const TILE_KEY_PATTERN = /^\d+,\d+$/;
 export interface Vector2 {
   x: number;
   y: number;
+}
+
+export interface AreaEnemySpawnEntry {
+  type: EnemyType;
+  limit: number;
+}
+
+export interface AreaEnemySpawnConfig {
+  baseline: number;
+  maxActive?: number;
+  entries: AreaEnemySpawnEntry[];
 }
 
 export interface AreaUpdateResult {
@@ -54,13 +68,14 @@ interface AreaEntryPoint {
   facing?: AreaTransitionDirection;
 }
 
-interface AreaDefinition {
+export interface AreaDefinition {
   id: AreaId;
   name: string;
   tileSize: number;
   layout: string[];
   neighbors: Partial<Record<AreaTransitionDirection, AreaId>>;
   entryPoints: { default: AreaEntryPoint } & Partial<Record<AreaTransitionDirection, AreaEntryPoint>>;
+  enemySpawns?: AreaEnemySpawnConfig;
 }
 
 interface AreaDerivedData {
@@ -610,186 +625,5 @@ function clampToBounds(position: Vector2, bounds: { width: number; height: numbe
 }
 
 function createDefaultAreaDefinitions(): AreaDefinition[] {
-  const centralHubLayout = [
-    '####################',
-    '#.........D........#',
-    '#..................#',
-    '#....####..####....#',
-    '#..................#',
-    '#D................D#',
-    '#....####..####....#',
-    '#..................#',
-    '#.........D........#',
-    '####################',
-  ];
-
-  const mirrorCorridorLayout = [
-    '####################',
-    '#..................#',
-    '#D................D#',
-    '#..................#',
-    '####################',
-  ];
-
-  const tileSize = 32;
-  const centralHubWidth = centralHubLayout[0].length * tileSize;
-  const centralHubHeight = centralHubLayout.length * tileSize;
-  const mirrorCorridorWidth = mirrorCorridorLayout[0].length * tileSize;
-  const mirrorCorridorHeight = mirrorCorridorLayout.length * tileSize;
-
-  const iceAreaLayout = [
-    '####################',
-    '#....##......##....#',
-    '#....##......##....#',
-    '#..................#',
-    '#..####......####..#',
-    '#.........D........#',
-    '####################',
-  ];
-  const iceAreaWidth = iceAreaLayout[0].length * tileSize;
-  const iceAreaHeight = iceAreaLayout.length * tileSize;
-
-  const forestAreaLayout = [
-    '########################',
-    '#...........D..........#',
-    '#..####..######..####..#',
-    '#......................#',
-    '#..####..######..####..#',
-    '#......................#',
-    '########################',
-  ];
-  const forestAreaWidth = forestAreaLayout[0].length * tileSize;
-  const forestAreaHeight = forestAreaLayout.length * tileSize;
-
-  const caveAreaLayout = [
-    '####################',
-    '#..................#',
-    '#..######..######..#',
-    '#.................D#',
-    '#..######..######..#',
-    '#..................#',
-    '####################',
-  ];
-  const caveAreaWidth = caveAreaLayout[0].length * tileSize;
-  const caveAreaHeight = caveAreaLayout.length * tileSize;
-
-  const fireAreaLayout = [
-    '########################',
-    '#......................#',
-    '#..####..######..####..#',
-    '#D.....................#',
-    '#..####..######..####..#',
-    '#......................#',
-    '########################',
-  ];
-  const fireAreaWidth = fireAreaLayout[0].length * tileSize;
-  const fireAreaHeight = fireAreaLayout.length * tileSize;
-
-  const centralHub: AreaDefinition = {
-    id: AREA_IDS.CentralHub,
-    name: 'Central Hub',
-    tileSize,
-    layout: centralHubLayout,
-    neighbors: {
-      north: AREA_IDS.IceArea,
-      east: AREA_IDS.MirrorCorridor,
-      south: AREA_IDS.ForestArea,
-      west: AREA_IDS.CaveArea,
-    },
-    entryPoints: {
-      default: { position: { x: centralHubWidth / 2, y: centralHubHeight / 2 } },
-      east: { position: { x: centralHubWidth - tileSize * 3, y: centralHubHeight / 2 } },
-      west: { position: { x: tileSize * 2, y: centralHubHeight / 2 } },
-      north: { position: { x: centralHubWidth / 2, y: tileSize * 2 } },
-      south: { position: { x: centralHubWidth / 2, y: centralHubHeight - tileSize * 3 } },
-    },
-  };
-
-  const mirrorCorridor: AreaDefinition = {
-    id: AREA_IDS.MirrorCorridor,
-    name: 'Mirror Corridor',
-    tileSize,
-    layout: mirrorCorridorLayout,
-    neighbors: {
-      west: AREA_IDS.CentralHub,
-      east: AREA_IDS.FireArea,
-    },
-    entryPoints: {
-      default: { position: { x: mirrorCorridorWidth / 2, y: mirrorCorridorHeight / 2 } },
-      west: { position: { x: tileSize * 2, y: mirrorCorridorHeight / 2 } },
-      east: { position: { x: mirrorCorridorWidth - tileSize * 3, y: mirrorCorridorHeight / 2 } },
-      north: { position: { x: mirrorCorridorWidth / 2, y: tileSize } },
-      south: { position: { x: mirrorCorridorWidth / 2, y: mirrorCorridorHeight - tileSize } },
-    },
-  };
-
-  const iceArea: AreaDefinition = {
-    id: AREA_IDS.IceArea,
-    name: 'Ice Area',
-    tileSize,
-    layout: iceAreaLayout,
-    neighbors: {
-      south: AREA_IDS.CentralHub,
-    },
-    entryPoints: {
-      default: { position: { x: iceAreaWidth / 2, y: iceAreaHeight - tileSize * 3 } },
-      south: { position: { x: iceAreaWidth / 2, y: iceAreaHeight - tileSize * 3 } },
-      north: { position: { x: iceAreaWidth / 2, y: tileSize * 2 } },
-      east: { position: { x: iceAreaWidth - tileSize * 2, y: iceAreaHeight / 2 } },
-      west: { position: { x: tileSize * 2, y: iceAreaHeight / 2 } },
-    },
-  };
-
-  const forestArea: AreaDefinition = {
-    id: AREA_IDS.ForestArea,
-    name: 'Forest Area',
-    tileSize,
-    layout: forestAreaLayout,
-    neighbors: {
-      north: AREA_IDS.CentralHub,
-    },
-    entryPoints: {
-      default: { position: { x: forestAreaWidth / 2, y: tileSize * 3 } },
-      north: { position: { x: forestAreaWidth / 2, y: tileSize * 3 } },
-      south: { position: { x: forestAreaWidth / 2, y: forestAreaHeight - tileSize * 2 } },
-      east: { position: { x: forestAreaWidth - tileSize * 2, y: forestAreaHeight / 2 } },
-      west: { position: { x: tileSize * 2, y: forestAreaHeight / 2 } },
-    },
-  };
-
-  const caveArea: AreaDefinition = {
-    id: AREA_IDS.CaveArea,
-    name: 'Cave Area',
-    tileSize,
-    layout: caveAreaLayout,
-    neighbors: {
-      east: AREA_IDS.CentralHub,
-    },
-    entryPoints: {
-      default: { position: { x: caveAreaWidth - tileSize * 3, y: caveAreaHeight / 2 } },
-      east: { position: { x: caveAreaWidth - tileSize * 3, y: caveAreaHeight / 2 } },
-      west: { position: { x: tileSize * 2, y: caveAreaHeight / 2 } },
-      north: { position: { x: caveAreaWidth / 2, y: tileSize * 2 } },
-      south: { position: { x: caveAreaWidth / 2, y: caveAreaHeight - tileSize * 2 } },
-    },
-  };
-
-  const fireArea: AreaDefinition = {
-    id: AREA_IDS.FireArea,
-    name: 'Fire Area',
-    tileSize,
-    layout: fireAreaLayout,
-    neighbors: {
-      west: AREA_IDS.MirrorCorridor,
-    },
-    entryPoints: {
-      default: { position: { x: tileSize * 2, y: fireAreaHeight / 2 } },
-      west: { position: { x: tileSize * 2, y: fireAreaHeight / 2 } },
-      east: { position: { x: fireAreaWidth - tileSize * 3, y: fireAreaHeight / 2 } },
-      north: { position: { x: fireAreaWidth / 2, y: tileSize } },
-      south: { position: { x: fireAreaWidth / 2, y: fireAreaHeight - tileSize * 2 } },
-    },
-  };
-
-  return [centralHub, mirrorCorridor, iceArea, forestArea, caveArea, fireArea];
+  return STAGE_DEFINITIONS.map((definition) => cloneStageDefinition(definition));
 }

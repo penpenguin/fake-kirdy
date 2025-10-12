@@ -65,6 +65,26 @@ const IMAGE_ASSETS: ReadonlyArray<ImageAsset> = [
     url: 'images/kirdy-spit.png',
   },
   {
+    key: 'kirdy-fire',
+    url: 'images/kirdy-fire.png',
+    fallbackUrl: 'images/fallbacks/kirdy-placeholder.png',
+  },
+  {
+    key: 'kirdy-ice',
+    url: 'images/kirdy-ice.png',
+    fallbackUrl: 'images/fallbacks/kirdy-placeholder.png',
+  },
+  {
+    key: 'kirdy-sword',
+    url: 'images/kirdy-sword.png',
+    fallbackUrl: 'images/fallbacks/kirdy-placeholder.png',
+  },
+  {
+    key: 'inhale-sparkle',
+    url: 'images/inhale-sparkle.png',
+    fallbackUrl: 'images/fallbacks/kirdy-placeholder.png',
+  },
+  {
     key: 'fire-attack',
     url: 'images/fire-attack.png',
   },

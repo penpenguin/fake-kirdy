@@ -42,7 +42,10 @@ type KirdyAnimationKey =
   | 'kirdy-hover'
   | 'kirdy-inhale'
   | 'kirdy-swallow'
-  | 'kirdy-spit';
+  | 'kirdy-spit'
+  | 'kirdy-fire-attack'
+  | 'kirdy-ice-attack'
+  | 'kirdy-sword-attack';
 
 export class Kirdy {
   public readonly sprite: Phaser.Physics.Matter.Sprite;
@@ -412,6 +415,9 @@ function registerAnimations(scene: Phaser.Scene) {
     { key: 'kirdy-inhale', frameRate: 10, repeat: -1, textureCandidates: ['kirdy-inhale', 'kirdy'] },
     { key: 'kirdy-swallow', frameRate: 12, repeat: 0, textureCandidates: ['kirdy-swallow', 'kirdy'] },
     { key: 'kirdy-spit', frameRate: 12, repeat: 0, textureCandidates: ['kirdy-spit', 'kirdy'] },
+    { key: 'kirdy-fire-attack', frameRate: 0, repeat: 0, textureCandidates: ['kirdy-fire', 'kirdy'] },
+    { key: 'kirdy-ice-attack', frameRate: 0, repeat: 0, textureCandidates: ['kirdy-ice', 'kirdy'] },
+    { key: 'kirdy-sword-attack', frameRate: 0, repeat: 0, textureCandidates: ['kirdy-sword', 'kirdy'] },
   ];
 
   animations.forEach((config) => {

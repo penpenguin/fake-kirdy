@@ -115,6 +115,12 @@ class AbilitySystem {
 }
 ```
 
+#### テクスチャとアニメーションのフォールバック
+
+- 能力獲得時は `trySetKirdyTexture` で `scene.textures` を参照し、`kirdy-fire` / `kirdy-ice` / `kirdy-sword` にフォールバックする。ベースフレームが欠落しても例外を投げない。
+- 能力攻撃のアニメーションキー（`kirdy-fire-attack` など）を `registerAnimations` で登録し、再生前に `scene.anims.exists` を確認して安全にスキップできるようにした。
+- 新規テクスチャはアセットパイプラインに登録し、`AbilitySystem.test.ts` でフォールバックとアニメーションの有無を検証する。
+
 ### 4. 敵管理システム
 
 ```javascript
@@ -143,6 +149,12 @@ class EnemyManager {
 }
 ```
 
+#### ステージ別スポーン構成
+
+- `src/game/world/stages/*.ts` に各エリアのレイアウトと `enemySpawns` 設定を切り出し、上限数や出現比率をステージ単位で管理する。
+- `GameScene` の自動スポーンは構成されたエントリ（例: Wabble Bee 2体 + Dronto Durt 1体）をローテーションし、`EnemyManager` の型別アクティブ数を確認してから出現させる。
+- ユニットテスト `GameScene.kirdy.test.ts` の「ステージ設定に従って異なるタイプの敵を自動スポーンする」でマルチタイプ出現を保証する。
+
 ### 5. 入力管理
 
 ```javascript
@@ -158,6 +170,12 @@ class PlayerInputManager {
 - **仮想コントロール**: モバイル向けに `virtual-controls` スプライトからタイルを切り出して構築する。左下に固定したDパッドが `左/右/上/下` を提供し、下方向は飲み込み (`↓/S`) と連動する。
 - **右側アクション配置**: 右端には `敵能力利用 → リンク解除 → 引き寄せ開始` の順で左下から右上へ斜めになる三角配置を採用し、物理キー `Z/X/C` と一致する。各ボタンは押下時にアルファ値を下げてフィードバックを与える。
 - **スナップショット**: タッチ状態とキーボード状態を統合し、`PlayerInputSnapshot` に変換してKirdyとアクション入力へ提供する。
+
+#### 吸い込みエフェクトのフォールバック
+
+- `InhaleSystem.ensureInhaleEffect` は `scene.textures` を確認し、`inhale-sparkle` → `kirdy-inhale` → `kirdy` の順で利用可能な粒子テクスチャを選択する。
+- どのテクスチャも利用できない場合はパーティクル生成をスキップし、ゲームプレイを継続する。
+- `InhaleSystem.test.ts` にフォールバックと非生成のケースを追加し、欠損アセットでタイトルに戻らないことを保証する。
 
 ### 5. マップシステム
 
@@ -227,6 +245,12 @@ const AreaData = {
   }
 };
 ```
+
+### ステージ定義モジュール化
+
+- 実装では `src/game/world/stages/*.ts` に各エリアの `AreaDefinition` を配置し、レイアウト・隣接情報・敵スポーン設定をモジュール単位で管理する。
+- `AreaManager` は `cloneStageDefinition` を介して定義をディープコピーし、ランタイムでの変更が他エリアへ波及しないようにしている。
+- `AreaManager.stage-import.test.ts` ではモジュールモックを利用して差し替え定義を読み込み、外部データソースやエディタ連携を見据えた拡張性を検証する。
 
 ## エラーハンドリング
 

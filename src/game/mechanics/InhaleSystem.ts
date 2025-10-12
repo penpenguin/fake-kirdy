@@ -90,10 +90,20 @@ export class InhaleSystem {
       return;
     }
 
-    const effect = this.scene.add.particles(0, 0, 'inhale-sparkle');
-    effect?.startFollow?.(this.kirdy.sprite as unknown as Phaser.Types.Math.Vector2Like);
-    effect?.setDepth?.(1000);
-    this.inhaleEffect = effect ?? undefined;
+    const candidates = this.getInhaleParticleCandidates();
+    for (const key of candidates) {
+      try {
+        const effect = this.scene.add.particles(0, 0, key);
+        effect?.startFollow?.(this.kirdy.sprite as unknown as Phaser.Types.Math.Vector2Like);
+        effect?.setDepth?.(1000);
+        if (effect) {
+          this.inhaleEffect = effect;
+          return;
+        }
+      } catch {
+        // try next candidate
+      }
+    }
   }
 
   private teardownEffect() {
@@ -164,5 +174,16 @@ export class InhaleSystem {
     });
 
     return viable[0];
+  }
+
+  private getInhaleParticleCandidates(): string[] {
+    const textures = this.scene?.textures as Partial<{ exists: (key: string) => boolean }> | undefined;
+    const base = ['inhale-sparkle', 'kirdy-inhale', 'kirdy'] as const;
+    if (!textures?.exists) {
+      return [...base];
+    }
+
+    const available = base.filter((key) => textures.exists?.(key));
+    return available.length > 0 ? available : [];
   }
 }

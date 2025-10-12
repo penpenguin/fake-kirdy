@@ -333,6 +333,7 @@ const createWabbleBeeMock = vi.hoisted(() =>
     takeDamage: vi.fn(),
     getHP: vi.fn().mockReturnValue(3),
     isDefeated: enemyIsDefeatedMock,
+    getEnemyType: vi.fn().mockReturnValue('wabble-bee'),
     getAbilityType: vi.fn().mockReturnValue('fire'),
     onDisperse: vi.fn(),
   })),
@@ -345,6 +346,7 @@ const createDrontoDurtMock = vi.hoisted(() =>
     takeDamage: vi.fn(),
     getHP: vi.fn().mockReturnValue(4),
     isDefeated: enemyIsDefeatedMock,
+    getEnemyType: vi.fn().mockReturnValue('dronto-durt'),
     getAbilityType: vi.fn().mockReturnValue('sword'),
     onDisperse: vi.fn(),
   })),
@@ -1541,6 +1543,23 @@ describe('GameScene player integration', () => {
     expect(hudUpdateHPMock).toHaveBeenLastCalledWith({ current: 0, max: 6 });
   });
 
+  it('フレーム更新でKirdyのHP変化を検知しHUDを即時更新する', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+    hudUpdateHPMock.mockClear();
+
+    kirdyInstance.setHP?.(3);
+    expect(hudUpdateHPMock).not.toHaveBeenCalled();
+
+    scene.update(100, 16);
+
+    expect(hudUpdateHPMock).toHaveBeenLastCalledWith({ current: 3, max: 6 });
+  });
+
   it('HPが0になるとゲームオーバーシーンを起動する', () => {
     const scene = new GameScene();
     createKirdyMock.mockReturnValue(makeKirdyStub());
@@ -1973,6 +1992,7 @@ describe('GameScene player integration', () => {
       takeDamage: vi.fn(),
       getHP: vi.fn().mockReturnValue(3),
       isDefeated: vi.fn().mockReturnValue(false),
+      getEnemyType: vi.fn().mockReturnValue('wabble-bee'),
       getAbilityType: vi.fn().mockReturnValue('fire'),
     };
 
@@ -2006,6 +2026,7 @@ describe('GameScene player integration', () => {
       takeDamage: vi.fn(),
       getHP: vi.fn().mockReturnValue(1),
       isDefeated,
+      getEnemyType: vi.fn().mockReturnValue('wabble-bee'),
       getAbilityType: vi.fn(),
     };
 
@@ -2032,6 +2053,7 @@ describe('GameScene player integration', () => {
       takeDamage: vi.fn(),
       getHP: vi.fn().mockReturnValue(4),
       isDefeated: vi.fn().mockReturnValue(false),
+      getEnemyType: vi.fn().mockReturnValue('dronto-durt'),
       getAbilityType: vi.fn().mockReturnValue('sword'),
     };
 
@@ -2061,6 +2083,7 @@ describe('GameScene player integration', () => {
       takeDamage: vi.fn(),
       getHP: vi.fn().mockReturnValue(3),
       isDefeated: vi.fn().mockReturnValue(false),
+      getEnemyType: vi.fn().mockReturnValue('wabble-bee'),
       getAbilityType: vi.fn().mockReturnValue('fire'),
     });
 
@@ -2120,6 +2143,7 @@ describe('GameScene player integration', () => {
       takeDamage: vi.fn(),
       getHP: vi.fn().mockReturnValue(3),
       isDefeated: vi.fn().mockReturnValue(false),
+      getEnemyType: vi.fn().mockReturnValue('wabble-bee'),
       getAbilityType: vi.fn().mockReturnValue('fire'),
     });
 
@@ -2142,6 +2166,29 @@ describe('GameScene player integration', () => {
     expect(allowed).toBeDefined();
     expect(allowed?.sprite).toBe(secondEnemy.sprite);
     expect(createWabbleBeeMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('ステージ設定に従って異なるタイプの敵を自動スポーンする', () => {
+    const scene = new GameScene();
+    defaultAreaState.definition.enemySpawns = {
+      baseline: 3,
+      entries: [
+        { type: 'wabble-bee', limit: 2 },
+        { type: 'dronto-durt', limit: 1 },
+      ],
+    };
+    createKirdyMock.mockReturnValue(makeKirdyStub({ sprite: { x: 0, y: 0 } }));
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    expect(createWabbleBeeMock).not.toHaveBeenCalled();
+    expect(createDrontoDurtMock).not.toHaveBeenCalled();
+
+    scene.update(0, 16);
+
+    expect(createWabbleBeeMock).toHaveBeenCalled();
+    expect(createDrontoDurtMock).toHaveBeenCalled();
   });
 
   it('disperses extra enemies when more than two cluster near Kirdy', () => {
@@ -2170,6 +2217,7 @@ describe('GameScene player integration', () => {
         takeDamage: vi.fn(),
         getHP: vi.fn().mockReturnValue(3),
         isDefeated: vi.fn().mockReturnValue(false),
+        getEnemyType: vi.fn().mockReturnValue('wabble-bee'),
         getAbilityType: vi.fn().mockReturnValue('fire'),
         onDisperse: vi.fn(),
       };

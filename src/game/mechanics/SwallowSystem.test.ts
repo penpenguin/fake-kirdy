@@ -213,6 +213,72 @@ describe('SwallowSystem', () => {
     expect(inhaleSystem.releaseCapturedTarget).toHaveBeenCalled();
   });
 
+  it('syncs swallowed ability payload safely when textures lack atlas frames', () => {
+    target.getData.mockReturnValueOnce('fire');
+
+    const swallowSystem = new SwallowSystem(scene, kirdy as any, inhaleSystem as any, physicsSystem as any);
+    swallowSystem.update(
+      buildActions({
+        swallow: { isDown: true, justPressed: true },
+      }),
+    );
+
+    const payload = swallowSystem.consumeSwallowedPayload();
+    expect(payload?.abilityType).toBe('fire');
+
+    const setTexture = vi.fn((key: string, frame?: string) => {
+      if (key === 'kirdy' && frame === 'fire') {
+        throw new Error('missing frame');
+      }
+      return undefined;
+    });
+
+    const abilityKirdy = {
+      sprite: {
+        setTint: vi.fn(),
+        clearTint: vi.fn(),
+        setTexture,
+        setData: vi.fn(),
+        anims: { play: vi.fn() },
+      },
+    };
+
+    const textureDescriptors: Record<string, { hasFrame: MockFn; has: MockFn; frames: Record<string, unknown> }> = {
+      kirdy: {
+        hasFrame: vi.fn().mockReturnValue(false),
+        has: vi.fn().mockReturnValue(false),
+        frames: {},
+      },
+      'kirdy-fire': {
+        hasFrame: vi.fn().mockReturnValue(true),
+        has: vi.fn().mockReturnValue(true),
+        frames: { default: {} },
+      },
+      'kirdy-idle': {
+        hasFrame: vi.fn().mockReturnValue(true),
+        has: vi.fn().mockReturnValue(true),
+        frames: { default: {} },
+      },
+    };
+
+    const textureManager = {
+      exists: vi.fn((key: string) => Object.prototype.hasOwnProperty.call(textureDescriptors, key)),
+      get: vi.fn((key: string) => textureDescriptors[key]),
+    };
+
+    const abilityScene = {
+      textures: textureManager,
+      events: { emit: vi.fn() },
+      sound: { play: vi.fn() },
+    } as unknown as Phaser.Scene;
+
+    const abilitySystem = new AbilitySystem(abilityScene, abilityKirdy as any, physicsSystem as any);
+
+    expect(() => abilitySystem.applySwallowedPayload(payload)).not.toThrow();
+    expect(setTexture).toHaveBeenCalledWith('kirdy-fire');
+    expect(setTexture).not.toHaveBeenCalledWith('kirdy', 'fire');
+  });
+
   it('flips projectile direction when Kirdy faces left', () => {
     kirdy.sprite.flipX = true;
 

@@ -34,6 +34,7 @@ export interface Enemy {
   takeDamage(amount: number): void;
   getHP(): number;
   isDefeated(): boolean;
+  getEnemyType(): EnemyType;
   getAbilityType(): AbilityType | undefined;
   onDisperse?(context: EnemyDisperseContext): void;
 }
@@ -109,6 +110,10 @@ abstract class BaseEnemy implements Enemy {
 
   getAbilityType() {
     return this.abilityType;
+  }
+
+  getEnemyType() {
+    return this.enemyType;
   }
 
   protected abstract updateAI(delta: number): void;

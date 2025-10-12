@@ -19,6 +19,7 @@ type TestEnemy = Enemy & {
   getHP: Mock;
   isDefeated: Mock;
   getAbilityType: Mock;
+  getEnemyType: Mock;
   onDisperse: Mock;
 };
 
@@ -72,6 +73,7 @@ describe('EnemyManager', () => {
     getHP: vi.fn().mockReturnValue(3),
     isDefeated: vi.fn().mockReturnValue(false),
     getAbilityType: vi.fn(),
+    getEnemyType: vi.fn().mockReturnValue('wabble-bee'),
     onDisperse: vi.fn(),
   });
 
