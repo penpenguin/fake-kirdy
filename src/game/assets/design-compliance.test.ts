@@ -128,16 +128,16 @@ const rgba = (r: number, g: number, b: number, a = 255): Rgba => ({ r, g, b, a }
 
 const VIRTUAL_CONTROL_FRAME_SIZE = 96;
 const VIRTUAL_CONTROL_LAYOUT: Record<
-  'left' | 'right' | 'jump' | 'inhale' | 'swallow' | 'spit' | 'discard',
+  'dpad-up' | 'dpad-left' | 'dpad-down' | 'dpad-right' | 'spit' | 'discard' | 'inhale',
   { column: number; row: number }
 > = {
-  left: { column: 0, row: 0 },
-  right: { column: 1, row: 0 },
-  jump: { column: 2, row: 0 },
-  inhale: { column: 3, row: 0 },
-  swallow: { column: 0, row: 1 },
-  spit: { column: 1, row: 1 },
-  discard: { column: 2, row: 1 },
+  'dpad-up': { column: 0, row: 0 },
+  'dpad-left': { column: 1, row: 0 },
+  'dpad-down': { column: 2, row: 0 },
+  'dpad-right': { column: 3, row: 0 },
+  spit: { column: 0, row: 1 },
+  discard: { column: 1, row: 1 },
+  inhale: { column: 2, row: 1 },
 };
 
 function frameContainsColor(
@@ -250,17 +250,14 @@ describe('asset sprites align with design palette expectations', () => {
     expect(png.width).toBe(384);
     expect(png.height).toBe(192);
 
-    const glyphAnchors: Record<
-      keyof typeof VIRTUAL_CONTROL_LAYOUT,
-      ColorAnchor
-    > = {
-      left: { label: 'left arrow cyan', color: rgba(90, 208, 255), tolerance: 22 },
-      right: { label: 'right arrow gold', color: rgba(255, 210, 112), tolerance: 20 },
-      jump: { label: 'jump burst ivory', color: rgba(255, 248, 196), tolerance: 18 },
-      inhale: { label: 'inhale swirl pink', color: rgba(255, 150, 216), tolerance: 24 },
-      swallow: { label: 'swallow glyph mint', color: rgba(132, 232, 172), tolerance: 20 },
+    const glyphAnchors: Record<keyof typeof VIRTUAL_CONTROL_LAYOUT, ColorAnchor> = {
+      'dpad-up': { label: 'up arrow aqua', color: rgba(122, 218, 255), tolerance: 24 },
+      'dpad-left': { label: 'left arrow cyan', color: rgba(90, 208, 255), tolerance: 22 },
+      'dpad-down': { label: 'down arrow mint', color: rgba(132, 232, 172), tolerance: 20 },
+      'dpad-right': { label: 'right arrow gold', color: rgba(255, 210, 112), tolerance: 20 },
       spit: { label: 'spit star ember', color: rgba(255, 190, 96), tolerance: 20 },
       discard: { label: 'discard cross magenta', color: rgba(255, 108, 144), tolerance: 20 },
+      inhale: { label: 'inhale swirl pink', color: rgba(255, 150, 216), tolerance: 24 },
     };
 
     (Object.keys(VIRTUAL_CONTROL_LAYOUT) as Array<keyof typeof VIRTUAL_CONTROL_LAYOUT>).forEach(

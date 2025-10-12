@@ -98,10 +98,11 @@ CONTROL_PINK: Color = (255, 156, 214, 255)
 CONTROL_GOLD: Color = (255, 232, 128, 255)
 CONTROL_OUTLINE: Color = (24, 32, 96, 255)
 CONTROL_BG: Color = (18, 20, 52, 200)
+CONTROL_UP_GLYPH: Color = (122, 218, 255, 255)
 CONTROL_LEFT_GLYPH: Color = (90, 208, 255, 255)
 CONTROL_RIGHT_GLYPH: Color = (255, 210, 112, 255)
+CONTROL_DOWN_GLYPH: Color = (132, 232, 172, 255)
 CONTROL_JUMP_GLYPH: Color = (255, 248, 196, 255)
-CONTROL_SWALLOW_GLYPH: Color = (132, 232, 172, 255)
 CONTROL_SPIT_GLYPH: Color = (255, 190, 96, 255)
 CONTROL_DISCARD_GLYPH: Color = (255, 108, 144, 255)
 
@@ -484,6 +485,24 @@ def draw_control_base(frame: List[List[Color]]):
         set_pixel(frame, x, y, CONTROL_GOLD)
 
 
+def draw_up_arrow(frame: List[List[Color]]):
+    size = len(frame)
+    cx = size // 2
+    cy = size // 2
+    shaft = 26
+    width = 7
+    for i in range(shaft):
+        y = cy + 8 - i
+        for dx in range(-width, width + 1):
+            set_pixel(frame, cx + dx, y, CONTROL_UP_GLYPH)
+    tip_length = 16
+    for i in range(tip_length):
+        y = cy + 8 - shaft - i
+        span = max(2, width - i // 2)
+        for dx in range(-span, span + 1):
+            set_pixel(frame, cx + dx, y, CONTROL_UP_GLYPH)
+
+
 def draw_left_arrow(frame: List[List[Color]]):
     size = len(frame)
     cx = size // 2
@@ -556,24 +575,22 @@ def draw_inhale_swirl(frame: List[List[Color]]):
             set_pixel(frame, x, y + offset, CONTROL_PINK)
 
 
-def draw_swallow_glyph(frame: List[List[Color]]):
+def draw_down_arrow(frame: List[List[Color]]):
     size = len(frame)
-    cx = size // 2 + 4
-    cy = size // 2 + 4
-    radius = 16
-    for y in range(cy - radius, cy + radius + 1):
-        for x in range(cx - radius, cx + radius + 1):
-            dx = x - cx
-            dy = y - (cy + 4)
-            if dx * dx + dy * dy <= radius * radius:
-                set_pixel(frame, x, y, CONTROL_SWALLOW_GLYPH)
-    for tip in range(8):
-        y = cy - radius - tip
-        span = max(0, 4 - tip // 2)
+    cx = size // 2
+    cy = size // 2
+    shaft = 26
+    width = 7
+    for i in range(shaft):
+        y = cy - 8 + i
+        for dx in range(-width, width + 1):
+            set_pixel(frame, cx + dx, y, CONTROL_DOWN_GLYPH)
+    tip_length = 16
+    for i in range(tip_length):
+        y = cy - 8 + shaft + i
+        span = max(2, width - i // 2)
         for dx in range(-span, span + 1):
-            set_pixel(frame, cx + dx, y, CONTROL_SWALLOW_GLYPH)
-    for dx in range(-10, 11):
-        set_pixel(frame, cx + dx, cy + radius - 4, CONTROL_OUTLINE)
+            set_pixel(frame, cx + dx, y, CONTROL_DOWN_GLYPH)
 
 
 def draw_spit_star(frame: List[List[Color]]):
@@ -626,13 +643,13 @@ def generate_virtual_controls():
     sheet = create_canvas(width, height)
 
     layout = [
-        ('left', 0, 0, draw_left_arrow),
-        ('right', 1, 0, draw_right_arrow),
-        ('jump', 2, 0, draw_jump_glyph),
-        ('inhale', 3, 0, draw_inhale_swirl),
-        ('swallow', 0, 1, draw_swallow_glyph),
-        ('spit', 1, 1, draw_spit_star),
-        ('discard', 2, 1, draw_discard_cross),
+        ('dpad-up', 0, 0, draw_up_arrow),
+        ('dpad-left', 1, 0, draw_left_arrow),
+        ('dpad-down', 2, 0, draw_down_arrow),
+        ('dpad-right', 3, 0, draw_right_arrow),
+        ('spit', 0, 1, draw_spit_star),
+        ('discard', 1, 1, draw_discard_cross),
+        ('inhale', 2, 1, draw_inhale_swirl),
     ]
 
     for _key, column, row, glyph in layout:

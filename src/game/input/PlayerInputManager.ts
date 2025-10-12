@@ -4,6 +4,15 @@ import type { KirdyInputState } from '../characters/Kirdy';
 export type PlayerAction = 'inhale' | 'swallow' | 'spit' | 'discard';
 export type PlayerTouchControl = 'left' | 'right' | 'jump' | PlayerAction;
 
+type VirtualControlFrame =
+  | 'inhale'
+  | 'spit'
+  | 'discard'
+  | 'dpad-up'
+  | 'dpad-left'
+  | 'dpad-down'
+  | 'dpad-right';
+
 export interface InputButtonState {
   isDown: boolean;
   justPressed: boolean;
@@ -43,14 +52,14 @@ const TOUCH_DEFAULT_STATE: Record<PlayerTouchControl, boolean> = {
 };
 
 const VIRTUAL_CONTROL_FRAME_SIZE = 96;
-const VIRTUAL_CONTROL_LAYOUT: Record<PlayerTouchControl, { column: number; row: number }> = {
-  left: { column: 0, row: 0 },
-  right: { column: 1, row: 0 },
-  jump: { column: 2, row: 0 },
-  inhale: { column: 3, row: 0 },
-  swallow: { column: 0, row: 1 },
-  spit: { column: 1, row: 1 },
-  discard: { column: 2, row: 1 },
+const VIRTUAL_CONTROL_LAYOUT: Record<VirtualControlFrame, { column: number; row: number }> = {
+  'dpad-up': { column: 0, row: 0 },
+  'dpad-left': { column: 1, row: 0 },
+  'dpad-down': { column: 2, row: 0 },
+  'dpad-right': { column: 3, row: 0 },
+  spit: { column: 0, row: 1 },
+  discard: { column: 1, row: 1 },
+  inhale: { column: 2, row: 1 },
 };
 
 function textureHasFrame(texture: any, frameKey: string) {
@@ -79,7 +88,7 @@ function ensureVirtualControlFrames(texture: any) {
     return;
   }
 
-  const missing = (Object.keys(VIRTUAL_CONTROL_LAYOUT) as PlayerTouchControl[]).filter(
+  const missing = (Object.keys(VIRTUAL_CONTROL_LAYOUT) as VirtualControlFrame[]).filter(
     (frameKey) => !textureHasFrame(texture, frameKey),
   );
 
@@ -268,24 +277,37 @@ export class PlayerInputManager {
     const width = scene.scale?.width ?? 800;
     const height = scene.scale?.height ?? 600;
 
-    const buttons: Array<{ control: PlayerTouchControl; x: number; y: number }> = [
-      { control: 'left', x: 80, y: height - 80 },
-      { control: 'right', x: 180, y: height - 80 },
-      { control: 'jump', x: width - 120, y: height - 80 },
-      { control: 'inhale', x: width - 220, y: height - 160 },
-      { control: 'swallow', x: width - 280, y: height - 100 },
-      { control: 'spit', x: width - 60, y: height - 200 },
-      { control: 'discard', x: width - 160, y: height - 240 },
+    const dpadCenterX = 140;
+    const dpadCenterY = height - 140;
+    const dpadOffset = 80;
+
+    const actionBaseX = width - 250;
+    const actionBaseY = height - 50;
+    const actionStep = 80;
+
+    const buttons: Array<{
+      frame: VirtualControlFrame;
+      control: PlayerTouchControl;
+      x: number;
+      y: number;
+    }> = [
+      { frame: 'dpad-left', control: 'left', x: dpadCenterX - dpadOffset, y: dpadCenterY },
+      { frame: 'dpad-right', control: 'right', x: dpadCenterX + dpadOffset, y: dpadCenterY },
+      { frame: 'dpad-up', control: 'jump', x: dpadCenterX, y: dpadCenterY - dpadOffset },
+      { frame: 'dpad-down', control: 'swallow', x: dpadCenterX, y: dpadCenterY + dpadOffset },
+      { frame: 'spit', control: 'spit', x: actionBaseX, y: actionBaseY },
+      { frame: 'discard', control: 'discard', x: actionBaseX + actionStep, y: actionBaseY - actionStep },
+      { frame: 'inhale', control: 'inhale', x: actionBaseX + actionStep * 2, y: actionBaseY - actionStep * 2 },
     ];
 
     const controlTexture = textures?.get?.('virtual-controls');
     ensureVirtualControlFrames(controlTexture);
     const availableFrames = controlTexture?.getFrameNames?.() ?? [];
 
-    buttons.forEach(({ control, x, y }) => {
-      const frameAvailable = availableFrames.includes(control) || textureHasFrame(controlTexture, control);
-      const frame = frameAvailable ? control : undefined;
-      const button = scene.add?.image?.(x, y, 'virtual-controls', frame);
+    buttons.forEach(({ frame, control, x, y }) => {
+      const frameAvailable = availableFrames.includes(frame) || textureHasFrame(controlTexture, frame);
+      const textureFrame = frameAvailable ? frame : undefined;
+      const button = scene.add?.image?.(x, y, 'virtual-controls', textureFrame);
       if (!button) {
         return;
       }
@@ -305,7 +327,7 @@ export class PlayerInputManager {
       } else {
         button.setDisplaySize?.(80, 80);
       }
-      button.setName?.(`touch-${control}`);
+      button.setName?.(`touch-${frame}`);
       button.on?.('pointerdown', downHandler);
       button.on?.('pointerup', upHandler);
       button.on?.('pointerout', upHandler);

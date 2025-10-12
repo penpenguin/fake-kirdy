@@ -69,17 +69,19 @@ type TextureManagerStub = {
   get: ReturnType<typeof vi.fn>;
 };
 
-const REQUIRED_CONTROL_FRAMES: PlayerTouchControl[] = [
-  'left',
-  'right',
-  'jump',
-  'inhale',
-  'swallow',
+const REQUIRED_CONTROL_FRAMES = [
+  'dpad-up',
+  'dpad-left',
+  'dpad-down',
+  'dpad-right',
   'spit',
   'discard',
-];
+  'inhale',
+] as const;
 
-function createControlTextureStub(options?: { initialFrames?: PlayerTouchControl[] }): ControlTextureStub {
+type VirtualControlFrame = (typeof REQUIRED_CONTROL_FRAMES)[number];
+
+function createControlTextureStub(options?: { initialFrames?: VirtualControlFrame[] }): ControlTextureStub {
   const frameSize = 96;
   const columns = 4;
   const rows = 2;
@@ -145,16 +147,18 @@ type SceneFactoryResult = {
     control?: string;
     events: Record<string, Array<(pointer?: unknown) => void>>;
     setAlpha: ReturnType<typeof vi.fn>;
-     setDisplaySize: ReturnType<typeof vi.fn>;
-     setName: ReturnType<typeof vi.fn>;
+    setDisplaySize: ReturnType<typeof vi.fn>;
+    setName: ReturnType<typeof vi.fn>;
     offCalls: Array<{ event: string; handler: (pointer?: unknown) => void }>;
     destroy: ReturnType<typeof vi.fn>;
+    x: number;
+    y: number;
   }>;
   container?: ContainerMock;
   controlTexture: ControlTextureStub;
 };
 
-function createSceneStub(options?: { initialControlFrames?: PlayerTouchControl[] }): SceneFactoryResult {
+function createSceneStub(options?: { initialControlFrames?: VirtualControlFrame[] }): SceneFactoryResult {
   const keyStore: Record<string, KeyMock> = {};
 
   const keyboard: KeyboardStub = {
@@ -182,7 +186,7 @@ function createSceneStub(options?: { initialControlFrames?: PlayerTouchControl[]
   const scene: SceneStub = {
     input: { keyboard },
     add: {
-      image: (_x: number, _y: number, _texture: string, frame?: string) => {
+      image: (x: number, y: number, _texture: string, frame?: string) => {
         const events: Record<string, Array<(pointer?: unknown) => void>> = {};
         const setAlphaSpy = vi.fn();
         const setDisplaySizeSpy = vi.fn();
@@ -226,6 +230,8 @@ function createSceneStub(options?: { initialControlFrames?: PlayerTouchControl[]
           control: frame,
           offCalls,
           destroy: destroySpy,
+          x,
+          y,
         });
 
         return imageStub;
@@ -406,6 +412,11 @@ describe('PlayerInputManager', () => {
       expect(button.setName).toHaveBeenCalledWith(expect.stringMatching(/^touch-/));
       expect(button.control).toBeDefined();
     });
+
+    const frames = sceneFactory.recordedButtons.map((button) => button.control);
+    expect(frames).toEqual(
+      expect.arrayContaining(['dpad-up', 'dpad-left', 'dpad-down', 'dpad-right', 'spit', 'discard', 'inhale']),
+    );
   });
 
   it('spritesheetメタデータが無くても仮想ボタン用フレームを補完する', () => {
@@ -425,30 +436,111 @@ describe('PlayerInputManager', () => {
     });
   });
 
+  it('左側の十字ボタンがWASD入力と連動する', () => {
+    const manager = createManager();
+
+    const leftButton = sceneFactory.recordedButtons.find((button) => button.control === 'dpad-left');
+    const rightButton = sceneFactory.recordedButtons.find((button) => button.control === 'dpad-right');
+    const upButton = sceneFactory.recordedButtons.find((button) => button.control === 'dpad-up');
+    const downButton = sceneFactory.recordedButtons.find((button) => button.control === 'dpad-down');
+
+    expect(leftButton).toBeDefined();
+    expect(rightButton).toBeDefined();
+    expect(upButton).toBeDefined();
+    expect(downButton).toBeDefined();
+
+    const leftDown = leftButton?.events['pointerdown']?.[0];
+    const leftUp = leftButton?.events['pointerup']?.[0];
+    expect(leftDown).toBeInstanceOf(Function);
+    expect(leftUp).toBeInstanceOf(Function);
+    leftDown?.();
+    let snapshot = manager.update();
+    expect(snapshot.kirdy.left).toBe(true);
+    leftUp?.();
+    snapshot = manager.update();
+    expect(snapshot.kirdy.left).toBe(false);
+
+    const rightDown = rightButton?.events['pointerdown']?.[0];
+    const rightUp = rightButton?.events['pointerup']?.[0];
+    expect(rightDown).toBeInstanceOf(Function);
+    expect(rightUp).toBeInstanceOf(Function);
+    rightDown?.();
+    snapshot = manager.update();
+    expect(snapshot.kirdy.right).toBe(true);
+    rightUp?.();
+    snapshot = manager.update();
+    expect(snapshot.kirdy.right).toBe(false);
+
+    const upDown = upButton?.events['pointerdown']?.[0];
+    const upUp = upButton?.events['pointerup']?.[0];
+    expect(upDown).toBeInstanceOf(Function);
+    expect(upUp).toBeInstanceOf(Function);
+    upDown?.();
+    snapshot = manager.update();
+    expect(snapshot.kirdy.jumpPressed).toBe(true);
+    expect(snapshot.kirdy.hoverPressed).toBe(true);
+    upUp?.();
+    snapshot = manager.update();
+    expect(snapshot.kirdy.jumpPressed).toBe(false);
+    expect(snapshot.kirdy.hoverPressed).toBe(false);
+
+    const downDown = downButton?.events['pointerdown']?.[0];
+    const downUp = downButton?.events['pointerup']?.[0];
+    expect(downDown).toBeInstanceOf(Function);
+    expect(downUp).toBeInstanceOf(Function);
+    downDown?.();
+    snapshot = manager.update();
+    expect(snapshot.actions.swallow.isDown).toBe(true);
+    expect(snapshot.actions.swallow.justPressed).toBe(true);
+    snapshot = manager.update();
+    expect(snapshot.actions.swallow.isDown).toBe(true);
+    expect(snapshot.actions.swallow.justPressed).toBe(false);
+    downUp?.();
+    snapshot = manager.update();
+    expect(snapshot.actions.swallow.isDown).toBe(false);
+  });
+
+  it('右側アクションボタンを左下から右上への対角線上に配置する', () => {
+    createManager();
+
+    const spit = sceneFactory.recordedButtons.find((button) => button.control === 'spit');
+    const discard = sceneFactory.recordedButtons.find((button) => button.control === 'discard');
+    const inhale = sceneFactory.recordedButtons.find((button) => button.control === 'inhale');
+
+    expect(spit).toBeDefined();
+    expect(discard).toBeDefined();
+    expect(inhale).toBeDefined();
+
+    expect(spit!.x).toBeLessThan(discard!.x);
+    expect(discard!.x).toBeLessThan(inhale!.x);
+    expect(spit!.y).toBeGreaterThan(discard!.y);
+    expect(discard!.y).toBeGreaterThan(inhale!.y);
+  });
+
   it('applies visual feedback when virtual buttons are pressed', () => {
     createManager();
 
-    const jumpButton = sceneFactory.recordedButtons.find((button) => button.control === 'jump');
-    expect(jumpButton).toBeDefined();
+    const spitButton = sceneFactory.recordedButtons.find((button) => button.control === 'spit');
+    expect(spitButton).toBeDefined();
 
-    const downHandler = jumpButton?.events['pointerdown']?.[0];
-    const upHandler = jumpButton?.events['pointerup']?.[0];
-    const upOutsideHandler = jumpButton?.events['pointerupoutside']?.[0];
+    const downHandler = spitButton?.events['pointerdown']?.[0];
+    const upHandler = spitButton?.events['pointerup']?.[0];
+    const upOutsideHandler = spitButton?.events['pointerupoutside']?.[0];
 
     expect(downHandler).toBeInstanceOf(Function);
     expect(upHandler).toBeInstanceOf(Function);
     expect(upOutsideHandler).toBeInstanceOf(Function);
 
     downHandler?.();
-    expect(jumpButton?.setAlpha).toHaveBeenCalledWith(0.6);
+    expect(spitButton?.setAlpha).toHaveBeenCalledWith(0.6);
 
-    jumpButton?.setAlpha.mockClear();
+    spitButton?.setAlpha.mockClear();
     upHandler?.();
-    expect(jumpButton?.setAlpha).toHaveBeenCalledWith(1);
+    expect(spitButton?.setAlpha).toHaveBeenCalledWith(1);
 
-    jumpButton?.setAlpha.mockClear();
+    spitButton?.setAlpha.mockClear();
     upOutsideHandler?.();
-    expect(jumpButton?.setAlpha).toHaveBeenCalledWith(1);
+    expect(spitButton?.setAlpha).toHaveBeenCalledWith(1);
   });
 
   it('unregisters touch handlers and destroys the virtual controls on dispose', () => {
