@@ -9,6 +9,9 @@ export const AREA_IDS = {
   ForestArea: 'forest-area',
   CaveArea: 'cave-area',
   GoalSanctum: 'goal-sanctum',
+  SkySanctum: 'sky-sanctum',
+  AuroraSpire: 'aurora-spire',
+  StarlitKeep: 'starlit-keep',
 } as const;
 
 export type AreaId = (typeof AREA_IDS)[keyof typeof AREA_IDS];

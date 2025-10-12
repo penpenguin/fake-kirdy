@@ -214,6 +214,23 @@ describe('AreaManager', () => {
     expect(spawnTile).toBe('floor');
   });
 
+  it('goal-sanctum の北扉から sky-sanctum へ遷移する', () => {
+    const branchManager = new AreaManager(AREA_IDS.GoalSanctum);
+    const goalSanctumState = branchManager.getCurrentAreaState();
+
+    const result = branchManager.updatePlayerPosition(
+      getDoorWorldPosition(goalSanctumState, 'north'),
+    );
+
+    expect(result.areaChanged).toBe(true);
+    expect(result.transition?.from).toBe(AREA_IDS.GoalSanctum);
+    expect(result.transition?.to).toBe(AREA_IDS.SkySanctum);
+    expect(result.transition?.via).toBe('north');
+
+    const skySanctum = branchManager.getCurrentAreaState();
+    expect(skySanctum.definition.id).toBe(AREA_IDS.SkySanctum);
+  });
+
   it('探索済みエリア情報を記録し、訪問済みエリアを管理する', () => {
     const centralHub = manager.getCurrentAreaState();
 
@@ -254,6 +271,10 @@ describe('AreaManager', () => {
         { id: AREA_IDS.FireArea, name: 'Fire Area' },
         { id: AREA_IDS.ForestArea, name: 'Forest Area' },
         { id: AREA_IDS.CaveArea, name: 'Cave Area' },
+        { id: AREA_IDS.GoalSanctum, name: 'Goal Sanctum' },
+        { id: AREA_IDS.SkySanctum, name: 'Sky Sanctum' },
+        { id: AREA_IDS.AuroraSpire, name: 'Aurora Spire' },
+        { id: AREA_IDS.StarlitKeep, name: 'Starlit Keep' },
       ]),
     );
   });

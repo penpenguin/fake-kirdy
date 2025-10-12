@@ -6,6 +6,9 @@ import { forestArea } from './forest-area';
 import { caveArea } from './cave-area';
 import { fireArea } from './fire-area';
 import { goalSanctum } from './goal-sanctum';
+import { skySanctum } from './sky-sanctum';
+import { auroraSpire } from './aurora-spire';
+import { starlitKeep } from './starlit-keep';
 
 export const STAGE_DEFINITIONS: ReadonlyArray<AreaDefinition> = [
   centralHub,
@@ -15,6 +18,9 @@ export const STAGE_DEFINITIONS: ReadonlyArray<AreaDefinition> = [
   caveArea,
   fireArea,
   goalSanctum,
+  skySanctum,
+  auroraSpire,
+  starlitKeep,
 ];
 
 const TRANSITIONS: AreaTransitionDirection[] = ['north', 'south', 'east', 'west'];

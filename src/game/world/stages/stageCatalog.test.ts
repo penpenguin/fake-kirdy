@@ -14,6 +14,7 @@ describe('Stage catalog', () => {
     const goalSanctum = findStage('goal-sanctum');
     expect(goalSanctum).toBeDefined();
     expect(goalSanctum?.neighbors?.south).toBe('fire-area');
+    expect(goalSanctum?.neighbors?.north).toBe('sky-sanctum');
     expect(goalSanctum?.enemySpawns?.baseline).toBeGreaterThanOrEqual(1);
 
     const hasExitDoor = goalSanctum?.layout.some((row) => row.includes('D')) ?? false;
@@ -36,5 +37,19 @@ describe('Stage catalog', () => {
     expect(southernDoor).toBeDefined();
     const expectedX = ((southernDoor?.columnIndex ?? 0) + 1) * tileSize;
     expect(southExit?.position.x).toBeCloseTo(expectedX, 6);
+  });
+
+  it('includes the sky sanctum branch connected north of the goal sanctum', () => {
+    const skySanctum = findStage('sky-sanctum');
+    expect(skySanctum).toBeDefined();
+    expect(skySanctum?.neighbors?.south).toBe('goal-sanctum');
+    expect(skySanctum?.neighbors?.east).toBe('aurora-spire');
+    expect(skySanctum?.neighbors?.west).toBe('starlit-keep');
+
+    const auroraSpire = findStage('aurora-spire');
+    expect(auroraSpire?.neighbors?.west).toBe('sky-sanctum');
+
+    const starlitKeep = findStage('starlit-keep');
+    expect(starlitKeep?.neighbors?.east).toBe('sky-sanctum');
   });
 });

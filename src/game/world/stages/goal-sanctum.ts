@@ -25,6 +25,7 @@ export const goalSanctum: AreaDefinition = {
   layout,
   neighbors: {
     south: 'fire-area',
+    north: 'sky-sanctum',
   },
   entryPoints: {
     default: { position: { x: southDoorX, y: height - tileSize * 2 } },
