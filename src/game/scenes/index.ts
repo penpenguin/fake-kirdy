@@ -382,12 +382,39 @@ export class GameScene extends Phaser.Scene {
   }
 
   create() {
+    if (this.input) {
+      this.input.enabled = true;
+      const keyboardPlugin = this.input.keyboard as Phaser.Input.Keyboard.KeyboardPlugin | undefined;
+      if (keyboardPlugin) {
+        keyboardPlugin.enabled = true;
+        keyboardPlugin.resetKeys?.();
+        const keyboardManager = (keyboardPlugin as { manager?: Phaser.Input.Keyboard.KeyboardManager }).manager;
+        if (keyboardManager) {
+          keyboardManager.enabled = true;
+          (keyboardManager as { resetKeys?: () => void }).resetKeys?.();
+          (keyboardManager as { releaseAllKeys?: () => void }).releaseAllKeys?.();
+          (keyboardManager as { clearCaptures?: () => void }).clearCaptures?.();
+        }
+      }
+      const inputExtensions = this.input as unknown as {
+        mouse?: { enabled?: boolean };
+        touch?: { enabled?: boolean };
+      };
+      if (inputExtensions.mouse) {
+        inputExtensions.mouse.enabled = true;
+      }
+      if (inputExtensions.touch) {
+        inputExtensions.touch.enabled = true;
+      }
+    }
+
     const savedProgress = this.initializeSaveManager();
 
     this.audioManager = new AudioManager(this);
     this.audioManager.playBgm('bgm-main', { volume: 1 });
 
     this.isGameOver = false;
+    this.runtimeErrorCaptured = false;
     this.progressDirty = false;
     this.physicsSystem = new PhysicsSystem(this);
     this.performanceMonitor = new PerformanceMonitor({
@@ -474,6 +501,9 @@ export class GameScene extends Phaser.Scene {
       this.hud?.destroy();
       this.hud = undefined;
       this.kirdy = undefined;
+      if (this.isGameOver) {
+        this.saveManager?.clear();
+      }
       this.isGameOver = false;
       this.saveManager = undefined;
       this.progressDirty = false;
@@ -1337,7 +1367,24 @@ export class GameScene extends Phaser.Scene {
 
   private initializeSaveManager(): GameProgressSnapshot | undefined {
     this.saveManager = new SaveManager();
-    return this.saveManager.load();
+    const snapshot = this.saveManager.load();
+    if (!snapshot) {
+      return undefined;
+    }
+
+    const maxHP = Number.isFinite(snapshot.player?.maxHP)
+      ? Math.max(0, Math.floor(snapshot.player!.maxHP))
+      : 0;
+    const currentHP = Number.isFinite(snapshot.player?.hp)
+      ? Math.max(0, Math.floor(snapshot.player!.hp))
+      : 0;
+
+    if (maxHP <= 0 || currentHP <= 0) {
+      this.saveManager.clear();
+      return undefined;
+    }
+
+    return snapshot;
   }
 
   private determineSpawnPosition(): Vector2 {
@@ -1542,26 +1589,31 @@ export class PauseScene extends Phaser.Scene {
         color: '#ffe4f2',
       };
 
-      const title = this.add.text(0, -60, 'Game Paused', style);
+      const width = typeof this.scale?.width === 'number' ? this.scale.width : 0;
+      const height = typeof this.scale?.height === 'number' ? this.scale.height : 0;
+      const centerX = width / 2;
+      const centerY = height / 2;
+
+      const title = this.add.text(centerX, centerY - 60, 'Game Paused', style);
       title.setOrigin?.(0.5, 0.5);
       title.setScrollFactor?.(0, 0);
       title.setDepth?.(2000);
 
-      const resumeOption = this.add.text(0, -10, 'Resume (ESC)', submenuStyle);
+      const resumeOption = this.add.text(centerX, centerY - 10, 'Resume (ESC)', submenuStyle);
       resumeOption.setOrigin?.(0.5, 0.5);
       resumeOption.setScrollFactor?.(0, 0);
       resumeOption.setDepth?.(2000);
       resumeOption.setInteractive?.({ useHandCursor: true });
       resumeOption.on?.('pointerdown', resumeHandler);
 
-      const restartOption = this.add.text(0, 30, 'Restart (R)', submenuStyle);
+      const restartOption = this.add.text(centerX, centerY + 30, 'Restart (R)', submenuStyle);
       restartOption.setOrigin?.(0.5, 0.5);
       restartOption.setScrollFactor?.(0, 0);
       restartOption.setDepth?.(2000);
       restartOption.setInteractive?.({ useHandCursor: true });
       restartOption.on?.('pointerdown', restartHandler);
 
-      const quitOption = this.add.text(0, 70, 'Quit to Menu (Q)', submenuStyle);
+      const quitOption = this.add.text(centerX, centerY + 70, 'Quit to Menu (Q)', submenuStyle);
       quitOption.setOrigin?.(0.5, 0.5);
       quitOption.setScrollFactor?.(0, 0);
       quitOption.setDepth?.(2000);

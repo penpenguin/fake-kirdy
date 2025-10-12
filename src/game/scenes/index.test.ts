@@ -624,6 +624,32 @@ describe('Scene registration', () => {
     expect(pauseScene.scene.start).toHaveBeenCalledWith(SceneKeys.Menu);
   });
 
+  it('positions the pause menu text around the screen center', () => {
+    const pauseScene = new PauseScene();
+
+    pauseScene.create();
+
+    const addTextMock = asMock(pauseScene.add.text);
+    const centerX = pauseScene.scale.width / 2;
+    const centerY = pauseScene.scale.height / 2;
+
+    expect(addTextMock).toHaveBeenCalledTimes(4);
+
+    const [titleArgs, resumeArgs, restartArgs, quitArgs] = addTextMock.mock.calls;
+
+    expect(titleArgs?.[0]).toBe(centerX);
+    expect(titleArgs?.[1]).toBeCloseTo(centerY - 60, 5);
+
+    expect(resumeArgs?.[0]).toBe(centerX);
+    expect(resumeArgs?.[1]).toBeCloseTo(centerY - 10, 5);
+
+    expect(restartArgs?.[0]).toBe(centerX);
+    expect(restartArgs?.[1]).toBeCloseTo(centerY + 30, 5);
+
+    expect(quitArgs?.[0]).toBe(centerX);
+    expect(quitArgs?.[1]).toBeCloseTo(centerY + 70, 5);
+  });
+
   it('game over scene can restart or return to menu', () => {
     const gameOverScene = new GameOverScene();
 

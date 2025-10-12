@@ -2,10 +2,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AbilityType } from '../mechanics/AbilitySystem';
 
 const stubs = vi.hoisted(() => {
+  const keyboardManager = {
+    enabled: true,
+    resetKeys: vi.fn(),
+    releaseAllKeys: vi.fn(),
+    clearCaptures: vi.fn(),
+  };
   const keyboard = {
     once: vi.fn(),
     on: vi.fn(),
     off: vi.fn(),
+    enabled: true,
+    resetKeys: vi.fn(),
+    manager: keyboardManager,
   };
 
   const events = {
@@ -128,11 +137,18 @@ const stubs = vi.hoisted(() => {
   }));
 
   class PhaserSceneMock {
-    public input = { keyboard };
+    public input = {
+      keyboard,
+      on: vi.fn(),
+      once: vi.fn(),
+      enabled: true,
+      mouse: { enabled: true },
+      touch: { enabled: true },
+    };
     public matter = matterFactory;
     public scene = scenePlugin;
-   public events = events;
-   public scale = { width: 800, height: 600 };
+    public events = events;
+    public scale = { width: 800, height: 600 };
     public children = createDisplayList();
     public add = {
       rectangle: (...args: unknown[]) => {
@@ -180,6 +196,7 @@ const stubs = vi.hoisted(() => {
 
   return {
     keyboard,
+    keyboardManager,
     scenePlugin,
     matterFactory,
     events,
@@ -1542,6 +1559,166 @@ describe('GameScene player integration', () => {
     expect(stubs.scenePlugin.pause).toHaveBeenCalledWith(SceneKeys.Game);
     const launchCall = stubs.scenePlugin.launch.mock.calls.find(([sceneKey]) => sceneKey === SceneKeys.GameOver);
     expect(launchCall?.[1]).toEqual(expect.objectContaining({ score: 100, ability: 'fire' }));
+  });
+
+  it('シーンを停止して再開した後でもプレイヤー入力が再構築される', () => {
+    const scene = new GameScene();
+    createKirdyMock.mockReturnValue(makeKirdyStub());
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const shutdownCall = stubs.events.once.mock.calls.find(([event]) => event === 'shutdown');
+    expect(shutdownCall?.[1]).toBeInstanceOf(Function);
+
+    PlayerInputManagerMock.mockClear();
+    playerInputDestroyMock.mockClear();
+
+    shutdownCall?.[1]?.();
+
+    expect(playerInputDestroyMock).toHaveBeenCalledTimes(1);
+
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    expect(PlayerInputManagerMock).toHaveBeenCalled();
+    expect(playerInputDestroyMock).not.toHaveBeenCalledTimes(2);
+    expect((scene as any).playerInput).toBeDefined();
+  });
+
+  it('ゲームオーバー後にタイトルへ戻る際はセーブデータをクリアする', () => {
+    const scene = new GameScene();
+    createKirdyMock.mockReturnValue(makeKirdyStub());
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const shutdownCall = stubs.events.once.mock.calls.find(([event]) => event === 'shutdown');
+    expect(shutdownCall?.[1]).toBeInstanceOf(Function);
+    const shutdownHandler = shutdownCall?.[1];
+
+    scene.damagePlayer(6);
+    saveManagerClearMock.mockClear();
+
+    shutdownHandler?.();
+
+    expect(saveManagerClearMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('ゲームオーバーでない終了ではセーブデータを保持する', () => {
+    const scene = new GameScene();
+    createKirdyMock.mockReturnValue(makeKirdyStub());
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const shutdownCall = stubs.events.once.mock.calls.find(([event]) => event === 'shutdown');
+    expect(shutdownCall?.[1]).toBeInstanceOf(Function);
+    const shutdownHandler = shutdownCall?.[1];
+
+    saveManagerClearMock.mockClear();
+    shutdownHandler?.();
+
+    expect(saveManagerClearMock).not.toHaveBeenCalled();
+  });
+
+  it('ゲームオーバー状態のセーブデータで再開した場合はクリアして新規開始する', () => {
+    const gameOverSnapshot = {
+      player: {
+        hp: 0,
+        maxHP: 6,
+        score: 1230,
+        ability: 'fire',
+        position: { x: 512, y: 512 },
+      },
+      area: {
+        currentAreaId: 'central-hub',
+        discoveredAreas: ['central-hub'],
+        exploredTiles: { 'central-hub': ['10,10'] },
+        lastKnownPlayerPosition: { x: 512, y: 512 },
+        completedAreas: [],
+        collectedItems: [],
+      },
+      settings: {
+        volume: 0.8,
+        controls: 'keyboard',
+        difficulty: 'normal',
+      },
+    } as any;
+
+    saveManagerLoadMock.mockReturnValueOnce(gameOverSnapshot);
+
+    const scene = new GameScene();
+    const kirdyStub = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyStub);
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    expect(saveManagerClearMock).toHaveBeenCalledTimes(1);
+    expect(createKirdyMock).toHaveBeenCalledWith(scene, defaultAreaState.playerSpawnPosition, expect.anything());
+    expect(kirdyStub.setHP).not.toHaveBeenCalledWith(0);
+    expect(hudUpdateHPMock).toHaveBeenLastCalledWith({ current: 6, max: 6 });
+  });
+
+  it('ゲーム再開時に入力プラグインを再有効化する', () => {
+    const scene = new GameScene();
+    createKirdyMock.mockReturnValue(makeKirdyStub());
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const shutdownCall = stubs.events.once.mock.calls.find(([event]) => event === 'shutdown');
+    const shutdownHandler = shutdownCall?.[1];
+
+    const inputPlugin = scene.input as unknown as {
+      enabled: boolean;
+      mouse?: { enabled?: boolean };
+      touch?: { enabled?: boolean };
+      keyboard: typeof stubs.keyboard | undefined;
+    };
+
+    inputPlugin.enabled = false;
+    const keyboardPlugin = inputPlugin.keyboard;
+    if (!keyboardPlugin) {
+      throw new Error('keyboard plugin missing in test setup');
+    }
+    keyboardPlugin.enabled = false;
+    keyboardPlugin.manager.enabled = false;
+    if (inputPlugin.mouse) {
+      inputPlugin.mouse.enabled = false;
+    }
+    if (inputPlugin.touch) {
+      inputPlugin.touch.enabled = false;
+    }
+    stubs.keyboard.resetKeys.mockClear();
+    stubs.keyboardManager.resetKeys.mockClear();
+    stubs.keyboardManager.releaseAllKeys.mockClear();
+    stubs.keyboardManager.clearCaptures.mockClear();
+
+    shutdownHandler?.();
+
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const refreshedInput = scene.input as unknown as {
+      enabled: boolean;
+      mouse?: { enabled?: boolean };
+      touch?: { enabled?: boolean };
+      keyboard?: typeof stubs.keyboard;
+    };
+
+    expect(refreshedInput.enabled).toBe(true);
+    expect(refreshedInput.keyboard?.enabled).toBe(true);
+    expect(stubs.keyboard.resetKeys).toHaveBeenCalled();
+    expect(stubs.keyboardManager.enabled).toBe(true);
+    expect(stubs.keyboardManager.resetKeys).toHaveBeenCalled();
+    expect(stubs.keyboardManager.releaseAllKeys).toHaveBeenCalled();
+    expect(stubs.keyboardManager.clearCaptures).toHaveBeenCalled();
+    expect(refreshedInput.mouse?.enabled).toBe(true);
+    expect(refreshedInput.touch?.enabled).toBe(true);
   });
 
   it('refreshes the world map overlay when the player discovers a new area while it is visible', () => {
