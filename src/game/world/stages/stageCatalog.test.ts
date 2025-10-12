@@ -18,5 +18,23 @@ describe('Stage catalog', () => {
 
     const hasExitDoor = goalSanctum?.layout.some((row) => row.includes('D')) ?? false;
     expect(hasExitDoor).toBe(true);
+
+    const tileSize = goalSanctum?.tileSize ?? 0;
+    const southExit = goalSanctum?.entryPoints?.south;
+    expect(southExit).toBeDefined();
+
+    const doorPositions = goalSanctum?.layout.flatMap((row, rowIndex) =>
+      [...row].flatMap((tile, columnIndex) => (tile === 'D' ? [{ rowIndex, columnIndex }] : [])),
+    ) ?? [];
+    const southernDoor = doorPositions.reduce<{ rowIndex: number; columnIndex: number } | undefined>((current, candidate) => {
+      if (!current) {
+        return candidate;
+      }
+      return candidate.rowIndex > current.rowIndex ? candidate : current;
+    }, undefined);
+
+    expect(southernDoor).toBeDefined();
+    const expectedX = ((southernDoor?.columnIndex ?? 0) + 1) * tileSize;
+    expect(southExit?.position.x).toBeCloseTo(expectedX, 6);
   });
 });
