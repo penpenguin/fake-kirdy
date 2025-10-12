@@ -236,6 +236,41 @@ describe('EnemyManager', () => {
     expect(physicsSystem.registerEnemy).toHaveBeenCalledWith(enemy);
   });
 
+  it('suspends captured enemies to stop AI updates and velocity', () => {
+    const enemy = makeEnemy();
+    createWabbleBeeMock.mockReturnValueOnce(enemy);
+
+    manager.spawnWabbleBee(makeSpawn(0, 0));
+    enemy.update.mockClear();
+    enemy.sprite.setVelocity.mockClear();
+
+    manager.suspendEnemy(enemy.sprite);
+    manager.update(16);
+
+    expect(enemy.update).not.toHaveBeenCalled();
+    expect(enemy.sprite.setVelocity).toHaveBeenCalledWith(0, 0);
+
+    manager.resumeEnemy(enemy.sprite);
+    manager.update(16);
+
+    expect(enemy.update).toHaveBeenCalledWith(16);
+    expect(inhaleSystem.setInhalableTargets).toHaveBeenLastCalledWith([enemy.sprite]);
+  });
+
+  it('consumes suspended enemies to remove them from管理対象', () => {
+    const enemy = makeEnemy();
+    createWabbleBeeMock.mockReturnValueOnce(enemy);
+
+    manager.spawnWabbleBee(makeSpawn(0, 0));
+    manager.update(16);
+
+    const removed = manager.consumeEnemy(enemy.sprite);
+
+    expect(removed).toBe(true);
+    expect(manager.getActiveEnemyCount()).toBe(0);
+    expect(inhaleSystem.setInhalableTargets).toHaveBeenCalledWith([]);
+  });
+
   it('disperses enemies that cluster too close to the player', () => {
     const enemies = Array.from({ length: 3 }, () => makeEnemy());
     createWabbleBeeMock

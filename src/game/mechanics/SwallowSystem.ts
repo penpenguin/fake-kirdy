@@ -92,6 +92,11 @@ export class SwallowSystem {
 
     const ability = AbilitySystem.copyAbility(target);
     this.swallowedPayload = ability ? { abilityType: ability.type, ability } : undefined;
+    if (ability) {
+      this.scene.events?.emit?.('enemy-swallowed', { sprite: target, abilityType: ability.type, ability });
+    } else {
+      this.scene.events?.emit?.('enemy-swallowed', { sprite: target });
+    }
 
     target.destroy?.();
     this.inhaleSystem.releaseCapturedTarget();
@@ -120,22 +125,23 @@ export class SwallowSystem {
       }
 
       const lifetime = this.scene.time?.delayedCall?.(STAR_PROJECTILE_LIFETIME_MS, () => {
-        if (this.physicsSystem) {
-          this.physicsSystem.destroyProjectile(projectile);
-        } else {
-          const recycled = this.recycleStarProjectile(projectile);
-          if (!recycled) {
-            projectile.destroy?.();
-          }
-        }
+        this.destroyProjectileSafely(projectile);
       });
 
-      projectile.setData?.('starProjectileExpire', lifetime);
+      let registered = true;
+      try {
+        this.physicsSystem?.registerPlayerAttack(projectile, {
+          damage: STAR_PROJECTILE_DAMAGE,
+          recycle: (candidate) => this.recycleStarProjectile(candidate),
+        });
+      } catch (error) {
+        registered = false;
+        console.warn('[SwallowSystem] failed to register star projectile', error);
+        lifetime?.remove?.();
+        this.destroyProjectileSafely(projectile);
+      }
 
-      this.physicsSystem?.registerPlayerAttack(projectile, {
-        damage: STAR_PROJECTILE_DAMAGE,
-        recycle: (candidate) => this.recycleStarProjectile(candidate),
-      });
+      projectile.setData?.('starProjectileExpire', registered ? lifetime : undefined);
     }
 
     target.setData?.('inMouth', false);
@@ -169,9 +175,17 @@ export class SwallowSystem {
   }
 
   private handleStarProjectileCollision(projectile: Phaser.Physics.Matter.Sprite) {
+    this.destroyProjectileSafely(projectile);
+  }
+
+  private destroyProjectileSafely(projectile: Phaser.Physics.Matter.Sprite) {
     if (this.physicsSystem) {
-      this.physicsSystem.destroyProjectile(projectile);
-      return;
+      try {
+        this.physicsSystem.destroyProjectile(projectile);
+        return;
+      } catch (error) {
+        console.warn('[SwallowSystem] failed to destroy star projectile', error);
+      }
     }
 
     const recycled = this.recycleStarProjectile(projectile);

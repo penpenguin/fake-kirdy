@@ -169,6 +169,68 @@ describe('PhysicsSystem', () => {
     expect(eventsEmit).toHaveBeenCalledWith('player-attack-hit-enemy', { enemy, damage: 3 });
   });
 
+  it('suspends enemy collisions when requested and restores them on resume', () => {
+    const system = new PhysicsSystem(scene);
+    const playerSprite = createSpriteStub();
+    system.registerPlayer({ sprite: playerSprite } as any);
+
+    const enemySprite = createSpriteStub();
+    const enemy = {
+      sprite: enemySprite,
+      takeDamage: vi.fn(),
+      isDefeated: vi.fn().mockReturnValue(false),
+    };
+    system.registerEnemy(enemy as any);
+
+    const projectileSprite = createSpriteStub();
+    projectileSprite.destroy = vi.fn();
+    system.registerPlayerAttack(projectileSprite as any, { damage: 1 });
+
+    system.suspendEnemy(enemySprite as any);
+    expect(enemySprite.setCollidesWith).toHaveBeenLastCalledWith(0);
+
+    const collisionHandler = getCollisionStartHandler(worldOn);
+    collisionHandler?.({
+      pairs: [
+        {
+          bodyA: { gameObject: playerSprite },
+          bodyB: { gameObject: enemySprite },
+          isSensor: false,
+        },
+        {
+          bodyA: { gameObject: projectileSprite },
+          bodyB: { gameObject: enemySprite },
+          isSensor: false,
+        },
+      ],
+    } as any);
+
+    expect(eventsEmit).not.toHaveBeenCalledWith('player-collided-with-enemy', expect.anything());
+    expect(enemy.takeDamage).not.toHaveBeenCalled();
+
+    system.resumeEnemy(enemySprite as any);
+    expect(enemySprite.setCollidesWith).toHaveBeenLastCalledWith(
+      PhysicsCategory.Player | PhysicsCategory.PlayerAttack | PhysicsCategory.Terrain,
+    );
+
+    const projectileSprite2 = createSpriteStub();
+    projectileSprite2.destroy = vi.fn();
+    system.registerPlayerAttack(projectileSprite2 as any, { damage: 1 });
+
+    collisionHandler?.({
+      pairs: [
+        {
+          bodyA: { gameObject: projectileSprite2 },
+          bodyB: { gameObject: enemySprite },
+          isSensor: false,
+        },
+      ],
+    } as any);
+
+    expect(enemy.takeDamage).toHaveBeenCalledWith(1);
+    expect(projectileSprite2.destroy).toHaveBeenCalled();
+  });
+
   it('keeps the player grounded while any terrain contact remains', () => {
     const system = new PhysicsSystem(scene);
     const playerSprite = createSpriteStub();

@@ -311,6 +311,7 @@ export class GameScene extends Phaser.Scene {
   private terrainTiles: Array<Phaser.GameObjects.GameObject & { destroy?: () => void }> = [];
   private terrainTransitionMarkers: Array<Phaser.GameObjects.GameObject & { destroy?: () => void }> = [];
   private cameraFollowConfigured = false;
+  private readonly capturedSprites = new Set<Phaser.Physics.Matter.Sprite>();
 
   constructor() {
     super(buildConfig(SceneKeys.Game));
@@ -340,6 +341,44 @@ export class GameScene extends Phaser.Scene {
     const updatedScore = this.kirdy.addScore(this.scorePerEnemy);
     this.hud?.updateScore(updatedScore);
     this.requestSave();
+  };
+
+  private readonly handleEnemyCaptured = (event: { sprite?: Phaser.Physics.Matter.Sprite }) => {
+    const sprite = event?.sprite;
+    if (!sprite) {
+      return;
+    }
+
+    this.capturedSprites.add(sprite);
+    this.enemyManager?.suspendEnemy(sprite);
+    this.physicsSystem?.suspendEnemy(sprite);
+  };
+
+  private readonly handleEnemyCaptureReleased = (event: { sprite?: Phaser.Physics.Matter.Sprite }) => {
+    const sprite = event?.sprite;
+    if (!sprite) {
+      return;
+    }
+
+    const wasCaptured = this.capturedSprites.delete(sprite);
+    const destroyed = (sprite as { destroyed?: boolean }).destroyed === true;
+    if (!wasCaptured || destroyed) {
+      return;
+    }
+
+    this.enemyManager?.resumeEnemy(sprite);
+    this.physicsSystem?.resumeEnemy(sprite);
+  };
+
+  private readonly handleEnemySwallowed = (event: { sprite?: Phaser.Physics.Matter.Sprite }) => {
+    const sprite = event?.sprite;
+    if (!sprite) {
+      return;
+    }
+
+    this.capturedSprites.delete(sprite);
+    this.enemyManager?.consumeEnemy(sprite);
+    this.physicsSystem?.consumeEnemy(sprite);
   };
 
   private readonly handlePlayerDefeated = () => {
@@ -511,6 +550,9 @@ export class GameScene extends Phaser.Scene {
     this.events?.on?.('ability-acquired', this.handleAbilityAcquired, this);
     this.events?.on?.('ability-cleared', this.handleAbilityCleared, this);
     this.events?.on?.('enemy-defeated', this.handleEnemyDefeated, this);
+    this.events?.on?.('enemy-captured', this.handleEnemyCaptured, this);
+    this.events?.on?.('enemy-capture-released', this.handleEnemyCaptureReleased, this);
+    this.events?.on?.('enemy-swallowed', this.handleEnemySwallowed, this);
 
     if (savedProgress?.player.ability) {
       this.abilitySystem?.applySwallowedPayload({ abilityType: savedProgress.player.ability } as SwallowedPayload);
@@ -542,6 +584,9 @@ export class GameScene extends Phaser.Scene {
       this.events?.off?.('ability-acquired', this.handleAbilityAcquired, this);
       this.events?.off?.('ability-cleared', this.handleAbilityCleared, this);
       this.events?.off?.('enemy-defeated', this.handleEnemyDefeated, this);
+      this.events?.off?.('enemy-captured', this.handleEnemyCaptured, this);
+      this.events?.off?.('enemy-capture-released', this.handleEnemyCaptureReleased, this);
+      this.events?.off?.('enemy-swallowed', this.handleEnemySwallowed, this);
       this.hud?.destroy();
       this.hud = undefined;
       this.lastHudHp = undefined;
@@ -557,6 +602,7 @@ export class GameScene extends Phaser.Scene {
       this.performanceMonitor = undefined;
       this.audioManager?.stopBgm();
       this.audioManager = undefined;
+      this.capturedSprites.clear();
     });
 
     if (this.kirdy) {
@@ -605,6 +651,8 @@ export class GameScene extends Phaser.Scene {
       this.kirdy?.update?.(time, delta, snapshot.kirdy);
       this.inhaleSystem?.update(snapshot.actions);
       this.swallowSystem?.update(snapshot.actions);
+      const hasMouthContent = Boolean(this.kirdy?.getMouthContent?.());
+      this.playerInput?.setSwallowDownEnabled?.(hasMouthContent);
 
       const payload = this.swallowSystem?.consumeSwallowedPayload();
       if (payload) {

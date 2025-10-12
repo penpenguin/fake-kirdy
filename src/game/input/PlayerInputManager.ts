@@ -36,10 +36,12 @@ const MOVEMENT_KEY_CODES = {
 
 const ACTION_KEY_CODES: Record<PlayerAction, string[]> = {
   inhale: ['C'],
-  swallow: ['S', 'DOWN'],
+  swallow: ['S'],
   spit: ['Z'],
   discard: ['X'],
 };
+
+const SWALLOW_DOWN_KEY = 'DOWN';
 
 const TOUCH_DEFAULT_STATE: Record<PlayerTouchControl, boolean> = {
   left: false,
@@ -139,6 +141,7 @@ export class PlayerInputManager {
     spit: false,
     discard: false,
   };
+  private allowSwallowDown = false;
   private touchState: Record<PlayerTouchControl, boolean> = { ...TOUCH_DEFAULT_STATE };
   private snapshot: PlayerInputSnapshot = this.createEmptySnapshot();
   private buttonCleanup: Array<() => void> = [];
@@ -193,6 +196,10 @@ export class PlayerInputManager {
     this.setTouchState(control, pressed);
   }
 
+  setSwallowDownEnabled(enabled: boolean) {
+    this.allowSwallowDown = Boolean(enabled);
+  }
+
   private createEmptySnapshot(): PlayerInputSnapshot {
     return {
       kirdy: {
@@ -220,6 +227,7 @@ export class PlayerInputManager {
     Object.values(ACTION_KEY_CODES).flat().forEach((code) => {
       this.registerKey(code);
     });
+    this.registerKey(SWALLOW_DOWN_KEY);
   }
 
   private registerKey(code: string) {
@@ -247,7 +255,10 @@ export class PlayerInputManager {
 
     (Object.keys(ACTION_KEY_CODES) as PlayerAction[]).forEach((action) => {
       const keyCodes = ACTION_KEY_CODES[action];
-      const keyDown = this.anyKeyDown(keyCodes);
+      let keyDown = this.anyKeyDown(keyCodes);
+      if (action === 'swallow' && !keyDown && this.allowSwallowDown) {
+        keyDown = this.anyKeyDown([SWALLOW_DOWN_KEY]);
+      }
       const touchDown = this.touchState[action];
       const isDown = keyDown || touchDown;
       const justPressed = isDown && !this.previousActionDown[action];

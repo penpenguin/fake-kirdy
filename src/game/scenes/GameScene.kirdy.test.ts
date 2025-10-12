@@ -258,11 +258,13 @@ vi.mock('../characters/Kirdy', () => ({
 
 const playerInputUpdateMock = vi.hoisted(() => vi.fn());
 const playerInputDestroyMock = vi.hoisted(() => vi.fn());
+const playerInputSetSwallowDownMock = vi.hoisted(() => vi.fn());
 const PlayerInputManagerMock = vi.hoisted(() =>
   vi.fn(() => ({
     update: playerInputUpdateMock,
     destroy: playerInputDestroyMock,
     simulateTouch: vi.fn(),
+    setSwallowDownEnabled: playerInputSetSwallowDownMock,
   })),
 );
 
@@ -461,6 +463,9 @@ const physicsRegisterTerrainMock = vi.hoisted(() => vi.fn());
 const physicsRegisterEnemyMock = vi.hoisted(() => vi.fn());
 const physicsDestroyProjectileMock = vi.hoisted(() => vi.fn());
 const physicsClearTerrainMock = vi.hoisted(() => vi.fn());
+const physicsSuspendEnemyMock = vi.hoisted(() => vi.fn());
+const physicsResumeEnemyMock = vi.hoisted(() => vi.fn());
+const physicsConsumeEnemyMock = vi.hoisted(() => vi.fn());
 
 const PhysicsSystemMock = vi.hoisted(() =>
   vi.fn(() => ({
@@ -470,6 +475,9 @@ const PhysicsSystemMock = vi.hoisted(() =>
     registerPlayerAttack: vi.fn(),
     destroyProjectile: physicsDestroyProjectileMock,
     clearTerrain: physicsClearTerrainMock,
+    suspendEnemy: physicsSuspendEnemyMock,
+    resumeEnemy: physicsResumeEnemyMock,
+    consumeEnemy: physicsConsumeEnemyMock,
   })),
 );
 
@@ -506,6 +514,9 @@ describe('GameScene player integration', () => {
     physicsRegisterEnemyMock.mockClear();
     physicsDestroyProjectileMock.mockClear();
     physicsClearTerrainMock.mockClear();
+    physicsSuspendEnemyMock.mockClear();
+    physicsResumeEnemyMock.mockClear();
+    physicsConsumeEnemyMock.mockClear();
     PhysicsSystemMock.mockClear();
     AreaManagerMock.mockClear();
     stubs.matterFactory.add.existing.mockReset();
@@ -1336,6 +1347,123 @@ describe('GameScene player integration', () => {
     expect(hudUpdateAbilityMock).toHaveBeenCalledWith('ice');
   });
 
+  it('enemy-captured イベントで敵をサスペンドする', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    scene.create();
+
+    const enemyManagerStub = {
+      suspendEnemy: vi.fn(),
+      resumeEnemy: vi.fn(),
+      consumeEnemy: vi.fn(),
+    };
+    (scene as any).enemyManager = enemyManagerStub;
+
+    const capturedHandler = stubs.events.on.mock.calls.find(([event]) => event === 'enemy-captured')?.[1];
+    expect(capturedHandler).toBeInstanceOf(Function);
+
+    const sprite = { destroyed: false } as any;
+    capturedHandler?.({ sprite });
+
+    expect(enemyManagerStub.suspendEnemy).toHaveBeenCalledWith(sprite);
+    expect(physicsSuspendEnemyMock).toHaveBeenCalledWith(sprite);
+  });
+
+  it('enemy-capture-released イベントで敵を再開する', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    scene.create();
+
+    const enemyManagerStub = {
+      suspendEnemy: vi.fn(),
+      resumeEnemy: vi.fn(),
+      consumeEnemy: vi.fn(),
+    };
+    (scene as any).enemyManager = enemyManagerStub;
+
+    const capturedHandler = stubs.events.on.mock.calls.find(([event]) => event === 'enemy-captured')?.[1];
+    const releasedHandler = stubs.events.on.mock.calls.find(([event]) => event === 'enemy-capture-released')?.[1];
+
+    expect(capturedHandler).toBeInstanceOf(Function);
+    expect(releasedHandler).toBeInstanceOf(Function);
+
+    const sprite = { destroyed: false } as any;
+    capturedHandler?.({ sprite });
+    releasedHandler?.({ sprite });
+
+    expect(enemyManagerStub.resumeEnemy).toHaveBeenCalledWith(sprite);
+    expect(physicsResumeEnemyMock).toHaveBeenCalledWith(sprite);
+  });
+
+  it('enemy-swallowed イベントで敵を消費し、再開処理を抑制する', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    scene.create();
+
+    const enemyManagerStub = {
+      suspendEnemy: vi.fn(),
+      resumeEnemy: vi.fn(),
+      consumeEnemy: vi.fn(),
+    };
+    (scene as any).enemyManager = enemyManagerStub;
+
+    const capturedHandler = stubs.events.on.mock.calls.find(([event]) => event === 'enemy-captured')?.[1];
+    const releasedHandler = stubs.events.on.mock.calls.find(([event]) => event === 'enemy-capture-released')?.[1];
+    const swallowedHandler = stubs.events.on.mock.calls.find(([event]) => event === 'enemy-swallowed')?.[1];
+
+    expect(capturedHandler).toBeInstanceOf(Function);
+    expect(releasedHandler).toBeInstanceOf(Function);
+    expect(swallowedHandler).toBeInstanceOf(Function);
+
+    const sprite = { destroyed: false } as any;
+    capturedHandler?.({ sprite });
+    swallowedHandler?.({ sprite });
+
+    expect(enemyManagerStub.consumeEnemy).toHaveBeenCalledWith(sprite);
+    expect(physicsConsumeEnemyMock).toHaveBeenCalledWith(sprite);
+
+    physicsResumeEnemyMock.mockClear();
+    enemyManagerStub.resumeEnemy.mockClear();
+
+    sprite.destroyed = true;
+    releasedHandler?.({ sprite });
+
+    expect(enemyManagerStub.resumeEnemy).not.toHaveBeenCalled();
+    expect(physicsResumeEnemyMock).not.toHaveBeenCalled();
+  });
+
+  it('口内に敵がある時だけDOWNキー吸い込みを有効化する', () => {
+    const scene = new GameScene();
+    const mouthSprite = { name: 'captured-enemy' } as any;
+    const getMouthContent = vi.fn().mockReturnValue(undefined);
+    const kirdyInstance = makeKirdyStub({ getMouthContent });
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    const snapshot = createSnapshot();
+    playerInputUpdateMock.mockReturnValue(snapshot);
+
+    scene.create();
+    scene.update(16, 16);
+
+    expect(playerInputSetSwallowDownMock).toHaveBeenCalledWith(false);
+    playerInputSetSwallowDownMock.mockClear();
+
+    getMouthContent.mockReturnValue(mouthSprite);
+    scene.update(16, 16);
+    expect(playerInputSetSwallowDownMock).toHaveBeenCalledWith(true);
+
+    playerInputSetSwallowDownMock.mockClear();
+    getMouthContent.mockReturnValue(undefined);
+    scene.update(16, 16);
+    expect(playerInputSetSwallowDownMock).toHaveBeenCalledWith(false);
+  });
+
   it('プレイヤーHPの変化時に進行状況を保存する', () => {
     const scene = new GameScene();
     const kirdyInstance = makeKirdyStub();
@@ -1591,6 +1719,7 @@ describe('GameScene player integration', () => {
     expect(shutdownCall?.[1]).toBeInstanceOf(Function);
 
     PlayerInputManagerMock.mockClear();
+    playerInputSetSwallowDownMock.mockClear();
     playerInputDestroyMock.mockClear();
 
     shutdownCall?.[1]?.();

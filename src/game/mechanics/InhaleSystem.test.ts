@@ -32,6 +32,7 @@ let particleManager: {
 let textureManager: {
   exists: ReturnType<typeof vi.fn>;
 };
+let emitEvent: ReturnType<typeof vi.fn>;
 let kirdy: {
   sprite: {
     anims: { play: ReturnType<typeof vi.fn> };
@@ -60,6 +61,8 @@ beforeEach(() => {
     exists: vi.fn().mockReturnValue(true),
   };
 
+  emitEvent = vi.fn();
+
   scene = {
     sound: {
       play: playSound,
@@ -68,6 +71,9 @@ beforeEach(() => {
       particles: addParticles,
     },
     textures: textureManager,
+    events: {
+      emit: emitEvent,
+    },
   } as unknown as Phaser.Scene;
 
   kirdy = {
@@ -298,5 +304,40 @@ describe('InhaleSystem target capture', () => {
     );
 
     expect(target.raw.setPosition).toHaveBeenCalledWith(128, 32);
+  });
+
+  it('吸い込み対象を捕捉した瞬間に enemy-captured イベントを通知する', () => {
+    const system = new InhaleSystem(scene, kirdy as any);
+    const target = createTarget(48, 0);
+
+    system.setInhalableTargets([target.sprite]);
+
+    system.update(
+      buildActions({
+        inhale: { isDown: true, justPressed: true },
+      }),
+    );
+
+    expect(emitEvent).toHaveBeenCalledWith('enemy-captured', { sprite: target.sprite });
+  });
+
+  it('releaseCapturedTarget で enemy-capture-released を通知する', () => {
+    const system = new InhaleSystem(scene, kirdy as any);
+    const target = createTarget(48, 0);
+
+    system.setInhalableTargets([target.sprite]);
+
+    system.update(
+      buildActions({
+        inhale: { isDown: true, justPressed: true },
+      }),
+    );
+
+    emitEvent.mockClear();
+
+    system.releaseCapturedTarget();
+
+    expect(emitEvent).toHaveBeenCalledWith('enemy-capture-released', { sprite: target.sprite });
+    expect(kirdy.setMouthContent).toHaveBeenCalledWith(undefined);
   });
 });

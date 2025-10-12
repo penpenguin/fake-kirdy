@@ -51,14 +51,14 @@ type StarProjectileStub = {
 };
 
 describe('SwallowSystem', () => {
-  let scene: Phaser.Scene;
-  let playSound: ReturnType<typeof vi.fn>;
-  let addSprite: ReturnType<typeof vi.fn>;
-  let delayedCall: ReturnType<typeof vi.fn>;
-  let physicsSystem: {
-    registerPlayerAttack: ReturnType<typeof vi.fn>;
-    destroyProjectile: ReturnType<typeof vi.fn>;
-  };
+let scene: Phaser.Scene;
+let playSound: ReturnType<typeof vi.fn>;
+let addSprite: ReturnType<typeof vi.fn>;
+let delayedCall: ReturnType<typeof vi.fn>;
+let physicsSystem: {
+  registerPlayerAttack: ReturnType<typeof vi.fn>;
+  destroyProjectile: ReturnType<typeof vi.fn>;
+};
   let kirdy: {
     sprite: {
       x: number;
@@ -71,8 +71,9 @@ describe('SwallowSystem', () => {
   let inhaleSystem: {
     releaseCapturedTarget: ReturnType<typeof vi.fn>;
   };
-  let target: FakeTarget;
+let target: FakeTarget;
   let starProjectile: StarProjectileStub;
+  let emitEvent: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     playSound = vi.fn();
@@ -112,6 +113,8 @@ describe('SwallowSystem', () => {
 
     addSprite = vi.fn().mockReturnValue(starProjectile);
 
+    emitEvent = vi.fn();
+
     scene = {
       sound: {
         play: playSound,
@@ -123,6 +126,9 @@ describe('SwallowSystem', () => {
       },
       time: {
         delayedCall,
+      },
+      events: {
+        emit: emitEvent,
       },
     } as unknown as Phaser.Scene;
 
@@ -171,6 +177,11 @@ describe('SwallowSystem', () => {
     const payload = system.consumeSwallowedPayload();
     expect(payload).toEqual({ abilityType: 'fire', ability: AbilitySystem.abilities.fire });
     expect(system.consumeSwallowedPayload()).toBeUndefined();
+    expect(emitEvent).toHaveBeenCalledWith('enemy-swallowed', {
+      sprite: target,
+      abilityType: 'fire',
+      ability: AbilitySystem.abilities.fire,
+    });
   });
 
   it('does nothing when swallow is triggered without mouth content', () => {
@@ -211,6 +222,81 @@ describe('SwallowSystem', () => {
     );
     expect(target.destroy).toHaveBeenCalled();
     expect(inhaleSystem.releaseCapturedTarget).toHaveBeenCalled();
+  });
+
+  it('gracefully recycles the projectile when physics destroy throws during collisions', () => {
+    physicsSystem.destroyProjectile.mockImplementation(() => {
+      throw new Error('physics destroy failed');
+    });
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any, physicsSystem as any);
+
+    system.update(
+      buildActions({
+        spit: { isDown: true, justPressed: true },
+      }),
+    );
+
+    starProjectile.setData('pooledProjectile', false);
+    const collideHandler = starProjectile.setOnCollide.mock.calls[0]?.[0];
+    expect(collideHandler).toBeInstanceOf(Function);
+
+    collideHandler?.();
+
+    expect(physicsSystem.destroyProjectile).toHaveBeenCalledWith(starProjectile);
+    expect(starProjectile.destroy).toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[SwallowSystem] failed to destroy star projectile',
+      expect.any(Error),
+    );
+
+    warnSpy.mockRestore();
+  });
+
+  it('logs and cleans up when registering the projectile with physics fails', () => {
+    physicsSystem.registerPlayerAttack.mockImplementation(() => {
+      throw new Error('register failed');
+    });
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any, physicsSystem as any);
+
+    expect(() =>
+      system.update(
+        buildActions({
+          spit: { isDown: true, justPressed: true },
+        }),
+      ),
+    ).not.toThrow();
+
+    expect(warnSpy).toHaveBeenCalledWith('[SwallowSystem] failed to register star projectile', expect.any(Error));
+    expect(physicsSystem.destroyProjectile).toHaveBeenCalledWith(starProjectile);
+
+    warnSpy.mockRestore();
+  });
+
+  it('still disposes the projectile if timed destruction fails', () => {
+    physicsSystem.destroyProjectile.mockImplementation(() => {
+      throw new Error('timer destroy failed');
+    });
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any, physicsSystem as any);
+
+    system.update(
+      buildActions({
+        spit: { isDown: true, justPressed: true },
+      }),
+    );
+
+    starProjectile.setData('pooledProjectile', false);
+
+    const timerCallback = delayedCall.mock.calls[0]?.[1];
+    expect(timerCallback).toBeInstanceOf(Function);
+
+    expect(() => timerCallback?.()).not.toThrow();
+    expect(physicsSystem.destroyProjectile).toHaveBeenCalledWith(starProjectile);
+    expect(warnSpy).toHaveBeenCalledWith('[SwallowSystem] failed to destroy star projectile', expect.any(Error));
+
+    warnSpy.mockRestore();
   });
 
   it('skips projectile spawning gracefully when Matter sprite creation fails', () => {

@@ -28,6 +28,8 @@ export const PhysicsCategory = {
   EnemyAttack: 0x0010,
 } as const;
 
+const ENEMY_COLLISION_MASK = PhysicsCategory.Player | PhysicsCategory.PlayerAttack | PhysicsCategory.Terrain;
+
 type PlayerAttackOptions = {
   damage?: number;
   recycle?: (projectile: MatterGameObject) => boolean | void;
@@ -43,6 +45,7 @@ export class PhysicsSystem {
   private readonly terrainObjects = new Set<MatterGameObject>();
   private readonly projectileData = new Map<MatterGameObject, ProjectileMetadata>();
   private readonly terrainContactIds = new Set<number>();
+  private readonly suspendedEnemies = new Map<MatterGameObject, Enemy>();
   private playerSprite?: MatterGameObject;
 
   constructor(private readonly scene: Phaser.Scene) {
@@ -85,8 +88,45 @@ export class PhysicsSystem {
   registerEnemy(enemy: Enemy) {
     const sprite = enemy.sprite as MatterGameObject;
     sprite.setCollisionCategory?.(PhysicsCategory.Enemy);
-    sprite.setCollidesWith?.(PhysicsCategory.Player | PhysicsCategory.PlayerAttack | PhysicsCategory.Terrain);
+    sprite.setCollidesWith?.(ENEMY_COLLISION_MASK);
     this.enemyByObject.set(sprite, enemy);
+    this.suspendedEnemies.delete(sprite);
+    if (typeof sprite.once === 'function') {
+      sprite.once('destroy', () => {
+        this.enemyByObject.delete(sprite);
+        this.suspendedEnemies.delete(sprite);
+      });
+    }
+  }
+
+  suspendEnemy(sprite: MatterGameObject) {
+    const enemy = this.enemyByObject.get(sprite);
+    if (!enemy) {
+      return false;
+    }
+
+    this.enemyByObject.delete(sprite);
+    this.suspendedEnemies.set(sprite, enemy);
+    sprite.setCollidesWith?.(0);
+    return true;
+  }
+
+  resumeEnemy(sprite: MatterGameObject) {
+    const enemy = this.suspendedEnemies.get(sprite);
+    if (!enemy) {
+      return false;
+    }
+
+    this.suspendedEnemies.delete(sprite);
+    this.enemyByObject.set(sprite, enemy);
+    sprite.setCollidesWith?.(ENEMY_COLLISION_MASK);
+    return true;
+  }
+
+  consumeEnemy(sprite: MatterGameObject) {
+    this.enemyByObject.delete(sprite);
+    this.suspendedEnemies.delete(sprite);
+    sprite.setCollidesWith?.(0);
   }
 
   registerPlayerAttack(projectile: MatterGameObject, options: PlayerAttackOptions = {}) {
@@ -238,6 +278,7 @@ export class PhysicsSystem {
     world?.off?.('collisionstart', this.handleCollisionStart);
     world?.off?.('collisionend', this.handleCollisionEnd);
     this.enemyByObject.clear();
+    this.suspendedEnemies.clear();
     this.terrainObjects.clear();
     this.projectileData.clear();
     this.terrainContactIds.clear();

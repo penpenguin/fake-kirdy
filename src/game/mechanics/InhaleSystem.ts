@@ -64,8 +64,12 @@ export class InhaleSystem {
   }
 
   releaseCapturedTarget() {
+    const target = this.capturedTarget;
     this.capturedTarget = undefined;
     this.kirdy.setMouthContent?.(undefined);
+    if (target) {
+      this.scene.events?.emit?.('enemy-capture-released', { sprite: target });
+    }
   }
 
   private startInhale() {
@@ -129,6 +133,7 @@ export class InhaleSystem {
     candidate.setPosition?.(this.kirdy.sprite.x, this.kirdy.sprite.y);
 
     this.kirdy.setMouthContent?.(candidate);
+    this.scene.events?.emit?.('enemy-captured', { sprite: candidate });
 
     this.inhalableTargets = this.inhalableTargets.filter((target) => target !== candidate);
   }

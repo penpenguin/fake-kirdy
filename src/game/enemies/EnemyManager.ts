@@ -56,6 +56,8 @@ export class EnemyManager {
   private enemies: Enemy[] = [];
   private enemySpawnCooldownRemaining = 0;
   private readonly enemyDisperseCooldowns = new Map<Enemy, number>();
+  private readonly enemyBySprite = new Map<Phaser.Physics.Matter.Sprite, Enemy>();
+  private readonly suspendedEnemies = new Set<Enemy>();
 
   constructor(options: EnemyManagerOptions) {
     this.scene = options.scene;
@@ -123,6 +125,13 @@ export class EnemyManager {
         return;
       }
 
+      if (this.suspendedEnemies.has(enemy)) {
+        enemy.sprite.setActive?.(false);
+        enemy.sprite.setVisible?.(false);
+        enemy.sprite.setVelocity?.(0, 0);
+        return;
+      }
+
       const position = this.getEnemyPosition(enemy);
       const inView = bounds ? this.isWithinBounds(position, bounds) : true;
 
@@ -134,12 +143,14 @@ export class EnemyManager {
       }
     });
 
-    const activeEnemies = this.getActiveEnemies();
+    const survivingEnemies = this.enemies.filter((enemy) => !enemy.isDefeated());
+    const activeEnemies = survivingEnemies.filter((enemy) => !this.suspendedEnemies.has(enemy));
+
     if (activeEnemies.length !== this.enemies.length) {
       this.inhaleSystem.setInhalableTargets(activeEnemies.map((enemy) => enemy.sprite));
     }
 
-    this.enemies = activeEnemies;
+    this.enemies = survivingEnemies;
     if (this.enemyDisperseCooldowns.size > 0) {
       const activeSet = new Set(activeEnemies);
       for (const enemy of Array.from(this.enemyDisperseCooldowns.keys())) {
@@ -156,6 +167,8 @@ export class EnemyManager {
       enemy.sprite.destroy?.();
     });
     this.enemies = [];
+    this.enemyBySprite.clear();
+    this.suspendedEnemies.clear();
     this.enemySpawnCooldownRemaining = 0;
     this.inhaleSystem.setInhalableTargets([]);
     this.enemyDisperseCooldowns.clear();
@@ -166,12 +179,12 @@ export class EnemyManager {
   }
 
   getActiveEnemyCount() {
-    return this.enemies.reduce((count, enemy) => (enemy.isDefeated() ? count : count + 1), 0);
+    return this.enemies.reduce((count, enemy) => (this.isEnemyActive(enemy) ? count + 1 : count), 0);
   }
 
   getActiveEnemyCountByType(type: EnemyType) {
     return this.enemies.reduce((count, enemy) => {
-      if (enemy.isDefeated()) {
+      if (!this.isEnemyActive(enemy)) {
         return count;
       }
 
@@ -191,6 +204,13 @@ export class EnemyManager {
     this.enemies.push(enemy);
     this.inhaleSystem.addInhalableTarget(enemy.sprite);
     this.physicsSystem.registerEnemy(enemy);
+    this.enemyBySprite.set(enemy.sprite, enemy);
+    if (typeof enemy.sprite.once === 'function') {
+      enemy.sprite.once('destroy', () => {
+        this.enemyBySprite.delete(enemy.sprite);
+        this.suspendedEnemies.delete(enemy);
+      });
+    }
     this.beginEnemySpawnCooldown();
     return enemy;
   }
@@ -223,7 +243,48 @@ export class EnemyManager {
   }
 
   private getActiveEnemies() {
-    return this.enemies.filter((enemy) => !enemy.isDefeated());
+    return this.enemies.filter((enemy) => this.isEnemyActive(enemy));
+  }
+
+  suspendEnemy(sprite: Phaser.Physics.Matter.Sprite) {
+    const enemy = this.enemyBySprite.get(sprite);
+    if (!enemy || this.suspendedEnemies.has(enemy)) {
+      return false;
+    }
+
+    this.suspendedEnemies.add(enemy);
+    enemy.sprite.setVelocity?.(0, 0);
+    enemy.sprite.setActive?.(false);
+    enemy.sprite.setVisible?.(false);
+    return true;
+  }
+
+  resumeEnemy(sprite: Phaser.Physics.Matter.Sprite) {
+    const enemy = this.enemyBySprite.get(sprite);
+    if (!enemy || !this.suspendedEnemies.has(enemy)) {
+      return false;
+    }
+
+    this.suspendedEnemies.delete(enemy);
+    this.inhaleSystem.setInhalableTargets(this.getActiveEnemies().map((entry) => entry.sprite));
+    return true;
+  }
+
+  consumeEnemy(sprite: Phaser.Physics.Matter.Sprite) {
+    const enemy = this.enemyBySprite.get(sprite);
+    if (!enemy) {
+      return false;
+    }
+
+    this.suspendedEnemies.delete(enemy);
+    this.enemyBySprite.delete(sprite);
+    this.enemies = this.enemies.filter((entry) => entry !== enemy);
+    this.inhaleSystem.setInhalableTargets(this.getActiveEnemies().map((entry) => entry.sprite));
+    return true;
+  }
+
+  private isEnemyActive(enemy: Enemy) {
+    return !enemy.isDefeated() && !this.suspendedEnemies.has(enemy);
   }
 
   private enforceEnemyDensity(activeEnemies: Enemy[]) {

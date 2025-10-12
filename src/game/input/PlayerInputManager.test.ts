@@ -517,6 +517,31 @@ describe('PlayerInputManager', () => {
     expect(discard!.y).toBeGreaterThan(inhale!.y);
   });
 
+  it('DOWNキーは吸い込み許可時のみ動作し、長押しでもjustPressedを再発火させない', () => {
+    const manager = createManager();
+    const downKey = sceneFactory.keyStore['DOWN'];
+    expect(downKey).toBeDefined();
+
+    downKey.isDown = true;
+    let snapshot = manager.update();
+    expect(snapshot.actions.swallow.isDown).toBe(false);
+    expect(snapshot.actions.swallow.justPressed).toBe(false);
+
+    manager.setSwallowDownEnabled(true);
+    snapshot = manager.update();
+    expect(snapshot.actions.swallow.isDown).toBe(true);
+    expect(snapshot.actions.swallow.justPressed).toBe(true);
+
+    snapshot = manager.update();
+    expect(snapshot.actions.swallow.isDown).toBe(true);
+    expect(snapshot.actions.swallow.justPressed).toBe(false);
+
+    manager.setSwallowDownEnabled(false);
+    snapshot = manager.update();
+    expect(snapshot.actions.swallow.isDown).toBe(false);
+    expect(snapshot.actions.swallow.justPressed).toBe(false);
+  });
+
   it('applies visual feedback when virtual buttons are pressed', () => {
     createManager();
 

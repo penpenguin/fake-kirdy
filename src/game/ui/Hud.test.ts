@@ -81,13 +81,25 @@ function createSceneStubs() {
     .mockImplementationOnce(() => abilityLabel)
     .mockImplementationOnce(() => scoreLabel);
 
+  const abilityIcon = {
+    setTexture: vi.fn().mockReturnThis(),
+    setVisible: vi.fn().mockReturnThis(),
+    setScrollFactor: vi.fn().mockReturnThis(),
+    setDepth: vi.fn().mockReturnThis(),
+    setOrigin: vi.fn().mockReturnThis(),
+  };
+
   const scene = {
     add: {
       container: vi.fn(() => container),
       rectangle: addRectangle,
       text: addText,
+      image: vi.fn(() => abilityIcon),
     },
     scale: { width: 800, height: 600 },
+    textures: {
+      exists: vi.fn().mockReturnValue(false),
+    },
   } as any;
 
   return {
@@ -100,6 +112,7 @@ function createSceneStubs() {
     hpLabel,
     abilityLabel,
     scoreLabel,
+    abilityIcon,
   };
 }
 
@@ -119,14 +132,39 @@ describe('Hud', () => {
   });
 
   it('displays the current ability type in uppercase, falling back to None', () => {
-    const { scene, abilityLabel } = createSceneStubs();
+    const { scene, abilityLabel, abilityIcon } = createSceneStubs();
     const hud = new Hud(scene);
+    const texturesExists = scene.textures.exists as ReturnType<typeof vi.fn>;
+
+    texturesExists.mockImplementation((key: string) => key === 'hud-ability-fire');
 
     hud.updateAbility('fire');
     expect(abilityLabel.setText).toHaveBeenCalledWith('Ability: FIRE');
+    expect(abilityIcon.setVisible).toHaveBeenCalledWith(true);
 
     hud.updateAbility(undefined);
     expect(abilityLabel.setText).toHaveBeenLastCalledWith('Ability: None');
+    expect(abilityIcon.setVisible).toHaveBeenLastCalledWith(false);
+  });
+
+  it('能力アイコンはテクスチャのフォールバック順序を評価する', () => {
+    const { scene, abilityIcon } = createSceneStubs();
+    const hud = new Hud(scene);
+    const texturesExists = scene.textures.exists as ReturnType<typeof vi.fn>;
+
+    texturesExists.mockImplementation((key: string) => key === 'hud-ability-fire');
+    hud.updateAbility('fire');
+    expect(abilityIcon.setTexture).toHaveBeenCalledWith('hud-ability-fire');
+
+    texturesExists.mockImplementation((key: string) => key === 'kirdy');
+    abilityIcon.setTexture.mockClear();
+    hud.updateAbility('ice');
+    expect(abilityIcon.setTexture).toHaveBeenCalledWith('kirdy', 'ice');
+
+    texturesExists.mockReturnValue(false);
+    abilityIcon.setTexture.mockClear();
+    hud.updateAbility('sword');
+    expect(abilityIcon.setTexture).not.toHaveBeenCalled();
   });
 
   it('renders the score as a zero-padded value', () => {
