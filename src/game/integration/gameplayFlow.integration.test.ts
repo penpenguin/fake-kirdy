@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createGameplayHarness, actionState } from './testHarness';
 
 describe('統合: ゲームプレイフロー', () => {
-  it('吸い込み→飲み込み→能力使用が連鎖し、能力攻撃が生成される', () => {
+  it('引き寄せ→吸収→能力使用が連鎖し、能力攻撃が生成される', () => {
     const harness = createGameplayHarness({ abilityType: 'fire' });
 
     const inhaleAction = actionState({ inhale: { isDown: true, justPressed: true } });
