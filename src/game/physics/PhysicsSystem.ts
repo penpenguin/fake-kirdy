@@ -76,6 +76,12 @@ export class PhysicsSystem {
     this.terrainObjects.add(terrain);
   }
 
+  clearTerrain() {
+    this.terrainObjects.clear();
+    this.terrainContactIds.clear();
+    this.playerSprite?.setData?.('isGrounded', false);
+  }
+
   registerEnemy(enemy: Enemy) {
     const sprite = enemy.sprite as MatterGameObject;
     sprite.setCollisionCategory?.(PhysicsCategory.Enemy);

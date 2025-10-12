@@ -7,6 +7,7 @@ const spriteFactory = vi.hoisted(() => () => ({
   setFixedRotation: vi.fn().mockReturnThis(),
   setFrictionAir: vi.fn().mockReturnThis(),
   setName: vi.fn().mockReturnThis(),
+  setOrigin: vi.fn().mockReturnThis(),
   setData: vi.fn().mockReturnThis(),
   setVelocityX: vi.fn().mockReturnThis(),
   setVelocityY: vi.fn().mockReturnThis(),
@@ -14,6 +15,9 @@ const spriteFactory = vi.hoisted(() => () => ({
   setActive: vi.fn().mockReturnThis(),
   setVisible: vi.fn().mockReturnThis(),
   setPosition: vi.fn().mockReturnThis(),
+  setScale: vi.fn().mockReturnThis(),
+  setBody: vi.fn().mockReturnThis(),
+  setRectangle: vi.fn().mockReturnThis(),
   destroy: vi.fn(),
 }));
 
@@ -43,6 +47,8 @@ describe('enemy system', () => {
     sprite.setVelocityX.mockReset();
     sprite.setFlipX.mockReset();
     sprite.destroy.mockReset();
+    sprite.setBody.mockReset();
+    sprite.setOrigin.mockReset();
 
     scene = {
       matter: { add: { sprite: addSpriteMock } },
@@ -60,10 +66,33 @@ describe('enemy system', () => {
     expect(addSpriteMock).toHaveBeenCalledWith(100, 200, 'wabble-bee');
     expect(sprite.setIgnoreGravity).toHaveBeenCalledWith(true);
     expect(sprite.setFixedRotation).toHaveBeenCalledWith();
+    expect(sprite.setOrigin).toHaveBeenCalledWith(0.5, 0.5);
+    expect(sprite.setScale).toHaveBeenCalledWith(0.65);
+    expect(sprite.setBody).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'rectangle',
+      width: 42,
+      height: 36,
+    }));
     expect(sprite.setData).toHaveBeenCalledWith('enemyType', 'wabble-bee');
     expect(sprite.setData).toHaveBeenCalledWith('abilityType', 'fire');
     expect(enemy.getAbilityType()).toBe('fire');
     expect(enemy.getHP()).toBeGreaterThan(0);
+  });
+
+  it('uses Kirdy move speed for default Wabble Bee patrols', async () => {
+    const { createWabbleBee } = await import('./index');
+    const { KIRDY_MOVE_SPEED } = await import('../characters/Kirdy');
+    const expectedSpeed = KIRDY_MOVE_SPEED / 2;
+
+    const enemy = createWabbleBee(scene, { x: 160, y: 200 }, {
+      getPlayerPosition: () => undefined,
+    });
+
+    sprite.x = 160;
+    enemy.update(16);
+
+    expect(sprite.setVelocityX).toHaveBeenLastCalledWith(expectedSpeed);
+    expect(sprite.setFlipX).toHaveBeenLastCalledWith(false);
   });
 
   it('patrols horizontally and flips at patrol bounds when player is distant', async () => {
@@ -111,6 +140,66 @@ describe('enemy system', () => {
     expect(sprite.setFlipX).toHaveBeenLastCalledWith(true);
   });
 
+  it('uses Kirdy move speed for default Wabble Bee chases', async () => {
+    const { createWabbleBee } = await import('./index');
+    const { KIRDY_MOVE_SPEED } = await import('../characters/Kirdy');
+    const expectedSpeed = KIRDY_MOVE_SPEED / 2;
+
+    const enemy = createWabbleBee(scene, { x: 200, y: 200 }, {
+      getPlayerPosition: () => ({ x: 120, y: 200 }),
+    });
+
+    sprite.x = 200;
+    enemy.update(16);
+
+    const [[chaseVelocity]] = sprite.setVelocityX.mock.calls.slice(-1);
+    expect(Math.abs(chaseVelocity)).toBe(expectedSpeed);
+  });
+
+  it('re-baselines the patrol center when dispersed to a new position', async () => {
+    const { createWabbleBee } = await import('./index');
+
+    const enemy = createWabbleBee(scene, { x: 100, y: 200 }, {
+      getPlayerPosition: () => undefined,
+      patrolRadius: 40,
+      patrolSpeed: 80,
+    });
+
+    sprite.x = 100;
+    enemy.update(16);
+    expect(sprite.setVelocityX).toHaveBeenLastCalledWith(80);
+
+    sprite.setVelocityX.mockClear();
+    enemy.onDisperse?.({ x: 200, y: 200 });
+    sprite.x = 200;
+    enemy.update(16);
+
+    expect(sprite.setVelocityX).toHaveBeenLastCalledWith(80);
+  });
+
+  it('resumes chasing after disperse recovery expires', async () => {
+    const { createWabbleBee } = await import('./index');
+
+    const target = { x: 40, y: 200 };
+    const enemy = createWabbleBee(scene, { x: 100, y: 200 }, {
+      getPlayerPosition: () => target,
+      patrolRadius: 40,
+      patrolSpeed: 80,
+      chaseSpeed: 120,
+      detectionRange: 160,
+    });
+
+    sprite.x = 200;
+    enemy.onDisperse?.({ x: 200, y: 200 });
+
+    enemy.update(16);
+    expect(sprite.setVelocityX).toHaveBeenLastCalledWith(80);
+
+    sprite.setVelocityX.mockClear();
+    enemy.update(2000);
+    expect(sprite.setVelocityX).toHaveBeenLastCalledWith(-120);
+  });
+
   it('reduces HP and destroys the enemy when HP reaches zero', async () => {
     const { createWabbleBee } = await import('./index');
 
@@ -145,6 +234,13 @@ describe('enemy system', () => {
 
     expect(addSpriteMock).toHaveBeenCalledWith(300, 240, 'dronto-durt');
     expect(sprite.setIgnoreGravity).toHaveBeenCalledWith(false);
+    expect(sprite.setOrigin).toHaveBeenCalledWith(0.5, 0.5);
+    expect(sprite.setScale).toHaveBeenCalledWith(0.75);
+    expect(sprite.setBody).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'rectangle',
+      width: 48,
+      height: 48,
+    }));
     expect(sprite.setData).toHaveBeenCalledWith('enemyType', 'dronto-durt');
     expect(sprite.setData).toHaveBeenCalledWith('abilityType', 'sword');
     expect(enemy.getAbilityType()).toBe('sword');
@@ -154,5 +250,21 @@ describe('enemy system', () => {
 
     expect(sprite.setVelocityX).toHaveBeenLastCalledWith(-90);
     expect(sprite.setFlipX).toHaveBeenLastCalledWith(true);
+  });
+
+  it('uses Kirdy move speed for default Dronto Durt charges', async () => {
+    const { createDrontoDurt } = await import('./index');
+    const { KIRDY_MOVE_SPEED } = await import('../characters/Kirdy');
+    const expectedSpeed = KIRDY_MOVE_SPEED / 2;
+
+    const enemy = createDrontoDurt(scene, { x: 240, y: 240 }, {
+      getPlayerPosition: () => ({ x: 200, y: 240 }),
+    });
+
+    sprite.x = 240;
+    enemy.update(16);
+
+    const [[chargeVelocity]] = sprite.setVelocityX.mock.calls.slice(-1);
+    expect(Math.abs(chargeVelocity)).toBe(expectedSpeed);
   });
 });

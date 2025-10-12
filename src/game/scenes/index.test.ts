@@ -117,12 +117,14 @@ const physicsSystemStubs = vi.hoisted(() => {
   const registerEnemy = vi.fn();
   const registerPlayerAttack = vi.fn();
   const destroyProjectile = vi.fn();
+  const clearTerrain = vi.fn();
   const mock = vi.fn(() => ({
     registerPlayer,
     registerTerrain,
     registerEnemy,
     registerPlayerAttack,
     destroyProjectile,
+    clearTerrain,
   }));
 
   return {
@@ -131,6 +133,7 @@ const physicsSystemStubs = vi.hoisted(() => {
     registerEnemy,
     registerPlayerAttack,
     destroyProjectile,
+    clearTerrain,
     mock,
   };
 });
@@ -210,6 +213,11 @@ describe('Scene registration', () => {
     vi.clearAllMocks();
     physicsSystemStubs.mock.mockClear();
     physicsSystemStubs.registerPlayer.mockClear();
+    physicsSystemStubs.registerTerrain.mockClear();
+    physicsSystemStubs.registerEnemy.mockClear();
+    physicsSystemStubs.registerPlayerAttack.mockClear();
+    physicsSystemStubs.destroyProjectile.mockClear();
+    physicsSystemStubs.clearTerrain.mockClear();
     audioManagerStubs.mock.mockClear();
     audioManagerStubs.playBgm.mockClear();
     audioManagerStubs.setMasterVolume.mockClear();
@@ -528,8 +536,10 @@ describe('Scene registration', () => {
     const gameScene = new GameScene();
 
     const registerTerrain = vi.fn();
-    (gameScene as unknown as { physicsSystem: { registerTerrain: typeof registerTerrain } }).physicsSystem = {
+    const clearTerrain = vi.fn();
+    (gameScene as unknown as { physicsSystem: { registerTerrain: typeof registerTerrain; clearTerrain: typeof clearTerrain } }).physicsSystem = {
       registerTerrain,
+      clearTerrain,
     };
 
     const tileMap = {

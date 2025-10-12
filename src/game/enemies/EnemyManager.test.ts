@@ -11,12 +11,15 @@ type TestEnemy = Enemy & {
     setActive: Mock;
     setVisible: Mock;
     setPosition: Mock;
+    setVelocity: Mock;
+    destroy: Mock;
   };
   update: Mock;
   takeDamage: Mock;
   getHP: Mock;
   isDefeated: Mock;
   getAbilityType: Mock;
+  onDisperse: Mock;
 };
 
 const createWabbleBeeMock = vi.hoisted(() => vi.fn());
@@ -32,15 +35,35 @@ vi.mock('./index', async (importOriginal) => {
 });
 
 describe('EnemyManager', () => {
-  const makeSprite = (): TestEnemy['sprite'] =>
-    ({
+  const makeSprite = (): TestEnemy['sprite'] => {
+    const sprite: any = {
       x: 0,
       y: 0,
       body: { position: { x: 0, y: 0 } },
-      setActive: vi.fn().mockReturnThis(),
-      setVisible: vi.fn().mockReturnThis(),
-      setPosition: vi.fn().mockReturnThis(),
-    } as unknown as TestEnemy['sprite']);
+      destroy: vi.fn(),
+    };
+
+    sprite.setActive = vi.fn(() => sprite);
+    sprite.setVisible = vi.fn(() => sprite);
+    sprite.setVelocity = vi.fn(() => sprite);
+    sprite.setPosition = vi.fn((x?: number, y?: number) => {
+      if (Number.isFinite(x)) {
+        sprite.x = x as number;
+        if (sprite.body?.position) {
+          sprite.body.position.x = x as number;
+        }
+      }
+      if (Number.isFinite(y)) {
+        sprite.y = y as number;
+        if (sprite.body?.position) {
+          sprite.body.position.y = y as number;
+        }
+      }
+      return sprite;
+    });
+
+    return sprite as TestEnemy['sprite'];
+  };
 
   const makeEnemy = (): TestEnemy => ({
     sprite: makeSprite(),
@@ -49,6 +72,7 @@ describe('EnemyManager', () => {
     getHP: vi.fn().mockReturnValue(3),
     isDefeated: vi.fn().mockReturnValue(false),
     getAbilityType: vi.fn(),
+    onDisperse: vi.fn(),
   });
 
   const makeSpawn = (x: number, y: number): EnemySpawn => ({ x, y });
@@ -192,18 +216,22 @@ describe('EnemyManager', () => {
 
     manager.spawnWabbleBee(makeSpawn(164, 364));
 
+    const initialPositionCounts = enemies.map((enemy) => enemy.sprite.setPosition.mock.calls.length);
+
     manager.update(16);
 
-    const repositioned = enemies.map((enemy) => enemy.sprite.setPosition.mock.calls.at(-1));
+    enemies.forEach((enemy, index) => {
+      expect(enemy.sprite.setPosition.mock.calls.length).toBe(initialPositionCounts[index]);
+    });
 
-    expect(repositioned.filter((call): call is [number, number] => Array.isArray(call)).length).toBeGreaterThan(0);
-    repositioned.forEach((call) => {
-      if (!Array.isArray(call)) {
-        return;
-      }
-      const [x, y] = call;
-      const dx = x - 160;
-      const dy = y - 360;
+    const dispersed = enemies.filter((enemy) => enemy.onDisperse.mock.calls.length > 0);
+    expect(dispersed.length).toBeGreaterThan(0);
+    dispersed.forEach((enemy) => {
+      expect(enemy.sprite.setVelocity).toHaveBeenCalledWith(0, 0);
+      const [context] = enemy.onDisperse.mock.calls.at(-1) ?? [];
+      expect(context).toMatchObject({ x: expect.any(Number), y: expect.any(Number) });
+      const dx = (context?.x ?? 0) - 160;
+      const dy = (context?.y ?? 0) - 360;
       expect(Math.hypot(dx, dy)).toBeGreaterThanOrEqual(96);
     });
   });
@@ -221,5 +249,69 @@ describe('EnemyManager', () => {
     expect(enemy.sprite.setActive).toHaveBeenCalledWith(false);
     expect(enemy.sprite.setVisible).toHaveBeenCalledWith(false);
     expect(enemy.update).not.toHaveBeenCalled();
+  });
+
+  it('destroys existing enemies when manager is destroyed', () => {
+    const enemy = makeEnemy();
+    createWabbleBeeMock.mockReturnValueOnce(enemy);
+
+    manager.spawnWabbleBee(makeSpawn(64, 64));
+
+    manager.destroy();
+
+    expect(enemy.sprite.destroy).toHaveBeenCalled();
+    expect(inhaleSystem.setInhalableTargets).toHaveBeenCalledWith([]);
+  });
+
+  it('repositions clustered enemies only while they remain inside the safety radius', () => {
+    const enemies = Array.from({ length: 3 }, () => makeEnemy());
+
+    createWabbleBeeMock
+      .mockReturnValueOnce(enemies[0])
+      .mockReturnValueOnce(enemies[1])
+      .mockReturnValueOnce(enemies[2]);
+
+    enemies.forEach((enemy, index) => {
+      enemy.sprite.x = 160 + index * 4;
+      enemy.sprite.y = 360 + index * 4;
+    });
+
+    manager.spawnWabbleBee(makeSpawn(160, 360));
+    manager.update(600);
+    manager.update(600);
+
+    manager.spawnWabbleBee(makeSpawn(164, 364));
+    manager.update(600);
+    manager.update(600);
+
+    manager.spawnWabbleBee(makeSpawn(168, 368));
+
+    manager.update(16);
+
+    const initialPositionCalls = enemies.map((enemy) => enemy.sprite.setPosition.mock.calls.length);
+    expect(initialPositionCalls.every((count) => count === 0)).toBe(true);
+    const initialDisperseCounts = enemies.map((enemy) => enemy.onDisperse.mock.calls.length);
+    expect(initialDisperseCounts.some((count) => count > 0)).toBe(true);
+
+    for (let i = 0; i < 10; i += 1) {
+      manager.update(16);
+    }
+
+    enemies.forEach((enemy, index) => {
+      expect(enemy.sprite.setPosition.mock.calls.length).toBe(initialPositionCalls[index]);
+      expect(enemy.onDisperse.mock.calls.length).toBe(initialDisperseCounts[index]);
+    });
+
+    enemies.forEach((enemy, index) => {
+      enemy.sprite.x = 160 + index * 2;
+      enemy.sprite.y = 360 + index * 2;
+    });
+
+    manager.update(32);
+
+    enemies.forEach((enemy, index) => {
+      expect(enemy.sprite.setPosition.mock.calls.length).toBe(initialPositionCalls[index]);
+      expect(enemy.onDisperse.mock.calls.length).toBe(initialDisperseCounts[index]);
+    });
   });
 });

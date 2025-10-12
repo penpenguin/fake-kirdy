@@ -303,6 +303,7 @@ const enemySpriteFactory = vi.hoisted(() => () => ({
   setActive: vi.fn(),
   setVisible: vi.fn(),
   setPosition: vi.fn().mockReturnThis(),
+  setVelocity: vi.fn().mockReturnThis(),
   destroy: vi.fn(),
 }));
 
@@ -316,6 +317,7 @@ const createWabbleBeeMock = vi.hoisted(() =>
     getHP: vi.fn().mockReturnValue(3),
     isDefeated: enemyIsDefeatedMock,
     getAbilityType: vi.fn().mockReturnValue('fire'),
+    onDisperse: vi.fn(),
   })),
 );
 
@@ -327,6 +329,7 @@ const createDrontoDurtMock = vi.hoisted(() =>
     getHP: vi.fn().mockReturnValue(4),
     isDefeated: enemyIsDefeatedMock,
     getAbilityType: vi.fn().mockReturnValue('sword'),
+    onDisperse: vi.fn(),
   })),
 );
 
@@ -438,6 +441,7 @@ const physicsRegisterPlayerMock = vi.hoisted(() => vi.fn());
 const physicsRegisterTerrainMock = vi.hoisted(() => vi.fn());
 const physicsRegisterEnemyMock = vi.hoisted(() => vi.fn());
 const physicsDestroyProjectileMock = vi.hoisted(() => vi.fn());
+const physicsClearTerrainMock = vi.hoisted(() => vi.fn());
 
 const PhysicsSystemMock = vi.hoisted(() =>
   vi.fn(() => ({
@@ -446,6 +450,7 @@ const PhysicsSystemMock = vi.hoisted(() =>
     registerEnemy: physicsRegisterEnemyMock,
     registerPlayerAttack: vi.fn(),
     destroyProjectile: physicsDestroyProjectileMock,
+    clearTerrain: physicsClearTerrainMock,
   })),
 );
 
@@ -481,6 +486,7 @@ describe('GameScene player integration', () => {
     physicsRegisterTerrainMock.mockClear();
     physicsRegisterEnemyMock.mockClear();
     physicsDestroyProjectileMock.mockClear();
+    physicsClearTerrainMock.mockClear();
     PhysicsSystemMock.mockClear();
     AreaManagerMock.mockClear();
     stubs.matterFactory.add.existing.mockReset();
@@ -1118,6 +1124,51 @@ describe('GameScene player integration', () => {
     handleSpy.mockRestore();
   });
 
+  it('初期エリア生成時に敵を初期配置する', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    expect(createWabbleBeeMock).not.toHaveBeenCalled();
+
+    scene.update(0, 16);
+
+    expect(createWabbleBeeMock).toHaveBeenCalledTimes(3);
+
+    const spawnArgs = createWabbleBeeMock.mock.calls as unknown as Array<[unknown, { x: number; y: number }]>;
+    const spawns = spawnArgs.map(([, spawn]) => spawn);
+
+    expect(spawns).toHaveLength(3);
+
+    const tileMap = defaultAreaState.tileMap;
+    const tileSize = tileMap.tileSize;
+    const neighborOffsets = [
+      { dx: 0, dy: 0 },
+      { dx: 1, dy: 0 },
+      { dx: -1, dy: 0 },
+      { dx: 0, dy: 1 },
+      { dx: 0, dy: -1 },
+    ];
+
+    spawns.forEach((spawn) => {
+      const tile = tileMap.getTileAtWorldPosition(spawn);
+      expect(tile).toBe('floor');
+
+      const column = Math.floor(spawn.x / tileSize);
+      const row = Math.floor(spawn.y / tileSize);
+
+      neighborOffsets.forEach(({ dx, dy }) => {
+        const neighborTile = tileMap.getTileAt(column + dx, row + dy);
+        expect(neighborTile).not.toBeUndefined();
+        expect(neighborTile).not.toBe('wall');
+        expect(neighborTile).not.toBe('void');
+      });
+    });
+  });
+
   it('画面外の敵を一時的に非アクティブ化し、戻った際に復帰させる', () => {
     const scene = new GameScene();
     const kirdyInstance = makeKirdyStub();
@@ -1125,6 +1176,7 @@ describe('GameScene player integration', () => {
     playerInputUpdateMock.mockReturnValue(createSnapshot());
 
     scene.create();
+    scene.setEnemyAutoSpawnEnabled(false);
 
     const firstEnemy = scene.spawnWabbleBee({ x: 48, y: 48 });
     scene.update(0, 600);
@@ -1824,6 +1876,7 @@ describe('GameScene player integration', () => {
     playerInputUpdateMock.mockReturnValue(createSnapshot());
 
     scene.create();
+    scene.setEnemyAutoSpawnEnabled(false);
 
     const makeEnemy = () => ({
       sprite: enemySpriteFactory(),
@@ -1882,6 +1935,7 @@ describe('GameScene player integration', () => {
     playerInputUpdateMock.mockReturnValue(createSnapshot());
 
     scene.create();
+    scene.setEnemyAutoSpawnEnabled(false);
 
     const makeEnemy = () => ({
       sprite: enemySpriteFactory(),
@@ -1929,6 +1983,7 @@ describe('GameScene player integration', () => {
     playerInputUpdateMock.mockReturnValue(createSnapshot());
 
     scene.create();
+    scene.setEnemyAutoSpawnEnabled(false);
 
     const makeEnemy = () => {
       const sprite = enemySpriteFactory();
@@ -1939,6 +1994,7 @@ describe('GameScene player integration', () => {
         getHP: vi.fn().mockReturnValue(3),
         isDefeated: vi.fn().mockReturnValue(false),
         getAbilityType: vi.fn().mockReturnValue('fire'),
+        onDisperse: vi.fn(),
       };
     };
 
@@ -1969,17 +2025,24 @@ describe('GameScene player integration', () => {
     enemy3.sprite.x = kirdySprite.x + 2;
     enemy3.sprite.y = kirdySprite.y;
 
+    const enemies = [enemy1, enemy2, enemy3];
+    const initialPositionCounts = enemies.map((entry) => entry.sprite.setPosition.mock.calls.length);
+
     scene.update(0, 16);
 
-    const repositioned = [enemy1, enemy2, enemy3]
-      .map((entry) => entry.sprite.setPosition.mock.calls.at(-1))
-      .filter((call): call is [number, number] => Array.isArray(call));
+    enemies.forEach((entry, index) => {
+      expect(entry.sprite.setPosition.mock.calls.length).toBe(initialPositionCounts[index]);
+    });
 
-    expect(repositioned.length).toBeGreaterThan(0);
+    const dispersed = enemies.filter((entry) => entry.onDisperse.mock.calls.length > 0);
+    expect(dispersed.length).toBeGreaterThan(0);
 
-    repositioned.forEach(([newX, newY]) => {
-      const dx = newX - kirdySprite.x;
-      const dy = newY - kirdySprite.y;
+    dispersed.forEach((entry) => {
+      expect(entry.sprite.setVelocity).toHaveBeenCalledWith(0, 0);
+      const [context] = entry.onDisperse.mock.calls.at(-1) ?? [];
+      expect(context).toMatchObject({ x: expect.any(Number), y: expect.any(Number) });
+      const dx = (context?.x ?? 0) - kirdySprite.x;
+      const dy = (context?.y ?? 0) - kirdySprite.y;
       const distance = Math.hypot(dx, dy);
       expect(distance).toBeGreaterThanOrEqual(96);
     });

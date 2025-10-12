@@ -22,6 +22,7 @@ interface EnemyManagerConfig {
   enemyClusterLimit: number;
   enemySafetyRadius: number;
   enemySpawnCooldownMs: number;
+  enemyDisperseCooldownMs: number;
 }
 
 interface EnemyManagerOptions {
@@ -38,6 +39,7 @@ const DEFAULT_CONFIG: EnemyManagerConfig = {
   enemyClusterLimit: 2,
   enemySafetyRadius: 96,
   enemySpawnCooldownMs: 1200,
+  enemyDisperseCooldownMs: 400,
 };
 
 export class EnemyManager {
@@ -50,8 +52,10 @@ export class EnemyManager {
   private readonly enemyClusterLimit: number;
   private readonly enemySafetyRadius: number;
   private readonly enemySpawnCooldownMs: number;
+  private readonly enemyDisperseCooldownMs: number;
   private enemies: Enemy[] = [];
   private enemySpawnCooldownRemaining = 0;
+  private readonly enemyDisperseCooldowns = new Map<Enemy, number>();
 
   constructor(options: EnemyManagerOptions) {
     this.scene = options.scene;
@@ -65,6 +69,7 @@ export class EnemyManager {
     this.enemyClusterLimit = Math.max(0, Math.min(this.maxActiveEnemies, config.enemyClusterLimit));
     this.enemySafetyRadius = Math.max(1, config.enemySafetyRadius);
     this.enemySpawnCooldownMs = Math.max(0, config.enemySpawnCooldownMs);
+    this.enemyDisperseCooldownMs = Math.max(0, config.enemyDisperseCooldownMs);
   }
 
   spawnWabbleBee(spawn: EnemySpawn, options: WabbleBeeOptions = {}) {
@@ -87,6 +92,7 @@ export class EnemyManager {
 
   update(delta: number) {
     this.tickEnemySpawnCooldown(delta);
+    this.tickEnemyDisperseCooldowns(delta);
 
     if (this.enemies.length === 0) {
       return;
@@ -116,13 +122,33 @@ export class EnemyManager {
     }
 
     this.enemies = activeEnemies;
+    if (this.enemyDisperseCooldowns.size > 0) {
+      const activeSet = new Set(activeEnemies);
+      for (const enemy of Array.from(this.enemyDisperseCooldowns.keys())) {
+        if (!activeSet.has(enemy)) {
+          this.enemyDisperseCooldowns.delete(enemy);
+        }
+      }
+    }
     this.enforceEnemyDensity(activeEnemies);
   }
 
   destroy() {
+    this.enemies.forEach((enemy) => {
+      enemy.sprite.destroy?.();
+    });
     this.enemies = [];
     this.enemySpawnCooldownRemaining = 0;
     this.inhaleSystem.setInhalableTargets([]);
+    this.enemyDisperseCooldowns.clear();
+  }
+
+  resetSpawnCooldown() {
+    this.enemySpawnCooldownRemaining = 0;
+  }
+
+  getActiveEnemyCount() {
+    return this.enemies.reduce((count, enemy) => (enemy.isDefeated() ? count : count + 1), 0);
   }
 
   private canSpawnEnemy() {
@@ -153,6 +179,21 @@ export class EnemyManager {
     this.enemySpawnCooldownRemaining = Math.max(0, this.enemySpawnCooldownRemaining - delta);
   }
 
+  private tickEnemyDisperseCooldowns(delta: number) {
+    if (!Number.isFinite(delta) || delta <= 0 || this.enemyDisperseCooldowns.size === 0) {
+      return;
+    }
+
+    for (const [enemy, remaining] of Array.from(this.enemyDisperseCooldowns.entries())) {
+      const next = Math.max(0, remaining - delta);
+      if (next <= 0) {
+        this.enemyDisperseCooldowns.delete(enemy);
+      } else {
+        this.enemyDisperseCooldowns.set(enemy, next);
+      }
+    }
+  }
+
   private getActiveEnemies() {
     return this.enemies.filter((enemy) => !enemy.isDefeated());
   }
@@ -174,7 +215,7 @@ export class EnemyManager {
         ...entry,
         distanceSq: this.getDistanceSquared(entry.position, playerPosition),
       }))
-      .filter((entry) => entry.distanceSq <= safetyRadiusSq);
+      .filter((entry) => entry.distanceSq < safetyRadiusSq);
 
     if (nearbyEnemies.length <= this.enemyClusterLimit) {
       return;
@@ -182,8 +223,9 @@ export class EnemyManager {
 
     nearbyEnemies.sort((a, b) => a.distanceSq - b.distanceSq);
     const overflow = nearbyEnemies.slice(this.enemyClusterLimit);
-    overflow.forEach((entry, index) => {
-      this.disperseEnemy(entry.enemy, playerPosition, index, overflow.length);
+    const dispersible = overflow.filter((entry) => !this.enemyDisperseCooldowns.has(entry.enemy));
+    dispersible.forEach((entry, index) => {
+      this.disperseEnemy(entry.enemy, playerPosition, index, dispersible.length);
     });
   }
 
@@ -208,10 +250,15 @@ export class EnemyManager {
     const normalizedX = dx / length;
     const normalizedY = dy / length;
 
-    const newX = origin.x + normalizedX * this.enemySafetyRadius;
-    const newY = origin.y + normalizedY * this.enemySafetyRadius;
+    const pushDistance = this.enemySafetyRadius + 8;
+    const newX = origin.x + normalizedX * pushDistance;
+    const newY = origin.y + normalizedY * pushDistance;
 
-    enemy.sprite.setPosition?.(newX, newY);
+    enemy.sprite.setVelocity?.(0, 0);
+    if (this.enemyDisperseCooldownMs > 0) {
+      this.enemyDisperseCooldowns.set(enemy, this.enemyDisperseCooldownMs);
+    }
+    enemy.onDisperse?.({ x: newX, y: newY });
   }
 
   private getEnemyPosition(enemy: Enemy) {

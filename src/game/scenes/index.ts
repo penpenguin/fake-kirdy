@@ -255,6 +255,11 @@ export class GameScene extends Phaser.Scene {
   private swallowSystem?: SwallowSystem;
   private abilitySystem?: AbilitySystem;
   private enemyManager?: EnemyManager;
+  private enemySpawnPoints: EnemySpawn[] = [];
+  private nextEnemySpawnIndex = 0;
+  private enemyAutoSpawnTimer = 0;
+  private enemyAutoSpawnEnabled = true;
+  private enemyBaselinePopulation = 0;
   private readonly enemyCullingPadding = 96;
   private readonly enemyManagerConfig = {
     maxActiveEnemies: 3,
@@ -430,16 +435,7 @@ export class GameScene extends Phaser.Scene {
       this.abilitySystem = new AbilitySystem(this, this.kirdy, this.physicsSystem, this.audioManager);
     }
 
-    if (this.inhaleSystem && this.physicsSystem) {
-      this.enemyManager = new EnemyManager({
-        scene: this,
-        inhaleSystem: this.inhaleSystem,
-        physicsSystem: this.physicsSystem,
-        getPlayerPosition: () => this.getPlayerPosition(),
-        getCullingBounds: () => this.getCullingBounds(),
-        config: this.enemyManagerConfig,
-      });
-    }
+    this.initializeEnemyManager();
 
     this.events?.on?.('ability-acquired', this.handleAbilityAcquired, this);
     this.events?.on?.('ability-cleared', this.handleAbilityCleared, this);
@@ -542,6 +538,7 @@ export class GameScene extends Phaser.Scene {
 
       this.abilitySystem?.update(snapshot.actions);
       this.enemyManager?.update(delta);
+      this.maintainEnemyPopulation(delta);
       this.updateAreaState();
 
       if (this.progressDirty) {
@@ -611,6 +608,212 @@ export class GameScene extends Phaser.Scene {
     return this.enemyManager?.spawnDrontoDurt(spawn, options);
   }
 
+  private initializeEnemyManager() {
+    if (!this.inhaleSystem || !this.physicsSystem) {
+      return;
+    }
+
+    if (this.enemyManager) {
+      this.enemyManager.destroy();
+      this.enemyManager = undefined;
+    }
+
+    this.enemyManager = new EnemyManager({
+      scene: this,
+      inhaleSystem: this.inhaleSystem,
+      physicsSystem: this.physicsSystem,
+      getPlayerPosition: () => this.getPlayerPosition(),
+      getCullingBounds: () => this.getCullingBounds(),
+      config: this.enemyManagerConfig,
+    });
+
+    this.enemyManager.resetSpawnCooldown();
+    this.enemySpawnPoints = this.collectInitialEnemySpawns();
+    this.enemyBaselinePopulation = Math.min(this.enemyManagerConfig.maxActiveEnemies, this.enemySpawnPoints.length);
+    this.nextEnemySpawnIndex = 0;
+    this.enemyAutoSpawnTimer = 0;
+  }
+
+  private collectInitialEnemySpawns(): EnemySpawn[] {
+    const areaState = this.areaManager?.getCurrentAreaState();
+    const tileMap = areaState?.tileMap as Partial<{
+      tileSize: number;
+      columns: number;
+      rows: number;
+      getTileAt: (column: number, row: number) => string | undefined;
+    }>;
+
+    const tileSize = Number.isFinite(tileMap?.tileSize) ? (tileMap!.tileSize as number) : 32;
+    const columns = Number.isFinite(tileMap?.columns) ? (tileMap!.columns as number) : 0;
+    const rows = Number.isFinite(tileMap?.rows) ? (tileMap!.rows as number) : 0;
+    const getTileAt =
+      typeof tileMap?.getTileAt === 'function' ? tileMap!.getTileAt!.bind(tileMap) : undefined;
+
+    if (!getTileAt || tileSize <= 0 || columns <= 0 || rows <= 0) {
+      return [];
+    }
+
+    const reference = areaState?.playerSpawnPosition ?? GameScene.PLAYER_SPAWN;
+    const referencePosition = {
+      x: Number.isFinite(reference?.x) ? (reference!.x as number) : GameScene.PLAYER_SPAWN.x,
+      y: Number.isFinite(reference?.y) ? (reference!.y as number) : GameScene.PLAYER_SPAWN.y,
+    };
+
+    const safetyRadius = this.enemyManagerConfig.enemySafetyRadius;
+    const safetyRadiusSq = safetyRadius * safetyRadius;
+    const minSeparationSq = Math.max(1, Math.floor(safetyRadiusSq / 2));
+
+    const neighborOffsets = [
+      { dx: 0, dy: 0 },
+      { dx: 1, dy: 0 },
+      { dx: -1, dy: 0 },
+      { dx: 0, dy: 1 },
+      { dx: 0, dy: -1 },
+    ] as const;
+
+    const isWalkableTile = (tile: string | undefined) => tile === 'floor' || tile === 'door';
+
+    const candidates: Array<{ spawn: EnemySpawn; distanceSq: number }> = [];
+
+    for (let row = 1; row < rows - 1; row += 1) {
+      for (let column = 1; column < columns - 1; column += 1) {
+        const tile = getTileAt(column, row);
+        if (tile !== 'floor') {
+          continue;
+        }
+
+        const hasBlockingNeighbor = neighborOffsets.some(({ dx, dy }) => {
+          const neighbor = getTileAt(column + dx, row + dy);
+          return !isWalkableTile(neighbor);
+        });
+
+        if (hasBlockingNeighbor) {
+          continue;
+        }
+
+        const spawnX = column * tileSize + tileSize / 2;
+        const spawnY = row * tileSize + tileSize / 2;
+        const dx = spawnX - referencePosition.x;
+        const dy = spawnY - referencePosition.y;
+        const distanceSq = dx * dx + dy * dy;
+
+        if (distanceSq < safetyRadiusSq) {
+          continue;
+        }
+
+        candidates.push({
+          spawn: { x: spawnX, y: spawnY },
+          distanceSq,
+        });
+      }
+    }
+
+    if (candidates.length === 0) {
+      return [];
+    }
+
+    candidates.sort((a, b) => b.distanceSq - a.distanceSq);
+
+    const spawns: EnemySpawn[] = [];
+
+    candidates.forEach(({ spawn }) => {
+      const overlaps = spawns.some((existing) => {
+        const dx = existing.x - spawn.x;
+        const dy = existing.y - spawn.y;
+        return dx * dx + dy * dy < minSeparationSq;
+      });
+
+      if (overlaps) {
+        return;
+      }
+
+      spawns.push(spawn);
+    });
+
+    return spawns.slice(0, this.enemyManagerConfig.maxActiveEnemies);
+  }
+
+  private maintainEnemyPopulation(delta: number) {
+    if (!this.enemyManager || !this.enemyAutoSpawnEnabled) {
+      return;
+    }
+
+    if (Number.isFinite(delta) && delta > 0) {
+      this.enemyAutoSpawnTimer = Math.max(0, this.enemyAutoSpawnTimer - delta);
+    }
+
+    if (this.enemySpawnPoints.length === 0) {
+      return;
+    }
+
+    const baseline = this.enemyBaselinePopulation;
+    if (baseline <= 0) {
+      return;
+    }
+
+    let activeCount = this.enemyManager.getActiveEnemyCount();
+    if (activeCount >= baseline) {
+      return;
+    }
+
+    if (this.enemyAutoSpawnTimer > 0) {
+      return;
+    }
+
+    let spawned = 0;
+
+    while (activeCount < baseline) {
+      const spawn = this.selectNextEnemySpawn();
+      if (!spawn) {
+        break;
+      }
+
+      const enemy = this.spawnWabbleBee(spawn);
+      if (!enemy) {
+        break;
+      }
+
+      spawned += 1;
+      activeCount += 1;
+      this.enemyManager.resetSpawnCooldown();
+    }
+
+    if (spawned > 0) {
+      const needsMore = activeCount < baseline;
+      this.enemyAutoSpawnTimer = needsMore
+        ? Math.max(200, Math.floor(this.enemyManagerConfig.enemySpawnCooldownMs / 3))
+        : this.enemyManagerConfig.enemySpawnCooldownMs;
+      return;
+    }
+
+    const retryDelay = Math.max(200, Math.floor(this.enemyManagerConfig.enemySpawnCooldownMs / 3));
+    this.enemyAutoSpawnTimer = retryDelay;
+  }
+
+  private selectNextEnemySpawn(): EnemySpawn | undefined {
+    if (this.enemySpawnPoints.length === 0) {
+      return undefined;
+    }
+
+    const startIndex = this.nextEnemySpawnIndex % this.enemySpawnPoints.length;
+
+    for (let offset = 0; offset < this.enemySpawnPoints.length; offset += 1) {
+      const index = (startIndex + offset) % this.enemySpawnPoints.length;
+      const spawn = this.enemySpawnPoints[index];
+      this.nextEnemySpawnIndex = index + 1;
+      return spawn;
+    }
+
+    return undefined;
+  }
+
+  setEnemyAutoSpawnEnabled(enabled: boolean) {
+    this.enemyAutoSpawnEnabled = Boolean(enabled);
+    if (this.enemyAutoSpawnEnabled && this.enemyAutoSpawnTimer > this.enemyManagerConfig.enemySpawnCooldownMs) {
+      this.enemyAutoSpawnTimer = this.enemyManagerConfig.enemySpawnCooldownMs;
+    }
+  }
+
   private updateAreaState() {
     if (!this.areaManager || !this.kirdy) {
       return;
@@ -647,6 +850,7 @@ export class GameScene extends Phaser.Scene {
       this.rebuildTerrainColliders();
       this.buildTerrainVisuals();
       this.configureCamera();
+      this.initializeEnemyManager();
     }
 
     this.trackExplorationProgress(result.areaChanged);
@@ -995,6 +1199,7 @@ export class GameScene extends Phaser.Scene {
       collider.destroy?.();
     });
     this.terrainColliders = [];
+    this.physicsSystem?.clearTerrain();
   }
 
   private configureCamera() {

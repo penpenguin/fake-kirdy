@@ -2,7 +2,7 @@
 
 ## 概要
 
-Kirdyの鏡の大迷宮ゲームは、HTML5 CanvasとPhaser.jsフレームワークを使用したWebベースの2Dプラットフォーマーゲームです。オリジナルの「星のカービィ 鏡の大迷宮」の核となる要素（吸い込み、能力コピー、ホバリング、迷宮探索）を再現しながら、Web技術に最適化された実装を提供します。
+Kirdyの大迷宮ゲームは、HTML5 CanvasとPhaser.jsフレームワークを使用したWebベースの2Dプラットフォーマーゲームです。核となる要素（引き寄せ、敵能力利用、ホバリング、迷宮探索）を再現しながら、Web技術に最適化された実装を提供します。
 
 ## アーキテクチャ
 
@@ -68,17 +68,19 @@ class Kirdy extends Phaser.GameObjects.Sprite {
     this.health = 100;
     this.currentAbility = null;
     this.isHovering = false;
-    this.mouthContent = null; // 吸い込んだ敵
+    this.pulledEnemy = null; // 引き寄せて拘束中の敵
+    this.linkState = 'idle'; // 敵能力利用の状態管理
   }
   
   // 基本アクション
   move(direction) { /* 移動処理 */ }
   jump() { /* ジャンプ処理 */ }
   startHover() { /* ホバリング開始 */ }
-  inhale() { /* 吸い込み処理 */ }
-  swallow() { /* 飲み込み処理 */ }
-  spit() { /* 吐き出し処理 */ }
-  useAbility() { /* 能力使用 */ }
+  startPull() { /* 引き寄せ開始 */ }
+  maintainPull() { /* 引き寄せ中の敵を固定 */ }
+  releasePull() { /* 引き寄せ解除 */ }
+  syncEnemyAbility() { /* 敵能力利用の準備 */ }
+  useEnemyAbility() { /* 敵能力を発動 */ }
 }
 ```
 
@@ -108,8 +110,8 @@ class AbilitySystem {
     }
   };
   
-  static copyAbility(enemy) { /* 能力コピー処理 */ }
-  static executeAbility(ability, kirdy) { /* 能力実行 */ }
+  static linkEnemyAbility(enemy) { /* 敵能力リンク処理 */ }
+  static executeEnemyAbility(link, kirdy) { /* 敵能力発動 */ }
 }
 ```
 
@@ -269,11 +271,11 @@ class SaveManager {
 ```javascript
 // 能力システムのテスト例
 describe('AbilitySystem', () => {
-  test('should copy fire ability from fire enemy', () => {
+  test('should channel fire ability while enemy is tethered', () => {
     const fireEnemy = new Enemy('fire-type');
-    const ability = AbilitySystem.copyAbility(fireEnemy);
-    expect(ability.name).toBe('Fire');
-    expect(ability.damage).toBe(20);
+    const link = AbilitySystem.linkEnemyAbility(fireEnemy);
+    expect(link.name).toBe('Fire');
+    expect(link.damage).toBe(20);
   });
   
   test('should not exceed max enemies limit', () => {
@@ -291,23 +293,23 @@ describe('AbilitySystem', () => {
 ```javascript
 // ゲームプレイフローのテスト
 describe('Gameplay Integration', () => {
-  test('should complete inhale -> swallow -> ability use flow', async () => {
+  test('should complete pull -> sync -> enemy ability use flow', async () => {
     const game = new TestGame();
     const kirdy = game.kirdy;
     const enemy = game.spawnEnemy('fire-type', 150, 300);
     
-    // 吸い込み
-    kirdy.inhale();
+    // 引き寄せ
+    kirdy.startPull();
     await game.waitForAnimation();
-    expect(kirdy.mouthContent).toBe(enemy);
+    expect(kirdy.pulledEnemy).toBe(enemy);
     
-    // 飲み込み
-    kirdy.swallow();
+    // 敵能力同期
+    kirdy.syncEnemyAbility();
     await game.waitForAnimation();
     expect(kirdy.currentAbility.name).toBe('Fire');
     
-    // 能力使用
-    kirdy.useAbility();
+    // 敵能力を発動
+    kirdy.useEnemyAbility();
     await game.waitForAnimation();
     expect(game.projectiles.length).toBe(1);
     expect(game.projectiles[0].type).toBe('fireball');

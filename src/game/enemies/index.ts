@@ -1,5 +1,8 @@
 import type Phaser from 'phaser';
 import type { AbilityType } from '../mechanics/AbilitySystem';
+import { KIRDY_MOVE_SPEED } from '../characters/Kirdy';
+
+const DEFAULT_ENEMY_SPEED = Math.max(1, KIRDY_MOVE_SPEED / 2);
 
 export type EnemyType = 'wabble-bee' | 'dronto-durt';
 
@@ -8,7 +11,14 @@ export interface EnemySpawn {
   y: number;
 }
 
+const WABBLE_BEE_SCALE = 0.65;
+const DRONTO_DURT_SCALE = 0.75;
+const WABBLE_BEE_BODY = { width: 42, height: 36 };
+const DRONTO_DURT_BODY = { width: 48, height: 48 };
+
 type TargetPosition = { x: number; y: number };
+
+type EnemyDisperseContext = { x: number; y: number };
 
 type TargetProvider = () => TargetPosition | undefined;
 
@@ -25,6 +35,7 @@ export interface Enemy {
   getHP(): number;
   isDefeated(): boolean;
   getAbilityType(): AbilityType | undefined;
+  onDisperse?(context: EnemyDisperseContext): void;
 }
 
 interface BaseEnemyConfig extends EnemyCommonOptions {
@@ -117,6 +128,10 @@ abstract class BaseEnemy implements Enemy {
       sprite: this.sprite,
     });
   }
+
+  onDisperse(_context: EnemyDisperseContext) {
+    // default no-op
+  }
 }
 
 export interface WabbleBeeOptions extends EnemyCommonOptions {
@@ -127,12 +142,14 @@ export interface WabbleBeeOptions extends EnemyCommonOptions {
 }
 
 class WabbleBee extends BaseEnemy {
-  private readonly spawnX: number;
+  private spawnX: number;
   private readonly patrolRadius: number;
   private readonly patrolSpeed: number;
   private readonly detectionRange: number;
   private readonly chaseSpeed: number;
   private patrolDirection = 1;
+  private disperseRecoveryMs = 0;
+  private readonly disperseChaseLockMs = 2000;
 
   constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, spawn: EnemySpawn, options: WabbleBeeOptions = {}) {
     super(scene, sprite, 'wabble-bee', {
@@ -145,16 +162,20 @@ class WabbleBee extends BaseEnemy {
 
     this.spawnX = spawn.x;
     this.patrolRadius = options.patrolRadius ?? 64;
-    this.patrolSpeed = options.patrolSpeed ?? 80;
+    this.patrolSpeed = options.patrolSpeed ?? DEFAULT_ENEMY_SPEED;
     this.detectionRange = options.detectionRange ?? 160;
-    this.chaseSpeed = options.chaseSpeed ?? 140;
+    this.chaseSpeed = options.chaseSpeed ?? DEFAULT_ENEMY_SPEED;
   }
 
   protected updateAI(_delta: number) {
+    if (Number.isFinite(_delta) && _delta > 0) {
+      this.disperseRecoveryMs = Math.max(0, this.disperseRecoveryMs - _delta);
+    }
+
     const spriteX = this.sprite.x ?? this.sprite.body?.position?.x ?? 0;
     const target = this.getPlayerPosition?.();
 
-    if (target) {
+    if (target && this.disperseRecoveryMs <= 0) {
       const deltaX = target.x - spriteX;
       if (Math.abs(deltaX) <= this.detectionRange) {
         const direction = deltaX < 0 ? -1 : deltaX > 0 ? 1 : 0;
@@ -175,6 +196,12 @@ class WabbleBee extends BaseEnemy {
 
     this.sprite.setVelocityX?.(this.patrolDirection * this.patrolSpeed);
     this.sprite.setFlipX?.(this.patrolDirection < 0);
+  }
+
+  onDisperse(context: EnemyDisperseContext) {
+    this.spawnX = context.x;
+    this.patrolDirection = 1;
+    this.disperseRecoveryMs = this.disperseChaseLockMs;
   }
 }
 
@@ -197,7 +224,7 @@ class DrontoDurt extends BaseEnemy {
     });
 
     this.detectionRange = options.detectionRange ?? 200;
-    this.chargeSpeed = options.chargeSpeed ?? 100;
+    this.chargeSpeed = options.chargeSpeed ?? DEFAULT_ENEMY_SPEED;
     // keep spawn reference to align y on ground if needed later
     void spawn; // avoids unused parameter linting
   }
@@ -240,6 +267,17 @@ export function createWabbleBee(scene: Phaser.Scene, spawn: EnemySpawn, options:
     'wabble-bee',
   );
 
+  sprite.setOrigin?.(0.5, 0.5);
+  if (typeof sprite.setBody === 'function') {
+    sprite.setBody?.({
+      type: 'rectangle',
+      width: WABBLE_BEE_BODY.width,
+      height: WABBLE_BEE_BODY.height,
+    });
+  } else {
+    sprite.setRectangle?.(WABBLE_BEE_BODY.width, WABBLE_BEE_BODY.height);
+  }
+  sprite.setScale?.(WABBLE_BEE_SCALE);
   sprite.setIgnoreGravity?.(true);
   sprite.setFixedRotation?.();
   sprite.setFrictionAir?.(0.02);
@@ -254,6 +292,17 @@ export function createDrontoDurt(scene: Phaser.Scene, spawn: EnemySpawn, options
     'dronto-durt',
   );
 
+  sprite.setOrigin?.(0.5, 0.5);
+  if (typeof sprite.setBody === 'function') {
+    sprite.setBody?.({
+      type: 'rectangle',
+      width: DRONTO_DURT_BODY.width,
+      height: DRONTO_DURT_BODY.height,
+    });
+  } else {
+    sprite.setRectangle?.(DRONTO_DURT_BODY.width, DRONTO_DURT_BODY.height);
+  }
+  sprite.setScale?.(DRONTO_DURT_SCALE);
   sprite.setIgnoreGravity?.(false);
   sprite.setFixedRotation?.();
   sprite.setFrictionAir?.(0.05);

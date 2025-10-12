@@ -29,7 +29,7 @@ export interface KirdyStatsSnapshot {
 
 export type KirdyMoveDirection = 'left' | 'right' | 'none';
 
-const MOVE_SPEED = 10;
+export const KIRDY_MOVE_SPEED = 10;
 const JUMP_SPEED = 20;
 const HOVER_ASCENT_SPEED = -10;
 const GROUND_VELOCITY_TOLERANCE = 1;
@@ -109,10 +109,10 @@ export class Kirdy {
   move(direction: KirdyMoveDirection) {
     let velocityX = 0;
     if (direction === 'left') {
-      velocityX = -MOVE_SPEED;
+      velocityX = -KIRDY_MOVE_SPEED;
       this.sprite.setFlipX(true);
     } else if (direction === 'right') {
-      velocityX = MOVE_SPEED;
+      velocityX = KIRDY_MOVE_SPEED;
       this.sprite.setFlipX(false);
     }
 

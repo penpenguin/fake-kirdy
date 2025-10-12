@@ -213,6 +213,51 @@ describe('PhysicsSystem', () => {
     expect(playerSprite.setData).toHaveBeenCalledWith('isGrounded', false);
   });
 
+  it('clears terrain contacts when resetting terrain registrations', () => {
+    const system = new PhysicsSystem(scene);
+    const playerSprite = createSpriteStub();
+    system.registerPlayer({ sprite: playerSprite } as any);
+
+    const terrainA = createSpriteStub();
+    system.registerTerrain(terrainA as any);
+
+    const collisionStart = getCollisionStartHandler(worldOn);
+    expect(collisionStart).toBeDefined();
+
+    collisionStart?.({
+      pairs: [
+        {
+          bodyA: { gameObject: playerSprite, id: 5001 } as any,
+          bodyB: { gameObject: terrainA, id: 6001 } as any,
+          isSensor: false,
+        },
+      ],
+    } as any);
+
+    expect(playerSprite.setData).toHaveBeenCalledWith('isGrounded', true);
+
+    playerSprite.setData.mockClear();
+
+    system.clearTerrain();
+
+    expect(playerSprite.setData).toHaveBeenCalledWith('isGrounded', false);
+
+    const terrainB = createSpriteStub();
+    system.registerTerrain(terrainB as any);
+
+    collisionStart?.({
+      pairs: [
+        {
+          bodyA: { gameObject: playerSprite, id: 5001 } as any,
+          bodyB: { gameObject: terrainB, id: 6002 } as any,
+          isSensor: false,
+        },
+      ],
+    } as any);
+
+    expect(playerSprite.setData).toHaveBeenCalledWith('isGrounded', true);
+  });
+
   it('uses recycle handlers when destroying projectiles', () => {
     const system = new PhysicsSystem(scene);
     const projectileSprite = createSpriteStub();
