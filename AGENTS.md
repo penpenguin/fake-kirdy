@@ -4,7 +4,7 @@
 - `src/` contains runtime TypeScript; `src/main.ts` bootstraps Phaser and delegates to `src/game/` for scenes and physics helpers.
 - Tests sit next to their modules (e.g., `src/main.test.ts`) or under `test/` for tooling coverage like `vite-config.test.ts`.
 - Static assets live in `public/` and compile into `dist/` via `npm run build`; leave `dist/` untouched between releases.
-- Scope, rules, and open tasks are tracked in `.kiro/specs/kirdy-mirror-maze-game/`; revise those specs before adjusting gameplay.
+- Scope, rules, and open tasks are tracked in `docs/`; revise those specs before adjusting gameplay.
 
 ## Build, Test, and Development Commands
 - `npm run dev` starts the Vite dev server with hot reload at `http://localhost:5173`.
