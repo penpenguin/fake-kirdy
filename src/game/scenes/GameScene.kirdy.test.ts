@@ -740,7 +740,7 @@ describe('GameScene player integration', () => {
     expect(AreaManagerMock).toHaveBeenCalled();
   });
 
-  it('メインカメラがカービィを追従するよう設定する', () => {
+  it('メインカメラがKirdyを追従するよう設定する', () => {
     const scene = new GameScene();
     const kirdyInstance = makeKirdyStub();
     createKirdyMock.mockReturnValue(kirdyInstance);

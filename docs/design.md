@@ -169,7 +169,7 @@ const GameState = {
     position: { x: 0, y: 0 },
     health: 100,
     ability: null,
-    mouthContent: null,
+    pulledEnemyId: null,
     score: 0
   },
   world: {
