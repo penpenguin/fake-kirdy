@@ -143,6 +143,22 @@ class EnemyManager {
 }
 ```
 
+### 5. 入力管理
+
+```javascript
+class PlayerInputManager {
+  constructor(scene) {
+    this.keyboard = scene.input.keyboard;
+    this.touchControls = this.createTouchControls();
+  }
+}
+```
+
+- **キーボード**: 移動は `←/→` と `A/D` をマージし、ジャンプ／ホバリングは `SPACE/↑/W` に統合。引き寄せ開始（`C`）、リンク維持（`S/↓`）、敵能力利用（`Z`）、リンク解除（`X`）といったアクションキーを登録する。
+- **仮想コントロール**: モバイル向けに `virtual-controls` スプライトからタイルを切り出して構築する。左下に固定したDパッドが `左/右/上/下` を提供し、下方向は飲み込み (`↓/S`) と連動する。
+- **右側アクション配置**: 右端には `敵能力利用 → リンク解除 → 引き寄せ開始` の順で左下から右上へ斜めになる三角配置を採用し、物理キー `Z/X/C` と一致する。各ボタンは押下時にアルファ値を下げてフィードバックを与える。
+- **スナップショット**: タッチ状態とキーボード状態を統合し、`PlayerInputSnapshot` に変換してKirdyとアクション入力へ提供する。
+
 ### 5. マップシステム
 
 ```javascript
