@@ -613,12 +613,12 @@ describe('Scene registration', () => {
     gameScene.create();
 
     const blurEffect = { destroy: vi.fn() };
-    const add = vi.fn(() => blurEffect);
+    const add = vi.fn<[string, number, number, number], typeof blurEffect>(() => blurEffect);
 
     const postFX = {
       add,
-      addBlur: vi.fn(function (radius: number, quality: number, strength: number) {
-        return this.add('Blur', radius, quality, strength);
+      addBlur: vi.fn((radius: number, quality: number, strength: number) => {
+        return add('Blur', radius, quality, strength);
       }),
     };
 
@@ -638,11 +638,15 @@ describe('Scene registration', () => {
     gameScene.create();
 
     const blurError = new TypeError('addBlur failed');
-    const addBlur = vi.fn(() => {
+    const addBlur = vi.fn<[number, number, number], void>(() => {
       throw blurError;
     });
 
-    (gameScene as unknown as { cameras: { main: { postFX: { addBlur: ReturnType<typeof vi.fn> } } } }).cameras = {
+    (gameScene as unknown as {
+      cameras: {
+        main: { postFX: { addBlur: ReturnType<typeof vi.fn<[number, number, number], void>> } };
+      };
+    }).cameras = {
       main: {
         postFX: {
           addBlur,
