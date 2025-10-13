@@ -21,7 +21,7 @@ describe('統合: ゲームプレイフロー', () => {
     expect(harness.scene.events.emit).toHaveBeenCalledWith('ability-acquired', { abilityType: 'fire' });
     expect(harness.physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'kirdy-fire-attack' }),
-      expect.objectContaining({ damage: 2 }),
+      expect.objectContaining({ damage: 3 }),
     );
     expect(harness.scene.sound.play).toHaveBeenCalledWith('kirdy-swallow');
     expect(harness.scene.sound.play).toHaveBeenCalledWith('ability-fire-attack');

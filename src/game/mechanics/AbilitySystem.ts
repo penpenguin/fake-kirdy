@@ -40,7 +40,7 @@ const FIRE_PROJECTILE_LIFETIME = 700;
 const ICE_PROJECTILE_SPEED = 300;
 const ICE_PROJECTILE_LIFETIME = 900;
 const SWORD_SLASH_LIFETIME = 200;
-const ABILITY_PROJECTILE_DAMAGE = 2;
+const ABILITY_PROJECTILE_DAMAGE = 3;
 
 const abilityCatalogueBase = {
   fire: { type: 'fire', name: 'Fire', attack: 'fire-attack', color: '#FF7B4A', damage: ABILITY_PROJECTILE_DAMAGE },

@@ -347,7 +347,7 @@ export class GameScene extends Phaser.Scene {
     maxActiveEnemies: 3,
     enemyClusterLimit: 2,
     enemySafetyRadius: 96,
-    enemySpawnCooldownMs: 1200,
+    enemySpawnCooldownMs: 10000,
   };
   private enemyManagerConfig = { ...this.defaultEnemyManagerConfig };
   private static readonly PLAYER_SPAWN = { x: 160, y: 360 } as const;

@@ -128,7 +128,6 @@ describe('EnemyManager', () => {
         maxActiveEnemies: 3,
         enemyClusterLimit: 2,
         enemySafetyRadius: 96,
-        enemySpawnCooldownMs: 1200,
       },
     });
   });
@@ -173,8 +172,8 @@ describe('EnemyManager', () => {
     createWabbleBeeMock.mockReturnValueOnce(defeatedEnemy);
 
     manager.spawnWabbleBee(makeSpawn(0, 0));
-    manager.update(600);
-    manager.update(600);
+    manager.update(5000);
+    manager.update(5000);
     manager.spawnWabbleBee(makeSpawn(32, 0));
 
     manager.update(16);
@@ -200,24 +199,39 @@ describe('EnemyManager', () => {
       .mockReturnValueOnce(enemy4);
 
     expect(manager.spawnWabbleBee(makeSpawn(0, 0))).toBe(enemy1);
-    manager.update(600);
-    manager.update(600);
 
+    manager.update(5000);
+    const earlyBlocked = manager.spawnWabbleBee(makeSpawn(16, 0));
+    expect(earlyBlocked).toBeUndefined();
+    expect(createWabbleBeeMock).toHaveBeenCalledTimes(1);
+
+    manager.update(5000);
     expect(manager.spawnWabbleBee(makeSpawn(16, 0))).toBe(enemy2);
-    manager.update(600);
-    manager.update(600);
+    expect(createWabbleBeeMock).toHaveBeenCalledTimes(2);
 
+    manager.update(5000);
+    const secondEarlyBlocked = manager.spawnWabbleBee(makeSpawn(32, 0));
+    expect(secondEarlyBlocked).toBeUndefined();
+
+    manager.update(5000);
     expect(manager.spawnWabbleBee(makeSpawn(32, 0))).toBe(enemy3);
+    expect(createWabbleBeeMock).toHaveBeenCalledTimes(3);
 
     const blocked = manager.spawnWabbleBee(makeSpawn(48, 0));
     expect(blocked).toBeUndefined();
+    expect(createWabbleBeeMock).toHaveBeenCalledTimes(3);
 
     enemy1.isDefeated.mockReturnValue(true);
     manager.update(16);
-    manager.update(1200);
 
+    manager.update(5000);
+    const reopenBlocked = manager.spawnWabbleBee(makeSpawn(64, 0));
+    expect(reopenBlocked).toBeUndefined();
+
+    manager.update(5000);
     const reopened = manager.spawnWabbleBee(makeSpawn(64, 0));
     expect(reopened).toBe(enemy4);
+    expect(createWabbleBeeMock).toHaveBeenCalledTimes(4);
   });
 
   it('spawns a Glacio Durt variant through the dedicated factory', () => {
@@ -310,12 +324,12 @@ describe('EnemyManager', () => {
     });
 
     manager.spawnWabbleBee(makeSpawn(160, 360));
-    manager.update(600);
-    manager.update(600);
+    manager.update(5000);
+    manager.update(5000);
 
     manager.spawnWabbleBee(makeSpawn(162, 362));
-    manager.update(600);
-    manager.update(600);
+    manager.update(5000);
+    manager.update(5000);
 
     manager.spawnWabbleBee(makeSpawn(164, 364));
 
@@ -380,12 +394,12 @@ describe('EnemyManager', () => {
     });
 
     manager.spawnWabbleBee(makeSpawn(160, 360));
-    manager.update(600);
-    manager.update(600);
+    manager.update(5000);
+    manager.update(5000);
 
     manager.spawnWabbleBee(makeSpawn(164, 364));
-    manager.update(600);
-    manager.update(600);
+    manager.update(5000);
+    manager.update(5000);
 
     manager.spawnWabbleBee(makeSpawn(168, 368));
 

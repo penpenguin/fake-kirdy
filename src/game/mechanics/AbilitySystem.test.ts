@@ -244,7 +244,7 @@ describe('AbilitySystem', () => {
     expect(projectile.setVelocityX).toHaveBeenCalledWith(420);
     expect(projectile.setIgnoreGravity).toHaveBeenCalledWith(true);
     expect(scene.time?.delayedCall).toHaveBeenCalled();
-    expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(projectile, { damage: 2 });
+    expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(projectile, { damage: 3 });
   });
 
   it('routes ability attack sounds through the audio manager when available', () => {
@@ -320,7 +320,7 @@ describe('AbilitySystem', () => {
 
     expect(addSprite).toHaveBeenCalledWith(128, 256, 'ice-attack');
     expect(iceProjectile.setVelocityX).toHaveBeenCalledWith(-300);
-    expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(iceProjectile as any, { damage: 2 });
+    expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(iceProjectile as any, { damage: 3 });
   });
 
   it('triggers a sword slash sensor instead of projectile', () => {
@@ -348,7 +348,7 @@ describe('AbilitySystem', () => {
     expect(addSprite).toHaveBeenCalledWith(128, 256, 'sword-slash');
     expect(slashStub.setSensor).toHaveBeenCalledWith(true);
     expect(slashStub.setVelocityX).not.toHaveBeenCalled();
-    expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(slashStub as any, { damage: 2 });
+    expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(slashStub as any, { damage: 3 });
   });
 
   it('discards the active ability when the discard action is triggered', () => {
@@ -448,7 +448,7 @@ describe('AbilitySystem', () => {
       ],
     } as any);
 
-    expect(enemy.takeDamage).toHaveBeenCalledWith(2);
+    expect(enemy.takeDamage).toHaveBeenCalledWith(3);
   });
 
   it('does nothing when an unknown ability type is provided', () => {

@@ -1267,8 +1267,8 @@ describe('GameScene player integration', () => {
     scene.setEnemyAutoSpawnEnabled(false);
 
     const firstEnemy = scene.spawnWabbleBee({ x: 48, y: 48 });
-    scene.update(0, 600);
-    scene.update(600, 600);
+    scene.update(0, 5000);
+    scene.update(5000, 5000);
     const secondEnemy = scene.spawnWabbleBee({ x: 400, y: 400 });
 
     if (!firstEnemy || !secondEnemy) {
@@ -2343,44 +2343,54 @@ describe('GameScene player integration', () => {
     });
 
     const enemy1 = makeEnemy();
-    const enemy2 = makeEnemy();
-    const enemy3 = makeEnemy();
-    const enemy4 = makeEnemy();
-
-    const advanceCooldown = () => {
-      scene.update(0, 600);
-      scene.update(600, 600);
-    };
-
     createWabbleBeeMock.mockReturnValueOnce(enemy1 as any);
     const result1 = scene.spawnWabbleBee({ x: 0, y: 0 });
     expect(result1).toBe(enemy1);
 
-    advanceCooldown();
+    scene.update(0, 5000);
+    const earlyBlocked = scene.spawnWabbleBee({ x: 16, y: 0 });
+    expect(earlyBlocked).toBeUndefined();
+    expect(createWabbleBeeMock).toHaveBeenCalledTimes(1);
 
+    scene.update(5000, 5000);
+
+    const enemy2 = makeEnemy();
     createWabbleBeeMock.mockReturnValueOnce(enemy2 as any);
     const result2 = scene.spawnWabbleBee({ x: 16, y: 0 });
     expect(result2).toBe(enemy2);
 
-    advanceCooldown();
+    scene.update(0, 5000);
+    const secondEarlyBlocked = scene.spawnWabbleBee({ x: 32, y: 0 });
+    expect(secondEarlyBlocked).toBeUndefined();
+    expect(createWabbleBeeMock).toHaveBeenCalledTimes(2);
 
+    scene.update(5000, 5000);
+
+    const enemy3 = makeEnemy();
     createWabbleBeeMock.mockReturnValueOnce(enemy3 as any);
     const result3 = scene.spawnWabbleBee({ x: 32, y: 0 });
     expect(result3).toBe(enemy3);
 
-    advanceCooldown();
-
-    createWabbleBeeMock.mockReturnValueOnce(enemy4 as any);
+    scene.update(0, 5000);
     const blocked = scene.spawnWabbleBee({ x: 48, y: 0 });
     expect(blocked).toBeUndefined();
     expect(createWabbleBeeMock).toHaveBeenCalledTimes(3);
 
+    const enemy4 = makeEnemy();
+    createWabbleBeeMock.mockReturnValueOnce(enemy4 as any);
+
     enemy1.isDefeated.mockReturnValue(true);
-    scene.update(1200, 16);
-    advanceCooldown();
+
+    scene.update(0, 16);
+    const reopenBlocked = scene.spawnWabbleBee({ x: 64, y: 0 });
+    expect(reopenBlocked).toBeUndefined();
+    expect(createWabbleBeeMock).toHaveBeenCalledTimes(3);
+
+    scene.update(16, 5000);
 
     const reopened = scene.spawnWabbleBee({ x: 64, y: 0 });
     expect(reopened).toBe(enemy4);
+    expect(createWabbleBeeMock).toHaveBeenCalledTimes(4);
     expect(inhaleSystemAddTargetMock).toHaveBeenCalledTimes(4);
   });
 
@@ -2414,8 +2424,12 @@ describe('GameScene player integration', () => {
     expect(blocked).toBeUndefined();
     expect(createWabbleBeeMock).toHaveBeenCalledTimes(1);
 
-    scene.update(100, 600);
-    scene.update(700, 600);
+    scene.update(100, 5000);
+    const stillBlocked = scene.spawnWabbleBee({ x: 64, y: 0 });
+    expect(stillBlocked).toBeUndefined();
+    expect(createWabbleBeeMock).toHaveBeenCalledTimes(1);
+
+    scene.update(5100, 5000);
 
     const allowed = scene.spawnWabbleBee({ x: 64, y: 0 });
     expect(allowed).toBeDefined();
@@ -2479,8 +2493,8 @@ describe('GameScene player integration', () => {
     };
 
     const advanceCooldown = () => {
-      scene.update(0, 600);
-      scene.update(600, 600);
+      scene.update(0, 5000);
+      scene.update(5000, 5000);
     };
 
     const enemy1 = makeEnemy();

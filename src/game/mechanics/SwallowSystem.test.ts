@@ -218,7 +218,7 @@ let target: FakeTarget;
     expect(delayedCall).toHaveBeenCalled();
     expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(
       starProjectile,
-      expect.objectContaining({ damage: 2, recycle: expect.any(Function) }),
+      expect.objectContaining({ damage: 3, recycle: expect.any(Function) }),
     );
     expect(target.destroy).toHaveBeenCalled();
     expect(inhaleSystem.releaseCapturedTarget).toHaveBeenCalled();

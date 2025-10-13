@@ -38,7 +38,7 @@ const DEFAULT_CONFIG: EnemyManagerConfig = {
   maxActiveEnemies: 3,
   enemyClusterLimit: 2,
   enemySafetyRadius: 96,
-  enemySpawnCooldownMs: 1200,
+  enemySpawnCooldownMs: 10000,
   enemyDisperseCooldownMs: 400,
 };
 

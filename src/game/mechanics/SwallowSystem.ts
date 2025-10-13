@@ -13,7 +13,7 @@ export interface SwallowedPayload {
 
 const STAR_PROJECTILE_SPEED = 350;
 const STAR_PROJECTILE_LIFETIME_MS = 1200;
-const STAR_PROJECTILE_DAMAGE = 2;
+const STAR_PROJECTILE_DAMAGE = 3;
 const STAR_PROJECTILE_TEXTURE = 'star-bullet';
 const STAR_PROJECTILE_POOL_SIZE = 6;
 
