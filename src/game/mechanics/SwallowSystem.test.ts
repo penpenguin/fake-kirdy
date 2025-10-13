@@ -321,6 +321,32 @@ let target: FakeTarget;
     warnSpy.mockRestore();
   });
 
+  it('handles star projectile setup errors without crashing', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const setupError = new Error("Cannot read properties of undefined (reading 'position')");
+    starProjectile.setVelocityX.mockImplementation(() => {
+      throw setupError;
+    });
+
+    const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any, physicsSystem as any);
+
+    expect(() =>
+      system.update(
+        buildActions({
+          spit: { isDown: true, justPressed: true },
+        }),
+      ),
+    ).not.toThrow();
+
+    expect(playSound).toHaveBeenCalledWith('kirdy-spit');
+    expect(physicsSystem.registerPlayerAttack).not.toHaveBeenCalled();
+    expect(starProjectile.destroy).toHaveBeenCalled();
+    expect(inhaleSystem.releaseCapturedTarget).toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledWith('[SwallowSystem] failed to prepare star projectile', setupError);
+
+    warnSpy.mockRestore();
+  });
+
   it('syncs swallowed ability payload safely when textures lack atlas frames', () => {
     target.getData.mockReturnValueOnce('fire');
 

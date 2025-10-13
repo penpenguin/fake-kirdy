@@ -107,30 +107,40 @@ export class SwallowSystem {
     const spawnX = this.kirdy.sprite.x ?? 0;
     const spawnY = this.kirdy.sprite.y ?? 0;
     const facingLeft = this.kirdy.sprite.flipX === true;
-    const projectile = this.acquireStarProjectile(spawnX, spawnY);
+    let projectile = this.acquireStarProjectile(spawnX, spawnY);
 
     if (projectile) {
-      projectile.setIgnoreGravity?.(true);
-      projectile.setFixedRotation?.();
-      projectile.setName?.('kirdy-star-projectile');
       const velocityX = facingLeft ? -STAR_PROJECTILE_SPEED : STAR_PROJECTILE_SPEED;
-      projectile.setVelocityX?.(velocityX);
-      projectile.setOnCollide?.(() => this.handleStarProjectileCollision(projectile));
+      try {
+        projectile.setIgnoreGravity?.(true);
+        projectile.setFixedRotation?.();
+        projectile.setName?.('kirdy-star-projectile');
+        projectile.setVelocityX?.(velocityX);
+      } catch (error) {
+        console.warn('[SwallowSystem] failed to prepare star projectile', error);
+        this.disposeFailedProjectile(projectile);
+        projectile = undefined;
+      }
+    }
 
-      const isPooled = projectile.getData?.('pooledProjectile') === true;
+    if (projectile) {
+      const preparedProjectile = projectile;
+      preparedProjectile.setOnCollide?.(() => this.handleStarProjectileCollision(preparedProjectile));
+
+      const isPooled = preparedProjectile.getData?.('pooledProjectile') === true;
       if (!isPooled) {
-        projectile.once?.('destroy', () => {
-          this.scene.events?.emit?.('star-projectile-destroyed', projectile);
+        preparedProjectile.once?.('destroy', () => {
+          this.scene.events?.emit?.('star-projectile-destroyed', preparedProjectile);
         });
       }
 
       const lifetime = this.scene.time?.delayedCall?.(STAR_PROJECTILE_LIFETIME_MS, () => {
-        this.destroyProjectileSafely(projectile);
+        this.destroyProjectileSafely(preparedProjectile);
       });
 
       let registered = true;
       try {
-        this.physicsSystem?.registerPlayerAttack(projectile, {
+        this.physicsSystem?.registerPlayerAttack(preparedProjectile, {
           damage: STAR_PROJECTILE_DAMAGE,
           recycle: (candidate) => this.recycleStarProjectile(candidate),
         });
@@ -138,10 +148,10 @@ export class SwallowSystem {
         registered = false;
         console.warn('[SwallowSystem] failed to register star projectile', error);
         lifetime?.remove?.();
-        this.destroyProjectileSafely(projectile);
+        this.destroyProjectileSafely(preparedProjectile);
       }
 
-      projectile.setData?.('starProjectileExpire', registered ? lifetime : undefined);
+      preparedProjectile.setData?.('starProjectileExpire', registered ? lifetime : undefined);
     }
 
     target.setData?.('inMouth', false);
@@ -191,6 +201,27 @@ export class SwallowSystem {
     const recycled = this.recycleStarProjectile(projectile);
     if (!recycled) {
       projectile.destroy?.();
+    }
+  }
+
+  private disposeFailedProjectile(projectile: Phaser.Physics.Matter.Sprite) {
+    try {
+      projectile.setData?.('pooledProjectile', false);
+    } catch {
+      // ignore data sync issues for failed projectile disposal
+    }
+
+    try {
+      projectile.setActive?.(false);
+      projectile.setVisible?.(false);
+    } catch {
+      // ignore visibility toggles if the sprite is already torn down
+    }
+
+    try {
+      projectile.destroy?.();
+    } catch (error) {
+      console.warn('[SwallowSystem] failed to dispose star projectile', error);
     }
   }
 
