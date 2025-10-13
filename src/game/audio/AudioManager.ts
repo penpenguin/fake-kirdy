@@ -5,6 +5,8 @@ type SoundManagerLike = Partial<{
   add(key: string, config?: Phaser.Types.Sound.SoundConfig): Phaser.Sound.BaseSound | undefined;
   setVolume(value: number): void;
   setMute(value: boolean): void;
+  once(event: string, callback: () => void): void;
+  locked: boolean;
 }>;
 
 type BaseSoundLike = {
@@ -16,6 +18,7 @@ type BaseSoundLike = {
 };
 
 const DEFAULT_MASTER_VOLUME = 0.8;
+const SOUND_UNLOCKED_EVENT = 'unlocked';
 
 function clamp01(value: number) {
   if (!Number.isFinite(value)) {
@@ -67,11 +70,24 @@ export class AudioManager {
     };
 
     const bgm = soundManager.add(key, mergedConfig);
-    bgm?.play?.();
-    this.applyCurrentMuteState(bgm as BaseSoundLike | undefined);
-    this.applyCurrentVolume(bgm as BaseSoundLike | undefined);
     this.currentBgm = bgm ?? undefined;
 
+    const attemptPlayback = () => {
+      if (!bgm || this.currentBgm !== bgm) {
+        return;
+      }
+
+      bgm.play?.();
+      this.applyCurrentMuteState(bgm as BaseSoundLike | undefined);
+      this.applyCurrentVolume(bgm as BaseSoundLike | undefined);
+    };
+
+    if (bgm && soundManager.locked && soundManager.once) {
+      soundManager.once(SOUND_UNLOCKED_EVENT, attemptPlayback);
+      return this.currentBgm;
+    }
+
+    attemptPlayback();
     return this.currentBgm;
   }
 

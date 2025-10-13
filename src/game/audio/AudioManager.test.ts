@@ -6,6 +6,8 @@ type SoundManagerStub = {
   add: ReturnType<typeof vi.fn>;
   setVolume: ReturnType<typeof vi.fn>;
   setMute: ReturnType<typeof vi.fn>;
+  once: ReturnType<typeof vi.fn>;
+  locked?: boolean;
 };
 
 type BaseSoundStub = {
@@ -36,8 +38,10 @@ describe('AudioManager', () => {
       add: vi.fn(),
       setVolume: vi.fn(),
       setMute: vi.fn(),
+      once: vi.fn(),
     };
 
+    soundManager.once.mockReturnValue(soundManager);
     scene = { sound: soundManager };
   });
 
@@ -102,5 +106,31 @@ describe('AudioManager', () => {
     audio.toggleMute();
     expect(soundManager.setMute).toHaveBeenLastCalledWith(false);
     expect(audio.isMuted()).toBe(false);
+  });
+
+  it('defers BGM playback until the sound manager unlocks when audio is locked', () => {
+    const track = createSoundStub('bgm-main');
+    const unlockCallbacks: Array<() => void> = [];
+
+    soundManager.locked = true;
+    soundManager.add.mockReturnValue(track as any);
+    soundManager.once.mockImplementation((event: string, callback: () => void) => {
+      if (event === 'unlocked') {
+        unlockCallbacks.push(callback);
+      }
+
+      return soundManager as any;
+    });
+
+    const audio = new AudioManager(scene as any);
+    const result = audio.playBgm('bgm-main');
+
+    expect(result).toBe(track);
+    expect(track.play).not.toHaveBeenCalled();
+    expect(soundManager.once).toHaveBeenCalledWith('unlocked', expect.any(Function));
+
+    unlockCallbacks.forEach((cb) => cb());
+
+    expect(track.play).toHaveBeenCalled();
   });
 });
