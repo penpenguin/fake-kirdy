@@ -119,31 +119,47 @@ export class EnemyManager {
     }
 
     const bounds = this.getCullingBoundsRef();
+    const destroyedEnemies = new Set<Enemy>();
 
     this.enemies.forEach((enemy) => {
+      const sprite = enemy.sprite;
+      if (this.isSpriteDestroyed(sprite)) {
+        destroyedEnemies.add(enemy);
+        return;
+      }
+
       if (enemy.isDefeated()) {
         return;
       }
 
       if (this.suspendedEnemies.has(enemy)) {
-        enemy.sprite.setActive?.(false);
-        enemy.sprite.setVisible?.(false);
-        enemy.sprite.setVelocity?.(0, 0);
+        sprite.setActive?.(false);
+        sprite.setVisible?.(false);
+        sprite.setVelocity?.(0, 0);
         return;
       }
 
       const position = this.getEnemyPosition(enemy);
       const inView = bounds ? this.isWithinBounds(position, bounds) : true;
 
-      enemy.sprite.setActive?.(inView);
-      enemy.sprite.setVisible?.(inView);
+      sprite.setActive?.(inView);
+      sprite.setVisible?.(inView);
 
       if (inView) {
         enemy.update(delta);
       }
     });
 
-    const survivingEnemies = this.enemies.filter((enemy) => !enemy.isDefeated());
+    if (destroyedEnemies.size > 0) {
+      for (const enemy of destroyedEnemies) {
+        this.enemyBySprite.delete(enemy.sprite);
+        this.suspendedEnemies.delete(enemy);
+      }
+    }
+
+    const survivingEnemies = this.enemies.filter(
+      (enemy) => !enemy.isDefeated() && !destroyedEnemies.has(enemy),
+    );
     const activeEnemies = survivingEnemies.filter((enemy) => !this.suspendedEnemies.has(enemy));
 
     if (activeEnemies.length !== this.enemies.length) {
@@ -281,6 +297,23 @@ export class EnemyManager {
     this.enemies = this.enemies.filter((entry) => entry !== enemy);
     this.inhaleSystem.setInhalableTargets(this.getActiveEnemies().map((entry) => entry.sprite));
     return true;
+  }
+
+  private isSpriteDestroyed(sprite: Phaser.Physics.Matter.Sprite | undefined) {
+    if (!sprite) {
+      return true;
+    }
+
+    if ((sprite as { destroyed?: boolean }).destroyed === true) {
+      return true;
+    }
+
+    const body = sprite.body as { position?: { x?: number; y?: number } } | undefined;
+    if (!body && (sprite as { active?: boolean }).active === false) {
+      return true;
+    }
+
+    return false;
   }
 
   private isEnemyActive(enemy: Enemy) {

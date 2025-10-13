@@ -257,6 +257,32 @@ describe('EnemyManager', () => {
     expect(inhaleSystem.setInhalableTargets).toHaveBeenLastCalledWith([enemy.sprite]);
   });
 
+  it('破棄された捕獲中の敵を update 中に安全に除去する', () => {
+    const enemy = makeEnemy();
+    createWabbleBeeMock.mockReturnValueOnce(enemy);
+
+    manager.spawnWabbleBee(makeSpawn(0, 0));
+    manager.update(16);
+
+    manager.suspendEnemy(enemy.sprite);
+
+    (enemy.sprite as any).destroyed = true;
+    enemy.sprite.body = undefined as any;
+
+    enemy.sprite.setActive.mockClear();
+    enemy.sprite.setVisible.mockClear();
+    enemy.sprite.setVelocity.mockClear();
+    inhaleSystem.setInhalableTargets.mockClear();
+
+    manager.update(16);
+
+    expect(enemy.sprite.setActive).not.toHaveBeenCalled();
+    expect(enemy.sprite.setVisible).not.toHaveBeenCalled();
+    expect(enemy.sprite.setVelocity).not.toHaveBeenCalled();
+    expect(manager.getActiveEnemyCount()).toBe(0);
+    expect(inhaleSystem.setInhalableTargets).toHaveBeenCalledWith([]);
+  });
+
   it('consumes suspended enemies to remove them from管理対象', () => {
     const enemy = makeEnemy();
     createWabbleBeeMock.mockReturnValueOnce(enemy);
