@@ -340,4 +340,41 @@ describe('InhaleSystem target capture', () => {
     expect(emitEvent).toHaveBeenCalledWith('enemy-capture-released', { sprite: target.sprite });
     expect(kirdy.setMouthContent).toHaveBeenCalledWith(undefined);
   });
+
+  it('physics ボディが失われた捕捉対象を安全に解放する', () => {
+    const system = new InhaleSystem(scene, kirdy as any);
+    const target = createTarget(48, 0);
+
+    target.raw.setPosition = vi.fn().mockImplementation(() => {
+      if (!target.raw.body?.position) {
+        throw new Error('body missing');
+      }
+      return target.raw;
+    });
+
+    system.setInhalableTargets([target.sprite]);
+
+    system.update(
+      buildActions({
+        inhale: { isDown: true, justPressed: true },
+      }),
+    );
+
+    expect(system.getCapturedTarget()).toBe(target.sprite);
+    emitEvent.mockClear();
+
+    target.raw.body = undefined as any;
+
+    expect(() =>
+      system.update(
+        buildActions({
+          inhale: { isDown: false, justPressed: false },
+        }),
+      ),
+    ).not.toThrow();
+
+    expect(system.getCapturedTarget()).toBeUndefined();
+    expect(kirdy.setMouthContent).toHaveBeenCalledWith(undefined);
+    expect(emitEvent).toHaveBeenCalledWith('enemy-capture-released', { sprite: target.sprite });
+  });
 });

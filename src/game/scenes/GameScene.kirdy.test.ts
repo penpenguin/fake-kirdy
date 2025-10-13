@@ -488,6 +488,9 @@ vi.mock('../physics/PhysicsSystem', () => ({
 import { HUD_SAFE_AREA_HEIGHT, HUD_WORLD_MARGIN } from '../ui/hud-layout';
 import { GameScene, SceneKeys } from './index';
 import { ErrorHandler } from '../errors/ErrorHandler';
+import type { AreaDefinition } from '../world/AreaManager';
+import { auroraSpire } from '../world/stages/aurora-spire';
+import { skySanctum } from '../world/stages/sky-sanctum';
 
 describe('GameScene player integration', () => {
   let defaultAreaState: any;
@@ -617,6 +620,61 @@ describe('GameScene player integration', () => {
     renderingPreferenceStubs.recordStableFpsEvent.mockClear();
     stubs.matterFactory.add.rectangle = vi.fn();
   });
+
+  function createAreaStateFromDefinition(definition: AreaDefinition) {
+    const { tileSize: stageTileSize, layout } = definition;
+    const rows = layout.length;
+    const columns = layout[0]?.length ?? 0;
+
+    const symbolToTile = (symbol: string) => {
+      switch (symbol) {
+        case '#':
+          return 'wall';
+        case 'D':
+          return 'door';
+        case '.':
+          return 'floor';
+        case ' ':
+          return 'void';
+        default:
+          return 'floor';
+      }
+    };
+
+    const getTileAt = (column: number, row: number) => {
+      if (column < 0 || column >= columns || row < 0 || row >= rows) {
+        return undefined;
+      }
+
+      return symbolToTile(layout[row][column]);
+    };
+
+    const getTileAtWorldPosition = (position: { x: number; y: number }) => {
+      const column = Math.floor(position.x / stageTileSize);
+      const row = Math.floor(position.y / stageTileSize);
+      return getTileAt(column, row);
+    };
+
+    const getClampedTileCoordinate = (position: { x: number; y: number }) => {
+      const column = Math.min(Math.max(0, Math.floor(position.x / stageTileSize)), Math.max(0, columns - 1));
+      const row = Math.min(Math.max(0, Math.floor(position.y / stageTileSize)), Math.max(0, rows - 1));
+      return { column, row };
+    };
+
+    return {
+      definition,
+      tileMap: {
+        tileSize: stageTileSize,
+        columns,
+        rows,
+        getTileAt,
+        getTileAtWorldPosition,
+        getClampedTileCoordinate,
+      },
+      pixelBounds: { width: columns * stageTileSize, height: rows * stageTileSize },
+      playerSpawnPosition: { ...definition.entryPoints.default.position },
+    };
+  }
 
   function createSnapshot(overrides?: Partial<ReturnType<typeof playerInputUpdateMock>>) {
     return {
@@ -1286,6 +1344,74 @@ describe('GameScene player integration', () => {
     });
     expect(kirdyInstance.sprite.setPosition).toHaveBeenCalledWith(entryPosition.x, entryPosition.y);
     expect(kirdyInstance.sprite.setVelocity).toHaveBeenCalledWith(0, 0);
+  });
+
+  it('aurora-spire の西扉を通過すると sky-sanctum へ遷移する', () => {
+    const auroraState = createAreaStateFromDefinition(auroraSpire);
+    const skyState = createAreaStateFromDefinition(skySanctum);
+
+    defaultAreaState = auroraState;
+    let currentState = auroraState;
+
+    areaManagerGetStateMock.mockReset();
+    areaManagerGetStateMock.mockImplementation(() => currentState);
+    areaManagerGetLastKnownPositionMock.mockReset();
+    areaManagerGetLastKnownPositionMock.mockImplementation(() => currentState.playerSpawnPosition);
+    areaManagerGetDiscoveredMock.mockReturnValue([auroraState.definition.id]);
+
+    areaManagerUpdateMock.mockReset();
+    areaManagerUpdateMock.mockReturnValue({ areaChanged: false });
+
+    const skyEntry = { ...skySanctum.entryPoints.east!.position };
+
+    areaManagerUpdateMock.mockImplementationOnce(() => {
+      currentState = skyState;
+      return {
+        areaChanged: true,
+        transition: {
+          from: auroraState.definition.id,
+          to: skyState.definition.id,
+          via: 'west',
+          entryPosition: skyEntry,
+        },
+      };
+    });
+
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    const snapshot = createSnapshot();
+    playerInputUpdateMock.mockReturnValue(snapshot);
+
+    scene.create();
+
+    const tileSize = auroraState.tileMap.tileSize;
+    const doorRowIndex = auroraSpire.layout.findIndex((row) => row.indexOf('D') === 1);
+    if (doorRowIndex < 0) {
+      throw new Error('aurora-spire west door missing');
+    }
+
+    const doorColumn = 1;
+    const doorX = doorColumn * tileSize + tileSize / 2;
+    const doorY = doorRowIndex * tileSize + tileSize / 2;
+
+    kirdyInstance.sprite.x = doorX;
+    kirdyInstance.sprite.y = doorY;
+    if (kirdyInstance.sprite.body?.position) {
+      kirdyInstance.sprite.body.position.x = doorX;
+      kirdyInstance.sprite.body.position.y = doorY;
+    }
+
+    scene.update(0, 16);
+
+    expect(areaManagerUpdateMock).toHaveBeenCalledWith({
+      x: doorX,
+      y: doorY,
+    });
+    expect(kirdyInstance.sprite.setPosition).toHaveBeenCalledWith(skyEntry.x, skyEntry.y);
+    expect(kirdyInstance.sprite.setVelocity).toHaveBeenCalledWith(0, 0);
+    expect(currentState.definition.id).toBe(skyState.definition.id);
   });
 
   it('保存済みの進行状況を復元し、HUDを更新する', () => {

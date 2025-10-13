@@ -165,6 +165,120 @@ vi.mock('../audio/AudioManager', () => ({
   AudioManager: audioManagerStubs.mock,
 }));
 
+const saveManagerStubs = vi.hoisted(() => {
+  type SaveManagerInstance = {
+    load: ReturnType<typeof vi.fn>;
+    save: ReturnType<typeof vi.fn>;
+    resetPlayerPosition: ReturnType<typeof vi.fn>;
+    clear: ReturnType<typeof vi.fn>;
+    updateSettings: ReturnType<typeof vi.fn>;
+  };
+
+  const instances: SaveManagerInstance[] = [];
+
+  const createInstance = () => {
+    const load = vi.fn(() => undefined) as ReturnType<typeof vi.fn>;
+    const save = vi.fn() as ReturnType<typeof vi.fn>;
+    const resetPlayerPosition = vi.fn() as ReturnType<typeof vi.fn>;
+    const clear = vi.fn() as ReturnType<typeof vi.fn>;
+    const updateSettings = vi.fn(() => ({
+      volume: 0.8,
+      controls: 'keyboard',
+      difficulty: 'normal',
+    })) as ReturnType<typeof vi.fn>;
+
+    const instance: SaveManagerInstance = {
+      load,
+      save,
+      resetPlayerPosition,
+      clear,
+      updateSettings,
+    };
+
+    instances.push(instance);
+    return instance;
+  };
+
+  const defaultFactory = () => createInstance();
+  const mock = vi.fn<[], SaveManagerInstance>(defaultFactory) as unknown as ReturnType<typeof vi.fn>;
+
+  const reset = () => {
+    instances.length = 0;
+    mock.mockImplementation(defaultFactory);
+  };
+
+  return {
+    mock,
+    instances,
+    createInstance,
+    reset,
+  };
+});
+
+vi.mock('../save/SaveManager', () => ({
+  SaveManager: saveManagerStubs.mock,
+  DEFAULT_SETTINGS: {
+    volume: 0.8,
+    controls: 'keyboard',
+    difficulty: 'normal',
+  },
+}));
+
+const playerInputStubs = vi.hoisted(() => {
+  type PlayerInputInstance = {
+    update: ReturnType<typeof vi.fn>;
+    destroy: ReturnType<typeof vi.fn>;
+    setControlScheme: ReturnType<typeof vi.fn>;
+    setSwallowDownEnabled: ReturnType<typeof vi.fn>;
+  };
+
+  const instances: PlayerInputInstance[] = [];
+
+  const createInstance = () => {
+    const update = vi.fn(() => ({
+      kirdy: { left: false, right: false, jumpPressed: false, hoverPressed: false },
+      actions: {
+        inhale: { isDown: false, justPressed: false },
+        swallow: { isDown: false, justPressed: false },
+        spit: { isDown: false, justPressed: false },
+        discard: { isDown: false, justPressed: false },
+      },
+    })) as ReturnType<typeof vi.fn>;
+    const destroy = vi.fn() as ReturnType<typeof vi.fn>;
+    const setControlScheme = vi.fn() as ReturnType<typeof vi.fn>;
+    const setSwallowDownEnabled = vi.fn() as ReturnType<typeof vi.fn>;
+
+    const instance: PlayerInputInstance = {
+      update,
+      destroy,
+      setControlScheme,
+      setSwallowDownEnabled,
+    };
+
+    instances.push(instance);
+    return instance;
+  };
+
+  const defaultFactory = () => createInstance();
+  const mock = vi.fn<[], PlayerInputInstance>(defaultFactory) as unknown as ReturnType<typeof vi.fn>;
+
+  const reset = () => {
+    instances.length = 0;
+    mock.mockImplementation(defaultFactory);
+  };
+
+  return {
+    mock,
+    instances,
+    createInstance,
+    reset,
+  };
+});
+
+vi.mock('../input/PlayerInputManager', () => ({
+  PlayerInputManager: playerInputStubs.mock,
+}));
+
 const assetPipelineStubs = vi.hoisted(() => {
   const createAssetManifest = vi.fn(() => ({
     baseURL: '',
@@ -206,7 +320,16 @@ const assetPipelineStubs = vi.hoisted(() => {
 
 vi.mock('../assets/pipeline', () => assetPipelineStubs);
 
-import { BootScene, GameOverScene, GameScene, MenuScene, PauseScene, SceneKeys, coreScenes } from './index';
+import {
+  BootScene,
+  GameOverScene,
+  GameScene,
+  MenuScene,
+  PauseScene,
+  SettingsScene,
+  SceneKeys,
+  coreScenes,
+} from './index';
 
 describe('Scene registration', () => {
   beforeEach(() => {
@@ -224,12 +347,15 @@ describe('Scene registration', () => {
     audioManagerStubs.setMuted.mockClear();
     audioManagerStubs.toggleMute.mockClear();
     audioManagerStubs.stopBgm.mockClear();
+    saveManagerStubs.reset();
+    playerInputStubs.reset();
   });
 
   it('exposes stable scene keys for coordination', () => {
     expect(SceneKeys.Boot).toBe('BootScene');
     expect(SceneKeys.Menu).toBe('MenuScene');
     expect(SceneKeys.Game).toBe('GameScene');
+     expect(SceneKeys.Settings).toBe('SettingsScene');
     expect(SceneKeys.Pause).toBe('PauseScene');
     expect(SceneKeys.GameOver).toBe('GameOverScene');
   });
@@ -407,6 +533,63 @@ describe('Scene registration', () => {
     expect(style).toMatchObject({ color: expect.stringContaining('#ff') });
   });
 
+  it('menu scene opens the settings overlay and pauses itself', () => {
+    const menuScene = new MenuScene();
+
+    menuScene.create();
+
+    expect(saveManagerStubs.instances.length).toBeGreaterThan(0);
+
+    const menuKeyboard = menuScene.input.keyboard!;
+    const keyboardOnceMock = asMock(menuKeyboard.once);
+    const settingsCall = keyboardOnceMock.mock.calls.find(([event]) => event === 'keydown-O');
+    expect(settingsCall).toBeTruthy();
+
+    const [, handler] = settingsCall ?? [];
+    expect(handler).toBeInstanceOf(Function);
+
+    asMock(menuScene.scene.launch).mockClear();
+    asMock(menuScene.scene.pause).mockClear();
+
+    handler?.();
+
+    expect(menuScene.scene.launch).toHaveBeenCalledWith(
+      SceneKeys.Settings,
+      expect.objectContaining({ returnTo: SceneKeys.Menu }),
+    );
+    expect(menuScene.scene.pause).toHaveBeenCalledWith(SceneKeys.Menu);
+  });
+
+  it('menu scene resets the stored spawn point when requested', () => {
+    const menuScene = new MenuScene();
+
+    menuScene.create();
+
+    const menuKeyboard = menuScene.input.keyboard!;
+    const keyboardOnceMock = asMock(menuKeyboard.once);
+    const resetCall = keyboardOnceMock.mock.calls.find(([event]) => event === 'keydown-R');
+    expect(resetCall).toBeTruthy();
+
+    const [, handler] = resetCall ?? [];
+    expect(handler).toBeInstanceOf(Function);
+
+    const saveManagerInstance = saveManagerStubs.instances.at(-1);
+    expect(saveManagerInstance).toBeDefined();
+    saveManagerInstance?.resetPlayerPosition.mockClear();
+
+    const addTextMock = asMock(menuScene.add.text);
+    const initialCallCount = addTextMock.mock.calls.length;
+
+    handler?.();
+
+    expect(saveManagerInstance?.resetPlayerPosition).toHaveBeenCalledTimes(1);
+
+    const confirmationCall = addTextMock.mock.calls
+      .slice(initialCallCount)
+      .find(([, , text]) => typeof text === 'string' && text.includes('初期位置'));
+    expect(confirmationCall).toBeTruthy();
+  });
+
   it('game scene pauses by launching the pause scene overlay', () => {
     const gameScene = new GameScene();
 
@@ -420,7 +603,60 @@ describe('Scene registration', () => {
     const [, handler] = keyboardOnMock.mock.calls[0];
     handler?.();
 
+    expect(gameScene.scene.pause).toHaveBeenCalledWith(SceneKeys.Game);
     expect(gameScene.scene.launch).toHaveBeenCalledWith(SceneKeys.Pause);
+  });
+
+  it('game scene calls postFX.addBlur with its postFX context', () => {
+    const gameScene = new GameScene();
+
+    gameScene.create();
+
+    const blurEffect = { destroy: vi.fn() };
+    const add = vi.fn(() => blurEffect);
+
+    const postFX = {
+      add,
+      addBlur: vi.fn(function (radius: number, quality: number, strength: number) {
+        return this.add('Blur', radius, quality, strength);
+      }),
+    };
+
+    (gameScene as unknown as { cameras: { main: { postFX: typeof postFX } } }).cameras = {
+      main: { postFX },
+    };
+
+    expect(() => gameScene.pauseGame()).not.toThrow();
+    expect(postFX.addBlur).toHaveBeenCalledWith(4, 1, 2);
+    expect(add).toHaveBeenCalledWith('Blur', 4, 1, 2);
+    expect((gameScene as unknown as { menuBlurEffect?: unknown }).menuBlurEffect).toBe(blurEffect);
+  });
+
+  it('game scene skips menu blur gracefully when postFX.addBlur throws', () => {
+    const gameScene = new GameScene();
+
+    gameScene.create();
+
+    const blurError = new TypeError('addBlur failed');
+    const addBlur = vi.fn(() => {
+      throw blurError;
+    });
+
+    (gameScene as unknown as { cameras: { main: { postFX: { addBlur: ReturnType<typeof vi.fn> } } } }).cameras = {
+      main: {
+        postFX: {
+          addBlur,
+        },
+      },
+    };
+
+    expect(() => gameScene.pauseGame()).not.toThrow();
+    expect(addBlur).toHaveBeenCalledWith(4, 1, 2);
+    expect(gameScene.scene.pause).toHaveBeenCalledWith(SceneKeys.Game);
+    expect(gameScene.scene.launch).toHaveBeenCalledWith(SceneKeys.Pause);
+
+    const internalState = gameScene as unknown as { menuBlurEffect?: unknown };
+    expect(internalState.menuBlurEffect).toBeUndefined();
   });
 
   it('game scene keeps the pause listener active and cleans it up on shutdown', () => {
@@ -471,6 +707,38 @@ describe('Scene registration', () => {
     expect(audioManagerStubs.setMasterVolume).toHaveBeenCalledWith(0.6);
     expect(audioManagerStubs.setMuted).toHaveBeenCalledWith(true);
     expect(audioManagerStubs.toggleMute).toHaveBeenCalled();
+  });
+
+  it('game scene applies saved settings when available', () => {
+    saveManagerStubs.mock.mockImplementation(() => {
+      const instance = saveManagerStubs.createInstance();
+      instance.load.mockReturnValue({
+        player: { hp: 6, maxHP: 6, score: 0, ability: undefined, position: { x: 0, y: 0 } },
+        area: undefined,
+        settings: {
+          volume: 0.45,
+          controls: 'touch',
+          difficulty: 'hard',
+        },
+      });
+      return instance;
+    });
+
+    const gameScene = new GameScene();
+
+    gameScene.create();
+
+    expect(audioManagerStubs.setMasterVolume).toHaveBeenCalledWith(0.45);
+
+    const inputInstance = playerInputStubs.instances.at(-1);
+    expect(inputInstance?.setControlScheme).toHaveBeenCalledWith('touch');
+
+    const settingsSnapshot = (gameScene as any).getSettingsSnapshot?.();
+    expect(settingsSnapshot).toMatchObject({
+      volume: expect.any(Number),
+      controls: 'touch',
+      difficulty: 'hard',
+    });
   });
 
   it('ゲームシーンは壁タイルのフレームが存在しない場合に矩形描画へフォールバックする', () => {
@@ -624,6 +892,31 @@ describe('Scene registration', () => {
     expect(pauseScene.scene.start).toHaveBeenCalledWith(SceneKeys.Menu);
   });
 
+  it('pause scene restart resets the stored spawn before relaunching the game', () => {
+    const pauseScene = new PauseScene();
+
+    pauseScene.create();
+
+    const pauseKeyboard = pauseScene.input.keyboard!;
+    const keyboardOnceMock = asMock(pauseKeyboard.once);
+    const restartCall = keyboardOnceMock.mock.calls.find(([event]) => event === 'keydown-R');
+    expect(restartCall).toBeTruthy();
+
+    const [, restartHandler] = restartCall ?? [];
+    expect(restartHandler).toBeInstanceOf(Function);
+
+    const saveManagerInstance = saveManagerStubs.instances.at(-1);
+    expect(saveManagerInstance).toBeDefined();
+    saveManagerInstance?.resetPlayerPosition.mockClear();
+
+    restartHandler?.();
+
+    expect(saveManagerInstance?.resetPlayerPosition).toHaveBeenCalledTimes(1);
+    expect(pauseScene.scene.stop).toHaveBeenCalledWith(SceneKeys.Pause);
+    expect(pauseScene.scene.stop).toHaveBeenCalledWith(SceneKeys.Game);
+    expect(pauseScene.scene.start).toHaveBeenCalledWith(SceneKeys.Game);
+  });
+
   it('positions the pause menu text around the screen center', () => {
     const pauseScene = new PauseScene();
 
@@ -633,9 +926,9 @@ describe('Scene registration', () => {
     const centerX = pauseScene.scale.width / 2;
     const centerY = pauseScene.scale.height / 2;
 
-    expect(addTextMock).toHaveBeenCalledTimes(4);
+    expect(addTextMock).toHaveBeenCalledTimes(5);
 
-    const [titleArgs, resumeArgs, restartArgs, quitArgs] = addTextMock.mock.calls;
+    const [titleArgs, resumeArgs, restartArgs, quitArgs, settingsArgs] = addTextMock.mock.calls;
 
     expect(titleArgs?.[0]).toBe(centerX);
     expect(titleArgs?.[1]).toBeCloseTo(centerY - 60, 5);
@@ -648,6 +941,63 @@ describe('Scene registration', () => {
 
     expect(quitArgs?.[0]).toBe(centerX);
     expect(quitArgs?.[1]).toBeCloseTo(centerY + 70, 5);
+
+    expect(settingsArgs?.[0]).toBe(centerX);
+    expect(settingsArgs?.[1]).toBeCloseTo(centerY + 110, 5);
+  });
+
+  it('pause scene opens the settings overlay while keeping gameplay paused', () => {
+    const pauseScene = new PauseScene();
+
+    pauseScene.create();
+
+    const pauseKeyboard = pauseScene.input.keyboard!;
+    const keyboardOnceMock = asMock(pauseKeyboard.once);
+    const settingsCall = keyboardOnceMock.mock.calls.find(([event]) => event === 'keydown-O');
+    expect(settingsCall).toBeTruthy();
+
+    const [, handler] = settingsCall ?? [];
+    expect(handler).toBeInstanceOf(Function);
+
+    asMock(pauseScene.scene.launch).mockClear();
+    asMock(pauseScene.scene.pause).mockClear();
+
+    handler?.();
+
+    expect(pauseScene.scene.launch).toHaveBeenCalledWith(
+      SceneKeys.Settings,
+      expect.objectContaining({ returnTo: SceneKeys.Pause }),
+    );
+    expect(pauseScene.scene.pause).toHaveBeenCalledWith(SceneKeys.Pause);
+  });
+
+  it('applies a blur effect to the gameplay camera while paused and removes it on resume', () => {
+    const gameScene = new GameScene();
+
+    const remove = vi.fn();
+    const clear = vi.fn();
+    const blurEffect = { destroy: vi.fn() } as const;
+    const addBlur = vi.fn(() => blurEffect);
+
+    const postFX = { addBlur, remove, clear };
+    (gameScene as unknown as { cameras: { main: { postFX: typeof postFX } } }).cameras = {
+      main: { postFX },
+    };
+
+    gameScene.pauseGame();
+
+    expect(addBlur).toHaveBeenCalledTimes(1);
+
+    const resumeCall = asMock(gameScene.events.once).mock.calls.find(([event]) => event === 'resume');
+    expect(resumeCall).toBeTruthy();
+
+    const [, handler] = resumeCall ?? [];
+    expect(handler).toBeInstanceOf(Function);
+
+    handler?.();
+
+    expect(remove).toHaveBeenCalledWith(blurEffect);
+    expect(clear).not.toHaveBeenCalled();
   });
 
   it('game over scene can restart or return to menu', () => {
@@ -680,12 +1030,67 @@ describe('Scene registration', () => {
     expect(gameOverScene.scene.start).toHaveBeenCalledWith(SceneKeys.Menu);
   });
 
+  it('settings scene cycles configuration values and resumes the invoking scene', () => {
+    saveManagerStubs.mock.mockImplementation(() => {
+      const instance = saveManagerStubs.createInstance();
+      instance.load.mockReturnValue({
+        settings: {
+          volume: 0.8,
+          controls: 'keyboard',
+          difficulty: 'normal',
+        },
+      });
+      return instance;
+    });
+
+    const settingsScene = new SettingsScene();
+
+    settingsScene.create({ returnTo: SceneKeys.Menu });
+
+    const settingsKeyboard = settingsScene.input.keyboard!;
+    const saveManagerInstance = saveManagerStubs.instances.at(-1);
+    expect(saveManagerInstance).toBeDefined();
+
+    const keyboardOnMock = asMock(settingsKeyboard.on);
+
+    const leftCall = keyboardOnMock.mock.calls.find(([event]) => event === 'keydown-LEFT');
+    expect(leftCall).toBeTruthy();
+    const [, leftHandler] = leftCall ?? [];
+    saveManagerInstance?.updateSettings.mockClear();
+    leftHandler?.();
+    expect(saveManagerInstance?.updateSettings).toHaveBeenCalledWith({ volume: 0.7 });
+
+    const controlCall = keyboardOnMock.mock.calls.find(([event]) => event === 'keydown-C');
+    expect(controlCall).toBeTruthy();
+    const [, controlHandler] = controlCall ?? [];
+    saveManagerInstance?.updateSettings.mockClear();
+    controlHandler?.();
+    expect(saveManagerInstance?.updateSettings).toHaveBeenCalledWith({ controls: 'touch' });
+
+    const difficultyCall = keyboardOnMock.mock.calls.find(([event]) => event === 'keydown-UP');
+    expect(difficultyCall).toBeTruthy();
+    const [, difficultyHandler] = difficultyCall ?? [];
+    saveManagerInstance?.updateSettings.mockClear();
+    difficultyHandler?.();
+    expect(saveManagerInstance?.updateSettings).toHaveBeenCalledWith({ difficulty: 'hard' });
+
+    const escCall = asMock(settingsKeyboard.once).mock.calls.find(([event]) => event === 'keydown-ESC');
+    expect(escCall).toBeTruthy();
+    const [, escHandler] = escCall ?? [];
+    asMock(settingsScene.scene.resume).mockClear();
+    asMock(settingsScene.scene.stop).mockClear();
+    escHandler?.();
+    expect(settingsScene.scene.resume).toHaveBeenCalledWith(SceneKeys.Menu);
+    expect(settingsScene.scene.stop).toHaveBeenCalledWith(SceneKeys.Settings);
+  });
+
   it('registers all core scenes in the expected order', () => {
     expect(coreScenes).toEqual([
       BootScene,
       MenuScene,
       GameScene,
       PauseScene,
+      SettingsScene,
       GameOverScene,
     ]);
   });

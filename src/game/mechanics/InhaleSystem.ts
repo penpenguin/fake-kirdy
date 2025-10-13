@@ -72,6 +72,20 @@ export class InhaleSystem {
     }
   }
 
+  private hasStablePhysicsBody(target?: Phaser.Physics.Matter.Sprite) {
+    if (!target) {
+      return false;
+    }
+
+    const destroyed = (target as { destroyed?: boolean }).destroyed === true;
+    if (destroyed) {
+      return false;
+    }
+
+    const body = target.body as { position?: { x?: number; y?: number } } | undefined;
+    return Boolean(body?.position);
+  }
+
   private startInhale() {
     this.isInhaling = true;
     this.kirdy.sprite.anims?.play?.('kirdy-inhale', true);
@@ -122,6 +136,11 @@ export class InhaleSystem {
       return;
     }
 
+    if (!this.hasStablePhysicsBody(candidate)) {
+      this.inhalableTargets = this.inhalableTargets.filter((target) => target !== candidate);
+      return;
+    }
+
     this.capturedTarget = candidate;
 
     candidate.setVelocity?.(0, 0);
@@ -140,6 +159,11 @@ export class InhaleSystem {
 
   private alignCapturedTarget() {
     if (!this.capturedTarget) {
+      return;
+    }
+
+    if (!this.hasStablePhysicsBody(this.capturedTarget)) {
+      this.releaseCapturedTarget();
       return;
     }
 

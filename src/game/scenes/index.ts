@@ -22,7 +22,14 @@ import {
 import { MapOverlay, createMapSummaries } from '../ui/MapOverlay';
 import { Hud, type HudHPState } from '../ui/Hud';
 import { HUD_SAFE_AREA_HEIGHT, HUD_WORLD_MARGIN } from '../ui/hud-layout';
-import { SaveManager, type GameProgressSnapshot, DEFAULT_SETTINGS, type GameSettingsSnapshot } from '../save/SaveManager';
+import {
+  SaveManager,
+  type GameProgressSnapshot,
+  DEFAULT_SETTINGS,
+  type GameSettingsSnapshot,
+  type ControlScheme,
+  type DifficultyLevel,
+} from '../save/SaveManager';
 import { createAssetManifest, queueAssetManifest, type AssetFallback } from '../assets/pipeline';
 import { PerformanceMonitor, type PerformanceMetrics } from '../performance/PerformanceMonitor';
 import { recordLowFpsEvent, recordStableFpsEvent } from '../performance/RenderingModePreference';
@@ -33,6 +40,7 @@ export const SceneKeys = {
   Boot: 'BootScene',
   Menu: 'MenuScene',
   Game: 'GameScene',
+  Settings: 'SettingsScene',
   Pause: 'PauseScene',
   GameOver: 'GameOverScene',
 } as const;
@@ -50,6 +58,8 @@ const DOOR_TEXTURE_KEY = 'door-marker';
 const DOOR_MARKER_COLOR = 0xffdd66;
 const DOOR_MARKER_ALPHA = 0.8;
 const DOOR_MARKER_DEPTH = TERRAIN_VISUAL_DEPTH + 4;
+const CONTROL_SCHEME_SEQUENCE: ControlScheme[] = ['keyboard', 'touch', 'controller'];
+const DIFFICULTY_SEQUENCE: DifficultyLevel[] = ['easy', 'normal', 'hard'];
 
 type TerrainTilePlacement = {
   column: number;
@@ -201,12 +211,16 @@ export class BootScene extends Phaser.Scene {
 
 export class MenuScene extends Phaser.Scene {
   public static readonly KEY = SceneKeys.Menu;
+  private readonly saveManager = new SaveManager();
+  private resetNotice?: Phaser.GameObjects.Text;
 
   constructor() {
     super(buildConfig(SceneKeys.Menu));
   }
 
   create(data?: { errorMessage?: string }) {
+    this.resetNotice?.destroy?.();
+    this.resetNotice = undefined;
     const errorMessage = data?.errorMessage?.trim();
 
     if (errorMessage && this.add?.text) {
@@ -250,16 +264,65 @@ export class MenuScene extends Phaser.Scene {
       instructions.setDepth?.(100);
       instructions.setLineSpacing?.(2);
       instructions.setWordWrapWidth?.(Math.min(width - 32, 620), true);
+
+      const optionsLines = [
+        'Press O to open Settings',
+        'Press R to reset spawn to the Central Hub',
+      ];
+      const options = this.add.text(centerX, centerY + 126, optionsLines.join('\n'), {
+        fontSize: '14px',
+        color: '#ffeeff',
+        align: 'center',
+      });
+      options.setOrigin?.(0.5, 0);
+      options.setScrollFactor?.(0, 0);
+      options.setDepth?.(100);
+      options.setLineSpacing?.(2);
     }
 
     const startHandler = () => this.startGame();
 
     this.input?.keyboard?.once?.('keydown-SPACE', startHandler);
     this.input?.on?.('pointerdown', startHandler);
+    this.input?.keyboard?.once?.('keydown-O', () => this.openSettings());
+    this.input?.keyboard?.once?.('keydown-R', () => this.resetSpawn());
   }
 
   startGame() {
     this.scene.start(SceneKeys.Game);
+  }
+
+  private openSettings() {
+    this.scene.launch(SceneKeys.Settings, { returnTo: SceneKeys.Menu });
+    this.scene.pause(SceneKeys.Menu);
+    this.input?.keyboard?.once?.('keydown-O', () => this.openSettings());
+  }
+
+  private resetSpawn() {
+    this.saveManager.resetPlayerPosition();
+    this.showResetNotice('初期位置をリセットしました');
+    this.input?.keyboard?.once?.('keydown-R', () => this.resetSpawn());
+  }
+
+  private showResetNotice(message: string) {
+    if (!this.add?.text) {
+      return;
+    }
+
+    this.resetNotice?.destroy?.();
+    const width = this.scale?.width ?? 800;
+    const height = this.scale?.height ?? 600;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const notice = this.add.text(centerX, centerY + 180, message, {
+      fontSize: '16px',
+      color: '#a8ffd0',
+      align: 'center',
+    });
+    notice.setOrigin?.(0.5, 0.5);
+    notice.setScrollFactor?.(0, 0);
+    notice.setDepth?.(120);
+    this.resetNotice = notice;
   }
 }
 
@@ -297,6 +360,23 @@ export class GameScene extends Phaser.Scene {
   private hud?: Hud;
   private lastHudHp?: HudHPState;
   private readonly playerMaxHP = 6;
+  private currentSettings: GameSettingsSnapshot = { ...DEFAULT_SETTINGS };
+  private readonly handleSettingsUpdated = (settings?: GameSettingsSnapshot) => {
+    if (!this.saveManager) {
+      return;
+    }
+
+    const resolved =
+      settings ??
+      this.saveManager.load()?.settings ??
+      this.currentSettings;
+
+    if (!resolved) {
+      return;
+    }
+
+    this.applySettings(resolved);
+  };
   private readonly scorePerEnemy = 100;
   private isGameOver = false;
   private runtimeErrorCaptured = false;
@@ -312,6 +392,8 @@ export class GameScene extends Phaser.Scene {
   private terrainTransitionMarkers: Array<Phaser.GameObjects.GameObject & { destroy?: () => void }> = [];
   private cameraFollowConfigured = false;
   private readonly capturedSprites = new Set<Phaser.Physics.Matter.Sprite>();
+  private menuBlurEffect?: { destroy?: () => void } | unknown;
+  private menuBlurResumeHandler?: () => void;
 
   constructor() {
     super(buildConfig(SceneKeys.Game));
@@ -495,6 +577,8 @@ export class GameScene extends Phaser.Scene {
 
     this.audioManager = new AudioManager(this);
     this.audioManager.playBgm('bgm-main', { volume: 1 });
+    this.applySettings(this.currentSettings);
+    this.game?.events?.on?.('settings-updated', this.handleSettingsUpdated);
 
     this.isGameOver = false;
     this.runtimeErrorCaptured = false;
@@ -539,6 +623,7 @@ export class GameScene extends Phaser.Scene {
       this.configureCamera();
     }
     this.playerInput = new PlayerInputManager(this);
+    this.playerInput?.setControlScheme?.(this.currentSettings.controls);
     if (this.kirdy) {
       this.inhaleSystem = new InhaleSystem(this, this.kirdy);
       this.swallowSystem = new SwallowSystem(this, this.kirdy, this.inhaleSystem, this.physicsSystem);
@@ -559,6 +644,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.events?.once?.('shutdown', () => {
+      this.clearMenuBlur();
       this.playerInput?.destroy();
       this.playerInput = undefined;
       this.latestInput = undefined;
@@ -602,6 +688,7 @@ export class GameScene extends Phaser.Scene {
       this.performanceMonitor = undefined;
       this.audioManager?.stopBgm();
       this.audioManager = undefined;
+      this.game?.events?.off?.('settings-updated', this.handleSettingsUpdated);
       this.capturedSprites.clear();
     });
 
@@ -630,7 +717,88 @@ export class GameScene extends Phaser.Scene {
     this.audioManager?.toggleMute();
   }
 
+  private applyMenuBlur() {
+    if (this.menuBlurEffect) {
+      return;
+    }
+
+    const camera = (this.cameras as {
+      main?: {
+        postFX?: {
+          addBlur?: (...args: number[]) => unknown;
+        };
+      };
+    } | undefined)?.main;
+    const postFX = camera?.postFX;
+    const addBlur = postFX?.addBlur;
+
+    if (!postFX || typeof addBlur !== 'function') {
+      return;
+    }
+
+    let effect: unknown;
+
+    try {
+      effect = addBlur.call(postFX, 4, 1, 2);
+    } catch (error) {
+      console.warn?.('[GameScene] failed to add menu blur', error);
+      return;
+    }
+
+    if (!effect) {
+      return;
+    }
+
+    this.menuBlurEffect = effect as { destroy?: () => void } | unknown;
+
+    if (this.menuBlurResumeHandler) {
+      this.events?.off?.('resume', this.menuBlurResumeHandler);
+    }
+
+    this.menuBlurResumeHandler = () => {
+      this.menuBlurResumeHandler = undefined;
+      this.clearMenuBlur();
+    };
+
+    this.events?.once?.('resume', this.menuBlurResumeHandler);
+  }
+
+  private clearMenuBlur() {
+    const camera = (this.cameras as {
+      main?: {
+        postFX?: {
+          remove?: (effect: unknown) => void;
+          clear?: () => void;
+        };
+      };
+    } | undefined)?.main;
+    const postFX = camera?.postFX;
+    const effect = this.menuBlurEffect;
+
+    if (effect) {
+      if (typeof postFX?.remove === 'function') {
+        postFX.remove(effect);
+      } else {
+        const destroy = (effect as { destroy?: () => void })?.destroy;
+        if (typeof destroy === 'function') {
+          destroy.call(effect as { destroy: () => void });
+        } else if (typeof postFX?.clear === 'function') {
+          postFX.clear();
+        }
+      }
+    }
+
+    this.menuBlurEffect = undefined;
+
+    if (this.menuBlurResumeHandler) {
+      this.events?.off?.('resume', this.menuBlurResumeHandler);
+      this.menuBlurResumeHandler = undefined;
+    }
+  }
+
   pauseGame() {
+    this.applyMenuBlur();
+    this.scene.pause(SceneKeys.Game);
     this.scene.launch(SceneKeys.Pause);
   }
 
@@ -1570,7 +1738,13 @@ export class GameScene extends Phaser.Scene {
   private initializeSaveManager(): GameProgressSnapshot | undefined {
     this.saveManager = new SaveManager();
     const snapshot = this.saveManager.load();
+    if (!snapshot?.settings) {
+      this.currentSettings = { ...DEFAULT_SETTINGS };
+    } else {
+      this.currentSettings = { ...snapshot.settings };
+    }
     if (!snapshot) {
+      this.currentSettings = { ...DEFAULT_SETTINGS };
       return undefined;
     }
 
@@ -1583,6 +1757,7 @@ export class GameScene extends Phaser.Scene {
 
     if (maxHP <= 0 || currentHP <= 0) {
       this.saveManager.clear();
+      this.currentSettings = { ...DEFAULT_SETTINGS };
       return undefined;
     }
 
@@ -1710,13 +1885,42 @@ export class GameScene extends Phaser.Scene {
 
   private getSettingsSnapshot(): GameSettingsSnapshot {
     const volume = this.audioManager?.getMasterVolume?.();
-    const normalizedVolume = Number.isFinite(volume) ? Math.min(1, Math.max(0, volume as number)) : DEFAULT_SETTINGS.volume;
+    const normalizedVolume = Number.isFinite(volume)
+      ? Math.min(1, Math.max(0, volume as number))
+      : this.currentSettings.volume;
 
     return {
       volume: normalizedVolume,
-      controls: DEFAULT_SETTINGS.controls,
-      difficulty: DEFAULT_SETTINGS.difficulty,
+      controls: this.currentSettings.controls,
+      difficulty: this.currentSettings.difficulty,
     } satisfies GameSettingsSnapshot;
+  }
+
+  private applySettings(settings: GameSettingsSnapshot) {
+    const clampedVolume = Number.isFinite(settings.volume)
+      ? Math.min(1, Math.max(0, settings.volume as number))
+      : DEFAULT_SETTINGS.volume;
+    const controls = settings.controls ?? DEFAULT_SETTINGS.controls;
+    const difficulty = settings.difficulty ?? DEFAULT_SETTINGS.difficulty;
+
+    const previous = this.currentSettings;
+    const changed =
+      previous.volume !== clampedVolume ||
+      previous.controls !== controls ||
+      previous.difficulty !== difficulty;
+
+    this.currentSettings = {
+      volume: clampedVolume,
+      controls,
+      difficulty,
+    };
+
+    this.audioManager?.setMasterVolume(clampedVolume);
+    this.playerInput?.setControlScheme?.(controls);
+
+    if (changed) {
+      this.requestSave();
+    }
   }
 
   private toggleMapOverlay() {
@@ -1764,6 +1968,7 @@ export class GameScene extends Phaser.Scene {
 
 export class PauseScene extends Phaser.Scene {
   public static readonly KEY = SceneKeys.Pause;
+  private readonly saveManager = new SaveManager();
 
   constructor() {
     super(buildConfig(SceneKeys.Pause));
@@ -1773,10 +1978,12 @@ export class PauseScene extends Phaser.Scene {
     const resumeHandler = () => this.resumeGame();
     const restartHandler = () => this.restartGame();
     const quitHandler = () => this.quitToMenu();
+    const settingsHandler = () => this.openSettings();
 
     this.input?.keyboard?.once?.('keydown-ESC', resumeHandler);
     this.input?.keyboard?.once?.('keydown-R', restartHandler);
     this.input?.keyboard?.once?.('keydown-Q', quitHandler);
+    this.input?.keyboard?.once?.('keydown-O', settingsHandler);
     this.input?.once?.('pointerdown', resumeHandler);
 
     if (this.add?.text) {
@@ -1821,6 +2028,13 @@ export class PauseScene extends Phaser.Scene {
       quitOption.setDepth?.(2000);
       quitOption.setInteractive?.({ useHandCursor: true });
       quitOption.on?.('pointerdown', quitHandler);
+
+      const settingsOption = this.add.text(centerX, centerY + 110, 'Settings (O)', submenuStyle);
+      settingsOption.setOrigin?.(0.5, 0.5);
+      settingsOption.setScrollFactor?.(0, 0);
+      settingsOption.setDepth?.(2000);
+      settingsOption.setInteractive?.({ useHandCursor: true });
+      settingsOption.on?.('pointerdown', settingsHandler);
     }
   }
 
@@ -1830,6 +2044,7 @@ export class PauseScene extends Phaser.Scene {
   }
 
   restartGame() {
+    this.saveManager.resetPlayerPosition();
     this.scene.stop(SceneKeys.Pause);
     this.scene.stop(SceneKeys.Game);
     this.scene.start(SceneKeys.Game);
@@ -1839,6 +2054,155 @@ export class PauseScene extends Phaser.Scene {
     this.scene.stop(SceneKeys.Pause);
     this.scene.stop(SceneKeys.Game);
     this.scene.start(SceneKeys.Menu);
+  }
+
+  private openSettings() {
+    this.scene.pause(SceneKeys.Pause);
+    this.scene.launch(SceneKeys.Settings, { returnTo: SceneKeys.Pause });
+    this.input?.keyboard?.once?.('keydown-O', () => this.openSettings());
+  }
+}
+
+interface SettingsSceneData {
+  returnTo?: SceneKey;
+}
+
+export class SettingsScene extends Phaser.Scene {
+  public static readonly KEY = SceneKeys.Settings;
+  private readonly saveManager = new SaveManager();
+  private currentSettings: GameSettingsSnapshot = { ...DEFAULT_SETTINGS };
+  private summaryText?: Phaser.GameObjects.Text;
+  private instructionsText?: Phaser.GameObjects.Text;
+  private returnToScene: SceneKey = SceneKeys.Menu;
+
+  constructor() {
+    super(buildConfig(SceneKeys.Settings));
+  }
+
+  create(data?: SettingsSceneData) {
+    this.returnToScene = data?.returnTo ?? SceneKeys.Menu;
+    const snapshot = this.saveManager.load();
+    if (snapshot?.settings) {
+      this.currentSettings = { ...snapshot.settings };
+    } else {
+      this.currentSettings = { ...DEFAULT_SETTINGS };
+    }
+
+    const width = this.scale?.width ?? 800;
+    const height = this.scale?.height ?? 600;
+    const centerX = width / 2;
+    const centerY = height / 2;
+
+    const summaryStyle: Phaser.Types.GameObjects.Text.TextStyle = {
+      fontSize: '22px',
+      color: '#ffffff',
+      align: 'center',
+    };
+    this.summaryText = this.add?.text?.(centerX, centerY - 60, '', summaryStyle);
+    this.summaryText?.setOrigin?.(0.5, 0.5);
+    this.summaryText?.setScrollFactor?.(0, 0);
+    this.summaryText?.setDepth?.(2200);
+
+    const instructionsStyle: Phaser.Types.GameObjects.Text.TextStyle = {
+      fontSize: '16px',
+      color: '#ffd6ff',
+      align: 'center',
+    };
+    const instructionsLines = [
+      'LEFT / RIGHT : Adjust volume',
+      'UP / DOWN     : Cycle difficulty',
+      'C             : Cycle control scheme',
+      'ESC           : Back',
+    ];
+    this.instructionsText = this.add?.text?.(centerX, centerY + 40, instructionsLines.join('\n'), instructionsStyle);
+    this.instructionsText?.setOrigin?.(0.5, 0.5);
+    this.instructionsText?.setScrollFactor?.(0, 0);
+    this.instructionsText?.setDepth?.(2200);
+    this.instructionsText?.setLineSpacing?.(4);
+
+    this.refreshSummaryText();
+
+    const keyboard = this.input?.keyboard;
+    const handleLeft = () => this.adjustVolume(-0.1);
+    const handleRight = () => this.adjustVolume(0.1);
+    const handleUp = () => this.cycleDifficulty(1);
+    const handleDown = () => this.cycleDifficulty(-1);
+    const handleControl = () => this.cycleControlScheme(1);
+    const handleEscape = () => this.close();
+
+    keyboard?.on?.('keydown-LEFT', handleLeft);
+    keyboard?.on?.('keydown-RIGHT', handleRight);
+    keyboard?.on?.('keydown-UP', handleUp);
+    keyboard?.on?.('keydown-DOWN', handleDown);
+    keyboard?.on?.('keydown-C', handleControl);
+    keyboard?.once?.('keydown-ESC', handleEscape);
+
+    this.events?.once?.('shutdown', () => {
+      keyboard?.off?.('keydown-LEFT', handleLeft);
+      keyboard?.off?.('keydown-RIGHT', handleRight);
+      keyboard?.off?.('keydown-UP', handleUp);
+      keyboard?.off?.('keydown-DOWN', handleDown);
+      keyboard?.off?.('keydown-C', handleControl);
+      keyboard?.off?.('keydown-ESC', handleEscape);
+    });
+  }
+
+  private adjustVolume(delta: number) {
+    const current = this.currentSettings.volume ?? DEFAULT_SETTINGS.volume;
+    const nextRaw = current + delta;
+    const next = Math.min(1, Math.max(0, Math.round(nextRaw * 100) / 100));
+    if (next === current) {
+      return;
+    }
+    this.applySettingChanges({ volume: next });
+  }
+
+  private cycleControlScheme(direction: 1 | -1) {
+    const current = this.currentSettings.controls ?? DEFAULT_SETTINGS.controls;
+    const index = CONTROL_SCHEME_SEQUENCE.indexOf(current);
+    const nextIndex =
+      (index + direction + CONTROL_SCHEME_SEQUENCE.length) % CONTROL_SCHEME_SEQUENCE.length;
+    const next = CONTROL_SCHEME_SEQUENCE[nextIndex];
+    if (next === current) {
+      return;
+    }
+    this.applySettingChanges({ controls: next });
+  }
+
+  private cycleDifficulty(direction: 1 | -1) {
+    const current = this.currentSettings.difficulty ?? DEFAULT_SETTINGS.difficulty;
+    const index = DIFFICULTY_SEQUENCE.indexOf(current);
+    const nextIndex = (index + direction + DIFFICULTY_SEQUENCE.length) % DIFFICULTY_SEQUENCE.length;
+    const next = DIFFICULTY_SEQUENCE[nextIndex];
+    if (next === current) {
+      return;
+    }
+    this.applySettingChanges({ difficulty: next });
+  }
+
+  private applySettingChanges(partial: Partial<GameSettingsSnapshot>) {
+    const updated = this.saveManager.updateSettings(partial);
+    this.currentSettings = { ...updated };
+    this.refreshSummaryText();
+    this.game?.events?.emit?.('settings-updated', updated);
+  }
+
+  private refreshSummaryText() {
+    const volumePercent = Math.round((this.currentSettings.volume ?? 0) * 100);
+    const controlLabel = this.currentSettings.controls ?? DEFAULT_SETTINGS.controls;
+    const difficultyLabel = this.currentSettings.difficulty ?? DEFAULT_SETTINGS.difficulty;
+    const lines = [
+      `Volume: ${volumePercent}%`,
+      `Controls: ${controlLabel}`,
+      `Difficulty: ${difficultyLabel}`,
+    ];
+    this.summaryText?.setText?.(lines.join('\n'));
+  }
+
+  private close() {
+    this.scene.resume(this.returnToScene);
+    this.scene.stop(SceneKeys.Settings);
+    this.game?.events?.emit?.('settings-updated', this.currentSettings);
   }
 }
 
@@ -1928,4 +2292,4 @@ export class GameOverScene extends Phaser.Scene {
   }
 }
 
-export const coreScenes = [BootScene, MenuScene, GameScene, PauseScene, GameOverScene];
+export const coreScenes = [BootScene, MenuScene, GameScene, PauseScene, SettingsScene, GameOverScene];

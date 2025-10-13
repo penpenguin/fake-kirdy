@@ -391,4 +391,16 @@ describe('EnemyManager', () => {
       expect(enemy.onDisperse.mock.calls.length).toBe(initialDisperseCounts[index]);
     });
   });
+
+  it('破棄済みのスプライトでも座標計算が例外にならない', () => {
+    const enemy = makeEnemy();
+    (enemy as any).sprite = undefined;
+
+    let position: { x: number; y: number } | undefined;
+    expect(() => {
+      position = (manager as any).getEnemyPosition(enemy);
+    }).not.toThrow();
+
+    expect(position).toEqual({ x: 0, y: 0 });
+  });
 });

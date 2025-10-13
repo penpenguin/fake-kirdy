@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type Phaser from 'phaser';
 import type { ActionStateMap } from './InhaleSystem';
 import { AbilitySystem, ABILITY_TYPES } from './AbilitySystem';
+import { PhysicsSystem } from '../physics/PhysicsSystem';
 
 function buildActions(
   overrides: Partial<{ [K in keyof ActionStateMap]: Partial<ActionStateMap[K]> }> = {},
@@ -51,6 +52,8 @@ describe('AbilitySystem', () => {
     registerPlayerAttack: ReturnType<typeof vi.fn>;
     destroyProjectile: ReturnType<typeof vi.fn>;
   };
+  let worldOn: ReturnType<typeof vi.fn>;
+  let worldOff: ReturnType<typeof vi.fn>;
   let kirdy: {
     sprite: {
       x: number;
@@ -106,8 +109,11 @@ describe('AbilitySystem', () => {
       exists: vi.fn().mockReturnValue(true),
     };
 
+    worldOn = vi.fn();
+    worldOff = vi.fn();
+
     scene = {
-      matter: { add: { sprite: addSprite } },
+      matter: { add: { sprite: addSprite }, world: { on: worldOn, off: worldOff, remove: vi.fn() } },
       time: { delayedCall },
       sound: { play: playSound },
       events: { emit: eventsEmit },
@@ -373,6 +379,76 @@ describe('AbilitySystem', () => {
     );
 
     expect(eventsEmit).toHaveBeenCalledWith('ability-cleared', {});
+  });
+
+  it('deals damage to active enemies when an ability projectile collides', () => {
+    const physics = new PhysicsSystem(scene);
+    const collisionStartHandler = worldOn.mock.calls.find(([event]) => event === 'collisionstart')?.[1];
+    if (!collisionStartHandler) {
+      throw new Error('collisionstart handler not registered');
+    }
+
+    const createPhysicsSprite = () => ({
+      setCollisionCategory: vi.fn().mockReturnThis(),
+      setCollidesWith: vi.fn().mockReturnThis(),
+      setIgnoreGravity: vi.fn().mockReturnThis(),
+      setFixedRotation: vi.fn().mockReturnThis(),
+      setName: vi.fn().mockReturnThis(),
+      setSensor: vi.fn().mockReturnThis(),
+      setData: vi.fn().mockReturnThis(),
+      setStatic: vi.fn().mockReturnThis(),
+      setVelocity: vi.fn().mockReturnThis(),
+      setActive: vi.fn().mockReturnThis(),
+      setVisible: vi.fn().mockReturnThis(),
+      once: vi.fn().mockReturnThis(),
+      destroy: vi.fn(),
+    });
+
+    const playerSprite = createPhysicsSprite();
+    physics.registerPlayer({ sprite: playerSprite } as any);
+
+    const enemySprite = createPhysicsSprite();
+    const enemy = {
+      sprite: enemySprite,
+      takeDamage: vi.fn(),
+      isDefeated: vi.fn().mockReturnValue(false),
+    };
+    physics.registerEnemy(enemy as any);
+
+    const system = new AbilitySystem(scene, kirdy as any, physics);
+    system.applySwallowedPayload({ abilityType: 'fire' });
+
+    const projectileStub = {
+      setCollisionCategory: vi.fn().mockReturnThis(),
+      setCollidesWith: vi.fn().mockReturnThis(),
+      setVelocityX: vi.fn().mockReturnThis(),
+      setIgnoreGravity: vi.fn().mockReturnThis(),
+      setFixedRotation: vi.fn().mockReturnThis(),
+      setName: vi.fn().mockReturnThis(),
+      setSensor: vi.fn().mockReturnThis(),
+      setData: vi.fn().mockReturnThis(),
+      once: vi.fn().mockReturnThis(),
+      destroy: vi.fn(),
+    };
+    addSprite.mockReturnValueOnce(projectileStub as any);
+
+    system.update(
+      buildActions({
+        spit: { isDown: true, justPressed: true },
+      }),
+    );
+
+    collisionStartHandler({
+      pairs: [
+        {
+          bodyA: { gameObject: projectileStub },
+          bodyB: { gameObject: enemySprite },
+          isSensor: false,
+        },
+      ],
+    } as any);
+
+    expect(enemy.takeDamage).toHaveBeenCalledWith(2);
   });
 
   it('does nothing when an unknown ability type is provided', () => {

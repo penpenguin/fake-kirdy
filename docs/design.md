@@ -57,6 +57,10 @@ class GameScene extends Phaser.Scene {
 class PauseScene extends Phaser.Scene {
   // ポーズメニュー
 }
+
+class SettingsScene extends Phaser.Scene {
+  // 設定オーバーレイ
+}
 ```
 
 ### 2. Kirdyキャラクターシステム
@@ -177,7 +181,19 @@ class PlayerInputManager {
 - どのテクスチャも利用できない場合はパーティクル生成をスキップし、ゲームプレイを継続する。
 - `InhaleSystem.test.ts` にフォールバックと非生成のケースを追加し、欠損アセットでタイトルに戻らないことを保証する。
 
-### 5. マップシステム
+### 6. 設定オーバーレイ
+
+- `SettingsScene` はメニューまたはポーズ状態から `SceneManager.launch` で起動し、呼び出し元シーンを `pause` したまま中央に設定パネルをオーバーレイ表示する。
+- キーボードショートカット:
+  - `LEFT` / `RIGHT`: マスターボリュームを 10% 刻みで増減し、`AudioManager`へ即時反映する。
+  - `UP` / `DOWN`: 難易度プリセット（`easy` / `normal` / `hard`）を循環させ、`SaveManager` のスナップショットへ記録する。
+  - `C`: 操作スキーム（`keyboard` / `touch` / `controller`）を切り替え、`PlayerInputManager.setControlScheme` でタッチ UI の表示状態を更新する。
+  - `ESC`: オーバーレイを閉じて呼び出し元シーンを再開する。
+- すべての変更は `SaveManager.updateSettings` を通じて即時に LocalStorage へ保存され、`GameScene` は `settings-updated` グローバルイベントを購読して音量や入力スキームを再適用する。
+- MenuScene は `O` キーで設定、`R` キーで初期位置リセットを案内し、PauseScene からも同じショートカットで設定オーバーレイを開ける。
+- PauseScene が前面にある間は GameScene のメインカメラへ post-processing ブラーを追加し、`resume` で解除して背景をソフトに演出する。
+
+### 7. マップシステム
 
 ```javascript
 class MapSystem {

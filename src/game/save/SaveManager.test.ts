@@ -3,6 +3,7 @@ import type { AbilityType } from '../mechanics/AbilitySystem';
 import { ABILITY_TYPES } from '../mechanics/AbilitySystem';
 import { AREA_IDS } from '../world/AreaManager';
 import type { AreaId } from '../world/AreaManager';
+import { centralHub } from '../world/stages/central-hub';
 import { SaveManager, type GameProgressSnapshot } from './SaveManager';
 
 interface StorageMock {
@@ -319,13 +320,13 @@ describe('SaveManager', () => {
           maxHP: 6,
           score: 0,
           ability: 'invalid-ability',
-          position: { x: 0, y: 0 },
+          position: centralHub.entryPoints.default.position,
         },
         area: {
           currentAreaId: 'strange-land',
           discoveredAreas: ['strange-land'],
           exploredTiles: {},
-          lastKnownPlayerPosition: { x: 0, y: 0 },
+          lastKnownPlayerPosition: centralHub.entryPoints.default.position,
         },
       },
     };
@@ -340,13 +341,13 @@ describe('SaveManager', () => {
         maxHP: 6,
         score: 0,
         ability: undefined,
-        position: { x: 0, y: 0 },
+        position: centralHub.entryPoints.default.position,
       },
       area: {
         currentAreaId: AREA_IDS.CentralHub,
         discoveredAreas: [],
         exploredTiles: {},
-        lastKnownPlayerPosition: { x: 0, y: 0 },
+        lastKnownPlayerPosition: centralHub.entryPoints.default.position,
         completedAreas: [],
         collectedItems: [],
       },
@@ -361,5 +362,92 @@ describe('SaveManager', () => {
   it('AbilityTypeの制約が変わっても検証関数を共有する', () => {
     const invalidAbility = 'super-fire';
     expect((ABILITY_TYPES as readonly AbilityType[]).includes(invalidAbility as AbilityType)).toBe(false);
+  });
+
+  it('resets player spawn position while preserving other progress', () => {
+    const payload = {
+      version: 1,
+      savedAt: nowStub(),
+      data: snapshot,
+    } satisfies { version: number; savedAt: number; data: GameProgressSnapshot };
+
+    storage.getItem.mockReturnValueOnce(JSON.stringify(payload));
+
+    saveManager.resetPlayerPosition();
+
+    const setCall = storage.setItem.mock.calls.find(([callKey]) => callKey === key);
+    expect(setCall).toBeDefined();
+    const [, serialized] = setCall ?? [];
+    const saved = JSON.parse(serialized as string) as { data: GameProgressSnapshot };
+
+    expect(saved.data.player.position).toEqual(centralHub.entryPoints.default.position);
+    expect(saved.data.area.lastKnownPlayerPosition).toEqual(centralHub.entryPoints.default.position);
+    expect(saved.data.area.currentAreaId).toBe(AREA_IDS.CentralHub);
+    expect(saved.data.player.score).toBe(snapshot.player.score);
+    expect(saved.data.settings.volume).toBe(snapshot.settings.volume);
+  });
+
+  describe('updateSettings', () => {
+    it('設定値を更新しつつ既存のプレイヤーとエリア情報を保持する', () => {
+      const payload = {
+        version: 1,
+        savedAt: nowStub(),
+        data: snapshot,
+      };
+      storage.getItem.mockReturnValueOnce(JSON.stringify(payload));
+
+      const result = saveManager.updateSettings({
+        volume: 0.25,
+        controls: 'touch',
+        difficulty: 'hard',
+      });
+
+      expect(result).toEqual({
+        volume: 0.25,
+        controls: 'touch',
+        difficulty: 'hard',
+      });
+
+      expect(storage.setItem).toHaveBeenCalled();
+      const [, serialized] = storage.setItem.mock.calls.at(-1)!;
+      const saved = JSON.parse(serialized);
+
+      expect(saved.data.player).toEqual(snapshot.player);
+      expect(saved.data.area).toEqual(snapshot.area);
+      expect(saved.data.settings).toEqual({
+        volume: 0.25,
+        controls: 'touch',
+        difficulty: 'hard',
+      });
+    });
+
+    it('無効な入力を正規化して保存し、正規化後の設定を返却する', () => {
+      const payload = {
+        version: 1,
+        savedAt: nowStub(),
+        data: snapshot,
+      };
+      storage.getItem.mockReturnValueOnce(JSON.stringify(payload));
+
+      const result = saveManager.updateSettings({
+        volume: 2.5,
+        controls: 'arcade-stick' as any,
+        difficulty: 'impossible' as any,
+      });
+
+      expect(result).toEqual({
+        volume: 1,
+        controls: 'keyboard',
+        difficulty: 'normal',
+      });
+
+      const [, serialized] = storage.setItem.mock.calls.at(-1)!;
+      const saved = JSON.parse(serialized);
+      expect(saved.data.settings).toEqual({
+        volume: 1,
+        controls: 'keyboard',
+        difficulty: 'normal',
+      });
+    });
   });
 });

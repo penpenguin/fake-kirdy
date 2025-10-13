@@ -1,5 +1,6 @@
 import { ABILITY_TYPES, type AbilityType } from '../mechanics/AbilitySystem';
 import { AREA_IDS, type AreaId, type Vector2 } from '../world/AreaManager';
+import { centralHub } from '../world/stages/central-hub';
 
 export interface PlayerProgressSnapshot {
   hp: number;
@@ -52,11 +53,18 @@ const DIFFICULTY_LEVELS: DifficultyLevel[] = ['easy', 'normal', 'hard'];
 const controlSchemeSet = new Set<ControlScheme>(CONTROL_SCHEMES);
 const difficultySet = new Set<DifficultyLevel>(DIFFICULTY_LEVELS);
 
+const CENTRAL_HUB_SPAWN = centralHub.entryPoints.default.position;
+
+const createCentralHubSpawn = (): Vector2 => ({
+  x: CENTRAL_HUB_SPAWN.x,
+  y: CENTRAL_HUB_SPAWN.y,
+});
+
 const DEFAULT_PLAYER: PlayerProgressSnapshot = {
   hp: 6,
   maxHP: 6,
   score: 0,
-  position: { x: 0, y: 0 },
+  position: createCentralHubSpawn(),
 };
 
 const DEFAULT_AREA: AreaProgressSnapshot = {
@@ -74,7 +82,7 @@ const DEFAULT_AREA: AreaProgressSnapshot = {
     [AREA_IDS.AuroraSpire]: [],
     [AREA_IDS.StarlitKeep]: [],
   },
-  lastKnownPlayerPosition: { x: 0, y: 0 },
+  lastKnownPlayerPosition: createCentralHubSpawn(),
   completedAreas: [],
   collectedItems: [],
 };
@@ -166,6 +174,54 @@ export class SaveManager {
   clear() {
     tryRemoveItem(this.storage, this.key);
     tryRemoveItem(this.fallbackStorage, this.fallbackKey);
+  }
+
+  resetPlayerPosition() {
+    const snapshot = this.load() ?? {
+      player: { ...DEFAULT_PLAYER },
+      area: { ...DEFAULT_AREA },
+      settings: { ...DEFAULT_SETTINGS },
+    } satisfies GameProgressSnapshot;
+
+    const playerSpawnPosition = createCentralHubSpawn();
+
+    const updatedPlayer: PlayerProgressSnapshot = {
+      ...snapshot.player,
+      position: playerSpawnPosition,
+    } satisfies PlayerProgressSnapshot;
+
+    const updatedArea: AreaProgressSnapshot = {
+      ...snapshot.area,
+      currentAreaId: AREA_IDS.CentralHub,
+      lastKnownPlayerPosition: createCentralHubSpawn(),
+    } satisfies AreaProgressSnapshot;
+
+    this.save({
+      player: updatedPlayer,
+      area: updatedArea,
+      settings: snapshot.settings ?? { ...DEFAULT_SETTINGS },
+    });
+  }
+
+  updateSettings(updates: Partial<GameSettingsSnapshot>): GameSettingsSnapshot {
+    const snapshot = this.load() ?? {
+      player: { ...DEFAULT_PLAYER },
+      area: { ...DEFAULT_AREA },
+      settings: { ...DEFAULT_SETTINGS },
+    };
+
+    const mergedSettings: GameSettingsSnapshot = sanitizeSettings({
+      ...(snapshot.settings ?? DEFAULT_SETTINGS),
+      ...updates,
+    });
+
+    this.save({
+      player: snapshot.player ?? { ...DEFAULT_PLAYER },
+      area: snapshot.area ?? { ...DEFAULT_AREA },
+      settings: mergedSettings,
+    });
+
+    return mergedSettings;
   }
 
   private loadFromStorage(

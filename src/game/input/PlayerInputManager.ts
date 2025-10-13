@@ -1,5 +1,6 @@
 import type Phaser from 'phaser';
 import type { KirdyInputState } from '../characters/Kirdy';
+import type { ControlScheme } from '../save/SaveManager';
 
 export type PlayerAction = 'inhale' | 'swallow' | 'spit' | 'discard';
 export type PlayerTouchControl = 'left' | 'right' | 'jump' | PlayerAction;
@@ -146,6 +147,7 @@ export class PlayerInputManager {
   private snapshot: PlayerInputSnapshot = this.createEmptySnapshot();
   private buttonCleanup: Array<() => void> = [];
   private touchContainer?: Phaser.GameObjects.Container;
+  private controlScheme: ControlScheme = 'keyboard';
 
   constructor(scene: Phaser.Scene) {
     this.keyboard = scene.input?.keyboard ?? undefined;
@@ -153,6 +155,7 @@ export class PlayerInputManager {
     this.registerMovementKeys();
     this.registerActionKeys();
     this.createTouchControls(scene);
+    this.updateTouchVisibility();
   }
 
   update(): PlayerInputSnapshot {
@@ -190,6 +193,11 @@ export class PlayerInputManager {
     this.touchContainer?.destroy?.();
     this.touchContainer = undefined;
     this.keys.clear();
+  }
+
+  setControlScheme(scheme: ControlScheme) {
+    this.controlScheme = scheme;
+    this.updateTouchVisibility();
   }
 
   simulateTouch(control: PlayerTouchControl, pressed: boolean) {
@@ -365,5 +373,14 @@ export class PlayerInputManager {
 
   private setTouchState(control: PlayerTouchControl, pressed: boolean) {
     this.touchState[control] = pressed;
+  }
+
+  private updateTouchVisibility() {
+    const wantsTouch = this.controlScheme === 'touch';
+    this.touchContainer?.setVisible?.(wantsTouch);
+    this.touchContainer?.setActive?.(wantsTouch);
+    if (!wantsTouch) {
+      this.touchState = { ...TOUCH_DEFAULT_STATE };
+    }
   }
 }

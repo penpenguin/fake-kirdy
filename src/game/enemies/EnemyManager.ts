@@ -352,10 +352,13 @@ export class EnemyManager {
 
   private getEnemyPosition(enemy: Enemy) {
     const sprite = enemy.sprite;
-    return {
-      x: sprite.x ?? sprite.body?.position?.x ?? 0,
-      y: sprite.y ?? sprite.body?.position?.y ?? 0,
-    };
+    if (!sprite) {
+      return { x: 0, y: 0 };
+    }
+
+    const x = sprite.x ?? sprite.body?.position?.x ?? 0;
+    const y = sprite.y ?? sprite.body?.position?.y ?? 0;
+    return { x, y };
   }
 
   private isWithinBounds(position: { x: number; y: number }, bounds: Bounds) {

@@ -4,11 +4,17 @@ const tileSize = 32;
 
 const layout = [
   '########################',
-  '#D....###.....###.....##',
-  '######.###.###.###.#####',
-  '#.....###.....###.....##',
-  '###.###########.########',
-  '#.....###.....###.....##',
+  '#....###....###....#####',
+  '#....###....###....#####',
+  '#..............###....##',
+  '#..######..######..##..#',
+  '#..#.....#..######..#..#',
+  '#D.#.....#..######..#..#',
+  '#..#.###.#..######..#..#',
+  '#..#.#...#..######..#..#',
+  '#..#.#.###..######..#..#',
+  '#..#.#..............#..#',
+  '#......................#',
   '########################',
 ];
 
@@ -28,11 +34,11 @@ export const auroraSpire: AreaDefinition = {
     west: 'sky-sanctum',
   },
   entryPoints: {
-    default: { position: { x: tileSize * 2, y: westEntryY } },
-    west: { position: { x: tileSize * 2, y: westEntryY }, facing: 'west' },
-    east: { position: { x: width - tileSize * 3, y: height - tileSize * 3 } },
-    north: { position: { x: width / 2, y: tileSize * 2 } },
-    south: { position: { x: width / 2, y: height - tileSize * 2 } },
+    default: { position: { x: tileSize * 12, y: height - tileSize * 2 }, facing: 'east' },
+    west: { position: { x: tileSize * 2, y: westEntryY }, facing: 'east' },
+    east: { position: { x: width - tileSize * 3, y: tileSize * 4 }, facing: 'east' },
+    north: { position: { x: width / 2, y: tileSize * 3 }, facing: 'north' },
+    south: { position: { x: width / 2, y: height - tileSize * 2 }, facing: 'south' },
   },
   enemySpawns: {
     baseline: 3,

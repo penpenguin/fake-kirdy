@@ -5,6 +5,7 @@ import {
   type AreaManagerSnapshot,
   type AreaTransitionDirection,
   type AreaUpdateResult,
+  type TileCode,
 } from './AreaManager';
 
 function getOpposite(direction: AreaTransitionDirection): AreaTransitionDirection {
@@ -66,6 +67,51 @@ function isDoorCoordinateForDirection(
       return _never;
     }
   }
+}
+
+function countReachableWalkableTiles(
+  tileMap: ReturnType<AreaManager['getCurrentAreaState']>['tileMap'],
+  startColumn: number,
+  startRow: number,
+) {
+  const deltas = [
+    { column: 1, row: 0 },
+    { column: -1, row: 0 },
+    { column: 0, row: 1 },
+    { column: 0, row: -1 },
+  ];
+  const visited = new Set<string>();
+  const queue: Array<{ column: number; row: number }> = [{ column: startColumn, row: startRow }];
+  const isWalkable = (tile?: TileCode) => tile === 'floor' || tile === 'door';
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (!current) {
+      continue;
+    }
+
+    if (!tileMap.isInBounds(current.column, current.row)) {
+      continue;
+    }
+
+    const key = `${current.column},${current.row}`;
+    if (visited.has(key)) {
+      continue;
+    }
+
+    const tile = tileMap.getTileAt(current.column, current.row);
+    if (!isWalkable(tile)) {
+      continue;
+    }
+
+    visited.add(key);
+
+    deltas.forEach((delta) => {
+      queue.push({ column: current.column + delta.column, row: current.row + delta.row });
+    });
+  }
+
+  return visited.size;
 }
 
 describe('AreaManager', () => {
@@ -229,6 +275,36 @@ describe('AreaManager', () => {
 
     const skySanctum = branchManager.getCurrentAreaState();
     expect(skySanctum.definition.id).toBe(AREA_IDS.SkySanctum);
+  });
+
+  it('aurora-spire の西扉から sky-sanctum へ遷移する', () => {
+    const branchManager = new AreaManager(AREA_IDS.AuroraSpire);
+    const auroraSpireState = branchManager.getCurrentAreaState();
+
+    const westDoorPosition = getDoorWorldPosition(auroraSpireState, 'west');
+
+    const result = branchManager.updatePlayerPosition(westDoorPosition);
+
+    expect(result.areaChanged).toBe(true);
+    expect(result.transition?.from).toBe(AREA_IDS.AuroraSpire);
+    expect(result.transition?.to).toBe(AREA_IDS.SkySanctum);
+    expect(result.transition?.via).toBe('west');
+
+    const skySanctum = branchManager.getCurrentAreaState();
+    expect(skySanctum.definition.id).toBe(AREA_IDS.SkySanctum);
+  });
+
+  it('aurora-spire の歩行可能タイルは既定スポーンから全て到達できる', () => {
+    const branchManager = new AreaManager(AREA_IDS.AuroraSpire);
+    const auroraSpireState = branchManager.getCurrentAreaState();
+    const { tileMap, playerSpawnPosition } = auroraSpireState;
+
+    const spawnColumn = Math.floor(playerSpawnPosition.x / tileMap.tileSize);
+    const spawnRow = Math.floor(playerSpawnPosition.y / tileMap.tileSize);
+
+    const reachable = countReachableWalkableTiles(tileMap, spawnColumn, spawnRow);
+
+    expect(reachable).toBe(tileMap.totalWalkableTiles);
   });
 
   it('探索済みエリア情報を記録し、訪問済みエリアを管理する', () => {

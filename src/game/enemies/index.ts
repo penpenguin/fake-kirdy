@@ -213,7 +213,8 @@ class WabbleBee extends BaseEnemy {
       this.disperseRecoveryMs = Math.max(0, this.disperseRecoveryMs - _delta);
     }
 
-    const spriteX = this.sprite.x ?? this.sprite.body?.position?.x ?? 0;
+    const sprite = this.sprite;
+    const spriteX = sprite?.x ?? sprite?.body?.position?.x ?? 0;
     const target = this.getPlayerPosition?.();
 
     if (target && this.disperseRecoveryMs <= 0) {
@@ -286,7 +287,8 @@ class DrontoDurt extends BaseEnemy {
 
   protected updateAI(_delta: number) {
     const target = this.getPlayerPosition?.();
-    const spriteX = this.sprite.x ?? this.sprite.body?.position?.x ?? 0;
+    const sprite = this.sprite;
+    const spriteX = sprite?.x ?? sprite?.body?.position?.x ?? 0;
 
     if (!target) {
       this.sprite.setVelocityX?.(0);

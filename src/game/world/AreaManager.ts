@@ -407,7 +407,12 @@ export class AreaManager {
     const doorKey = `${coordinate.column},${coordinate.row}`;
     const direction =
       derived.doorDirections.get(doorKey) ??
-      inferDoorDirectionForTile(coordinate.column, coordinate.row, derived.tileMap);
+      inferDoorDirectionForTile(
+        coordinate.column,
+        coordinate.row,
+        derived.tileMap,
+        definition.neighbors,
+      );
 
     if (!direction) {
       return undefined;
@@ -571,7 +576,7 @@ export class AreaManager {
           continue;
         }
 
-        const direction = inferDoorDirectionForTile(column, row, tileMap);
+        const direction = inferDoorDirectionForTile(column, row, tileMap, definition.neighbors);
         if (!direction) {
           continue;
         }
@@ -596,26 +601,52 @@ function inferDoorDirectionForTile(
   column: number,
   row: number,
   tileMap: TileMap,
+  neighbors?: Partial<Record<AreaTransitionDirection, AreaId>>,
 ): AreaTransitionDirection | undefined {
   const edgeOffset = 1;
+  const candidates: Array<{
+    direction: AreaTransitionDirection;
+    interior?: { column: number; row: number };
+  }> = [];
 
   if (row <= edgeOffset) {
-    return 'north';
+    candidates.push({ direction: 'north', interior: row + 1 < tileMap.rows ? { column, row: row + 1 } : undefined });
   }
 
   if (row >= tileMap.rows - 1 - edgeOffset) {
-    return 'south';
+    candidates.push({ direction: 'south', interior: row - 1 >= 0 ? { column, row: row - 1 } : undefined });
   }
 
   if (column <= edgeOffset) {
-    return 'west';
+    candidates.push({ direction: 'west', interior: column + 1 < tileMap.columns ? { column: column + 1, row } : undefined });
   }
 
   if (column >= tileMap.columns - 1 - edgeOffset) {
-    return 'east';
+    candidates.push({ direction: 'east', interior: column - 1 >= 0 ? { column: column - 1, row } : undefined });
   }
 
-  return undefined;
+  const isWalkableTile = (tile?: TileCode) => tile === 'floor' || tile === 'door';
+
+  const eligibleCandidates = neighbors
+    ? candidates.filter((candidate) => neighbors[candidate.direction])
+    : candidates;
+
+  for (const candidate of eligibleCandidates) {
+    if (!candidate.interior) {
+      continue;
+    }
+
+    const interiorTile = tileMap.getTileAt(candidate.interior.column, candidate.interior.row);
+    if (isWalkableTile(interiorTile)) {
+      return candidate.direction;
+    }
+  }
+
+  if (eligibleCandidates.length > 0) {
+    return eligibleCandidates[0]?.direction;
+  }
+
+  return candidates[0]?.direction;
 }
 
 function clampToBounds(position: Vector2, bounds: { width: number; height: number }): Vector2 {

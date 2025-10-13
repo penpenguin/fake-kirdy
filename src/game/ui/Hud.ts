@@ -4,7 +4,15 @@ import { HUD_SAFE_AREA_HEIGHT } from './hud-layout';
 
 type TextureManagerLike = {
   exists?: (key: string) => boolean;
-  get?: (key: string) => { hasFrame?: (frame: string) => boolean; frames?: Record<string, unknown> } | undefined;
+  get?: (
+    key: string,
+  ) =>
+    | {
+        hasFrame?: (frame: string) => boolean;
+        has?: (frame: string) => boolean;
+        frames?: Record<string, unknown>;
+      }
+    | undefined;
 };
 
 export interface HudHPState {
@@ -13,6 +21,46 @@ export interface HudHPState {
 }
 
 const SCORE_DIGITS = 6;
+
+type AbilityIconCandidate = { key: string; frame?: string };
+
+function textureHasFrame(texture: { hasFrame?: (frame: string) => boolean; has?: (frame: string) => boolean; frames?: Record<string, unknown> } | undefined, frame: string) {
+  if (!texture || !frame) {
+    return false;
+  }
+
+  if (typeof texture.hasFrame === 'function' && texture.hasFrame(frame)) {
+    return true;
+  }
+
+  if (typeof texture.has === 'function' && texture.has(frame)) {
+    return true;
+  }
+
+  if (texture.frames && Object.prototype.hasOwnProperty.call(texture.frames, frame)) {
+    return true;
+  }
+
+  return false;
+}
+
+function canUseTextureCandidate(candidate: AbilityIconCandidate, textures: TextureManagerLike | undefined) {
+  if (!candidate.key) {
+    return false;
+  }
+
+  const hasTexture = textures?.exists?.(candidate.key);
+  if (textures?.exists && hasTexture === false) {
+    return false;
+  }
+
+  if (candidate.frame === undefined || !textures?.get) {
+    return true;
+  }
+
+  const texture = textures.get(candidate.key);
+  return textureHasFrame(texture, candidate.frame);
+}
 
 export class Hud {
   private container?: Phaser.GameObjects.Container;
@@ -160,7 +208,7 @@ export class Hud {
     const { x, y } = this.abilityIconPosition;
 
     for (const candidate of candidates) {
-      if (textures?.exists && textures.exists(candidate.key) === false) {
+      if (!canUseTextureCandidate(candidate, textures)) {
         continue;
       }
 
@@ -192,7 +240,7 @@ export class Hud {
     const candidates = this.resolveAbilityIconCandidates(ability);
 
     for (const candidate of candidates) {
-      if (textures?.exists && textures.exists(candidate.key) === false) {
+      if (!canUseTextureCandidate(candidate, textures)) {
         continue;
       }
 
@@ -211,13 +259,14 @@ export class Hud {
     return false;
   }
 
-  private resolveAbilityIconCandidates(ability: AbilityType) {
+  private resolveAbilityIconCandidates(ability: AbilityType): AbilityIconCandidate[] {
     return [
       { key: `hud-ability-${ability}` },
       { key: 'hud-ability-icons', frame: ability },
       { key: 'hud-ability', frame: ability },
-      { key: 'kirdy', frame: ability },
       { key: `kirdy-${ability}` },
+      { key: 'kirdy', frame: ability },
+      { key: 'kirdy-idle', frame: ability },
     ];
   }
 

@@ -52,4 +52,27 @@ describe('Stage catalog', () => {
     const starlitKeep = findStage('starlit-keep');
     expect(starlitKeep?.neighbors?.east).toBe('sky-sanctum');
   });
+
+  it('lays out aurora-spire as a vertical tower with safe west entry', () => {
+    const auroraSpire = findStage('aurora-spire');
+    expect(auroraSpire).toBeDefined();
+
+    const layoutRows = auroraSpire?.layout.length ?? 0;
+    expect(layoutRows).toBeGreaterThanOrEqual(11);
+
+    const tileSize = auroraSpire?.tileSize ?? 0;
+    const stageHeight = layoutRows * tileSize;
+    const defaultSpawnY = auroraSpire?.entryPoints.default.position.y ?? 0;
+    expect(defaultSpawnY).toBeGreaterThan(stageHeight / 2);
+
+    const westEntry = auroraSpire?.entryPoints.west;
+    expect(westEntry).toBeDefined();
+    expect(westEntry?.facing).toBe('east');
+
+    const spawnColumn = Math.floor((westEntry?.position.x ?? 0) / tileSize);
+    const spawnRow = Math.floor((westEntry?.position.y ?? 0) / tileSize);
+    const spawnRowLayout = auroraSpire?.layout[spawnRow] ?? '';
+    const spawnSymbol = spawnRowLayout.charAt(spawnColumn);
+    expect(['.', 'D'].includes(spawnSymbol)).toBe(true);
+  });
 });
