@@ -18,6 +18,22 @@ const height = layout.length * tileSize;
 
 const eastDoorRowIndex = layout.findIndex((row) => row.lastIndexOf('D') === columns - 2);
 const eastEntryY = (eastDoorRowIndex >= 0 ? eastDoorRowIndex + 0.5 : layout.length / 2) * tileSize;
+const eastDoorColumnIndex =
+  eastDoorRowIndex >= 0 ? layout[eastDoorRowIndex].lastIndexOf('D') : columns - 2;
+const eastEntryColumnIndex =
+  eastDoorRowIndex >= 0 && eastDoorColumnIndex >= 0
+    ? (() => {
+        const row = layout[eastDoorRowIndex];
+        for (let column = eastDoorColumnIndex - 1; column >= 0; column -= 1) {
+          if (row[column] === '.') {
+            return column;
+          }
+        }
+
+        return Math.max(1, eastDoorColumnIndex - 1);
+      })()
+    : columns - 3;
+const eastEntryX = (eastEntryColumnIndex + 0.5) * tileSize;
 
 export const starlitKeep: AreaDefinition = {
   id: 'starlit-keep',
@@ -28,8 +44,8 @@ export const starlitKeep: AreaDefinition = {
     east: 'sky-sanctum',
   },
   entryPoints: {
-    default: { position: { x: width - tileSize * 3, y: eastEntryY } },
-    east: { position: { x: width - tileSize * 3, y: eastEntryY }, facing: 'east' },
+    default: { position: { x: eastEntryX, y: eastEntryY } },
+    east: { position: { x: eastEntryX, y: eastEntryY }, facing: 'east' },
     west: { position: { x: tileSize * 2, y: height / 2 } },
     north: { position: { x: width / 2, y: tileSize * 2 } },
     south: { position: { x: width / 2, y: height - tileSize * 2 } },

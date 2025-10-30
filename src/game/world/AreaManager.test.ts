@@ -260,6 +260,32 @@ describe('AreaManager', () => {
     expect(spawnTile).toBe('floor');
   });
 
+  it('starlit-keep のデフォルトスポーンは歩行可能タイルになる', () => {
+    const branchManager = new AreaManager(AREA_IDS.StarlitKeep);
+    const starlitKeep = branchManager.getCurrentAreaState();
+    const spawnTile = starlitKeep.tileMap.getTileAtWorldPosition(starlitKeep.playerSpawnPosition);
+
+    expect(spawnTile === 'floor' || spawnTile === 'door').toBe(true);
+  });
+
+  it('sky-sanctum から starlit-keep へ入った直後にエリアが戻らない', () => {
+    const branchManager = new AreaManager(AREA_IDS.SkySanctum);
+    const skySanctum = branchManager.getCurrentAreaState();
+
+    const westDoorPosition = getDoorWorldPosition(skySanctum, 'west');
+    const transition = branchManager.updatePlayerPosition(westDoorPosition);
+
+    expect(transition.areaChanged).toBe(true);
+    expect(transition.transition?.to).toBe(AREA_IDS.StarlitKeep);
+
+    const starlitKeep = branchManager.getCurrentAreaState();
+    const spawnTile = starlitKeep.tileMap.getTileAtWorldPosition(starlitKeep.playerSpawnPosition);
+    expect(spawnTile).toBe('floor');
+
+    const immediateUpdate = branchManager.updatePlayerPosition(starlitKeep.playerSpawnPosition);
+    expect(immediateUpdate.areaChanged).toBe(false);
+  });
+
   it('goal-sanctum の北扉から sky-sanctum へ遷移する', () => {
     const branchManager = new AreaManager(AREA_IDS.GoalSanctum);
     const goalSanctumState = branchManager.getCurrentAreaState();
