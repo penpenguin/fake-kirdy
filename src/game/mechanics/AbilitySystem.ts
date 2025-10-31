@@ -450,7 +450,42 @@ function spawnSlash(context: { scene: Phaser.Scene; kirdy: Kirdy }, texture: str
   slash?.setFixedRotation?.();
   slash?.setSensor?.(true);
   slash?.setName?.('kirdy-sword-slash');
+  configureSlashHitbox(slash, kirdy.sprite);
   return slash;
+}
+
+function configureSlashHitbox(
+  slash?: Phaser.Physics.Matter.Sprite,
+  kirdySprite?: Phaser.Physics.Matter.Sprite,
+) {
+  if (!slash) {
+    return;
+  }
+
+  slash.setOrigin?.(0.5, 0.5);
+
+  const rawWidth = slash.displayWidth ?? slash.width ?? 0;
+  const rawHeight = slash.displayHeight ?? slash.height ?? 0;
+  const fallbackSize = 64;
+  const width = Number.isFinite(rawWidth) && rawWidth > 0 ? rawWidth : fallbackSize;
+  const height = Number.isFinite(rawHeight) && rawHeight > 0 ? rawHeight : fallbackSize;
+  const radius = Math.max(1, Math.round(Math.max(width, height) / 2));
+  const offsetX = Math.round(width / 2 - radius);
+  const offsetY = Math.round(height / 2 - radius);
+
+  if (typeof slash.setCircle === 'function') {
+    slash.setCircle(radius, offsetX, offsetY);
+  } else if (typeof slash.setBody === 'function') {
+    slash.setBody({ type: 'circle', radius, x: offsetX, y: offsetY });
+  } else {
+    slash.setRectangle?.(radius * 2, radius * 2);
+  }
+
+  if (typeof slash.setPosition === 'function') {
+    const targetX = kirdySprite?.x ?? slash.x ?? 0;
+    const targetY = kirdySprite?.y ?? slash.y ?? 0;
+    slash.setPosition(targetX, targetY);
+  }
 }
 
 export function isAbilityType(value: string | undefined): value is AbilityType {

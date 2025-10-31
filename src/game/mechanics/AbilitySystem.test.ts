@@ -328,11 +328,19 @@ describe('AbilitySystem', () => {
     system.applySwallowedPayload({ abilityType: 'sword' });
 
     const slashStub = {
+      width: 64,
+      height: 64,
+      displayWidth: 64,
+      displayHeight: 64,
       setVelocityX: vi.fn().mockReturnThis(),
       setIgnoreGravity: vi.fn().mockReturnThis(),
       setFixedRotation: vi.fn().mockReturnThis(),
       setName: vi.fn().mockReturnThis(),
       setSensor: vi.fn().mockReturnThis(),
+      setCircle: vi.fn().mockReturnThis(),
+      setBody: vi.fn().mockReturnThis(),
+      setRectangle: vi.fn().mockReturnThis(),
+      setPosition: vi.fn().mockReturnThis(),
       once: vi.fn().mockReturnThis(),
       destroy: vi.fn(),
     };
@@ -347,6 +355,8 @@ describe('AbilitySystem', () => {
 
     expect(addSprite).toHaveBeenCalledWith(128, 256, 'sword-slash');
     expect(slashStub.setSensor).toHaveBeenCalledWith(true);
+    expect(slashStub.setCircle).toHaveBeenCalledWith(32, 0, 0);
+    expect(slashStub.setPosition).toHaveBeenCalledWith(128, 256);
     expect(slashStub.setVelocityX).not.toHaveBeenCalled();
     expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(slashStub as any, { damage: 3 });
   });

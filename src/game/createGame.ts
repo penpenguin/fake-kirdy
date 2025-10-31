@@ -8,11 +8,14 @@ export interface CreateGameOptions {
 
 const DEFAULT_WIDTH = 800;
 const DEFAULT_HEIGHT = 600;
+const MAX_WIDTH_PX = `${DEFAULT_WIDTH}px`;
 
 export function createGame(parent: HTMLElement, options: CreateGameOptions = {}) {
   if (!(parent instanceof HTMLElement)) {
     throw new Error('createGame expects an HTMLElement as the parent container.');
   }
+
+  applyResponsiveContainer(parent);
 
   const baseConfig: Phaser.Types.Core.GameConfig = {
     type: determineRendererType(),
@@ -29,7 +32,11 @@ export function createGame(parent: HTMLElement, options: CreateGameOptions = {})
     },
     scale: {
       mode: Phaser.Scale.FIT,
-      autoCenter: Phaser.Scale.CENTER_BOTH,
+      autoCenter: Phaser.Scale.NO_CENTER,
+      max: {
+        width: DEFAULT_WIDTH,
+        height: DEFAULT_HEIGHT,
+      },
     },
   };
 
@@ -52,6 +59,26 @@ function determineRendererType() {
   }
 
   return Phaser.CANVAS ?? Phaser.AUTO;
+}
+
+function applyResponsiveContainer(parent: HTMLElement) {
+  const style = parent.style;
+  style.margin = '0 auto';
+  style.width = '100%';
+  style.height = '100%';
+  style.maxWidth = MAX_WIDTH_PX;
+
+  if (!style.display) {
+    style.display = 'flex';
+  }
+
+  if (!style.justifyContent) {
+    style.justifyContent = 'center';
+  }
+
+  if (!style.alignItems) {
+    style.alignItems = 'center';
+  }
 }
 
 function isWebglSupported() {

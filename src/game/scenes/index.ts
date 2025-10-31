@@ -258,6 +258,7 @@ export class MenuScene extends Phaser.Scene {
       prompt.setPosition?.(centerX, centerY);
       prompt.setScrollFactor?.(0, 0);
       prompt.setDepth?.(100);
+      this.createStartPromptBlink(prompt);
 
       const controlsLines = [
         'Controls: Left/Right or A/D to move, Space to jump or hover',
@@ -333,6 +334,21 @@ export class MenuScene extends Phaser.Scene {
     notice.setScrollFactor?.(0, 0);
     notice.setDepth?.(120);
     this.resetNotice = notice;
+  }
+
+  private createStartPromptBlink(prompt?: Phaser.GameObjects.Text) {
+    if (!prompt || !this.tweens?.add) {
+      return;
+    }
+
+    this.tweens.add({
+      targets: prompt,
+      alpha: { from: 1, to: 0 },
+      duration: 1200,
+      ease: 'Sine.easeInOut',
+      yoyo: true,
+      repeat: -1,
+    });
   }
 }
 

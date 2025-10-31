@@ -27,7 +27,7 @@ vi.mock('phaser', () => {
       AUTO: 'AUTO',
       WEBGL: 'WEBGL',
       CANVAS: 'CANVAS',
-      Scale: { FIT: 'FIT', CENTER_BOTH: 'CENTER_BOTH' },
+      Scale: { FIT: 'FIT', CENTER_BOTH: 'CENTER_BOTH', NO_CENTER: 'NO_CENTER' },
       Types: {
         Scenes: {
           SettingsConfig: class {},
@@ -112,5 +112,32 @@ describe('createGame', () => {
 
     const config = (PhaserGameMock as any).lastConfig;
     expect(config.type).toBe('CANVAS');
+  });
+
+  it('スケール設定に最大サイズを設定して拡大しすぎないよう制限する', () => {
+    createGame(container);
+
+    const config = (PhaserGameMock as any).lastConfig;
+    expect(config.scale?.max).toEqual({ width: 800, height: 600 });
+  });
+
+  it('Phaserのオートセンタリングを無効化してDOM側のレイアウトに任せる', () => {
+    createGame(container);
+
+    const config = (PhaserGameMock as any).lastConfig;
+    expect(config.scale?.autoCenter).toBe('NO_CENTER');
+  });
+
+  it('親要素に幅800の上限と中央寄せを適用しつつ縦方向は全体に広げる', () => {
+    createGame(container);
+
+    expect(container.style.margin).toBe('0px auto');
+    expect(container.style.width).toBe('100%');
+    expect(container.style.height).toBe('100%');
+    expect(container.style.maxWidth).toBe('800px');
+    expect(container.style.maxHeight).toBe('');
+    expect(container.style.display).toBe('flex');
+    expect(container.style.justifyContent).toBe('center');
+    expect(container.style.alignItems).toBe('center');
   });
 });

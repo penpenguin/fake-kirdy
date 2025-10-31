@@ -86,6 +86,9 @@ vi.mock('phaser', () => {
         setDepth: vi.fn().mockReturnThis(),
       })),
     };
+    public tweens = {
+      add: vi.fn(),
+    };
     public matter = {
       add: {
         sprite: vi.fn(() => createMatterSpriteMock()),
@@ -100,7 +103,7 @@ vi.mock('phaser', () => {
     default: {
       Scene: PhaserSceneMock,
       AUTO: 'AUTO',
-      Scale: { FIT: 'FIT', CENTER_BOTH: 'CENTER_BOTH' },
+      Scale: { FIT: 'FIT', CENTER_BOTH: 'CENTER_BOTH', NO_CENTER: 'NO_CENTER' },
       Textures: { FilterMode: { LINEAR: 'LINEAR', NEAREST: 'NEAREST' } },
       Types: {
         Scenes: {
@@ -516,6 +519,38 @@ describe('Scene registration', () => {
     const controlsText = controlsCall?.[2];
     expect(controlsText).toContain('Left/Right or A/D');
     expect(controlsText).toContain('Touch:');
+  });
+
+  it('menu scene animates the start prompt with a gentle blink', () => {
+    const menuScene = new MenuScene();
+
+    menuScene.create();
+
+    const addTextMock = asMock(menuScene.add.text);
+    const promptCallIndex = addTextMock.mock.calls.findIndex(
+      ([, , text]) => text === 'Press Space or Tap to Start',
+    );
+    expect(promptCallIndex).toBeGreaterThanOrEqual(0);
+
+    const prompt = addTextMock.mock.results[promptCallIndex]?.value;
+    const tweenAddMock = asMock(menuScene.tweens.add);
+    const blinkCall = tweenAddMock.mock.calls.find(([config]) => config?.targets === prompt);
+
+    expect(blinkCall).toBeDefined();
+
+    const blinkConfig = blinkCall?.[0] ?? {};
+    expect(blinkConfig).toMatchObject({
+      targets: prompt,
+      yoyo: true,
+      repeat: -1,
+    });
+    expect(typeof blinkConfig.duration).toBe('number');
+    expect(blinkConfig.duration).toBe(1200);
+    const alphaConfig = blinkConfig.alpha as { from: number; to: number } | undefined;
+    expect(alphaConfig).toBeDefined();
+    expect(alphaConfig?.from).toBe(1);
+    expect(alphaConfig?.to).toBe(0);
+    expect(blinkConfig.ease).toBe('Sine.easeInOut');
   });
 
   it('menu scene surfaces critical error notices when provided via scene data', () => {

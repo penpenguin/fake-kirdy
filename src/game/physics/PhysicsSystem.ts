@@ -57,6 +57,7 @@ export class PhysicsSystem {
     world?.setBounds?.(0, 0, width, height);
 
     world?.on?.('collisionstart', this.handleCollisionStart);
+    world?.on?.('collisionactive', this.handleCollisionActive);
     world?.on?.('collisionend', this.handleCollisionEnd);
 
     this.scene.events?.once?.('shutdown', () => this.teardown());
@@ -155,7 +156,32 @@ export class PhysicsSystem {
     projectile.destroy?.();
   }
 
+  private resolveGameObject(body?: MatterBody): MatterGameObject | undefined {
+    let current: MatterBody | undefined = body;
+    while (current) {
+      const candidate = current.gameObject as MatterGameObject | undefined;
+      if (candidate) {
+        return candidate;
+      }
+
+      const parent = current.parent as MatterBody | undefined;
+      if (!parent || parent === current) {
+        break;
+      }
+
+      current = parent;
+    }
+
+    return undefined;
+  }
+
   private handleCollisionStart = (event: CollisionEvent) => {
+    event.pairs?.forEach((pair) => {
+      this.handlePairCollision(pair);
+    });
+  };
+
+  private handleCollisionActive = (event: CollisionEvent) => {
     event.pairs?.forEach((pair) => {
       this.handlePairCollision(pair);
     });
@@ -168,8 +194,8 @@ export class PhysicsSystem {
   };
 
   private handlePairCollision(pair: CollisionPair) {
-    const gameObjectA = pair.bodyA?.gameObject;
-    const gameObjectB = pair.bodyB?.gameObject;
+    const gameObjectA = this.resolveGameObject(pair.bodyA);
+    const gameObjectB = this.resolveGameObject(pair.bodyB);
     if (!gameObjectA || !gameObjectB) {
       return;
     }
@@ -187,8 +213,8 @@ export class PhysicsSystem {
   }
 
   private handlePairSeparation(pair: CollisionPair) {
-    const gameObjectA = pair.bodyA?.gameObject;
-    const gameObjectB = pair.bodyB?.gameObject;
+    const gameObjectA = this.resolveGameObject(pair.bodyA);
+    const gameObjectB = this.resolveGameObject(pair.bodyB);
     if (!gameObjectA || !gameObjectB) {
       return;
     }
@@ -276,6 +302,7 @@ export class PhysicsSystem {
   private teardown() {
     const world = this.scene.matter?.world;
     world?.off?.('collisionstart', this.handleCollisionStart);
+    world?.off?.('collisionactive', this.handleCollisionActive);
     world?.off?.('collisionend', this.handleCollisionEnd);
     this.enemyByObject.clear();
     this.suspendedEnemies.clear();

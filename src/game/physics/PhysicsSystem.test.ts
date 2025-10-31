@@ -169,6 +169,74 @@ describe('PhysicsSystem', () => {
     expect(eventsEmit).toHaveBeenCalledWith('player-attack-hit-enemy', { enemy, damage: 3 });
   });
 
+  it('applies damage even when the enemy sprite is only exposed on the parent body', () => {
+    const system = new PhysicsSystem(scene);
+    const playerSprite = createSpriteStub();
+    system.registerPlayer({ sprite: playerSprite } as any);
+
+    const enemySprite = createSpriteStub();
+    const enemy = {
+      sprite: enemySprite,
+      takeDamage: vi.fn(),
+      isDefeated: vi.fn().mockReturnValue(false),
+    };
+    system.registerEnemy(enemy as any);
+
+    const projectileSprite = createSpriteStub();
+    projectileSprite.destroy = vi.fn();
+    system.registerPlayerAttack(projectileSprite as any, { damage: 2 });
+
+    const collisionHandler = getCollisionStartHandler(worldOn);
+    expect(collisionHandler).toBeDefined();
+
+    collisionHandler?.({
+      pairs: [
+        {
+          bodyA: { gameObject: projectileSprite },
+          bodyB: { parent: { gameObject: enemySprite } },
+          isSensor: false,
+        },
+      ],
+    } as any);
+
+    expect(enemy.takeDamage).toHaveBeenCalledWith(2);
+    expect(projectileSprite.destroy).toHaveBeenCalled();
+  });
+
+  it('applies damage during ongoing collisions (collisionactive)', () => {
+    const system = new PhysicsSystem(scene);
+    const playerSprite = createSpriteStub();
+    system.registerPlayer({ sprite: playerSprite } as any);
+
+    const enemySprite = createSpriteStub();
+    const enemy = {
+      sprite: enemySprite,
+      takeDamage: vi.fn(),
+      isDefeated: vi.fn().mockReturnValue(false),
+    };
+    system.registerEnemy(enemy as any);
+
+    const projectileSprite = createSpriteStub();
+    projectileSprite.destroy = vi.fn();
+    system.registerPlayerAttack(projectileSprite as any, { damage: 5 });
+
+    const collisionActive = getCollisionActiveHandler(worldOn);
+    expect(collisionActive).toBeDefined();
+
+    collisionActive?.({
+      pairs: [
+        {
+          bodyA: { gameObject: projectileSprite },
+          bodyB: { gameObject: enemySprite },
+          isSensor: true,
+        },
+      ],
+    } as any);
+
+    expect(enemy.takeDamage).toHaveBeenCalledWith(5);
+    expect(projectileSprite.destroy).toHaveBeenCalled();
+  });
+
   it('suspends enemy collisions when requested and restores them on resume', () => {
     const system = new PhysicsSystem(scene);
     const playerSprite = createSpriteStub();
@@ -374,5 +442,10 @@ function getCollisionStartHandler(worldOn: ReturnType<typeof vi.fn>) {
 
 function getCollisionEndHandler(worldOn: ReturnType<typeof vi.fn>) {
   const entry = worldOn.mock.calls.find(([event]) => event === 'collisionend');
+  return entry?.[1] as ((event: unknown) => void) | undefined;
+}
+
+function getCollisionActiveHandler(worldOn: ReturnType<typeof vi.fn>) {
+  const entry = worldOn.mock.calls.find(([event]) => event === 'collisionactive');
   return entry?.[1] as ((event: unknown) => void) | undefined;
 }

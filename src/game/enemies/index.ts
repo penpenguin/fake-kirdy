@@ -186,8 +186,9 @@ class WabbleBee extends BaseEnemy {
     variant: WabbleBeeVariantConfig = { enemyType: 'wabble-bee', displayName: 'Wabble Bee', defaultAbility: 'fire' },
   ) {
     const resolvedAbility = options.abilityType ?? variant.defaultAbility;
+    const defaultHP = Math.max(1, options.maxHP ?? 1);
     super(scene, sprite, variant.enemyType, {
-      defaultHP: Math.max(1, options.maxHP ?? 3),
+      defaultHP,
       defaultAbility: resolvedAbility,
       getPlayerPosition: options.getPlayerPosition,
       abilityType: resolvedAbility,
@@ -264,8 +265,9 @@ class DrontoDurt extends BaseEnemy {
     variant: DrontoDurtVariantConfig = { enemyType: 'dronto-durt', displayName: 'Dronto Durt', defaultAbility: 'sword' },
   ) {
     const resolvedAbility = options.abilityType ?? variant.defaultAbility;
+    const defaultHP = Math.max(1, options.maxHP ?? 1);
     super(scene, sprite, variant.enemyType, {
-      defaultHP: Math.max(1, options.maxHP ?? 4),
+      defaultHP,
       defaultAbility: resolvedAbility,
       getPlayerPosition: options.getPlayerPosition,
       abilityType: resolvedAbility,

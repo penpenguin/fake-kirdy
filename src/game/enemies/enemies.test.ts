@@ -78,7 +78,7 @@ describe('enemy system', () => {
     expect(sprite.setData).toHaveBeenCalledWith('enemyType', 'wabble-bee');
     expect(sprite.setData).toHaveBeenCalledWith('abilityType', 'fire');
     expect(enemy.getAbilityType()).toBe('fire');
-    expect(enemy.getHP()).toBeGreaterThan(0);
+    expect(enemy.getHP()).toBe(1);
   });
 
   it('uses Kirdy move speed for default Wabble Bee patrols', async () => {
