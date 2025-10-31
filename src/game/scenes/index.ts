@@ -9,7 +9,13 @@ import {
   type PlayerAction,
   type InputButtonState,
 } from '../input/PlayerInputManager';
-import { type EnemySpawn, type WabbleBeeOptions, type DrontoDurtOptions, type EnemyType } from '../enemies';
+import {
+  type EnemySpawn,
+  type WabbleBeeOptions,
+  type DrontoDurtOptions,
+  type EnemyType,
+  type Enemy,
+} from '../enemies';
 import { EnemyManager } from '../enemies/EnemyManager';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
 import {
@@ -78,6 +84,10 @@ type StageEnemySpawnPlan = {
   baseline: number;
   maxActive: number;
   entries: StageEnemySpawnEntry[];
+};
+
+type PlayerEnemyCollisionEvent = {
+  enemy?: Enemy;
 };
 
 function buildConfig(key: SceneKey) {
@@ -394,6 +404,7 @@ export class GameScene extends Phaser.Scene {
   private readonly capturedSprites = new Set<Phaser.Physics.Matter.Sprite>();
   private menuBlurEffect?: { destroy?: () => void } | unknown;
   private menuBlurResumeHandler?: () => void;
+  private readonly playerContactDamage = 1;
 
   constructor() {
     super(buildConfig(SceneKeys.Game));
@@ -461,6 +472,19 @@ export class GameScene extends Phaser.Scene {
     this.capturedSprites.delete(sprite);
     this.enemyManager?.consumeEnemy(sprite);
     this.physicsSystem?.consumeEnemy(sprite);
+  };
+
+  private readonly handlePlayerEnemyCollision = (event: PlayerEnemyCollisionEvent) => {
+    if (!this.kirdy) {
+      return;
+    }
+
+    const sprite = event?.enemy?.sprite;
+    if (sprite && this.capturedSprites.has(sprite)) {
+      return;
+    }
+
+    this.damagePlayer(this.playerContactDamage);
   };
 
   private readonly handlePlayerDefeated = () => {
@@ -638,6 +662,7 @@ export class GameScene extends Phaser.Scene {
     this.events?.on?.('enemy-captured', this.handleEnemyCaptured, this);
     this.events?.on?.('enemy-capture-released', this.handleEnemyCaptureReleased, this);
     this.events?.on?.('enemy-swallowed', this.handleEnemySwallowed, this);
+    this.events?.on?.('player-collided-with-enemy', this.handlePlayerEnemyCollision, this);
 
     if (savedProgress?.player.ability) {
       this.abilitySystem?.applySwallowedPayload({ abilityType: savedProgress.player.ability } as SwallowedPayload);
@@ -673,6 +698,7 @@ export class GameScene extends Phaser.Scene {
       this.events?.off?.('enemy-captured', this.handleEnemyCaptured, this);
       this.events?.off?.('enemy-capture-released', this.handleEnemyCaptureReleased, this);
       this.events?.off?.('enemy-swallowed', this.handleEnemySwallowed, this);
+      this.events?.off?.('player-collided-with-enemy', this.handlePlayerEnemyCollision, this);
       this.hud?.destroy();
       this.hud = undefined;
       this.lastHudHp = undefined;

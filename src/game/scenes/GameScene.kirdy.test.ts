@@ -1590,6 +1590,28 @@ describe('GameScene player integration', () => {
     expect(playerInputSetSwallowDownMock).toHaveBeenCalledWith(false);
   });
 
+  it('物理システムの敵衝突イベントでプレイヤーがダメージを受ける', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const takeDamageMock = kirdyInstance.takeDamage as ReturnType<typeof vi.fn>;
+    takeDamageMock.mockClear();
+
+    const collisionHandler = stubs.events.on.mock.calls.find(
+      ([event]) => event === 'player-collided-with-enemy',
+    )?.[1];
+
+    expect(collisionHandler).toBeInstanceOf(Function);
+
+    collisionHandler?.({ enemy: { sprite: {} } });
+
+    expect(takeDamageMock).toHaveBeenCalledWith(1);
+  });
+
   it('プレイヤーHPの変化時に進行状況を保存する', () => {
     const scene = new GameScene();
     const kirdyInstance = makeKirdyStub();
