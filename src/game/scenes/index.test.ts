@@ -59,6 +59,8 @@ vi.mock('phaser', () => {
     on: vi.fn().mockReturnThis(),
     off: vi.fn().mockReturnThis(),
     setText: vi.fn().mockReturnThis(),
+    setPadding: vi.fn().mockReturnThis(),
+    setStyle: vi.fn().mockReturnThis(),
     destroy: vi.fn(),
   });
 
@@ -497,7 +499,7 @@ describe('Scene registration', () => {
     expect(menuScene.scene.start).toHaveBeenCalledTimes(2);
   });
 
-  it('menu scene displays controls guidance and centers the start prompt', () => {
+  it('menu scene displays keycap-styled controls and keeps option prompts separated', () => {
     const menuScene = new MenuScene();
 
     menuScene.create();
@@ -512,13 +514,46 @@ describe('Scene registration', () => {
     expect(prompt?.setOrigin).toHaveBeenCalledWith(0.5, 0.5);
     expect(prompt?.setPosition).toHaveBeenCalledWith(400, 300);
 
-    const controlsCall = addTextMock.mock.calls.find(
-      ([, , text]) => typeof text === 'string' && text.includes('Controls:'),
-    );
-    expect(controlsCall).toBeTruthy();
-    const controlsText = controlsCall?.[2];
-    expect(controlsText).toContain('Left/Right or A/D');
-    expect(controlsText).toContain('Touch:');
+    const findTextCall = (value: string) =>
+      addTextMock.mock.calls.find(([, , text]) => typeof text === 'string' && text === value);
+
+    const expectedKeycaps = ['Left', 'Right', 'A', 'D', 'Space', 'C', 'S', 'Z', 'X', 'O', 'R'];
+    expectedKeycaps.forEach((label) => {
+      const call = findTextCall(label);
+      expect(call).toBeTruthy();
+      expect(call?.[3]).toMatchObject({
+        backgroundColor: '#1c2333',
+        fontFamily: 'monospace',
+        padding: { left: 12, right: 12, top: 6, bottom: 6 },
+      });
+    });
+
+    const captionTexts = [
+      'Move',
+      'Jump / Hover',
+      'Inhale / Swallow',
+      'Spit / Discard',
+      'Open Settings',
+      'Reset spawn to the Central Hub',
+    ];
+    captionTexts.forEach((caption) => {
+      const call = findTextCall(caption);
+      expect(call).toBeTruthy();
+    });
+
+    const touchCall = findTextCall('Touch: use on-screen buttons');
+    expect(touchCall).toBeTruthy();
+
+    expect(
+      addTextMock.mock.calls.some(
+        ([, , text]) => typeof text === 'string' && text.includes('Press O to'),
+      ),
+    ).toBe(false);
+
+    const oKeyCall = findTextCall('O');
+    const rKeyCall = findTextCall('R');
+    expect(oKeyCall?.[1]).toBeGreaterThan((touchCall?.[1] ?? 0));
+    expect(rKeyCall?.[1]).toBeGreaterThan((oKeyCall?.[1] ?? 0));
   });
 
   it('menu scene animates the start prompt with a gentle blink', () => {

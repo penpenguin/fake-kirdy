@@ -260,35 +260,83 @@ export class MenuScene extends Phaser.Scene {
       prompt.setDepth?.(100);
       this.createStartPromptBlink(prompt);
 
-      const controlsLines = [
-        'Controls: Left/Right or A/D to move, Space to jump or hover',
-        'C inhale, S swallow, Z spit, X discard',
-        'Touch: use on-screen buttons',
-      ];
-      const instructions = this.add.text(centerX, centerY + 72, controlsLines.join('\n'), {
+      const keycapStyle: Phaser.Types.GameObjects.Text.TextStyle = {
         fontSize: '16px',
+        color: '#f4f8ff',
+        fontFamily: 'monospace',
+        backgroundColor: '#1c2333',
+        padding: { left: 12, right: 12, top: 6, bottom: 6 },
+        align: 'center',
+      };
+      const keycapWidth = 64;
+      const keycapGap = 12;
+      const keycapHeight = 32;
+      const keycapRowSpacing = 72;
+      const captionOffset = 26;
+
+      const createKeycap = (x: number, y: number, label: string) => {
+        const text = this.add.text(x, y, label, keycapStyle);
+        text.setOrigin?.(0.5, 0.5);
+        text.setScrollFactor?.(0, 0);
+        text.setDepth?.(100);
+        text.setPadding?.(12, 6, 12, 6);
+        return text;
+      };
+
+      const renderKeycapRow = (y: number, labels: string[], caption: string) => {
+        const totalWidth = labels.length * keycapWidth + (labels.length - 1) * keycapGap;
+        let currentX = centerX - totalWidth / 2 + keycapWidth / 2;
+
+        labels.forEach((label) => {
+          createKeycap(currentX, y, label);
+          currentX += keycapWidth + keycapGap;
+        });
+
+        const captionText = this.add.text(centerX, y + keycapHeight / 2 + 8, caption, {
+          fontSize: '14px',
+          color: '#dce6ff',
+          align: 'center',
+        });
+        captionText.setOrigin?.(0.5, 0);
+        captionText.setScrollFactor?.(0, 0);
+        captionText.setDepth?.(100);
+      };
+
+      let controlsTop = centerY + 72;
+      const keycapRows: Array<{ keys: string[]; caption: string }> = [
+        { keys: ['Left', 'Right', 'A', 'D'], caption: 'Move' },
+        { keys: ['Space'], caption: 'Jump / Hover' },
+        { keys: ['C', 'S'], caption: 'Inhale / Swallow' },
+        { keys: ['Z', 'X'], caption: 'Spit / Discard' },
+      ];
+
+      keycapRows.forEach(({ keys, caption }) => {
+        renderKeycapRow(controlsTop, keys, caption);
+        controlsTop += keycapRowSpacing;
+      });
+
+      const touchY = controlsTop;
+      const touch = this.add.text(centerX, touchY, 'Touch: use on-screen buttons', {
+        fontSize: '14px',
         color: '#ffffff',
         align: 'center',
       });
-      instructions.setOrigin?.(0.5, 0);
-      instructions.setScrollFactor?.(0, 0);
-      instructions.setDepth?.(100);
-      instructions.setLineSpacing?.(2);
-      instructions.setWordWrapWidth?.(Math.min(width - 32, 620), true);
+      touch.setOrigin?.(0.5, 0);
+      touch.setScrollFactor?.(0, 0);
+      touch.setDepth?.(100);
+      touch.setWordWrapWidth?.(Math.min(width - 32, 620), true);
 
-      const optionsLines = [
-        'Press O to open Settings',
-        'Press R to reset spawn to the Central Hub',
+      controlsTop += captionOffset + keycapHeight; // advance past touch label
+
+      const menuActions: Array<{ key: string; caption: string }> = [
+        { key: 'O', caption: 'Open Settings' },
+        { key: 'R', caption: 'Reset spawn to the Central Hub' },
       ];
-      const options = this.add.text(centerX, centerY + 126, optionsLines.join('\n'), {
-        fontSize: '14px',
-        color: '#ffeeff',
-        align: 'center',
+
+      menuActions.forEach(({ key, caption }) => {
+        renderKeycapRow(controlsTop, [key], caption);
+        controlsTop += keycapRowSpacing;
       });
-      options.setOrigin?.(0.5, 0);
-      options.setScrollFactor?.(0, 0);
-      options.setDepth?.(100);
-      options.setLineSpacing?.(2);
     }
 
     const startHandler = () => this.startGame();
