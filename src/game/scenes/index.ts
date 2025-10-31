@@ -421,6 +421,8 @@ export class GameScene extends Phaser.Scene {
   private menuBlurEffect?: { destroy?: () => void } | unknown;
   private menuBlurResumeHandler?: () => void;
   private readonly playerContactDamage = 1;
+  private readonly playerInvulnerabilityDurationMs = 2000;
+  private playerInvulnerabilityRemainingMs = 0;
 
   constructor() {
     super(buildConfig(SceneKeys.Game));
@@ -503,6 +505,18 @@ export class GameScene extends Phaser.Scene {
     this.damagePlayer(this.playerContactDamage);
   };
 
+  private tickPlayerInvulnerability(delta: number) {
+    if (!Number.isFinite(delta) || delta <= 0) {
+      return;
+    }
+
+    if (this.playerInvulnerabilityRemainingMs <= 0) {
+      return;
+    }
+
+    this.playerInvulnerabilityRemainingMs = Math.max(0, this.playerInvulnerabilityRemainingMs - delta);
+  }
+
   private readonly handlePlayerDefeated = () => {
     if (this.isGameOver) {
       return;
@@ -570,6 +584,10 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
+    if (this.playerInvulnerabilityRemainingMs > 0) {
+      return;
+    }
+
     const previous = this.kirdy.getHP();
     const current = this.kirdy.takeDamage(normalized);
 
@@ -578,6 +596,8 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.applyHudHp({ current, max: this.kirdy.getMaxHP() });
+
+    this.playerInvulnerabilityRemainingMs = this.playerInvulnerabilityDurationMs;
 
     if (current <= 0) {
       this.handlePlayerDefeated();
@@ -623,6 +643,7 @@ export class GameScene extends Phaser.Scene {
     this.isGameOver = false;
     this.runtimeErrorCaptured = false;
     this.progressDirty = false;
+    this.playerInvulnerabilityRemainingMs = 0;
     this.physicsSystem = new PhysicsSystem(this);
     this.performanceMonitor = new PerformanceMonitor({
       sampleWindowMs: 500,
@@ -851,6 +872,7 @@ export class GameScene extends Phaser.Scene {
 
     try {
       this.performanceMonitor?.update(delta);
+      this.tickPlayerInvulnerability(delta);
 
       const snapshot = this.playerInput?.update();
       if (!snapshot) {

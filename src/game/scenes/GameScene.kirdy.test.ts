@@ -1612,6 +1612,38 @@ describe('GameScene player integration', () => {
     expect(takeDamageMock).toHaveBeenCalledWith(1);
   });
 
+  it('プレイヤーはダメージ後2秒間無敵となり再ダメージを受けない', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const takeDamageMock = kirdyInstance.takeDamage as ReturnType<typeof vi.fn>;
+    takeDamageMock.mockClear();
+
+    const collisionHandler = stubs.events.on.mock.calls.find(
+      ([event]) => event === 'player-collided-with-enemy',
+    )?.[1];
+
+    expect(collisionHandler).toBeInstanceOf(Function);
+
+    collisionHandler?.({ enemy: { sprite: {} } });
+    expect(takeDamageMock).toHaveBeenCalledTimes(1);
+
+    collisionHandler?.({ enemy: { sprite: {} } });
+    expect(takeDamageMock).toHaveBeenCalledTimes(1);
+
+    scene.update(16, 1000);
+    collisionHandler?.({ enemy: { sprite: {} } });
+    expect(takeDamageMock).toHaveBeenCalledTimes(1);
+
+    scene.update(1016, 1000);
+    collisionHandler?.({ enemy: { sprite: {} } });
+    expect(takeDamageMock).toHaveBeenCalledTimes(2);
+  });
+
   it('プレイヤーHPの変化時に進行状況を保存する', () => {
     const scene = new GameScene();
     const kirdyInstance = makeKirdyStub();
@@ -1815,6 +1847,10 @@ describe('GameScene player integration', () => {
     scene.damagePlayer(2);
     expect(hudUpdateHPMock).toHaveBeenLastCalledWith({ current: 4, max: 6 });
 
+    scene.damagePlayer(10);
+    expect(hudUpdateHPMock).toHaveBeenLastCalledWith({ current: 4, max: 6 });
+
+    scene.update(16, 2000);
     scene.damagePlayer(10);
     expect(hudUpdateHPMock).toHaveBeenLastCalledWith({ current: 0, max: 6 });
   });

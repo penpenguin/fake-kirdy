@@ -473,10 +473,10 @@ function configureSlashHitbox(
   const offsetX = Math.round(width / 2 - radius);
   const offsetY = Math.round(height / 2 - radius);
 
-  if (typeof slash.setCircle === 'function') {
-    slash.setCircle(radius, offsetX, offsetY);
-  } else if (typeof slash.setBody === 'function') {
+  if (typeof slash.setBody === 'function') {
     slash.setBody({ type: 'circle', radius, x: offsetX, y: offsetY });
+  } else if (typeof slash.setCircle === 'function') {
+    slash.setCircle(radius);
   } else {
     slash.setRectangle?.(radius * 2, radius * 2);
   }

@@ -355,7 +355,8 @@ describe('AbilitySystem', () => {
 
     expect(addSprite).toHaveBeenCalledWith(128, 256, 'sword-slash');
     expect(slashStub.setSensor).toHaveBeenCalledWith(true);
-    expect(slashStub.setCircle).toHaveBeenCalledWith(32, 0, 0);
+    expect(slashStub.setBody).toHaveBeenCalledWith({ type: 'circle', radius: 32, x: 0, y: 0 });
+    expect(slashStub.setCircle).not.toHaveBeenCalled();
     expect(slashStub.setPosition).toHaveBeenCalledWith(128, 256);
     expect(slashStub.setVelocityX).not.toHaveBeenCalled();
     expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(slashStub as any, { damage: 3 });
