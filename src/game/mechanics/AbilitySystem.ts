@@ -473,10 +473,16 @@ function configureSlashHitbox(
   const offsetX = Math.round(width / 2 - radius);
   const offsetY = Math.round(height / 2 - radius);
 
-  if (typeof slash.setBody === 'function') {
+  if (typeof slash.setCircle === 'function') {
+    // Phaser runtime accepts (radius, offsetX, offsetY) but the type definition only exposes the options overload.
+    const setCircle = slash.setCircle as unknown as (
+      radius: number,
+      offsetX?: number,
+      offsetY?: number,
+    ) => Phaser.Physics.Matter.Sprite;
+    setCircle.call(slash, radius, offsetX, offsetY);
+  } else if (typeof slash.setBody === 'function') {
     slash.setBody({ type: 'circle', radius, x: offsetX, y: offsetY });
-  } else if (typeof slash.setCircle === 'function') {
-    slash.setCircle(radius);
   } else {
     slash.setRectangle?.(radius * 2, radius * 2);
   }
