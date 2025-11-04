@@ -17,7 +17,7 @@ type BaseSoundLike = {
   setMute?: (value: boolean) => void;
 };
 
-const DEFAULT_MASTER_VOLUME = 0.8;
+const DEFAULT_MASTER_VOLUME = 0.4;
 const SOUND_UNLOCKED_EVENT = 'unlocked';
 
 function clamp01(value: number) {

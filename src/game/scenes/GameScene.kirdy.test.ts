@@ -402,7 +402,7 @@ const SaveManagerMock = vi.hoisted(() =>
 vi.mock('../save/SaveManager', () => ({
   SaveManager: SaveManagerMock,
   DEFAULT_SETTINGS: {
-    volume: 0.8,
+    volume: 0.4,
     controls: 'keyboard',
     difficulty: 'normal',
   },
@@ -1973,7 +1973,7 @@ describe('GameScene player integration', () => {
         collectedItems: [],
       },
       settings: {
-        volume: 0.8,
+        volume: 0.4,
         controls: 'keyboard',
         difficulty: 'normal',
       },

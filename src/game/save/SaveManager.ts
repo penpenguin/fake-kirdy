@@ -88,7 +88,7 @@ const DEFAULT_AREA: AreaProgressSnapshot = {
 };
 
 export const DEFAULT_SETTINGS: GameSettingsSnapshot = {
-  volume: 0.8,
+  volume: 0.4,
   controls: 'keyboard',
   difficulty: 'normal',
 } as const satisfies GameSettingsSnapshot;

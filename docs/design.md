@@ -229,7 +229,7 @@ const GameState = {
     collectedItems: []
   },
   settings: {
-    volume: 0.8,
+    volume: 0.4,
     controls: 'keyboard', // or 'touch'
     difficulty: 'normal'
   }

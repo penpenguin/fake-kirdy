@@ -467,8 +467,7 @@ export class GameScene extends Phaser.Scene {
   private cameraFollowConfigured = false;
   private readonly capturedSprites = new Set<Phaser.Physics.Matter.Sprite>();
   private menuBlurEffect?: { destroy?: () => void } | unknown;
-  private menuOverlayActive = false;
-  private menuOverlayResumeHandler?: () => void;
+  private menuOverlayDepth = 0;
   private readonly playerContactDamage = 1;
   private readonly playerInvulnerabilityDurationMs = 2000;
   private playerInvulnerabilityRemainingMs = 0;
@@ -756,7 +755,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.events?.once?.('shutdown', () => {
-      this.clearMenuBlur();
+      this.deactivateMenuOverlay({ force: true });
       this.playerInput?.destroy();
       this.playerInput = undefined;
       this.latestInput = undefined;
@@ -891,34 +890,25 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.menuBlurEffect = undefined;
-    this.menuOverlayActive = false;
+  }
 
-    if (this.menuOverlayResumeHandler) {
-      this.events?.off?.('resume', this.menuOverlayResumeHandler);
-      this.menuOverlayResumeHandler = undefined;
+  activateMenuOverlay() {
+    this.menuOverlayDepth += 1;
+    if (this.menuOverlayDepth === 1) {
+      this.applyMenuBlur();
     }
   }
 
-  private activateMenuOverlay() {
-    if (!this.menuOverlayActive) {
-      this.menuOverlayActive = true;
-      this.registerMenuOverlayResumeHandler();
+  deactivateMenuOverlay({ force = false }: { force?: boolean } = {}) {
+    if (force) {
+      this.menuOverlayDepth = 0;
+    } else if (this.menuOverlayDepth > 0) {
+      this.menuOverlayDepth -= 1;
     }
 
-    this.applyMenuBlur();
-  }
-
-  private registerMenuOverlayResumeHandler() {
-    if (this.menuOverlayResumeHandler) {
-      this.events?.off?.('resume', this.menuOverlayResumeHandler);
-    }
-
-    this.menuOverlayResumeHandler = () => {
-      this.menuOverlayResumeHandler = undefined;
+    if (this.menuOverlayDepth === 0) {
       this.clearMenuBlur();
-    };
-
-    this.events?.once?.('resume', this.menuOverlayResumeHandler);
+    }
   }
 
   pauseGame() {
@@ -932,7 +922,7 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
-    if (this.menuOverlayActive) {
+    if (this.menuOverlayDepth > 0) {
       return;
     }
 
@@ -2104,6 +2094,14 @@ export class PauseScene extends Phaser.Scene {
     super(buildConfig(SceneKeys.Pause));
   }
 
+  private resolveGameScene(): GameScene | undefined {
+    try {
+      return this.scene.get?.(SceneKeys.Game) as GameScene | undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
   create() {
     const resumeHandler = () => this.resumeGame();
     const restartHandler = () => this.restartGame();
@@ -2169,26 +2167,45 @@ export class PauseScene extends Phaser.Scene {
   }
 
   resumeGame() {
+    this.resolveGameScene()?.deactivateMenuOverlay?.();
     this.scene.stop(SceneKeys.Pause);
     this.scene.resume(SceneKeys.Game);
   }
 
   restartGame() {
     this.saveManager.resetPlayerPosition();
+    this.resolveGameScene()?.deactivateMenuOverlay?.({ force: true });
     this.scene.stop(SceneKeys.Pause);
     this.scene.stop(SceneKeys.Game);
     this.scene.start(SceneKeys.Game);
   }
 
   quitToMenu() {
+    this.resolveGameScene()?.deactivateMenuOverlay?.({ force: true });
     this.scene.stop(SceneKeys.Pause);
     this.scene.stop(SceneKeys.Game);
     this.scene.start(SceneKeys.Menu);
   }
 
   private openSettings() {
-    this.scene.pause(SceneKeys.Pause);
+    const gameScene = this.resolveGameScene();
+    try {
+      this.scene.pause(SceneKeys.Game);
+    } catch {
+      // ignore when the game scene is not active
+    }
+
+    gameScene?.activateMenuOverlay?.();
+
     this.scene.launch(SceneKeys.Settings, { returnTo: SceneKeys.Pause });
+
+    try {
+      this.scene.pause(SceneKeys.Game);
+    } catch {
+      // ignore when the game scene is not active
+    }
+
+    this.scene.pause(SceneKeys.Pause);
     this.input?.keyboard?.once?.('keydown-O', () => this.openSettings());
   }
 }
@@ -2207,6 +2224,14 @@ export class SettingsScene extends Phaser.Scene {
 
   constructor() {
     super(buildConfig(SceneKeys.Settings));
+  }
+
+  private resolveGameScene(): GameScene | undefined {
+    try {
+      return this.scene.get?.(SceneKeys.Game) as GameScene | undefined;
+    } catch {
+      return undefined;
+    }
   }
 
   create(data?: SettingsSceneData) {
@@ -2251,6 +2276,16 @@ export class SettingsScene extends Phaser.Scene {
     this.instructionsText?.setLineSpacing?.(4);
 
     this.refreshSummaryText();
+
+    const gameScene = this.resolveGameScene();
+    if (gameScene) {
+      gameScene.activateMenuOverlay();
+      try {
+        this.scene.pause(SceneKeys.Game);
+      } catch {
+        // ignore when the game scene is not active
+      }
+    }
 
     const keyboard = this.input?.keyboard;
     const handleLeft = () => this.adjustVolume(-0.1);
@@ -2330,6 +2365,9 @@ export class SettingsScene extends Phaser.Scene {
   }
 
   private close() {
+    const gameScene = this.resolveGameScene();
+    gameScene?.deactivateMenuOverlay();
+
     this.scene.resume(this.returnToScene);
     this.scene.stop(SceneKeys.Settings);
     this.game?.events?.emit?.('settings-updated', this.currentSettings);
@@ -2349,6 +2387,14 @@ export class GameOverScene extends Phaser.Scene {
 
   constructor() {
     super(buildConfig(SceneKeys.GameOver));
+  }
+
+  private resolveGameScene(): GameScene | undefined {
+    try {
+      return this.scene.get?.(SceneKeys.Game) as GameScene | undefined;
+    } catch {
+      return undefined;
+    }
   }
 
   create(data?: GameOverData) {
@@ -2415,12 +2461,14 @@ export class GameOverScene extends Phaser.Scene {
   }
 
   restartGame() {
+    this.resolveGameScene()?.deactivateMenuOverlay?.({ force: true });
     this.scene.stop(SceneKeys.GameOver);
     this.scene.stop(SceneKeys.Game);
     this.scene.start(SceneKeys.Game);
   }
 
   returnToMenu() {
+    this.resolveGameScene()?.deactivateMenuOverlay?.({ force: true });
     this.scene.stop(SceneKeys.GameOver);
     this.scene.stop(SceneKeys.Game);
     this.scene.start(SceneKeys.Menu);

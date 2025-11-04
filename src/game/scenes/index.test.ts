@@ -10,6 +10,7 @@ vi.mock('phaser', () => {
     stop: vi.fn(),
     resume: vi.fn(),
     pause: vi.fn(),
+    get: vi.fn(),
   });
 
   const createEventEmitterMock = () => ({
@@ -187,7 +188,7 @@ const saveManagerStubs = vi.hoisted(() => {
     const resetPlayerPosition = vi.fn() as ReturnType<typeof vi.fn>;
     const clear = vi.fn() as ReturnType<typeof vi.fn>;
     const updateSettings = vi.fn(() => ({
-      volume: 0.8,
+      volume: 0.4,
       controls: 'keyboard',
       difficulty: 'normal',
     })) as ReturnType<typeof vi.fn>;
@@ -223,7 +224,7 @@ const saveManagerStubs = vi.hoisted(() => {
 vi.mock('../save/SaveManager', () => ({
   SaveManager: saveManagerStubs.mock,
   DEFAULT_SETTINGS: {
-    volume: 0.8,
+    volume: 0.4,
     controls: 'keyboard',
     difficulty: 'normal',
   },
@@ -768,7 +769,7 @@ describe('Scene registration', () => {
     expect(internalState.menuBlurEffect).toBe(blurEffect);
   });
 
-  it('game scene still schedules menu overlay cleanup when blur cannot be applied', () => {
+  it('game scene keeps overlay depth when blur cannot be applied', () => {
     const gameScene = new GameScene();
 
     gameScene.create();
@@ -790,16 +791,59 @@ describe('Scene registration', () => {
 
     (gameScene as unknown as { kirdy?: typeof kirdyStub }).kirdy = kirdyStub;
 
-    const eventsOnceMock = asMock(gameScene.events.once);
-    eventsOnceMock.mockClear();
+    (gameScene as unknown as { handlePlayerDefeated: () => void }).handlePlayerDefeated();
 
-    const internal = gameScene as unknown as { handlePlayerDefeated: () => void };
-    internal.handlePlayerDefeated();
+    const internalState = gameScene as unknown as { menuOverlayDepth?: number; menuBlurEffect?: unknown };
+    expect(internalState.menuOverlayDepth).toBe(1);
+    expect(internalState.menuBlurEffect).toBeUndefined();
 
-    const resumeCall = eventsOnceMock.mock.calls.find(([event]) => event === 'resume');
-    expect(resumeCall).toBeTruthy();
-    const [, handler] = resumeCall ?? [];
-    expect(handler).toBeInstanceOf(Function);
+    gameScene.deactivateMenuOverlay();
+    expect(internalState.menuOverlayDepth).toBe(0);
+  });
+
+  it('pause scene re-activates gameplay blur when opening settings', () => {
+    const gameScene = new GameScene();
+
+    gameScene.create();
+
+    const blurEffect = { destroy: vi.fn() };
+    const addBlur = vi.fn<[number, number, number], unknown>(() => blurEffect);
+    (gameScene as unknown as { cameras: { main: { postFX: { addBlur: typeof addBlur } } } }).cameras = {
+      main: {
+        postFX: {
+          addBlur,
+        },
+      },
+    };
+
+    gameScene.pauseGame();
+    gameScene.deactivateMenuOverlay({ force: true });
+
+    const internal = gameScene as unknown as { menuOverlayDepth?: number };
+    expect(internal.menuOverlayDepth).toBe(0);
+
+    addBlur.mockClear();
+
+    const pauseScene = new PauseScene();
+    const overlaySpy = vi.spyOn(gameScene as any, 'activateMenuOverlay');
+
+    asMock(pauseScene.scene.get).mockReturnValue(gameScene);
+
+    pauseScene.create();
+
+    const pauseKeyboard = pauseScene.input.keyboard!;
+    const keyboardOnceMock = asMock(pauseKeyboard.once);
+    const settingsCall = keyboardOnceMock.mock.calls.find(([event]) => event === 'keydown-O');
+    expect(settingsCall).toBeTruthy();
+    const [, handler] = settingsCall ?? [];
+
+    handler?.();
+
+    expect(pauseScene.scene.get).toHaveBeenCalledWith(SceneKeys.Game);
+    expect(overlaySpy).toHaveBeenCalled();
+
+    expect(addBlur).toHaveBeenCalledWith(4, 1, 2);
+    expect(internal.menuOverlayDepth).toBeGreaterThan(0);
   });
 
   it('game scene keeps the pause listener active and cleans it up on shutdown', () => {
@@ -1236,13 +1280,7 @@ describe('Scene registration', () => {
 
     expect(addBlur).toHaveBeenCalledTimes(1);
 
-    const resumeCall = asMock(gameScene.events.once).mock.calls.find(([event]) => event === 'resume');
-    expect(resumeCall).toBeTruthy();
-
-    const [, handler] = resumeCall ?? [];
-    expect(handler).toBeInstanceOf(Function);
-
-    handler?.();
+    gameScene.deactivateMenuOverlay();
 
     expect(remove).toHaveBeenCalledWith(blurEffect);
     expect(clear).not.toHaveBeenCalled();
@@ -1312,7 +1350,7 @@ describe('Scene registration', () => {
       const instance = saveManagerStubs.createInstance();
       instance.load.mockReturnValue({
         settings: {
-          volume: 0.8,
+          volume: 0.4,
           controls: 'keyboard',
           difficulty: 'normal',
         },
@@ -1335,7 +1373,7 @@ describe('Scene registration', () => {
     const [, leftHandler] = leftCall ?? [];
     saveManagerInstance?.updateSettings.mockClear();
     leftHandler?.();
-    expect(saveManagerInstance?.updateSettings).toHaveBeenCalledWith({ volume: 0.7 });
+    expect(saveManagerInstance?.updateSettings).toHaveBeenCalledWith({ volume: 0.3 });
 
     const controlCall = keyboardOnMock.mock.calls.find(([event]) => event === 'keydown-C');
     expect(controlCall).toBeTruthy();
