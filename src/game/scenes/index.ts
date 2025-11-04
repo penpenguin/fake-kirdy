@@ -249,13 +249,14 @@ export class MenuScene extends Phaser.Scene {
       const height = this.scale?.height ?? 600;
       const centerX = width / 2;
       const centerY = height / 2;
-      const prompt = this.add.text(centerX, centerY, 'Press Space or Tap to Start', {
+      const promptY = centerY - 110;
+      const prompt = this.add.text(centerX, promptY, 'Press Space or Tap to Start', {
         fontSize: '24px',
         color: '#ffffff',
         align: 'center',
       });
       prompt.setOrigin?.(0.5, 0.5);
-      prompt.setPosition?.(centerX, centerY);
+      prompt.setPosition?.(centerX, promptY);
       prompt.setScrollFactor?.(0, 0);
       prompt.setDepth?.(100);
       this.createStartPromptBlink(prompt);
@@ -271,8 +272,10 @@ export class MenuScene extends Phaser.Scene {
       const keycapWidth = 64;
       const keycapGap = 12;
       const keycapHeight = 32;
-      const keycapRowSpacing = 72;
-      const captionOffset = 26;
+      const keycapRowSpacing = 40;
+      const sectionTitleSpacing = 20;
+      const sectionGap = 24;
+      const noteSpacing = 32;
 
       const createKeycap = (x: number, y: number, label: string) => {
         const text = this.add.text(x, y, label, keycapStyle);
@@ -281,6 +284,18 @@ export class MenuScene extends Phaser.Scene {
         text.setDepth?.(100);
         text.setPadding?.(12, 6, 12, 6);
         return text;
+      };
+
+      const renderSectionTitle = (y: number, title: string) => {
+        const sectionTitleStyle: Phaser.Types.GameObjects.Text.TextStyle = {
+          fontSize: '16px',
+          color: '#ffe9ff',
+          align: 'center',
+        };
+        const titleText = this.add.text(centerX, y, title, sectionTitleStyle);
+        titleText.setOrigin?.(0.5, 0);
+        titleText.setScrollFactor?.(0, 0);
+        titleText.setDepth?.(100);
       };
 
       const renderKeycapRow = (y: number, labels: string[], caption: string) => {
@@ -302,40 +317,56 @@ export class MenuScene extends Phaser.Scene {
         captionText.setDepth?.(100);
       };
 
-      let controlsTop = centerY + 72;
-      const keycapRows: Array<{ keys: string[]; caption: string }> = [
-        { keys: ['Left', 'Right', 'A', 'D'], caption: 'Move' },
-        { keys: ['Space'], caption: 'Jump / Hover' },
-        { keys: ['C', 'S'], caption: 'Inhale / Swallow' },
-        { keys: ['Z', 'X'], caption: 'Spit / Discard' },
+      let controlsTop = centerY - 20;
+
+      const sections: Array<{
+        title: string;
+        rows: Array<{ keys: string[]; caption: string }>;
+        note?: string;
+      }> = [
+        {
+          title: 'Keyboard Controls',
+          rows: [
+            { keys: ['Left', 'Right', 'A', 'D'], caption: 'Move left / right' },
+            { keys: ['Space'], caption: 'Jump or hover while airborne' },
+            { keys: ['C', 'S'], caption: 'Inhale, then swallow to gain abilities' },
+            { keys: ['Z', 'X'], caption: 'Spit or discard current ability' },
+          ],
+          note: 'Touch controls appear as on-screen buttons.',
+        },
+        {
+          title: 'Menu Shortcuts',
+          rows: [
+            { keys: ['Esc'], caption: 'Pause or resume gameplay' },
+            { keys: ['O', 'R'], caption: 'Open settings / Reset spawn to the Central Hub' },
+          ],
+        },
       ];
 
-      keycapRows.forEach(({ keys, caption }) => {
-        renderKeycapRow(controlsTop, keys, caption);
-        controlsTop += keycapRowSpacing;
-      });
+      sections.forEach(({ title, rows, note }) => {
+        renderSectionTitle(controlsTop, title);
+        controlsTop += sectionTitleSpacing;
 
-      const touchY = controlsTop;
-      const touch = this.add.text(centerX, touchY, 'Touch: use on-screen buttons', {
-        fontSize: '14px',
-        color: '#ffffff',
-        align: 'center',
-      });
-      touch.setOrigin?.(0.5, 0);
-      touch.setScrollFactor?.(0, 0);
-      touch.setDepth?.(100);
-      touch.setWordWrapWidth?.(Math.min(width - 32, 620), true);
+        rows.forEach(({ keys, caption }) => {
+          renderKeycapRow(controlsTop, keys, caption);
+          controlsTop += keycapRowSpacing;
+        });
 
-      controlsTop += captionOffset + keycapHeight; // advance past touch label
+        if (note) {
+          const noteStyle: Phaser.Types.GameObjects.Text.TextStyle = {
+            fontSize: '14px',
+            color: '#ffffff',
+            align: 'center',
+          };
+          const noteText = this.add.text(centerX, controlsTop, note, noteStyle);
+          noteText.setOrigin?.(0.5, 0);
+          noteText.setScrollFactor?.(0, 0);
+          noteText.setDepth?.(100);
+          noteText.setWordWrapWidth?.(Math.min(width - 32, 620), true);
+          controlsTop += noteSpacing;
+        }
 
-      const menuActions: Array<{ key: string; caption: string }> = [
-        { key: 'O', caption: 'Open Settings' },
-        { key: 'R', caption: 'Reset spawn to the Central Hub' },
-      ];
-
-      menuActions.forEach(({ key, caption }) => {
-        renderKeycapRow(controlsTop, [key], caption);
-        controlsTop += keycapRowSpacing;
+        controlsTop += sectionGap;
       });
     }
 

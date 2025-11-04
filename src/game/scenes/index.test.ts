@@ -505,7 +505,7 @@ describe('Scene registration', () => {
     expect(menuScene.scene.start).toHaveBeenCalledTimes(2);
   });
 
-  it('menu scene displays keycap-styled controls and keeps option prompts separated', () => {
+  it('menu scene explains controls with grouped keycaps and menu shortcuts', () => {
     const menuScene = new MenuScene();
 
     menuScene.create();
@@ -518,12 +518,17 @@ describe('Scene registration', () => {
 
     const prompt = addTextMock.mock.results[promptCallIndex]?.value;
     expect(prompt?.setOrigin).toHaveBeenCalledWith(0.5, 0.5);
-    expect(prompt?.setPosition).toHaveBeenCalledWith(400, 300);
+    expect(prompt?.setPosition).toHaveBeenCalledWith(400, 190);
+
+    const keyboardSection = addTextMock.mock.calls.find(([, , text]) => text === 'Keyboard Controls');
+    const menuSection = addTextMock.mock.calls.find(([, , text]) => text === 'Menu Shortcuts');
+    expect(keyboardSection).toBeTruthy();
+    expect(menuSection).toBeTruthy();
 
     const findTextCall = (value: string) =>
       addTextMock.mock.calls.find(([, , text]) => typeof text === 'string' && text === value);
 
-    const expectedKeycaps = ['Left', 'Right', 'A', 'D', 'Space', 'C', 'S', 'Z', 'X', 'O', 'R'];
+    const expectedKeycaps = ['Left', 'Right', 'A', 'D', 'Space', 'C', 'S', 'Z', 'X', 'Esc', 'O', 'R'];
     expectedKeycaps.forEach((label) => {
       const call = findTextCall(label);
       expect(call).toBeTruthy();
@@ -535,19 +540,19 @@ describe('Scene registration', () => {
     });
 
     const captionTexts = [
-      'Move',
-      'Jump / Hover',
-      'Inhale / Swallow',
-      'Spit / Discard',
-      'Open Settings',
-      'Reset spawn to the Central Hub',
+      'Move left / right',
+      'Jump or hover while airborne',
+      'Inhale, then swallow to gain abilities',
+      'Spit or discard current ability',
+      'Pause or resume gameplay',
+      'Open settings / Reset spawn to the Central Hub',
     ];
     captionTexts.forEach((caption) => {
       const call = findTextCall(caption);
       expect(call).toBeTruthy();
     });
 
-    const touchCall = findTextCall('Touch: use on-screen buttons');
+    const touchCall = findTextCall('Touch controls appear as on-screen buttons.');
     expect(touchCall).toBeTruthy();
 
     expect(
@@ -559,7 +564,7 @@ describe('Scene registration', () => {
     const oKeyCall = findTextCall('O');
     const rKeyCall = findTextCall('R');
     expect(oKeyCall?.[1]).toBeGreaterThan((touchCall?.[1] ?? 0));
-    expect(rKeyCall?.[1]).toBeGreaterThan((oKeyCall?.[1] ?? 0));
+    expect(rKeyCall?.[1]).toBe(oKeyCall?.[1]);
   });
 
   it('menu scene animates the start prompt with a gentle blink', () => {
