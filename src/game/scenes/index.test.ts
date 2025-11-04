@@ -733,6 +733,75 @@ describe('Scene registration', () => {
     expect(internalState.menuBlurEffect).toBeUndefined();
   });
 
+  it('game scene applies menu blur when the game over overlay launches', () => {
+    const gameScene = new GameScene();
+
+    gameScene.create();
+
+    const blurEffect = { destroy: vi.fn() };
+    const addBlur = vi.fn<[number, number, number], unknown>(() => blurEffect);
+
+    (gameScene as unknown as { cameras: { main: { postFX: { addBlur: typeof addBlur } } } }).cameras = {
+      main: {
+        postFX: {
+          addBlur,
+        },
+      },
+    };
+
+    const kirdyStub = {
+      update: vi.fn(),
+      getMouthContent: vi.fn(() => undefined),
+      getHP: vi.fn(() => 6),
+      getMaxHP: vi.fn(() => 6),
+      getScore: vi.fn(() => 4200),
+      getAbility: vi.fn(() => 'fire'),
+    };
+
+    (gameScene as unknown as { kirdy?: typeof kirdyStub }).kirdy = kirdyStub;
+
+    const internal = gameScene as unknown as { handlePlayerDefeated: () => void };
+    internal.handlePlayerDefeated();
+
+    expect(addBlur).toHaveBeenCalledWith(4, 1, 2);
+    const internalState = gameScene as unknown as { menuBlurEffect?: unknown };
+    expect(internalState.menuBlurEffect).toBe(blurEffect);
+  });
+
+  it('game scene still schedules menu overlay cleanup when blur cannot be applied', () => {
+    const gameScene = new GameScene();
+
+    gameScene.create();
+
+    (gameScene as unknown as { cameras: { main: { postFX: Record<string, unknown> } } }).cameras = {
+      main: {
+        postFX: {},
+      },
+    };
+
+    const kirdyStub = {
+      update: vi.fn(),
+      getMouthContent: vi.fn(() => undefined),
+      getHP: vi.fn(() => 6),
+      getMaxHP: vi.fn(() => 6),
+      getScore: vi.fn(() => 4200),
+      getAbility: vi.fn(() => 'fire'),
+    };
+
+    (gameScene as unknown as { kirdy?: typeof kirdyStub }).kirdy = kirdyStub;
+
+    const eventsOnceMock = asMock(gameScene.events.once);
+    eventsOnceMock.mockClear();
+
+    const internal = gameScene as unknown as { handlePlayerDefeated: () => void };
+    internal.handlePlayerDefeated();
+
+    const resumeCall = eventsOnceMock.mock.calls.find(([event]) => event === 'resume');
+    expect(resumeCall).toBeTruthy();
+    const [, handler] = resumeCall ?? [];
+    expect(handler).toBeInstanceOf(Function);
+  });
+
   it('game scene keeps the pause listener active and cleans it up on shutdown', () => {
     const gameScene = new GameScene();
 
@@ -759,6 +828,111 @@ describe('Scene registration', () => {
     shutdownHandler?.();
 
     expect(gameKeyboard.off).toHaveBeenCalledWith('keydown-ESC', pauseHandler);
+  });
+
+  it('game scene skips its update loop while the pause menu overlay is active', () => {
+    const gameScene = new GameScene();
+
+    gameScene.create();
+
+    const enemyManagerUpdate = vi.fn();
+    const kirdyStub = {
+      update: vi.fn(),
+      getMouthContent: vi.fn(() => undefined),
+      getHP: vi.fn(() => 6),
+      getMaxHP: vi.fn(() => 6),
+      getScore: vi.fn(() => 0),
+      getAbility: vi.fn(() => undefined),
+    };
+    const swallowSystemStub = {
+      update: vi.fn(),
+      consumeSwallowedPayload: vi.fn(() => undefined),
+    };
+    const abilitySystemStub = {
+      update: vi.fn(),
+      applySwallowedPayload: vi.fn(),
+    };
+
+    (gameScene as unknown as {
+      enemyManager?: { update: (delta: number) => void };
+      kirdy?: typeof kirdyStub;
+      swallowSystem?: typeof swallowSystemStub;
+      abilitySystem?: typeof abilitySystemStub;
+      maintainEnemyPopulation?: (delta: number) => void;
+      updateAreaState?: () => void;
+      syncHudHpWithPlayer?: () => void;
+      persistProgress?: () => void;
+      runtimeErrorCaptured?: boolean;
+    }).enemyManager = {
+      update: enemyManagerUpdate,
+    };
+    (gameScene as unknown as { kirdy?: typeof kirdyStub }).kirdy = kirdyStub;
+    (gameScene as unknown as { swallowSystem?: typeof swallowSystemStub }).swallowSystem = swallowSystemStub;
+    (gameScene as unknown as { abilitySystem?: typeof abilitySystemStub }).abilitySystem = abilitySystemStub;
+    (gameScene as unknown as { maintainEnemyPopulation?: (delta: number) => void }).maintainEnemyPopulation = vi.fn();
+    (gameScene as unknown as { updateAreaState?: () => void }).updateAreaState = vi.fn();
+    (gameScene as unknown as { syncHudHpWithPlayer?: () => void }).syncHudHpWithPlayer = vi.fn();
+    (gameScene as unknown as { persistProgress?: () => void }).persistProgress = vi.fn();
+    (gameScene as unknown as { runtimeErrorCaptured?: boolean }).runtimeErrorCaptured = false;
+
+    expect(enemyManagerUpdate).not.toHaveBeenCalled();
+
+    gameScene.pauseGame();
+
+    gameScene.update(0, 16);
+    expect(enemyManagerUpdate).not.toHaveBeenCalled();
+  });
+
+  it('game scene halts gameplay updates after player defeat triggers the game over menu', () => {
+    const gameScene = new GameScene();
+
+    gameScene.create();
+
+    const enemyManagerUpdate = vi.fn();
+    const kirdyStub = {
+      update: vi.fn(),
+      getMouthContent: vi.fn(() => undefined),
+      getHP: vi.fn(() => 6),
+      getMaxHP: vi.fn(() => 6),
+      getScore: vi.fn(() => 2500),
+      getAbility: vi.fn(() => 'fire'),
+    };
+    const swallowSystemStub = {
+      update: vi.fn(),
+      consumeSwallowedPayload: vi.fn(() => undefined),
+    };
+    const abilitySystemStub = {
+      update: vi.fn(),
+      applySwallowedPayload: vi.fn(),
+    };
+
+    (gameScene as unknown as {
+      enemyManager?: { update: (delta: number) => void };
+      kirdy?: typeof kirdyStub;
+      swallowSystem?: typeof swallowSystemStub;
+      abilitySystem?: typeof abilitySystemStub;
+      maintainEnemyPopulation?: (delta: number) => void;
+      updateAreaState?: () => void;
+      syncHudHpWithPlayer?: () => void;
+      persistProgress?: () => void;
+      runtimeErrorCaptured?: boolean;
+    }).enemyManager = {
+      update: enemyManagerUpdate,
+    };
+    (gameScene as unknown as { kirdy?: typeof kirdyStub }).kirdy = kirdyStub;
+    (gameScene as unknown as { swallowSystem?: typeof swallowSystemStub }).swallowSystem = swallowSystemStub;
+    (gameScene as unknown as { abilitySystem?: typeof abilitySystemStub }).abilitySystem = abilitySystemStub;
+    (gameScene as unknown as { maintainEnemyPopulation?: (delta: number) => void }).maintainEnemyPopulation = vi.fn();
+    (gameScene as unknown as { updateAreaState?: () => void }).updateAreaState = vi.fn();
+    (gameScene as unknown as { syncHudHpWithPlayer?: () => void }).syncHudHpWithPlayer = vi.fn();
+    (gameScene as unknown as { persistProgress?: () => void }).persistProgress = vi.fn();
+    (gameScene as unknown as { runtimeErrorCaptured?: boolean }).runtimeErrorCaptured = false;
+
+    const internal = gameScene as unknown as { handlePlayerDefeated: () => void };
+    internal.handlePlayerDefeated();
+
+    gameScene.update(0, 16);
+    expect(enemyManagerUpdate).not.toHaveBeenCalled();
   });
 
   it('game scene starts background music when created', () => {
@@ -1102,6 +1276,35 @@ describe('Scene registration', () => {
     menuHandler?.();
 
     expect(gameOverScene.scene.start).toHaveBeenCalledWith(SceneKeys.Menu);
+  });
+
+  it('centers the game over menu contents around the screen midpoint', () => {
+    const gameOverScene = new GameOverScene();
+
+    gameOverScene.create({ score: 999, ability: 'ice' as any, maxHP: 8 });
+
+    const addTextMock = asMock(gameOverScene.add.text);
+    const centerX = gameOverScene.scale.width / 2;
+    const centerY = gameOverScene.scale.height / 2;
+
+    expect(addTextMock).toHaveBeenCalledTimes(5);
+
+    const [titleArgs, scoreArgs, abilityArgs, restartArgs, menuArgs] = addTextMock.mock.calls;
+
+    expect(titleArgs?.[0]).toBe(centerX);
+    expect(titleArgs?.[1]).toBeCloseTo(centerY - 80, 5);
+
+    expect(scoreArgs?.[0]).toBe(centerX);
+    expect(scoreArgs?.[1]).toBeCloseTo(centerY - 20, 5);
+
+    expect(abilityArgs?.[0]).toBe(centerX);
+    expect(abilityArgs?.[1]).toBeCloseTo(centerY + 20, 5);
+
+    expect(restartArgs?.[0]).toBe(centerX);
+    expect(restartArgs?.[1]).toBeCloseTo(centerY + 70, 5);
+
+    expect(menuArgs?.[0]).toBe(centerX);
+    expect(menuArgs?.[1]).toBeCloseTo(centerY + 110, 5);
   });
 
   it('settings scene cycles configuration values and resumes the invoking scene', () => {

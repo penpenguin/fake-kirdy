@@ -467,7 +467,8 @@ export class GameScene extends Phaser.Scene {
   private cameraFollowConfigured = false;
   private readonly capturedSprites = new Set<Phaser.Physics.Matter.Sprite>();
   private menuBlurEffect?: { destroy?: () => void } | unknown;
-  private menuBlurResumeHandler?: () => void;
+  private menuOverlayActive = false;
+  private menuOverlayResumeHandler?: () => void;
   private readonly playerContactDamage = 1;
   private readonly playerInvulnerabilityDurationMs = 2000;
   private playerInvulnerabilityRemainingMs = 0;
@@ -571,6 +572,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.isGameOver = true;
+    this.activateMenuOverlay();
     this.scene.pause(SceneKeys.Game);
     const score = this.kirdy?.getScore() ?? 0;
     const ability = this.kirdy?.getAbility();
@@ -861,17 +863,6 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.menuBlurEffect = effect as { destroy?: () => void } | unknown;
-
-    if (this.menuBlurResumeHandler) {
-      this.events?.off?.('resume', this.menuBlurResumeHandler);
-    }
-
-    this.menuBlurResumeHandler = () => {
-      this.menuBlurResumeHandler = undefined;
-      this.clearMenuBlur();
-    };
-
-    this.events?.once?.('resume', this.menuBlurResumeHandler);
   }
 
   private clearMenuBlur() {
@@ -900,21 +891,48 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.menuBlurEffect = undefined;
+    this.menuOverlayActive = false;
 
-    if (this.menuBlurResumeHandler) {
-      this.events?.off?.('resume', this.menuBlurResumeHandler);
-      this.menuBlurResumeHandler = undefined;
+    if (this.menuOverlayResumeHandler) {
+      this.events?.off?.('resume', this.menuOverlayResumeHandler);
+      this.menuOverlayResumeHandler = undefined;
     }
   }
 
-  pauseGame() {
+  private activateMenuOverlay() {
+    if (!this.menuOverlayActive) {
+      this.menuOverlayActive = true;
+      this.registerMenuOverlayResumeHandler();
+    }
+
     this.applyMenuBlur();
+  }
+
+  private registerMenuOverlayResumeHandler() {
+    if (this.menuOverlayResumeHandler) {
+      this.events?.off?.('resume', this.menuOverlayResumeHandler);
+    }
+
+    this.menuOverlayResumeHandler = () => {
+      this.menuOverlayResumeHandler = undefined;
+      this.clearMenuBlur();
+    };
+
+    this.events?.once?.('resume', this.menuOverlayResumeHandler);
+  }
+
+  pauseGame() {
+    this.activateMenuOverlay();
     this.scene.pause(SceneKeys.Game);
     this.scene.launch(SceneKeys.Pause);
   }
 
   update(time: number, delta: number) {
     if (this.runtimeErrorCaptured) {
+      return;
+    }
+
+    if (this.menuOverlayActive) {
       return;
     }
 
@@ -2356,7 +2374,12 @@ export class GameOverScene extends Phaser.Scene {
         color: '#ffffff',
       };
 
-      const title = this.add.text(0, -80, 'Game Over', style);
+      const width = typeof this.scale?.width === 'number' ? this.scale.width : 0;
+      const height = typeof this.scale?.height === 'number' ? this.scale.height : 0;
+      const centerX = width / 2;
+      const centerY = height / 2;
+
+      const title = this.add.text(centerX, centerY - 80, 'Game Over', style);
       title.setOrigin?.(0.5, 0.5);
       title.setScrollFactor?.(0, 0);
       title.setDepth?.(2000);
@@ -2365,24 +2388,24 @@ export class GameOverScene extends Phaser.Scene {
       const scoreText = `Final Score: ${this.finalScore.toString().padStart(6, '0')}`;
       const abilityText = `Ability Carried: ${abilityLabel}`;
 
-      const scoreLine = this.add.text(0, -20, scoreText, infoStyle);
+      const scoreLine = this.add.text(centerX, centerY - 20, scoreText, infoStyle);
       scoreLine.setOrigin?.(0.5, 0.5);
       scoreLine.setScrollFactor?.(0, 0);
       scoreLine.setDepth?.(2000);
 
-      const abilityLine = this.add.text(0, 20, abilityText, infoStyle);
+      const abilityLine = this.add.text(centerX, centerY + 20, abilityText, infoStyle);
       abilityLine.setOrigin?.(0.5, 0.5);
       abilityLine.setScrollFactor?.(0, 0);
       abilityLine.setDepth?.(2000);
 
-      const restartLine = this.add.text(0, 70, 'Restart (R)', infoStyle);
+      const restartLine = this.add.text(centerX, centerY + 70, 'Restart (R)', infoStyle);
       restartLine.setOrigin?.(0.5, 0.5);
       restartLine.setScrollFactor?.(0, 0);
       restartLine.setDepth?.(2000);
       restartLine.setInteractive?.({ useHandCursor: true });
       restartLine.on?.('pointerdown', restartHandler);
 
-      const menuLine = this.add.text(0, 110, 'Return to Menu (M)', infoStyle);
+      const menuLine = this.add.text(centerX, centerY + 110, 'Return to Menu (M)', infoStyle);
       menuLine.setOrigin?.(0.5, 0.5);
       menuLine.setScrollFactor?.(0, 0);
       menuLine.setDepth?.(2000);
