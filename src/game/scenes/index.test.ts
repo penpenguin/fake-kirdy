@@ -10,7 +10,10 @@ vi.mock('phaser', () => {
     stop: vi.fn(),
     resume: vi.fn(),
     pause: vi.fn(),
+    bringToTop: vi.fn(),
     get: vi.fn(),
+    isActive: vi.fn(() => false),
+    isPaused: vi.fn(() => false),
   });
 
   const createEventEmitterMock = () => ({
@@ -336,6 +339,8 @@ import {
   SceneKeys,
   coreScenes,
 } from './index';
+
+type SettingsSceneCreateArg = Parameters<SettingsScene['create']>[0];
 
 describe('Scene registration', () => {
   beforeEach(() => {
@@ -874,6 +879,84 @@ describe('Scene registration', () => {
     expect(gameKeyboard.off).toHaveBeenCalledWith('keydown-ESC', pauseHandler);
   });
 
+  it('pause scene removes its escape handler while the settings scene is active', () => {
+    const pauseScene = new PauseScene();
+    const gameScene = new GameScene();
+
+    asMock(pauseScene.scene.get).mockReturnValue(gameScene);
+
+    pauseScene.create();
+
+    const pauseKeyboard = pauseScene.input.keyboard!;
+    const keyboardOnMock = asMock(pauseKeyboard.on);
+
+    const escapeCall = keyboardOnMock.mock.calls.find(([event]) => event === 'keydown-ESC');
+    expect(escapeCall).toBeTruthy();
+    const [, escapeHandler] = escapeCall ?? [];
+    expect(escapeHandler).toBeInstanceOf(Function);
+
+    const settingsCall = asMock(pauseKeyboard.once).mock.calls.find(([event]) => event === 'keydown-O');
+    expect(settingsCall).toBeTruthy();
+    const [, openSettingsHandler] = settingsCall ?? [];
+    expect(openSettingsHandler).toBeInstanceOf(Function);
+
+    asMock(pauseKeyboard.off).mockClear();
+
+    openSettingsHandler?.();
+
+    expect(pauseKeyboard.off).toHaveBeenCalledWith('keydown-ESC', escapeHandler);
+  });
+
+  it('pause scene rebinds its escape handler after the settings scene resumes it', () => {
+    const pauseScene = new PauseScene();
+    const gameScene = new GameScene();
+
+    asMock(pauseScene.scene.get).mockReturnValue(gameScene);
+
+    pauseScene.create();
+
+    const pauseKeyboard = pauseScene.input.keyboard!;
+    const keyboardOnMock = asMock(pauseKeyboard.on);
+
+    const escapeCall = keyboardOnMock.mock.calls.find(([event]) => event === 'keydown-ESC');
+    expect(escapeCall).toBeTruthy();
+    const [, escapeHandler] = escapeCall ?? [];
+    expect(escapeHandler).toBeInstanceOf(Function);
+
+    const keyboardOnceMock = asMock(pauseKeyboard.once);
+    const settingsCall = keyboardOnceMock.mock.calls.find(([event]) => event === 'keydown-O');
+    expect(settingsCall).toBeTruthy();
+    const [, openSettingsHandler] = settingsCall ?? [];
+    expect(openSettingsHandler).toBeInstanceOf(Function);
+
+    const eventsOnceMock = asMock(pauseScene.events.once);
+    eventsOnceMock.mockClear();
+    keyboardOnMock.mockClear();
+
+    openSettingsHandler?.();
+
+    const resumeCall = eventsOnceMock.mock.calls.find(([event]) => event === 'resume');
+    expect(resumeCall).toBeTruthy();
+    const [, resumeHandler] = resumeCall ?? [];
+    expect(resumeHandler).toBeInstanceOf(Function);
+
+    keyboardOnMock.mockClear();
+    asMock(pauseScene.scene.resume).mockClear();
+    asMock(pauseScene.scene.stop).mockClear();
+
+    resumeHandler?.();
+
+    expect(pauseScene.scene.bringToTop).toHaveBeenCalledWith(SceneKeys.Pause);
+
+    const rebindCall = keyboardOnMock.mock.calls.find(([event]) => event === 'keydown-ESC');
+    const reboundEscape = rebindCall?.[1] as (() => void) | undefined;
+    expect(reboundEscape).toBe(escapeHandler);
+
+    reboundEscape?.();
+    expect(pauseScene.scene.stop).toHaveBeenCalledWith(SceneKeys.Pause);
+    expect(pauseScene.scene.resume).toHaveBeenCalledWith(SceneKeys.Game);
+  });
+
   it('game scene skips its update loop while the pause menu overlay is active', () => {
     const gameScene = new GameScene();
 
@@ -1148,15 +1231,16 @@ describe('Scene registration', () => {
     pauseScene.create();
 
     const pauseKeyboard = pauseScene.input.keyboard!;
+    const pauseKeyboardOnMock = asMock(pauseKeyboard.on);
     const pauseKeyboardOnceMock = asMock(pauseKeyboard.once);
     const pauseInputOnceMock = asMock(pauseScene.input.once);
 
-    expect(pauseKeyboard.once).toHaveBeenCalledWith('keydown-ESC', expect.any(Function));
+    expect(pauseKeyboard.on).toHaveBeenCalledWith('keydown-ESC', expect.any(Function));
     expect(pauseKeyboard.once).toHaveBeenCalledWith('keydown-R', expect.any(Function));
     expect(pauseKeyboard.once).toHaveBeenCalledWith('keydown-Q', expect.any(Function));
     expect(pauseScene.input.once).toHaveBeenCalledWith('pointerdown', expect.any(Function));
 
-    const [, keyHandler] = pauseKeyboardOnceMock.mock.calls[0];
+    const [, keyHandler] = pauseKeyboardOnMock.mock.calls.find(([event]) => event === 'keydown-ESC') ?? [];
     keyHandler?.();
 
     expect(pauseScene.scene.stop).toHaveBeenCalledWith(SceneKeys.Pause);
@@ -1260,6 +1344,32 @@ describe('Scene registration', () => {
       SceneKeys.Settings,
       expect.objectContaining({ returnTo: SceneKeys.Pause }),
     );
+    expect(pauseScene.scene.pause).toHaveBeenCalledWith(SceneKeys.Pause);
+  });
+
+  it('pause scene avoids pausing the game scene again when it is already paused', () => {
+    const pauseScene = new PauseScene();
+    const gameScene = new GameScene();
+
+    asMock(pauseScene.scene.get).mockReturnValue(gameScene);
+
+    pauseScene.create();
+
+    const pauseKeyboard = pauseScene.input.keyboard!;
+    const keyboardOnceMock = asMock(pauseKeyboard.once);
+    const settingsCall = keyboardOnceMock.mock.calls.find(([event]) => event === 'keydown-O');
+    expect(settingsCall).toBeTruthy();
+
+    const [, handler] = settingsCall ?? [];
+    expect(handler).toBeInstanceOf(Function);
+
+    asMock(pauseScene.scene.pause).mockClear();
+    asMock(pauseScene.scene.isActive).mockReturnValue(true);
+    asMock(pauseScene.scene.isPaused).mockReturnValue(true);
+
+    handler?.();
+
+    expect(pauseScene.scene.pause).not.toHaveBeenCalledWith(SceneKeys.Game);
     expect(pauseScene.scene.pause).toHaveBeenCalledWith(SceneKeys.Pause);
   });
 
@@ -1397,6 +1507,113 @@ describe('Scene registration', () => {
     escHandler?.();
     expect(settingsScene.scene.resume).toHaveBeenCalledWith(SceneKeys.Menu);
     expect(settingsScene.scene.stop).toHaveBeenCalledWith(SceneKeys.Settings);
+  });
+
+  it('settings scene skips repausing the game when it is already paused', () => {
+    const gameScene = new GameScene();
+    const settingsScene = new SettingsScene();
+
+    asMock(settingsScene.scene.get).mockImplementation((key: unknown) =>
+      key === SceneKeys.Game ? gameScene : undefined,
+    );
+    asMock(settingsScene.scene.isActive).mockImplementation((key: unknown) => key === SceneKeys.Game);
+    asMock(settingsScene.scene.isPaused).mockImplementation((key: unknown) => key === SceneKeys.Game);
+    asMock(settingsScene.scene.pause).mockClear();
+
+    settingsScene.create({ returnTo: SceneKeys.Pause });
+
+    expect(settingsScene.scene.pause).not.toHaveBeenCalledWith(SceneKeys.Game);
+  });
+
+  it('settings scene resumes the pause menu and brings it to the front when closed with ESC', () => {
+    const gameScene = new GameScene();
+    const settingsScene = new SettingsScene();
+
+    asMock(settingsScene.scene.get).mockImplementation((key: unknown) =>
+      key === SceneKeys.Game ? gameScene : undefined,
+    );
+    asMock(settingsScene.scene.isActive).mockImplementation((key: unknown) => key === SceneKeys.Game);
+    asMock(settingsScene.scene.isPaused).mockImplementation((key: unknown) => key === SceneKeys.Game);
+
+    settingsScene.create({ returnTo: SceneKeys.Pause });
+
+    const escCall = asMock(settingsScene.input.keyboard!.once).mock.calls.find(
+      ([event]) => event === 'keydown-ESC',
+    );
+    expect(escCall).toBeTruthy();
+    const [, escHandler] = escCall ?? [];
+    expect(escHandler).toBeInstanceOf(Function);
+
+    const deactivateSpy = vi.spyOn(gameScene, 'deactivateMenuOverlay');
+
+    asMock(settingsScene.scene.resume).mockClear();
+    asMock(settingsScene.scene.bringToTop).mockClear();
+
+    escHandler?.();
+
+    expect(deactivateSpy).toHaveBeenCalledTimes(2);
+    expect(settingsScene.scene.resume).toHaveBeenCalledWith(SceneKeys.Pause);
+    expect(settingsScene.scene.bringToTop).toHaveBeenCalledWith(SceneKeys.Pause);
+  });
+
+  it('clears the gameplay blur after returning from settings to resume the game', () => {
+    const gameScene = new GameScene();
+    gameScene.create();
+    gameScene.pauseGame();
+
+    const pauseScene = new PauseScene();
+    const settingsScene = new SettingsScene();
+    const scenePlugin = pauseScene.scene;
+
+    asMock(scenePlugin.get).mockReturnValue(gameScene);
+
+    const launchMock = asMock(scenePlugin.launch);
+    launchMock.mockImplementation((key, data) => {
+      if (key === SceneKeys.Settings) {
+        asMock(settingsScene.scene.get).mockImplementation((target: unknown) =>
+          target === SceneKeys.Game ? gameScene : undefined,
+        );
+        asMock(settingsScene.scene.isActive).mockImplementation((target: unknown) =>
+          target === SceneKeys.Game,
+        );
+        asMock(settingsScene.scene.isPaused).mockImplementation((target: unknown) =>
+          target === SceneKeys.Game,
+        );
+        settingsScene.create(data as SettingsSceneCreateArg);
+      }
+    });
+
+    pauseScene.create();
+
+    const pauseKeyboard = pauseScene.input.keyboard!;
+    const settingsCall = asMock(pauseKeyboard.once).mock.calls.find(([event]) => event === 'keydown-O');
+    const [, openSettingsHandler] = settingsCall ?? [];
+    expect(openSettingsHandler).toBeInstanceOf(Function);
+
+    openSettingsHandler?.();
+
+    const resumeCall = asMock(pauseScene.events.once).mock.calls.find(([event]) => event === 'resume');
+    const [, resumeHandler] = resumeCall ?? [];
+    expect(resumeHandler).toBeInstanceOf(Function);
+
+    const settingsKeyboard = settingsScene.input.keyboard!;
+    const escCall = asMock(settingsKeyboard.once).mock.calls.find(([event]) => event === 'keydown-ESC');
+    const [, escHandler] = escCall ?? [];
+    expect(escHandler).toBeInstanceOf(Function);
+
+    escHandler?.();
+    resumeHandler?.();
+
+    const escapeCall = asMock(pauseKeyboard.on).mock.calls.find(([event]) => event === 'keydown-ESC');
+    const [, escapeHandler] = escapeCall ?? [];
+    expect(escapeHandler).toBeInstanceOf(Function);
+
+    const overlayState = gameScene as unknown as { menuOverlayDepth?: number };
+
+    escapeHandler?.();
+
+    expect(pauseScene.scene.resume).toHaveBeenCalledWith(SceneKeys.Game);
+    expect(overlayState.menuOverlayDepth).toBe(0);
   });
 
   it('registers all core scenes in the expected order', () => {

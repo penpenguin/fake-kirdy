@@ -2089,6 +2089,9 @@ export class GameScene extends Phaser.Scene {
 export class PauseScene extends Phaser.Scene {
   public static readonly KEY = SceneKeys.Pause;
   private readonly saveManager = new SaveManager();
+  private readonly escapeHandler = () => {
+    this.resumeGame();
+  };
 
   constructor() {
     super(buildConfig(SceneKeys.Pause));
@@ -2108,11 +2111,15 @@ export class PauseScene extends Phaser.Scene {
     const quitHandler = () => this.quitToMenu();
     const settingsHandler = () => this.openSettings();
 
-    this.input?.keyboard?.once?.('keydown-ESC', resumeHandler);
+    this.bindEscapeHandler();
     this.input?.keyboard?.once?.('keydown-R', restartHandler);
     this.input?.keyboard?.once?.('keydown-Q', quitHandler);
     this.input?.keyboard?.once?.('keydown-O', settingsHandler);
     this.input?.once?.('pointerdown', resumeHandler);
+
+    this.events?.once?.('shutdown', () => {
+      this.unbindEscapeHandler();
+    });
 
     if (this.add?.text) {
       const style: Phaser.Types.GameObjects.Text.TextStyle = {
@@ -2167,12 +2174,14 @@ export class PauseScene extends Phaser.Scene {
   }
 
   resumeGame() {
+    this.unbindEscapeHandler();
     this.resolveGameScene()?.deactivateMenuOverlay?.();
     this.scene.stop(SceneKeys.Pause);
     this.scene.resume(SceneKeys.Game);
   }
 
   restartGame() {
+    this.unbindEscapeHandler();
     this.saveManager.resetPlayerPosition();
     this.resolveGameScene()?.deactivateMenuOverlay?.({ force: true });
     this.scene.stop(SceneKeys.Pause);
@@ -2181,6 +2190,7 @@ export class PauseScene extends Phaser.Scene {
   }
 
   quitToMenu() {
+    this.unbindEscapeHandler();
     this.resolveGameScene()?.deactivateMenuOverlay?.({ force: true });
     this.scene.stop(SceneKeys.Pause);
     this.scene.stop(SceneKeys.Game);
@@ -2189,24 +2199,49 @@ export class PauseScene extends Phaser.Scene {
 
   private openSettings() {
     const gameScene = this.resolveGameScene();
-    try {
-      this.scene.pause(SceneKeys.Game);
-    } catch {
-      // ignore when the game scene is not active
+
+    const scenePlugin = this.scene as
+      | (Phaser.Scenes.ScenePlugin & {
+          isActive?: (key: SceneKey) => boolean;
+          isPaused?: (key: SceneKey) => boolean;
+        })
+      | undefined;
+    const gameIsInactive = scenePlugin?.isActive?.(SceneKeys.Game) === false;
+    const gameAlreadyPaused = scenePlugin?.isPaused?.(SceneKeys.Game) === true;
+
+    if (!gameIsInactive && !gameAlreadyPaused) {
+      try {
+        scenePlugin?.pause?.(SceneKeys.Game);
+      } catch {
+        // ignore when the game scene is not active
+      }
     }
 
     gameScene?.activateMenuOverlay?.();
 
+    this.unbindEscapeHandler();
+
     this.scene.launch(SceneKeys.Settings, { returnTo: SceneKeys.Pause });
 
-    try {
-      this.scene.pause(SceneKeys.Game);
-    } catch {
-      // ignore when the game scene is not active
-    }
-
     this.scene.pause(SceneKeys.Pause);
+    this.events?.once?.('resume', () => {
+      this.bindEscapeHandler();
+      try {
+        this.scene.bringToTop(SceneKeys.Pause);
+      } catch {
+        // ignore when scene manager is not available
+      }
+    });
     this.input?.keyboard?.once?.('keydown-O', () => this.openSettings());
+  }
+
+  private bindEscapeHandler() {
+    this.unbindEscapeHandler();
+    this.input?.keyboard?.on?.('keydown-ESC', this.escapeHandler);
+  }
+
+  private unbindEscapeHandler() {
+    this.input?.keyboard?.off?.('keydown-ESC', this.escapeHandler);
   }
 }
 
@@ -2280,10 +2315,21 @@ export class SettingsScene extends Phaser.Scene {
     const gameScene = this.resolveGameScene();
     if (gameScene) {
       gameScene.activateMenuOverlay();
-      try {
-        this.scene.pause(SceneKeys.Game);
-      } catch {
-        // ignore when the game scene is not active
+      const scenePlugin = this.scene as
+        | (Phaser.Scenes.ScenePlugin & {
+            isActive?: (key: SceneKey) => boolean;
+            isPaused?: (key: SceneKey) => boolean;
+          })
+        | undefined;
+      const gameIsInactive = scenePlugin?.isActive?.(SceneKeys.Game) === false;
+      const gameAlreadyPaused = scenePlugin?.isPaused?.(SceneKeys.Game) === true;
+
+      if (!gameIsInactive && !gameAlreadyPaused) {
+        try {
+          scenePlugin?.pause?.(SceneKeys.Game);
+        } catch {
+          // ignore when the game scene is not active
+        }
       }
     }
 
@@ -2367,8 +2413,16 @@ export class SettingsScene extends Phaser.Scene {
   private close() {
     const gameScene = this.resolveGameScene();
     gameScene?.deactivateMenuOverlay();
+    if (this.returnToScene === SceneKeys.Pause) {
+      gameScene?.deactivateMenuOverlay();
+    }
 
     this.scene.resume(this.returnToScene);
+    try {
+      this.scene.bringToTop(this.returnToScene);
+    } catch {
+      // ignore when the scene manager is not available
+    }
     this.scene.stop(SceneKeys.Settings);
     this.game?.events?.emit?.('settings-updated', this.currentSettings);
   }
