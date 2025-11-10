@@ -68,6 +68,23 @@ vi.mock('phaser', () => {
     destroy: vi.fn(),
   });
 
+  const createRectangleMock = () => ({
+    setOrigin: vi.fn().mockReturnThis(),
+    setScrollFactor: vi.fn().mockReturnThis(),
+    setDepth: vi.fn().mockReturnThis(),
+    setStrokeStyle: vi.fn().mockReturnThis(),
+  });
+
+  const createGraphicsMock = () => ({
+    fillStyle: vi.fn().mockReturnThis(),
+    lineStyle: vi.fn().mockReturnThis(),
+    fillRoundedRect: vi.fn().mockReturnThis(),
+    strokeRoundedRect: vi.fn().mockReturnThis(),
+    setScrollFactor: vi.fn().mockReturnThis(),
+    setDepth: vi.fn().mockReturnThis(),
+    destroy: vi.fn(),
+  });
+
   class PhaserSceneMock {
     public scene = createScenePluginMock();
     public events = createEventEmitterMock();
@@ -91,6 +108,8 @@ vi.mock('phaser', () => {
         setScrollFactor: vi.fn().mockReturnThis(),
         setDepth: vi.fn().mockReturnThis(),
       })),
+      rectangle: vi.fn(() => createRectangleMock()),
+      graphics: vi.fn(() => createGraphicsMock()),
     };
     public tweens = {
       add: vi.fn(),
@@ -505,7 +524,7 @@ describe('Scene registration', () => {
     expect(menuScene.scene.start).toHaveBeenCalledTimes(2);
   });
 
-  it('menu scene explains controls with grouped keycaps and menu shortcuts', () => {
+  it('menu scene zones instruction panels and renders rounded keycaps', () => {
     const menuScene = new MenuScene();
 
     menuScene.create();
@@ -518,42 +537,222 @@ describe('Scene registration', () => {
 
     const prompt = addTextMock.mock.results[promptCallIndex]?.value;
     expect(prompt?.setOrigin).toHaveBeenCalledWith(0.5, 0.5);
-    expect(prompt?.setPosition).toHaveBeenCalledWith(400, 190);
+    expect(prompt?.setPosition).toHaveBeenCalledWith(400, 120);
 
-    const keyboardSection = addTextMock.mock.calls.find(([, , text]) => text === 'Keyboard Controls');
+    const movementSection = addTextMock.mock.calls.find(([, , text]) => text === 'Movement');
+    const abilitiesSection = addTextMock.mock.calls.find(([, , text]) => text === 'Abilities');
     const menuSection = addTextMock.mock.calls.find(([, , text]) => text === 'Menu Shortcuts');
-    expect(keyboardSection).toBeTruthy();
+    const settingsSection = addTextMock.mock.calls.find(([, , text]) => text === 'Settings Adjustments');
+    expect(movementSection).toBeTruthy();
+    expect(abilitiesSection).toBeTruthy();
     expect(menuSection).toBeTruthy();
+    expect(settingsSection).toBeTruthy();
+
+    const addRectangleMock = asMock(menuScene.add.rectangle);
+    const zonePanels = addRectangleMock.mock.calls.filter(([, , , , fillColor]) => fillColor === 0x0d162e);
+    expect(zonePanels.length).toBe(4);
+    zonePanels.forEach(([, , , , , fillAlpha]) => {
+      expect(fillAlpha).toBeCloseTo(0.85);
+    });
+
+    const panelXs = Array.from(new Set(zonePanels.map(([x]) => x))).sort((a, b) => a - b);
+    expect(panelXs.length).toBe(2);
+
+    const panelTops = zonePanels.map(([, centerY, , height]) => centerY - height / 2);
+    const panelBottoms = zonePanels.map(([, centerY, , height]) => centerY + height / 2);
+    const panelHeights = zonePanels.map(([, , , height]) => height);
+    const firstPanelHeight = panelHeights[0];
+    expect(firstPanelHeight).toBeGreaterThan(0);
+    panelHeights.forEach((height) => {
+      expect(height).toBe(firstPanelHeight);
+    });
+    expect(Math.min(...panelTops)).toBeGreaterThanOrEqual(140);
+    expect(Math.max(...panelBottoms)).toBeLessThanOrEqual(600);
+
+    const rowTops = Array.from(new Set(panelTops.map((value) => value.toFixed(2)))).map(Number);
+    expect(rowTops.length).toBe(2);
+    expect(rowTops[0]).toBeLessThan(rowTops[1]);
+
+    const movementZone = zonePanels[0];
+    expect(movementZone).toBeDefined();
+    const movementZoneTop = (movementZone?.[1] ?? 0) - (movementZone?.[3] ?? 0) / 2;
+
+    const addGraphicsMock = asMock(menuScene.add.graphics);
+    const expectedKeycaps = [
+      '← / A',
+      '→ / D',
+      'Space',
+      'C',
+      'S',
+      'Z',
+      'X',
+      'Esc',
+      'O',
+      'R',
+      '← / →',
+      '↑ / ↓',
+      'C',
+      'Esc',
+    ];
+    const graphicsCalls = addGraphicsMock.mock.results.map((result) => {
+      const graphics = result?.value as {
+        fillRoundedRect: ReturnType<typeof vi.fn>;
+      } | undefined;
+      expect(graphics).toBeDefined();
+      const fillCalls = graphics ? asMock(graphics.fillRoundedRect).mock.calls : [];
+      expect(fillCalls.length).toBeGreaterThan(0);
+      const [x, y, width, height, radius] = fillCalls[0] ?? [];
+      return { graphics, x, y, width, height, radius };
+    });
+
+    const zonePanelGraphics = graphicsCalls.filter((call) => (call.width ?? 0) > 200);
+    const keycapGraphics = graphicsCalls.filter((call) => (call.width ?? 0) <= 200);
+
+    expect(zonePanelGraphics.length).toBe(4);
+    zonePanelGraphics.forEach((call) => {
+      expect(call.radius).toBe(16);
+      expect(call.height).toBeGreaterThan(100);
+    });
+
+    expect(keycapGraphics.length).toBe(expectedKeycaps.length);
+    keycapGraphics.forEach((call) => {
+      expect(call.radius).toBe(10);
+    });
+
+    const getKeycapWidth = (label: string) => {
+      const keycapIndex = expectedKeycaps.indexOf(label);
+      const call = keycapGraphics[keycapIndex];
+      const width = call?.width ?? 0;
+      return width;
+    };
+
+    expect(getKeycapWidth('← / A')).toBeGreaterThan(getKeycapWidth('O'));
 
     const findTextCall = (value: string) =>
       addTextMock.mock.calls.find(([, , text]) => typeof text === 'string' && text === value);
 
-    const expectedKeycaps = ['Left', 'Right', 'A', 'D', 'Space', 'C', 'S', 'Z', 'X', 'Esc', 'O', 'R'];
     expectedKeycaps.forEach((label) => {
       const call = findTextCall(label);
       expect(call).toBeTruthy();
-      expect(call?.[3]).toMatchObject({
-        backgroundColor: '#1c2333',
+      const style = call?.[3] as Phaser.Types.GameObjects.Text.TextStyle | undefined;
+      expect(style).toMatchObject({
         fontFamily: 'monospace',
-        padding: { left: 12, right: 12, top: 6, bottom: 6 },
+        padding: { left: 8, right: 8, top: 4, bottom: 4 },
       });
+      expect(style?.backgroundColor).toBeUndefined();
+    });
+
+    const expectedKeycapCounts: Record<string, number> = {
+      '← / A': 1,
+      '→ / D': 1,
+      Space: 1,
+      C: 2,
+      S: 1,
+      Z: 1,
+      X: 1,
+      Esc: 2,
+      O: 1,
+      R: 1,
+      '← / →': 1,
+      '↑ / ↓': 1,
+    };
+    Object.entries(expectedKeycapCounts).forEach(([label, count]) => {
+      const matches = addTextMock.mock.calls.filter(([, , text, style]) =>
+        text === label && style?.fontFamily === 'monospace'
+      );
+      expect(matches.length).toBe(count);
     });
 
     const captionTexts = [
-      'Move left / right',
-      'Jump or hover while airborne',
-      'Inhale, then swallow to gain abilities',
-      'Spit or discard current ability',
-      'Pause or resume gameplay',
-      'Open settings / Reset spawn to the Central Hub',
+      'Left',
+      'Right',
+      'Jump',
+      'Inhale',
+      'Spit',
+      'Pause',
+      'Settings',
+      'Reset',
+      'Volume',
+      'Difficulty',
+      'Controls',
+      'Close',
     ];
     captionTexts.forEach((caption) => {
       const call = findTextCall(caption);
       expect(call).toBeTruthy();
     });
 
-    const touchCall = findTextCall('Touch controls appear as on-screen buttons.');
+    const touchCall = findTextCall('Touch');
     expect(touchCall).toBeTruthy();
+
+    const getCaptionY = (caption: string) => {
+      const call = findTextCall(caption);
+      expect(call).toBeTruthy();
+      return call?.[1] ?? 0;
+    };
+
+    const movementRowCaptions = ['Left', 'Right', 'Jump'] as const;
+    const movementRowYs = movementRowCaptions.map((caption) => getCaptionY(caption));
+    movementRowYs.forEach((currentY, index) => {
+      if (index === 0) {
+        return;
+      }
+      const previousY = movementRowYs[index - 1];
+      expect(currentY - previousY).toBeGreaterThanOrEqual(40);
+    });
+
+    const findTextCallNear = (value: string, targetY?: number) => {
+      const matches = addTextMock.mock.calls.filter(([, , text]) => typeof text === 'string' && text === value);
+      if (matches.length <= 1 || targetY === undefined) {
+        return matches[0];
+      }
+      return matches.find(([, y]) => Math.abs((y ?? 0) - targetY) < 1) ?? matches[0];
+    };
+
+    const ensureCaptionRightOfKeys = (caption: string, keyLabels: string[]) => {
+      const captionCall = findTextCall(caption);
+      expect(captionCall).toBeTruthy();
+      const captionX = captionCall?.[0] ?? 0;
+      const captionY = captionCall?.[1] ?? 0;
+      const keyXs = keyLabels.map((label) => {
+        const keyCall = findTextCallNear(label, captionY);
+        expect(keyCall).toBeTruthy();
+        return keyCall?.[0] ?? 0;
+      });
+      const maxKeyX = Math.max(...keyXs);
+      expect(captionX).toBeGreaterThan(maxKeyX + 12);
+      const firstKeyY = findTextCallNear(keyLabels[0], captionY)?.[1] ?? 0;
+      expect(Math.abs((captionY ?? 0) - firstKeyY)).toBeLessThanOrEqual(40);
+    };
+
+    ensureCaptionRightOfKeys('Left', ['← / A']);
+    ensureCaptionRightOfKeys('Right', ['→ / D']);
+    ensureCaptionRightOfKeys('Jump', ['Space']);
+    ensureCaptionRightOfKeys('Inhale', ['S']);
+    ensureCaptionRightOfKeys('Spit', ['X']);
+    ensureCaptionRightOfKeys('Pause', ['Esc']);
+    ensureCaptionRightOfKeys('Settings', ['O']);
+    ensureCaptionRightOfKeys('Reset', ['R']);
+    ensureCaptionRightOfKeys('Volume', ['← / →']);
+    ensureCaptionRightOfKeys('Difficulty', ['↑ / ↓']);
+    ensureCaptionRightOfKeys('Controls', ['C']);
+    ensureCaptionRightOfKeys('Close', ['Esc']);
+
+    const leftKeyCall = findTextCall('← / A');
+
+    const movementTitleToKeys = (leftKeyCall?.[1] ?? 0) - (movementSection?.[1] ?? 0);
+    expect(movementTitleToKeys).toBeGreaterThanOrEqual(48);
+
+    const hoverCaptionCall = findTextCall('Jump');
+    expect(touchCall?.[1]).toBeGreaterThanOrEqual((hoverCaptionCall?.[1] ?? 0) + 12);
+
+    const movementSectionTopPadding = (movementSection?.[1] ?? 0) - movementZoneTop;
+    expect(movementSectionTopPadding).toBeGreaterThanOrEqual(6);
+
+    const touchBottomPadding = Math.max(...panelBottoms) - ((touchCall?.[1] ?? 0) + 18);
+    expect(touchBottomPadding).toBeGreaterThanOrEqual(12);
+
+    expect((settingsSection?.[1] ?? 0)).toBe(menuSection?.[1] ?? 0);
 
     expect(
       addTextMock.mock.calls.some(
@@ -564,7 +763,7 @@ describe('Scene registration', () => {
     const oKeyCall = findTextCall('O');
     const rKeyCall = findTextCall('R');
     expect(oKeyCall?.[1]).toBeGreaterThan((touchCall?.[1] ?? 0));
-    expect(rKeyCall?.[1]).toBe(oKeyCall?.[1]);
+    expect(rKeyCall?.[1]).toBeGreaterThan((oKeyCall?.[1] ?? 0));
   });
 
   it('menu scene animates the start prompt with a gentle blink', () => {

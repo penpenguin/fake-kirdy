@@ -249,7 +249,7 @@ export class MenuScene extends Phaser.Scene {
       const height = this.scale?.height ?? 600;
       const centerX = width / 2;
       const centerY = height / 2;
-      const promptY = centerY - 110;
+      const promptY = centerY - 180;
       const prompt = this.add.text(centerX, promptY, 'Press Space or Tap to Start', {
         fontSize: '24px',
         color: '#ffffff',
@@ -261,63 +261,152 @@ export class MenuScene extends Phaser.Scene {
       prompt.setDepth?.(100);
       this.createStartPromptBlink(prompt);
 
+      const keycapPadding = { left: 8, right: 8, top: 4, bottom: 4 } as const;
       const keycapStyle: Phaser.Types.GameObjects.Text.TextStyle = {
         fontSize: '16px',
         color: '#f4f8ff',
         fontFamily: 'monospace',
-        backgroundColor: '#1c2333',
-        padding: { left: 12, right: 12, top: 6, bottom: 6 },
+        padding: keycapPadding,
         align: 'center',
       };
-      const keycapWidth = 64;
+      const keycapBaseWidth = 64;
+      const keycapCharWidth = 12;
       const keycapGap = 12;
       const keycapHeight = 32;
+      const keycapRadius = 10;
       const keycapRowSpacing = 40;
-      const sectionTitleSpacing = 20;
-      const sectionGap = 24;
-      const noteSpacing = 32;
+      const sectionTitleSpacing = 48;
+      const noteSpacing = 12;
+      const zonePadding = 8;
+      const zoneRowGap = 8;
+      const zoneColumns = 2;
+      const zoneColumnGap = 32;
+      const zoneWidth = Math.min(width - 64, 660);
+      const zoneFillColor = 0x0d162e;
+      const zoneStrokeColor = 0x2b3650;
+      const zonePanelDepth = 70;
+      const zonePanelRadius = 16;
+      const keycapBackgroundDepth = 90;
+      const keycapTextDepth = 100;
+      const columnWidth =
+        (zoneWidth - zoneColumnGap * (zoneColumns - 1)) / zoneColumns;
+      const gridTotalWidth = columnWidth * zoneColumns + zoneColumnGap * (zoneColumns - 1);
+      const columnCenters = Array.from({ length: zoneColumns }, (_, columnIndex) =>
+        centerX - gridTotalWidth / 2 + columnWidth / 2 + columnIndex * (columnWidth + zoneColumnGap),
+      );
+      const gridTop = promptY + 20;
 
-      const createKeycap = (x: number, y: number, label: string) => {
+      const computeKeycapWidth = (label: string) => {
+        const horizontalPadding = keycapPadding.left + keycapPadding.right;
+        return Math.max(keycapBaseWidth, label.length * keycapCharWidth + horizontalPadding);
+      };
+
+      const createKeycap = (x: number, y: number, label: string, backgroundWidth: number) => {
+        const rectX = x - backgroundWidth / 2;
+        const rectY = y - keycapHeight / 2;
+
+        if (this.add?.graphics) {
+          const keycapGraphic = this.add.graphics();
+          keycapGraphic.fillStyle?.(0x1c2333, 1);
+          keycapGraphic.lineStyle?.(1, 0x4f5f8f, 0.9);
+          keycapGraphic.fillRoundedRect?.(rectX, rectY, backgroundWidth, keycapHeight, keycapRadius);
+          keycapGraphic.strokeRoundedRect?.(rectX, rectY, backgroundWidth, keycapHeight, keycapRadius);
+          keycapGraphic.setScrollFactor?.(0, 0);
+          keycapGraphic.setDepth?.(keycapBackgroundDepth);
+        }
+
         const text = this.add.text(x, y, label, keycapStyle);
         text.setOrigin?.(0.5, 0.5);
         text.setScrollFactor?.(0, 0);
-        text.setDepth?.(100);
-        text.setPadding?.(12, 6, 12, 6);
+        text.setDepth?.(keycapTextDepth);
+        text.setPadding?.(
+          keycapPadding.left,
+          keycapPadding.top,
+          keycapPadding.right,
+          keycapPadding.bottom,
+        );
         return text;
       };
 
-      const renderSectionTitle = (y: number, title: string) => {
+      const renderSectionTitle = (x: number, y: number, title: string) => {
         const sectionTitleStyle: Phaser.Types.GameObjects.Text.TextStyle = {
           fontSize: '16px',
           color: '#ffe9ff',
           align: 'center',
         };
-        const titleText = this.add.text(centerX, y, title, sectionTitleStyle);
+        const titleText = this.add.text(x, y, title, sectionTitleStyle);
         titleText.setOrigin?.(0.5, 0);
         titleText.setScrollFactor?.(0, 0);
-        titleText.setDepth?.(100);
+        titleText.setDepth?.(keycapTextDepth);
       };
 
-      const renderKeycapRow = (y: number, labels: string[], caption: string) => {
-        const totalWidth = labels.length * keycapWidth + (labels.length - 1) * keycapGap;
-        let currentX = centerX - totalWidth / 2 + keycapWidth / 2;
+      const renderKeycapRow = (
+        columnCenter: number,
+        columnWidthValue: number,
+        y: number,
+        labels: string[],
+        caption: string,
+      ) => {
+        const keyColumnCenter = columnCenter - columnWidthValue / 4;
+        const descColumnCenter = columnCenter + columnWidthValue / 4;
+        const rowWidths = labels.map((label) => computeKeycapWidth(label));
+        const totalWidth = rowWidths.reduce((sum, width) => sum + width, 0) + (labels.length - 1) * keycapGap;
+        let currentX = keyColumnCenter - totalWidth / 2;
 
-        labels.forEach((label) => {
-          createKeycap(currentX, y, label);
-          currentX += keycapWidth + keycapGap;
+        labels.forEach((label, index) => {
+          const widthForKey = rowWidths[index];
+          const labelCenterX = currentX + widthForKey / 2;
+          createKeycap(labelCenterX, y, label, widthForKey);
+          currentX += widthForKey + keycapGap;
         });
 
-        const captionText = this.add.text(centerX, y + keycapHeight / 2 + 8, caption, {
+        const captionText = this.add.text(descColumnCenter, y, caption, {
           fontSize: '14px',
           color: '#dce6ff',
           align: 'center',
         });
-        captionText.setOrigin?.(0.5, 0);
+        captionText.setOrigin?.(0.5, 0.5);
         captionText.setScrollFactor?.(0, 0);
-        captionText.setDepth?.(100);
+        captionText.setDepth?.(keycapTextDepth);
       };
 
-      let controlsTop = centerY - 20;
+      const renderSectionNote = (x: number, y: number, note: string, availableWidth: number) => {
+        const noteStyle: Phaser.Types.GameObjects.Text.TextStyle = {
+          fontSize: '14px',
+          color: '#ffffff',
+          align: 'center',
+        };
+        const noteText = this.add.text(x, y, note, noteStyle);
+        noteText.setOrigin?.(0.5, 0);
+        noteText.setScrollFactor?.(0, 0);
+        noteText.setDepth?.(keycapTextDepth);
+        noteText.setWordWrapWidth?.(availableWidth - 24, true);
+      };
+
+      const renderZonePanel = (x: number, top: number, height: number, width: number) => {
+        if (!this.add?.rectangle) {
+          return;
+        }
+
+        const centerYPosition = top + height / 2;
+        const panel = this.add.rectangle(x, centerYPosition, width, height, zoneFillColor, 0.85);
+        panel.setStrokeStyle?.(1, zoneStrokeColor, 0.9);
+        panel.setScrollFactor?.(0, 0);
+        panel.setDepth?.(zonePanelDepth);
+        panel.setVisible?.(false);
+
+        if (this.add?.graphics) {
+          const roundedPanel = this.add.graphics();
+          const rectX = x - width / 2;
+          const rectY = top;
+          roundedPanel.fillStyle?.(zoneFillColor, 0.85);
+          roundedPanel.lineStyle?.(1, zoneStrokeColor, 0.9);
+          roundedPanel.fillRoundedRect?.(rectX, rectY, width, height, zonePanelRadius);
+          roundedPanel.strokeRoundedRect?.(rectX, rectY, width, height, zonePanelRadius);
+          roundedPanel.setScrollFactor?.(0, 0);
+          roundedPanel.setDepth?.(zonePanelDepth);
+        }
+      };
 
       const sections: Array<{
         title: string;
@@ -325,48 +414,74 @@ export class MenuScene extends Phaser.Scene {
         note?: string;
       }> = [
         {
-          title: 'Keyboard Controls',
+          title: 'Movement',
           rows: [
-            { keys: ['Left', 'Right', 'A', 'D'], caption: 'Move left / right' },
-            { keys: ['Space'], caption: 'Jump or hover while airborne' },
-            { keys: ['C', 'S'], caption: 'Inhale, then swallow to gain abilities' },
-            { keys: ['Z', 'X'], caption: 'Spit or discard current ability' },
+            { keys: ['← / A'], caption: 'Left' },
+            { keys: ['→ / D'], caption: 'Right' },
+            { keys: ['Space'], caption: 'Jump' },
           ],
-          note: 'Touch controls appear as on-screen buttons.',
+          note: 'Touch',
+        },
+        {
+          title: 'Abilities',
+          rows: [
+            { keys: ['C', 'S'], caption: 'Inhale' },
+            { keys: ['Z', 'X'], caption: 'Spit' },
+          ],
         },
         {
           title: 'Menu Shortcuts',
           rows: [
-            { keys: ['Esc'], caption: 'Pause or resume gameplay' },
-            { keys: ['O', 'R'], caption: 'Open settings / Reset spawn to the Central Hub' },
+            { keys: ['Esc'], caption: 'Pause' },
+            { keys: ['O'], caption: 'Settings' },
+            { keys: ['R'], caption: 'Reset' },
+          ],
+        },
+        {
+          title: 'Settings Adjustments',
+          rows: [
+            { keys: ['← / →'], caption: 'Volume' },
+            { keys: ['↑ / ↓'], caption: 'Difficulty' },
+            { keys: ['C'], caption: 'Controls' },
+            { keys: ['Esc'], caption: 'Close' },
           ],
         },
       ];
+      const measureSectionHeight = (section: (typeof sections)[number]) =>
+        zonePadding * 2 + sectionTitleSpacing + section.rows.length * keycapRowSpacing + (section.note ? noteSpacing : 0);
 
-      sections.forEach(({ title, rows, note }) => {
-        renderSectionTitle(controlsTop, title);
-        controlsTop += sectionTitleSpacing;
+      const sectionHeights = sections.map(measureSectionHeight);
+      const uniformZoneHeight = Math.max(...sectionHeights, 0);
+      const totalRows = Math.ceil(sections.length / zoneColumns);
+      const rowTopOffsets: number[] = [];
+      let nextRowTop = gridTop;
+      for (let rowIndex = 0; rowIndex < totalRows; rowIndex += 1) {
+        rowTopOffsets[rowIndex] = nextRowTop;
+        nextRowTop += uniformZoneHeight + (rowIndex < totalRows - 1 ? zoneRowGap : 0);
+      }
 
-        rows.forEach(({ keys, caption }) => {
-          renderKeycapRow(controlsTop, keys, caption);
-          controlsTop += keycapRowSpacing;
+      sections.forEach((section, sectionIndex) => {
+        const columnIndex = sectionIndex % zoneColumns;
+        const rowIndex = Math.floor(sectionIndex / zoneColumns);
+        const columnCenter = columnCenters[columnIndex] ?? centerX;
+        const zoneTop = rowTopOffsets[rowIndex] ?? gridTop;
+        const columnWidthValue = columnWidth - 12;
+        let cursorY = zoneTop + zonePadding;
+
+        renderSectionTitle(columnCenter, cursorY, section.title);
+        cursorY += sectionTitleSpacing;
+
+        section.rows.forEach(({ keys, caption }) => {
+          renderKeycapRow(columnCenter, columnWidthValue, cursorY, keys, caption);
+          cursorY += keycapRowSpacing;
         });
 
-        if (note) {
-          const noteStyle: Phaser.Types.GameObjects.Text.TextStyle = {
-            fontSize: '14px',
-            color: '#ffffff',
-            align: 'center',
-          };
-          const noteText = this.add.text(centerX, controlsTop, note, noteStyle);
-          noteText.setOrigin?.(0.5, 0);
-          noteText.setScrollFactor?.(0, 0);
-          noteText.setDepth?.(100);
-          noteText.setWordWrapWidth?.(Math.min(width - 32, 620), true);
-          controlsTop += noteSpacing;
+        if (section.note) {
+          renderSectionNote(columnCenter, cursorY, section.note, columnWidthValue);
+          cursorY += noteSpacing;
         }
 
-        controlsTop += sectionGap;
+        renderZonePanel(columnCenter, zoneTop, uniformZoneHeight, columnWidth);
       });
     }
 
