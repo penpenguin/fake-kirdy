@@ -1,5 +1,11 @@
 # Repository Guidelines
 
+## Serena Tooling Expectations
+- Default to Serena's MCP integrations whenever you need context; it centralizes specs, saved memories, and helper scripts so agents stay in sync.
+- Kick off each session by opening the Serena Instructions Manual (call `mcp__serena__initial_instructions`) and listing resources via `list_mcp_resources` to learn what's already documented before poking around the repo.
+- Use `read_mcp_resource` (or the parameterized templates) instead of ad-hoc browsing when you need docs from `docs/` or historical decisions, and record new findings with `write_memory` so future agents inherit them.
+- Favor Serena's memory + resource workflow during hand-offs (e.g., summarize outstanding bugs, feature flags, or test gaps) to minimize institutional knowledge loss.
+
 ## Project Structure & Module Organization
 - `src/` contains runtime TypeScript; `src/main.ts` bootstraps Phaser and delegates to `src/game/` for scenes and physics helpers.
 - Tests sit next to their modules (e.g., `src/main.test.ts`) or under `test/` for tooling coverage like `vite-config.test.ts`.
