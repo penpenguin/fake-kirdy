@@ -537,7 +537,7 @@ describe('Scene registration', () => {
 
     const prompt = addTextMock.mock.results[promptCallIndex]?.value;
     expect(prompt?.setOrigin).toHaveBeenCalledWith(0.5, 0.5);
-    expect(prompt?.setPosition).toHaveBeenCalledWith(400, 120);
+    expect(prompt?.setPosition).toHaveBeenCalledWith(400, 144);
 
     const movementSection = addTextMock.mock.calls.find(([, , text]) => text === 'Movement');
     const abilitiesSection = addTextMock.mock.calls.find(([, , text]) => text === 'Abilities');
@@ -698,7 +698,7 @@ describe('Scene registration', () => {
         return;
       }
       const previousY = movementRowYs[index - 1];
-      expect(currentY - previousY).toBeGreaterThanOrEqual(40);
+      expect(currentY - previousY).toBeGreaterThanOrEqual(32);
     });
 
     const findTextCallNear = (value: string, targetY?: number) => {
@@ -741,7 +741,7 @@ describe('Scene registration', () => {
     const leftKeyCall = findTextCall('← / A');
 
     const movementTitleToKeys = (leftKeyCall?.[1] ?? 0) - (movementSection?.[1] ?? 0);
-    expect(movementTitleToKeys).toBeGreaterThanOrEqual(48);
+    expect(movementTitleToKeys).toBeGreaterThanOrEqual(44);
 
     const hoverCaptionCall = findTextCall('Jump');
     expect(touchCall?.[1]).toBeGreaterThanOrEqual((hoverCaptionCall?.[1] ?? 0) + 12);

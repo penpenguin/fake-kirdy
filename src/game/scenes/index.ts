@@ -249,14 +249,20 @@ export class MenuScene extends Phaser.Scene {
       const height = this.scale?.height ?? 600;
       const centerX = width / 2;
       const centerY = height / 2;
-      const promptY = centerY - 180;
-      const prompt = this.add.text(centerX, promptY, 'Press Space or Tap to Start', {
+      const promptFontSize = 24;
+      const promptMarginLines = 2;
+      const promptMarginPixels = promptFontSize * promptMarginLines;
+      const promptOffsetFromCenter = 180 + promptMarginPixels / 2;
+      const promptBaseY = centerY - promptOffsetFromCenter;
+      const promptDisplayY = promptBaseY + promptMarginPixels;
+      const promptMessage = 'Press Space or Tap to Start';
+      const prompt = this.add.text(centerX, promptDisplayY, promptMessage, {
         fontSize: '24px',
         color: '#ffffff',
         align: 'center',
       });
       prompt.setOrigin?.(0.5, 0.5);
-      prompt.setPosition?.(centerX, promptY);
+      prompt.setPosition?.(centerX, promptDisplayY);
       prompt.setScrollFactor?.(0, 0);
       prompt.setDepth?.(100);
       this.createStartPromptBlink(prompt);
@@ -274,8 +280,8 @@ export class MenuScene extends Phaser.Scene {
       const keycapGap = 12;
       const keycapHeight = 32;
       const keycapRadius = 10;
-      const keycapRowSpacing = 40;
-      const sectionTitleSpacing = 48;
+      const keycapRowSpacing = 32;
+      const sectionTitleSpacing = 44;
       const noteSpacing = 12;
       const zonePadding = 8;
       const zoneRowGap = 8;
@@ -294,7 +300,7 @@ export class MenuScene extends Phaser.Scene {
       const columnCenters = Array.from({ length: zoneColumns }, (_, columnIndex) =>
         centerX - gridTotalWidth / 2 + columnWidth / 2 + columnIndex * (columnWidth + zoneColumnGap),
       );
-      const gridTop = promptY + 20;
+      const gridTop = promptBaseY + promptMarginPixels * 2 + 20;
 
       const computeKeycapWidth = (label: string) => {
         const horizontalPadding = keycapPadding.left + keycapPadding.right;
