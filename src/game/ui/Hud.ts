@@ -1,6 +1,6 @@
 import type Phaser from 'phaser';
 import type { AbilityType } from '../mechanics/AbilitySystem';
-import { HUD_SAFE_AREA_HEIGHT } from './hud-layout';
+import { HUD_LINE_SPACING, HUD_SAFE_AREA_HEIGHT } from './hud-layout';
 
 export const HUD_ABILITY_ICON_SIZE = 20;
 
@@ -307,13 +307,18 @@ export class Hud {
     hpFill.setScrollFactor?.(0, 0);
     hpFill.setDepth?.(3);
 
-    const labelStyle = { fontSize: '14px', color: '#ffffff' } satisfies Phaser.Types.GameObjects.Text.TextStyle;
+    const labelStyle =
+      {
+        fontSize: '14px',
+        color: '#ffffff',
+        lineSpacing: HUD_LINE_SPACING,
+      } satisfies Phaser.Types.GameObjects.Text.TextStyle;
     const hpLabel = add.text(padding, padding - 18, 'HP 0 / 0', labelStyle);
     hpLabel.setScrollFactor?.(0, 0);
     hpLabel.setDepth?.(4);
 
     const abilityIconX = padding;
-    const abilityIconY = padding + 18;
+    const abilityIconY = padding + 18 + HUD_LINE_SPACING;
     const abilityLabelX = abilityIconX + HUD_ABILITY_ICON_SIZE + 8;
     const abilityLabel = add.text(abilityLabelX, abilityIconY, 'Ability: None', labelStyle);
     abilityLabel.setOrigin?.(0, 0.5);

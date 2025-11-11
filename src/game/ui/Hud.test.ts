@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Hud, HUD_ABILITY_ICON_SIZE } from './Hud';
-import { HUD_SAFE_AREA_HEIGHT } from './hud-layout';
+import { HUD_SAFE_AREA_HEIGHT, HUD_LINE_SPACING } from './hud-layout';
 
 const EXPECTED_ICON_SIZE = 20;
 
@@ -279,13 +279,14 @@ describe('Hud', () => {
     expect(HUD_ABILITY_ICON_SIZE).toBe(EXPECTED_ICON_SIZE);
   });
 
-  it('能力アイコンはHUD左側に配置される', () => {
+  it('能力アイコンはHUD左側に配置され行間を確保する', () => {
     const { scene, addImage } = createSceneStubs();
     const hud = new Hud(scene);
 
     hud.updateAbility('fire');
 
-    expect(addImage).toHaveBeenCalledWith(16, 34, 'hud-ability-fire');
+    const expectedY = 34 + HUD_LINE_SPACING;
+    expect(addImage).toHaveBeenCalledWith(16, expectedY, 'hud-ability-fire');
   });
 
   it('fire能力のアイコンは炎のシェイプを描画する', () => {
