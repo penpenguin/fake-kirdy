@@ -2,6 +2,14 @@ import type Phaser from 'phaser';
 import type { AbilityType } from '../mechanics/AbilitySystem';
 import { HUD_SAFE_AREA_HEIGHT } from './hud-layout';
 
+export const HUD_ABILITY_ICON_SIZE = 20;
+
+type CanvasTextureLike = {
+  context?: CanvasRenderingContext2D | null;
+  refresh?: () => void;
+  destroy?: () => void;
+};
+
 type TextureManagerLike = {
   exists?: (key: string) => boolean;
   get?: (
@@ -13,6 +21,7 @@ type TextureManagerLike = {
         frames?: Record<string, unknown>;
       }
     | undefined;
+  createCanvas?: (key: string, width: number, height: number) => CanvasTextureLike | undefined;
 };
 
 export interface HudHPState {
@@ -21,6 +30,53 @@ export interface HudHPState {
 }
 
 const SCORE_DIGITS = 6;
+type AbilityIconTheme = {
+  background: string;
+  border: string;
+  shapePrimary?: string;
+  shapeSecondary?: string;
+  detail?: string;
+  glyph?: string;
+  glyphColor?: string;
+  glyphOffsetY?: number;
+};
+
+const DEFAULT_ABILITY_ICON_THEME: AbilityIconTheme = {
+  background: '#c0c0c0',
+  border: '#ffffff',
+  glyph: '?',
+  glyphColor: '#1f1f1f',
+};
+
+const ABILITY_ICON_THEMES: Record<AbilityType, AbilityIconTheme> = {
+  fire: {
+    background: '#2b0d1a',
+    border: '#ffb347',
+    shapePrimary: '#ff6b3d',
+    shapeSecondary: '#ffd166',
+  },
+  ice: {
+    background: '#0b1a33',
+    border: '#8ee1ff',
+    shapePrimary: '#c3f3ff',
+    shapeSecondary: '#78c0e0',
+  },
+  sword: {
+    background: '#eae8dc',
+    border: '#4f5d75',
+    shapePrimary: '#bcc5d3',
+    shapeSecondary: '#f4a259',
+    detail: '#2d3142',
+  },
+};
+
+type AbilityIconRenderer = (context: CanvasRenderingContext2D, theme: AbilityIconTheme) => void;
+
+const ABILITY_ICON_RENDERERS: Partial<Record<AbilityType, AbilityIconRenderer>> = {
+  fire: drawFireIcon,
+  ice: drawIceIcon,
+  sword: drawSwordIcon,
+};
 
 type AbilityIconCandidate = { key: string; frame?: string };
 
@@ -60,6 +116,145 @@ function canUseTextureCandidate(candidate: AbilityIconCandidate, textures: Textu
 
   const texture = textures.get(candidate.key);
   return textureHasFrame(texture, candidate.frame);
+}
+
+function abilityIconTextureKey(ability: AbilityType) {
+  return `hud-ability-${ability}`;
+}
+
+function ensureAbilityIconTexture(ability: AbilityType, textures: TextureManagerLike | undefined) {
+  if (!textures?.createCanvas) {
+    return false;
+  }
+
+  const textureKey = abilityIconTextureKey(ability);
+  if (textures.exists?.(textureKey)) {
+    return true;
+  }
+
+  const canvasTexture = textures.createCanvas(textureKey, HUD_ABILITY_ICON_SIZE, HUD_ABILITY_ICON_SIZE);
+  const context = canvasTexture?.context;
+  if (!canvasTexture || !context) {
+    canvasTexture?.destroy?.();
+    return false;
+  }
+
+  drawAbilityIcon(context, ability);
+  canvasTexture.refresh?.();
+
+  return true;
+}
+
+function drawAbilityIcon(context: CanvasRenderingContext2D, ability: AbilityType) {
+  const theme = ABILITY_ICON_THEMES[ability] ?? DEFAULT_ABILITY_ICON_THEME;
+  drawIconBackground(context, theme);
+  const renderer = ABILITY_ICON_RENDERERS[ability];
+  if (renderer) {
+    renderer(context, theme);
+    return;
+  }
+
+  drawGlyphIcon(context, theme);
+}
+
+function drawIconBackground(context: CanvasRenderingContext2D, theme: AbilityIconTheme) {
+  const size = HUD_ABILITY_ICON_SIZE;
+  const half = size / 2;
+  const radius = half - 1;
+
+  context.clearRect(0, 0, size, size);
+  context.beginPath();
+  context.fillStyle = theme.background;
+  context.arc(half, half, radius, 0, Math.PI * 2);
+  context.fill();
+
+  context.lineWidth = 2;
+  context.strokeStyle = theme.border;
+  context.stroke();
+}
+
+function drawGlyphIcon(context: CanvasRenderingContext2D, theme: AbilityIconTheme) {
+  const size = HUD_ABILITY_ICON_SIZE;
+  const half = size / 2;
+  context.fillStyle = theme.glyphColor ?? '#1f1f1f';
+  context.font = `bold ${Math.round(size * 0.58)}px 'Press Start 2P', 'Courier New', sans-serif`;
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  context.fillText(theme.glyph ?? '?', half, half + (theme.glyphOffsetY ?? 0));
+}
+
+function drawFireIcon(context: CanvasRenderingContext2D, theme: AbilityIconTheme) {
+  const size = HUD_ABILITY_ICON_SIZE;
+  const half = size / 2;
+
+  context.beginPath();
+  context.moveTo(half, size * 0.15);
+  context.bezierCurveTo(size * 0.05, size * 0.3, size * 0.1, size * 0.75, half, size * 0.92);
+  context.bezierCurveTo(size * 0.9, size * 0.75, size * 0.95, size * 0.3, half, size * 0.15);
+  context.closePath();
+  context.fillStyle = theme.shapePrimary ?? '#ff7f50';
+  context.fill();
+
+  context.beginPath();
+  context.moveTo(half, size * 0.35);
+  context.bezierCurveTo(size * 0.35, size * 0.4, size * 0.35, size * 0.6, half, size * 0.78);
+  context.bezierCurveTo(size * 0.65, size * 0.6, size * 0.65, size * 0.4, half, size * 0.35);
+  context.closePath();
+  context.fillStyle = theme.shapeSecondary ?? '#ffe29a';
+  context.fill();
+}
+
+function drawIceIcon(context: CanvasRenderingContext2D, theme: AbilityIconTheme) {
+  const size = HUD_ABILITY_ICON_SIZE;
+  const half = size / 2;
+
+  context.save();
+  context.translate(half, half);
+  context.strokeStyle = theme.shapePrimary ?? '#cfefff';
+  context.lineWidth = 2;
+
+  for (let i = 0; i < 6; i += 1) {
+    context.beginPath();
+    context.moveTo(0, -half + 3);
+    context.lineTo(0, half - 3);
+    context.stroke();
+
+    context.beginPath();
+    context.moveTo(0, -half + 6);
+    context.lineTo(3, -half + 11);
+    context.moveTo(0, -half + 6);
+    context.lineTo(-3, -half + 11);
+    context.stroke();
+
+    context.rotate(Math.PI / 3);
+  }
+
+  context.restore();
+}
+
+function drawSwordIcon(context: CanvasRenderingContext2D, theme: AbilityIconTheme) {
+  const size = HUD_ABILITY_ICON_SIZE;
+  const bladeWidth = size * 0.22;
+  const bladeHeight = size * 0.55;
+  const bladeX = (size - bladeWidth) / 2;
+  const bladeY = size * 0.12;
+
+  context.fillStyle = theme.shapePrimary ?? '#dfe7f2';
+  context.fillRect(bladeX, bladeY, bladeWidth, bladeHeight);
+
+  context.beginPath();
+  context.moveTo(size / 2, bladeY);
+  context.lineTo(bladeX, bladeY + bladeWidth * 0.6);
+  context.lineTo(bladeX + bladeWidth, bladeY + bladeWidth * 0.6);
+  context.closePath();
+  context.fill();
+
+  const guardY = bladeY + bladeHeight;
+  context.fillStyle = theme.shapeSecondary ?? '#f4a259';
+  context.fillRect(size * 0.25, guardY, size * 0.5, size * 0.08);
+
+  context.fillStyle = theme.detail ?? '#2d3142';
+  context.fillRect(size * 0.45, guardY + size * 0.08, size * 0.1, size * 0.22);
 }
 
 export class Hud {
@@ -117,7 +312,11 @@ export class Hud {
     hpLabel.setScrollFactor?.(0, 0);
     hpLabel.setDepth?.(4);
 
-    const abilityLabel = add.text(padding, padding + 18, 'Ability: None', labelStyle);
+    const abilityIconX = padding;
+    const abilityIconY = padding + 18;
+    const abilityLabelX = abilityIconX + HUD_ABILITY_ICON_SIZE + 8;
+    const abilityLabel = add.text(abilityLabelX, abilityIconY, 'Ability: None', labelStyle);
+    abilityLabel.setOrigin?.(0, 0.5);
     abilityLabel.setScrollFactor?.(0, 0);
     abilityLabel.setDepth?.(4);
 
@@ -126,7 +325,7 @@ export class Hud {
     scoreLabel.setScrollFactor?.(0, 0);
     scoreLabel.setDepth?.(4);
 
-    this.abilityIconPosition = { x: scoreX - 32, y: padding + 18 };
+    this.abilityIconPosition = { x: abilityIconX, y: abilityIconY };
 
     container.add?.([background, border, hpBar, hpFill, hpLabel, abilityLabel, scoreLabel] as any);
 
@@ -186,6 +385,7 @@ export class Hud {
     }
 
     const textures = this.scene?.textures as TextureManagerLike | undefined;
+    ensureAbilityIconTexture(ability, textures);
     const applied = this.applyAbilityIconTexture(icon, ability, textures);
     icon.setVisible(applied);
     if (!applied) {
@@ -204,6 +404,7 @@ export class Hud {
     }
 
     const textures = this.scene?.textures as TextureManagerLike | undefined;
+    ensureAbilityIconTexture(ability, textures);
     const candidates = this.resolveAbilityIconCandidates(ability);
     const { x, y } = this.abilityIconPosition;
 
@@ -221,6 +422,7 @@ export class Hud {
         icon.setScrollFactor?.(0, 0);
         icon.setDepth?.(4);
         icon.setVisible?.(false);
+        icon.setDisplaySize?.(HUD_ABILITY_ICON_SIZE, HUD_ABILITY_ICON_SIZE);
         this.container?.add?.(icon as any);
         this.abilityIcon = icon;
         return icon;
@@ -261,7 +463,7 @@ export class Hud {
 
   private resolveAbilityIconCandidates(ability: AbilityType): AbilityIconCandidate[] {
     return [
-      { key: `hud-ability-${ability}` },
+      { key: abilityIconTextureKey(ability) },
       { key: 'hud-ability-icons', frame: ability },
       { key: 'hud-ability', frame: ability },
       { key: `kirdy-${ability}` },

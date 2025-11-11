@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import { Hud } from './Hud';
+import { Hud, HUD_ABILITY_ICON_SIZE } from './Hud';
 import { HUD_SAFE_AREA_HEIGHT } from './hud-layout';
+
+const EXPECTED_ICON_SIZE = 20;
+
+type CanvasContextStub = CanvasRenderingContext2D & { ops: string[] };
 
 function createSceneStubs() {
   const containerDestroy = vi.fn();
@@ -87,21 +91,87 @@ function createSceneStubs() {
     setScrollFactor: vi.fn().mockReturnThis(),
     setDepth: vi.fn().mockReturnThis(),
     setOrigin: vi.fn().mockReturnThis(),
+    setDisplaySize: vi.fn().mockReturnThis(),
+  };
+
+  const createCanvasContextStub = () => {
+    const ops: string[] = [];
+    const record = (name: string) => () => {
+      ops.push(name);
+    };
+
+    const context: any = {
+      ops,
+      clearRect: vi.fn(record('clearRect')),
+      beginPath: vi.fn(record('beginPath')),
+      arc: vi.fn(record('arc')),
+      moveTo: vi.fn(record('moveTo')),
+      lineTo: vi.fn(record('lineTo')),
+      bezierCurveTo: vi.fn(record('bezierCurveTo')),
+      closePath: vi.fn(record('closePath')),
+      fill: vi.fn(record('fill')),
+      stroke: vi.fn(record('stroke')),
+      fillText: vi.fn(record('fillText')),
+      fillRect: vi.fn(record('fillRect')),
+      save: vi.fn(record('save')),
+      restore: vi.fn(record('restore')),
+      translate: vi.fn(record('translate')),
+      rotate: vi.fn(record('rotate')),
+    };
+
+    Object.defineProperty(context, 'fillStyle', {
+      set(value: string) {
+        ops.push(`fillStyle:${value}`);
+      },
+    });
+    Object.defineProperty(context, 'strokeStyle', {
+      set(value: string) {
+        ops.push(`strokeStyle:${value}`);
+      },
+    });
+    Object.defineProperty(context, 'lineWidth', {
+      set(value: number) {
+        ops.push(`lineWidth:${value}`);
+      },
+    });
+    Object.defineProperty(context, 'font', {
+      set(value: string) {
+        ops.push(`font:${value}`);
+      },
+    });
+
+    return context as CanvasContextStub;
   };
 
   const texturesGet = vi.fn();
+  const createdTextureKeys = new Set<string>();
+  const texturesExists = vi.fn((key: string) => createdTextureKeys.has(key));
+  const canvasContexts = new Map<string, CanvasContextStub>();
+  const texturesCreateCanvas = vi.fn((key: string) => {
+    createdTextureKeys.add(key);
+    const context = createCanvasContextStub();
+    canvasContexts.set(key, context);
+    return {
+      context,
+      refresh: vi.fn(),
+      destroy: vi.fn(),
+    };
+  });
+
+  const addImage = vi.fn(() => abilityIcon);
 
   const scene = {
     add: {
       container: vi.fn(() => container),
       rectangle: addRectangle,
       text: addText,
-      image: vi.fn(() => abilityIcon),
+      image: addImage,
     },
     scale: { width: 800, height: 600 },
     textures: {
-      exists: vi.fn().mockReturnValue(false),
+      exists: texturesExists,
       get: texturesGet,
+      createCanvas: texturesCreateCanvas,
     },
   } as any;
 
@@ -117,6 +187,10 @@ function createSceneStubs() {
     scoreLabel,
     abilityIcon,
     texturesGet,
+    texturesExists,
+    texturesCreateCanvas,
+    canvasContexts,
+    addImage,
   };
 }
 
@@ -136,9 +210,8 @@ describe('Hud', () => {
   });
 
   it('displays the current ability type in uppercase, falling back to None', () => {
-    const { scene, abilityLabel, abilityIcon, texturesGet } = createSceneStubs();
+    const { scene, abilityLabel, abilityIcon, texturesGet, texturesExists } = createSceneStubs();
     const hud = new Hud(scene);
-    const texturesExists = scene.textures.exists as ReturnType<typeof vi.fn>;
 
     texturesExists.mockImplementation((key: string) => key === 'hud-ability-fire');
     texturesGet.mockImplementation(() => undefined);
@@ -153,9 +226,8 @@ describe('Hud', () => {
   });
 
   it('能力アイコンはテクスチャのフォールバック順序を評価する', () => {
-    const { scene, abilityIcon, texturesGet } = createSceneStubs();
+    const { scene, abilityIcon, texturesGet, texturesExists } = createSceneStubs();
     const hud = new Hud(scene);
-    const texturesExists = scene.textures.exists as ReturnType<typeof vi.fn>;
 
     texturesExists.mockImplementation((key: string) => key === 'hud-ability-fire');
     texturesGet.mockImplementation(() => undefined);
@@ -182,6 +254,68 @@ describe('Hud', () => {
     abilityIcon.setTexture.mockClear();
     hud.updateAbility('sword');
     expect(abilityIcon.setTexture).not.toHaveBeenCalled();
+  });
+
+  it('能力アイコン用テクスチャを存在しない場合は自前で生成する', () => {
+    const { scene, abilityIcon, texturesCreateCanvas } = createSceneStubs();
+    const hud = new Hud(scene);
+
+    hud.updateAbility('fire');
+
+    expect(texturesCreateCanvas).toHaveBeenCalledWith('hud-ability-fire', EXPECTED_ICON_SIZE, EXPECTED_ICON_SIZE);
+    expect(abilityIcon.setTexture).toHaveBeenCalledWith('hud-ability-fire');
+  });
+
+  it('能力アイコンをHUD用の固定サイズに揃える', () => {
+    const { scene, abilityIcon } = createSceneStubs();
+    const hud = new Hud(scene);
+
+    hud.updateAbility('fire');
+
+    expect(abilityIcon.setDisplaySize).toHaveBeenCalledWith(EXPECTED_ICON_SIZE, EXPECTED_ICON_SIZE);
+  });
+
+  it('HUD_ABILITY_ICON_SIZEはUI仕様のサイズを提供する', () => {
+    expect(HUD_ABILITY_ICON_SIZE).toBe(EXPECTED_ICON_SIZE);
+  });
+
+  it('能力アイコンはHUD左側に配置される', () => {
+    const { scene, addImage } = createSceneStubs();
+    const hud = new Hud(scene);
+
+    hud.updateAbility('fire');
+
+    expect(addImage).toHaveBeenCalledWith(16, 34, 'hud-ability-fire');
+  });
+
+  it('fire能力のアイコンは炎のシェイプを描画する', () => {
+    const { scene, canvasContexts } = createSceneStubs();
+    const hud = new Hud(scene);
+
+    hud.updateAbility('fire');
+
+    const ops = canvasContexts.get('hud-ability-fire')?.ops ?? [];
+    expect(ops).toContain('bezierCurveTo');
+  });
+
+  it('sword能力のアイコンは剣のシェイプを描画する', () => {
+    const { scene, canvasContexts } = createSceneStubs();
+    const hud = new Hud(scene);
+
+    hud.updateAbility('sword');
+
+    const ops = canvasContexts.get('hud-ability-sword')?.ops ?? [];
+    expect(ops).toContain('fillRect');
+  });
+
+  it('ice能力のアイコンは雪の結晶シェイプを描画する', () => {
+    const { scene, canvasContexts } = createSceneStubs();
+    const hud = new Hud(scene);
+
+    hud.updateAbility('ice');
+
+    const ops = canvasContexts.get('hud-ability-ice')?.ops ?? [];
+    expect(ops).toContain('rotate');
   });
 
   it('renders the score as a zero-padded value', () => {
