@@ -4,6 +4,7 @@ import type { ActionStateMap } from './InhaleSystem';
 import type { SwallowedPayload } from './SwallowSystem';
 import type { PhysicsSystem } from '../physics/PhysicsSystem';
 import type { AudioManager } from '../audio/AudioManager';
+import { configureProjectileHitbox, resolveForwardSpawnPosition } from './projectilePlacement';
 
 export const ABILITY_TYPES = ['fire', 'ice', 'sword'] as const;
 export type AbilityType = (typeof ABILITY_TYPES)[number];
@@ -183,8 +184,12 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
       }
 
       const direction = kirdy.sprite.flipX === true ? -1 : 1;
+      const spawnPosition = resolveForwardSpawnPosition(kirdy.sprite, direction);
+      projectile.setPosition?.(spawnPosition.x, spawnPosition.y);
       projectile.setIgnoreGravity?.(true);
       projectile.setFixedRotation?.();
+      projectile.setSensor?.(true);
+      configureProjectileHitbox(projectile);
       projectile.setName?.('kirdy-fire-attack');
       projectile.setVelocityX?.(direction * FIRE_PROJECTILE_SPEED);
       projectile.once?.('destroy', () => {
@@ -219,8 +224,12 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
       }
 
       const direction = kirdy.sprite.flipX === true ? -1 : 1;
+      const spawnPosition = resolveForwardSpawnPosition(kirdy.sprite, direction);
+      projectile.setPosition?.(spawnPosition.x, spawnPosition.y);
       projectile.setIgnoreGravity?.(true);
       projectile.setFixedRotation?.();
+      projectile.setSensor?.(true);
+      configureProjectileHitbox(projectile);
       projectile.setName?.('kirdy-ice-attack');
       projectile.setVelocityX?.(direction * ICE_PROJECTILE_SPEED);
       projectile.once?.('destroy', () => {

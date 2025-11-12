@@ -3,6 +3,7 @@ import type Phaser from 'phaser';
 import type { ActionStateMap } from './InhaleSystem';
 import { AbilitySystem, ABILITY_TYPES } from './AbilitySystem';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
+import { resolveForwardSpawnPosition } from './projectilePlacement';
 
 function buildActions(
   overrides: Partial<{ [K in keyof ActionStateMap]: Partial<ActionStateMap[K]> }> = {},
@@ -37,6 +38,10 @@ type ProjectileStub = {
   setFixedRotation: ReturnType<typeof vi.fn>;
   setName: ReturnType<typeof vi.fn>;
   setSensor: ReturnType<typeof vi.fn>;
+  setPosition: ReturnType<typeof vi.fn>;
+  setCircle: ReturnType<typeof vi.fn>;
+  setBody: ReturnType<typeof vi.fn>;
+  setRectangle: ReturnType<typeof vi.fn>;
   once: ReturnType<typeof vi.fn>;
   destroy: ReturnType<typeof vi.fn>;
 };
@@ -59,6 +64,14 @@ describe('AbilitySystem', () => {
       x: number;
       y: number;
       flipX: boolean;
+      displayWidth: number;
+      displayHeight: number;
+      body: {
+        bounds: {
+          min: { x: number; y: number };
+          max: { x: number; y: number };
+        };
+      };
       setTint: ReturnType<typeof vi.fn>;
       clearTint: ReturnType<typeof vi.fn>;
       setTexture: ReturnType<typeof vi.fn>;
@@ -79,6 +92,10 @@ describe('AbilitySystem', () => {
       setFixedRotation: vi.fn().mockReturnThis(),
       setName: vi.fn().mockReturnThis(),
       setSensor: vi.fn().mockReturnThis(),
+      setPosition: vi.fn().mockReturnThis(),
+      setCircle: vi.fn().mockReturnThis(),
+      setBody: vi.fn().mockReturnThis(),
+      setRectangle: vi.fn().mockReturnThis(),
       once: vi.fn().mockReturnThis(),
       destroy: vi.fn(),
     };
@@ -126,6 +143,14 @@ describe('AbilitySystem', () => {
         x: 128,
         y: 256,
         flipX: false,
+        displayWidth: 64,
+        displayHeight: 64,
+        body: {
+          bounds: {
+            min: { x: 96, y: 224 },
+            max: { x: 160, y: 288 },
+          },
+        },
         setTint: vi.fn().mockReturnThis(),
         clearTint: vi.fn().mockReturnThis(),
         setTexture: vi.fn().mockReturnThis(),
@@ -241,8 +266,12 @@ describe('AbilitySystem', () => {
     );
 
     expect(addSprite).toHaveBeenCalledWith(128, 256, 'fire-attack');
+    const spawn = resolveForwardSpawnPosition(kirdy.sprite as any, 1);
+    expect(projectile.setPosition).toHaveBeenCalledWith(spawn.x, spawn.y);
     expect(projectile.setVelocityX).toHaveBeenCalledWith(420);
     expect(projectile.setIgnoreGravity).toHaveBeenCalledWith(true);
+    expect(projectile.setSensor).toHaveBeenCalledWith(true);
+    expect(projectile.setRectangle).toHaveBeenCalledWith(64, 64);
     expect(scene.time?.delayedCall).toHaveBeenCalled();
     expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(projectile, { damage: 3 });
   });
@@ -304,6 +333,10 @@ describe('AbilitySystem', () => {
       setFixedRotation: vi.fn().mockReturnThis(),
       setName: vi.fn().mockReturnThis(),
       setSensor: vi.fn().mockReturnThis(),
+      setCircle: vi.fn().mockReturnThis(),
+      setBody: vi.fn().mockReturnThis(),
+      setRectangle: vi.fn().mockReturnThis(),
+      setPosition: vi.fn().mockReturnThis(),
       once: vi.fn().mockReturnThis(),
       destroy: vi.fn(),
     };
@@ -319,7 +352,11 @@ describe('AbilitySystem', () => {
     );
 
     expect(addSprite).toHaveBeenCalledWith(128, 256, 'ice-attack');
+    const spawn = resolveForwardSpawnPosition(kirdy.sprite as any, -1);
+    expect(iceProjectile.setPosition).toHaveBeenCalledWith(spawn.x, spawn.y);
     expect(iceProjectile.setVelocityX).toHaveBeenCalledWith(-300);
+    expect(iceProjectile.setSensor).toHaveBeenCalledWith(true);
+    expect(iceProjectile.setRectangle).toHaveBeenCalledWith(64, 64);
     expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(iceProjectile as any, { damage: 3 });
   });
 

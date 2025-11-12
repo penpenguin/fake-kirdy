@@ -3,6 +3,7 @@ import type Phaser from 'phaser';
 import type { ActionStateMap } from './InhaleSystem';
 import { AbilitySystem } from './AbilitySystem';
 import { SwallowSystem } from './SwallowSystem';
+import { resolveForwardSpawnPosition } from './projectilePlacement';
 
 type MockFn = ReturnType<typeof vi.fn>;
 
@@ -40,6 +41,10 @@ type StarProjectileStub = {
   setOnCollide: MockFn;
   setName: MockFn;
   setFixedRotation: MockFn;
+  setCircle: MockFn;
+  setBody: MockFn;
+  setRectangle: MockFn;
+  setSensor: MockFn;
   setActive: MockFn;
   setVisible: MockFn;
   setPosition: MockFn;
@@ -59,13 +64,21 @@ let physicsSystem: {
   registerPlayerAttack: ReturnType<typeof vi.fn>;
   destroyProjectile: ReturnType<typeof vi.fn>;
 };
-  let kirdy: {
-    sprite: {
-      x: number;
-      y: number;
-      flipX: boolean;
-      anims: { play: ReturnType<typeof vi.fn> };
+let kirdy: {
+  sprite: {
+    x: number;
+    y: number;
+    displayWidth: number;
+    displayHeight: number;
+    body: {
+      bounds: {
+        min: { x: number; y: number };
+        max: { x: number; y: number };
+      };
     };
+    flipX: boolean;
+    anims: { play: ReturnType<typeof vi.fn> };
+  };
     getMouthContent: ReturnType<typeof vi.fn>;
   };
   let inhaleSystem: {
@@ -94,6 +107,10 @@ let target: FakeTarget;
       setOnCollide: vi.fn().mockReturnThis(),
       setName: vi.fn().mockReturnThis(),
       setFixedRotation: vi.fn().mockReturnThis(),
+      setCircle: vi.fn().mockReturnThis(),
+      setBody: vi.fn().mockReturnThis(),
+      setRectangle: vi.fn().mockReturnThis(),
+      setSensor: vi.fn().mockReturnThis(),
       setActive: vi.fn().mockReturnThis(),
       setVisible: vi.fn().mockReturnThis(),
       setPosition: vi.fn().mockReturnThis(),
@@ -149,6 +166,14 @@ let target: FakeTarget;
       sprite: {
         x: 128,
         y: 256,
+        displayWidth: 64,
+        displayHeight: 64,
+        body: {
+          bounds: {
+            min: { x: 96, y: 224 },
+            max: { x: 160, y: 288 },
+          },
+        },
         flipX: false,
         anims: {
           play: vi.fn(),
@@ -210,9 +235,12 @@ let target: FakeTarget;
 
     expect(playSound).toHaveBeenCalledWith('kirdy-spit');
     expect(addSprite).toHaveBeenCalledWith(0, 0, 'star-bullet');
-    expect(starProjectile.setPosition).toHaveBeenCalledWith(128, 256);
+    const spawn = resolveForwardSpawnPosition(kirdy.sprite as any, 1);
+    expect(starProjectile.setPosition).toHaveBeenCalledWith(spawn.x, spawn.y);
     expect(starProjectile.setVelocityX).toHaveBeenCalledWith(350);
     expect(starProjectile.setIgnoreGravity).toHaveBeenCalledWith(true);
+    expect(starProjectile.setRectangle).toHaveBeenCalledWith(64, 64);
+    expect(starProjectile.setSensor).toHaveBeenCalledWith(true);
     expect(starProjectile.setOnCollide).toHaveBeenCalledWith(expect.any(Function));
     expect(starProjectile.once).not.toHaveBeenCalled();
     expect(delayedCall).toHaveBeenCalled();
@@ -224,12 +252,29 @@ let target: FakeTarget;
     expect(inhaleSystem.releaseCapturedTarget).toHaveBeenCalled();
   });
 
-  it('gracefully recycles the projectile when physics destroy throws during collisions', () => {
-    physicsSystem.destroyProjectile.mockImplementation(() => {
-      throw new Error('physics destroy failed');
-    });
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+  it('defers star projectile cleanup to the physics collision handler when available', () => {
     const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any, physicsSystem as any);
+
+    system.update(
+      buildActions({
+        spit: { isDown: true, justPressed: true },
+      }),
+    );
+
+    const collideHandler = starProjectile.setOnCollide.mock.calls[0]?.[0];
+    expect(collideHandler).toBeInstanceOf(Function);
+
+    const emitCallsBefore = emitEvent.mock.calls.length;
+    collideHandler?.();
+
+    expect(physicsSystem.destroyProjectile).not.toHaveBeenCalled();
+    expect(emitEvent.mock.calls.length).toBe(emitCallsBefore);
+    expect(starProjectile.destroy).not.toHaveBeenCalled();
+  });
+
+  it('disposes star projectiles locally when collisions occur without physics support', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any);
 
     system.update(
       buildActions({
@@ -243,12 +288,10 @@ let target: FakeTarget;
 
     collideHandler?.();
 
-    expect(physicsSystem.destroyProjectile).toHaveBeenCalledWith(starProjectile);
+    expect(physicsSystem.destroyProjectile).not.toHaveBeenCalled();
+    expect(emitEvent).toHaveBeenCalledWith('star-projectile-destroyed', starProjectile);
     expect(starProjectile.destroy).toHaveBeenCalled();
-    expect(warnSpy).toHaveBeenCalledWith(
-      '[SwallowSystem] failed to destroy star projectile',
-      expect.any(Error),
-    );
+    expect(warnSpy).not.toHaveBeenCalled();
 
     warnSpy.mockRestore();
   });
@@ -486,6 +529,7 @@ let target: FakeTarget;
     expect(addSprite).toHaveBeenCalledTimes(1);
     expect(starProjectile.setActive).toHaveBeenCalledWith(true);
     expect(starProjectile.setVisible).toHaveBeenCalledWith(true);
-    expect(starProjectile.setPosition).toHaveBeenCalledWith(128, 256);
+    const spawn = resolveForwardSpawnPosition(kirdy.sprite as any, 1);
+    expect(starProjectile.setPosition).toHaveBeenCalledWith(spawn.x, spawn.y);
   });
 });

@@ -5,6 +5,7 @@ import type { PhysicsSystem, MatterGameObject } from '../physics/PhysicsSystem';
 import { AbilitySystem } from './AbilitySystem';
 import type { AbilityMetadata } from './AbilitySystem';
 import { ObjectPool } from '../performance/ObjectPool';
+import { configureProjectileHitbox, resolveForwardSpawnPosition } from './projectilePlacement';
 
 export interface SwallowedPayload {
   abilityType?: string;
@@ -40,6 +41,8 @@ export class SwallowSystem {
         sprite.setActive?.(false);
         sprite.setVisible?.(false);
         sprite.setData?.('pooledProjectile', true);
+        sprite.setSensor?.(true);
+        configureProjectileHitbox(sprite);
         return sprite;
       },
       onAcquire: (sprite) => {
@@ -49,6 +52,8 @@ export class SwallowSystem {
         sprite.setFixedRotation?.();
         sprite.setName?.('kirdy-star-projectile');
         sprite.setData?.('pooledProjectile', true);
+        sprite.setSensor?.(true);
+        configureProjectileHitbox(sprite);
       },
       onRelease: (sprite) => {
         sprite.setVelocity?.(0, 0);
@@ -104,17 +109,19 @@ export class SwallowSystem {
 
   private handleSpit(target: Phaser.Physics.Matter.Sprite) {
     this.scene.sound?.play?.('kirdy-spit');
-    const spawnX = this.kirdy.sprite.x ?? 0;
-    const spawnY = this.kirdy.sprite.y ?? 0;
     const facingLeft = this.kirdy.sprite.flipX === true;
-    let projectile = this.acquireStarProjectile(spawnX, spawnY);
+    const direction = facingLeft ? -1 : 1;
+    const spawnPosition = resolveForwardSpawnPosition(this.kirdy.sprite, direction);
+    let projectile = this.acquireStarProjectile(spawnPosition.x, spawnPosition.y);
 
     if (projectile) {
-      const velocityX = facingLeft ? -STAR_PROJECTILE_SPEED : STAR_PROJECTILE_SPEED;
+      const velocityX = direction * STAR_PROJECTILE_SPEED;
       try {
         projectile.setIgnoreGravity?.(true);
         projectile.setFixedRotation?.();
         projectile.setName?.('kirdy-star-projectile');
+        projectile.setSensor?.(true);
+        configureProjectileHitbox(projectile);
         projectile.setVelocityX?.(velocityX);
       } catch (error) {
         console.warn('[SwallowSystem] failed to prepare star projectile', error);
@@ -179,12 +186,19 @@ export class SwallowSystem {
         fallback.setFixedRotation?.();
         fallback.setName?.('kirdy-star-projectile');
         fallback.setData?.('pooledProjectile', false);
+        fallback.setSensor?.(true);
+        configureProjectileHitbox(fallback);
       }
       return fallback;
     }
   }
 
   private handleStarProjectileCollision(projectile: Phaser.Physics.Matter.Sprite) {
+    if (this.physicsSystem) {
+      // Let PhysicsSystem handle the collision so damage can be applied before cleanup.
+      return;
+    }
+
     this.destroyProjectileSafely(projectile);
   }
 
