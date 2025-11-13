@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Mock } from 'vitest';
 import type Phaser from 'phaser';
 import type { ActionStateMap } from './InhaleSystem';
 import { AbilitySystem, ABILITY_TYPES } from './AbilitySystem';
@@ -33,6 +34,8 @@ function createTextureDescriptor(frames: string[] = []) {
 }
 
 type ProjectileStub = {
+  x: number;
+  y: number;
   setVelocityX: ReturnType<typeof vi.fn>;
   setIgnoreGravity: ReturnType<typeof vi.fn>;
   setFixedRotation: ReturnType<typeof vi.fn>;
@@ -42,8 +45,15 @@ type ProjectileStub = {
   setCircle: ReturnType<typeof vi.fn>;
   setBody: ReturnType<typeof vi.fn>;
   setRectangle: ReturnType<typeof vi.fn>;
-  once: ReturnType<typeof vi.fn>;
+  once: Mock<[string, () => void], ProjectileStub>;
   destroy: ReturnType<typeof vi.fn>;
+};
+
+type ParticleEffectStub = {
+  startFollow: ReturnType<typeof vi.fn>;
+  stop: ReturnType<typeof vi.fn>;
+  destroy: ReturnType<typeof vi.fn>;
+  setDepth: ReturnType<typeof vi.fn>;
 };
 
 describe('AbilitySystem', () => {
@@ -84,9 +94,14 @@ describe('AbilitySystem', () => {
   let sceneAnims: {
     exists: ReturnType<typeof vi.fn>;
   };
+  let addParticles: ReturnType<typeof vi.fn>;
+  let particleEffect: ParticleEffectStub;
+  let projectileEvents: Record<string, Array<() => void>>;
 
   beforeEach(() => {
     projectile = {
+      x: 128,
+      y: 256,
       setVelocityX: vi.fn().mockReturnThis(),
       setIgnoreGravity: vi.fn().mockReturnThis(),
       setFixedRotation: vi.fn().mockReturnThis(),
@@ -96,9 +111,16 @@ describe('AbilitySystem', () => {
       setCircle: vi.fn().mockReturnThis(),
       setBody: vi.fn().mockReturnThis(),
       setRectangle: vi.fn().mockReturnThis(),
-      once: vi.fn().mockReturnThis(),
+      once: vi.fn(),
       destroy: vi.fn(),
     };
+
+    projectileEvents = {};
+    projectile.once = vi.fn((event: string, handler: () => void) => {
+      projectileEvents[event] = projectileEvents[event] ?? [];
+      projectileEvents[event].push(handler);
+      return projectile as unknown as ProjectileStub;
+    });
 
     addSprite = vi.fn().mockReturnValue(projectile);
     delayedCall = vi.fn();
@@ -129,6 +151,15 @@ describe('AbilitySystem', () => {
     worldOn = vi.fn();
     worldOff = vi.fn();
 
+    particleEffect = {
+      startFollow: vi.fn(),
+      stop: vi.fn(),
+      destroy: vi.fn(),
+      setDepth: vi.fn(),
+    };
+
+    addParticles = vi.fn().mockReturnValue(particleEffect);
+
     scene = {
       matter: { add: { sprite: addSprite }, world: { on: worldOn, off: worldOff, remove: vi.fn() } },
       time: { delayedCall },
@@ -136,6 +167,7 @@ describe('AbilitySystem', () => {
       events: { emit: eventsEmit },
       textures: textureManager,
       anims: sceneAnims,
+      add: { particles: addParticles },
     } as unknown as Phaser.Scene;
 
     kirdy = {
@@ -274,6 +306,26 @@ describe('AbilitySystem', () => {
     expect(projectile.setRectangle).toHaveBeenCalledWith(64, 64);
     expect(scene.time?.delayedCall).toHaveBeenCalled();
     expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(projectile, { damage: 3 });
+  });
+
+  it('follows fired projectiles with a particle trail until they are destroyed', () => {
+    const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
+    system.applySwallowedPayload({ abilityType: 'fire' });
+
+    system.update(
+      buildActions({
+        spit: { isDown: true, justPressed: true },
+      }),
+    );
+
+    expect(addParticles).toHaveBeenCalledWith(0, 0, 'inhale-sparkle');
+    expect(particleEffect.setDepth).toHaveBeenCalledWith(expect.any(Number));
+    expect(particleEffect.startFollow).toHaveBeenCalledWith(projectile as any);
+
+    projectileEvents.destroy?.forEach((handler) => handler());
+
+    expect(particleEffect.stop).toHaveBeenCalledWith(true);
+    expect(particleEffect.destroy).toHaveBeenCalled();
   });
 
   it('routes ability attack sounds through the audio manager when available', () => {

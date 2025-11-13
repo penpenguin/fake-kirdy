@@ -6,6 +6,7 @@ import { AbilitySystem } from './AbilitySystem';
 import type { AbilityMetadata } from './AbilitySystem';
 import { ObjectPool } from '../performance/ObjectPool';
 import { configureProjectileHitbox, resolveForwardSpawnPosition } from './projectilePlacement';
+import { attachProjectileTrail } from './projectileTrail';
 
 export interface SwallowedPayload {
   abilityType?: string;
@@ -17,6 +18,7 @@ const STAR_PROJECTILE_LIFETIME_MS = 1200;
 const STAR_PROJECTILE_DAMAGE = 3;
 const STAR_PROJECTILE_TEXTURE = 'star-bullet';
 const STAR_PROJECTILE_POOL_SIZE = 6;
+const STAR_PROJECTILE_TRAIL_TEXTURES = ['inhale-sparkle', STAR_PROJECTILE_TEXTURE, 'kirdy'] as const;
 
 export class SwallowSystem {
   private swallowedPayload?: SwallowedPayload;
@@ -113,6 +115,7 @@ export class SwallowSystem {
     const direction = facingLeft ? -1 : 1;
     const spawnPosition = resolveForwardSpawnPosition(this.kirdy.sprite, direction);
     let projectile = this.acquireStarProjectile(spawnPosition.x, spawnPosition.y);
+    let projectileTrailTeardown: (() => void) | undefined;
 
     if (projectile) {
       const velocityX = direction * STAR_PROJECTILE_SPEED;
@@ -122,10 +125,14 @@ export class SwallowSystem {
         projectile.setName?.('kirdy-star-projectile');
         projectile.setSensor?.(true);
         configureProjectileHitbox(projectile);
+        projectileTrailTeardown = attachProjectileTrail(this.scene, projectile, {
+          textureKeys: STAR_PROJECTILE_TRAIL_TEXTURES,
+        });
         projectile.setVelocityX?.(velocityX);
       } catch (error) {
         console.warn('[SwallowSystem] failed to prepare star projectile', error);
         this.disposeFailedProjectile(projectile);
+        projectileTrailTeardown?.();
         projectile = undefined;
       }
     }
@@ -149,12 +156,16 @@ export class SwallowSystem {
       try {
         this.physicsSystem?.registerPlayerAttack(preparedProjectile, {
           damage: STAR_PROJECTILE_DAMAGE,
-          recycle: (candidate) => this.recycleStarProjectile(candidate),
+          recycle: (candidate) => {
+            projectileTrailTeardown?.();
+            return this.recycleStarProjectile(candidate);
+          },
         });
       } catch (error) {
         registered = false;
         console.warn('[SwallowSystem] failed to register star projectile', error);
         lifetime?.remove?.();
+        projectileTrailTeardown?.();
         this.destroyProjectileSafely(preparedProjectile);
       }
 

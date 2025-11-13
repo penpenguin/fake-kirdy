@@ -5,6 +5,7 @@ import type { SwallowedPayload } from './SwallowSystem';
 import type { PhysicsSystem } from '../physics/PhysicsSystem';
 import type { AudioManager } from '../audio/AudioManager';
 import { configureProjectileHitbox, resolveForwardSpawnPosition } from './projectilePlacement';
+import { attachProjectileTrail } from './projectileTrail';
 
 export const ABILITY_TYPES = ['fire', 'ice', 'sword'] as const;
 export type AbilityType = (typeof ABILITY_TYPES)[number];
@@ -61,6 +62,12 @@ const abilityTextureFallbacks: Record<AbilityType, readonly string[]> = {
   fire: ['kirdy-fire'],
   ice: ['kirdy-ice'],
   sword: ['kirdy-sword'],
+};
+
+const abilityTrailParticleCandidates: Record<AbilityType, readonly string[]> = {
+  fire: ['inhale-sparkle', 'fire-attack', 'kirdy-fire', 'kirdy'],
+  ice: ['inhale-sparkle', 'ice-attack', 'kirdy-ice', 'kirdy'],
+  sword: ['inhale-sparkle', 'kirdy-sword', 'kirdy'],
 };
 
 const BASE_TEXTURE_FALLBACKS = ['kirdy-idle'] as const;
@@ -192,6 +199,7 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
       configureProjectileHitbox(projectile);
       projectile.setName?.('kirdy-fire-attack');
       projectile.setVelocityX?.(direction * FIRE_PROJECTILE_SPEED);
+      attachProjectileTrail(scene, projectile, { textureKeys: abilityTrailParticleCandidates.fire });
       projectile.once?.('destroy', () => {
         scene.events?.emit?.('ability-attack-destroyed', { abilityType: 'fire', projectile });
       });
@@ -232,6 +240,7 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
       configureProjectileHitbox(projectile);
       projectile.setName?.('kirdy-ice-attack');
       projectile.setVelocityX?.(direction * ICE_PROJECTILE_SPEED);
+      attachProjectileTrail(scene, projectile, { textureKeys: abilityTrailParticleCandidates.ice });
       projectile.once?.('destroy', () => {
         scene.events?.emit?.('ability-attack-destroyed', { abilityType: 'ice', projectile });
       });

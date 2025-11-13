@@ -34,6 +34,8 @@ type FakeTarget = Phaser.Physics.Matter.Sprite & {
 };
 
 type StarProjectileStub = {
+  x: number;
+  y: number;
   setVelocityX: MockFn;
   setIgnoreGravity: MockFn;
   setCollisionCategory: MockFn;
@@ -56,37 +58,44 @@ type StarProjectileStub = {
 };
 
 describe('SwallowSystem', () => {
-let scene: Phaser.Scene;
-let playSound: ReturnType<typeof vi.fn>;
-let addSprite: ReturnType<typeof vi.fn>;
-let delayedCall: ReturnType<typeof vi.fn>;
-let physicsSystem: {
-  registerPlayerAttack: ReturnType<typeof vi.fn>;
-  destroyProjectile: ReturnType<typeof vi.fn>;
-};
-let kirdy: {
-  sprite: {
-    x: number;
-    y: number;
-    displayWidth: number;
-    displayHeight: number;
-    body: {
-      bounds: {
-        min: { x: number; y: number };
-        max: { x: number; y: number };
-      };
-    };
-    flipX: boolean;
-    anims: { play: ReturnType<typeof vi.fn> };
+  let scene: Phaser.Scene;
+  let playSound: ReturnType<typeof vi.fn>;
+  let addSprite: ReturnType<typeof vi.fn>;
+  let delayedCall: ReturnType<typeof vi.fn>;
+  let physicsSystem: {
+    registerPlayerAttack: ReturnType<typeof vi.fn>;
+    destroyProjectile: ReturnType<typeof vi.fn>;
   };
+  let kirdy: {
+    sprite: {
+      x: number;
+      y: number;
+      displayWidth: number;
+      displayHeight: number;
+      body: {
+        bounds: {
+          min: { x: number; y: number };
+          max: { x: number; y: number };
+        };
+      };
+      flipX: boolean;
+      anims: { play: ReturnType<typeof vi.fn> };
+    };
     getMouthContent: ReturnType<typeof vi.fn>;
   };
   let inhaleSystem: {
     releaseCapturedTarget: ReturnType<typeof vi.fn>;
   };
-let target: FakeTarget;
+  let target: FakeTarget;
   let starProjectile: StarProjectileStub;
   let emitEvent: ReturnType<typeof vi.fn>;
+  let addParticles: ReturnType<typeof vi.fn>;
+  let particleEffect: {
+    startFollow: MockFn;
+    stop: MockFn;
+    destroy: MockFn;
+    setDepth: MockFn;
+  };
 
   beforeEach(() => {
     playSound = vi.fn();
@@ -100,6 +109,8 @@ let target: FakeTarget;
     const starProjectileData = new Map<string, unknown>();
 
     const projectile: Partial<StarProjectileStub> = {
+      x: 0,
+      y: 0,
       setVelocityX: vi.fn().mockReturnThis(),
       setIgnoreGravity: vi.fn().mockReturnThis(),
       setCollisionCategory: vi.fn().mockReturnThis(),
@@ -132,6 +143,15 @@ let target: FakeTarget;
 
     emitEvent = vi.fn();
 
+    particleEffect = {
+      startFollow: vi.fn(),
+      stop: vi.fn(),
+      destroy: vi.fn(),
+      setDepth: vi.fn(),
+    };
+
+    addParticles = vi.fn().mockReturnValue(particleEffect);
+
     scene = {
       sound: {
         play: playSound,
@@ -146,6 +166,9 @@ let target: FakeTarget;
       },
       events: {
         emit: emitEvent,
+      },
+      add: {
+        particles: addParticles,
       },
     } as unknown as Phaser.Scene;
 
@@ -242,7 +265,7 @@ let target: FakeTarget;
     expect(starProjectile.setRectangle).toHaveBeenCalledWith(64, 64);
     expect(starProjectile.setSensor).toHaveBeenCalledWith(true);
     expect(starProjectile.setOnCollide).toHaveBeenCalledWith(expect.any(Function));
-    expect(starProjectile.once).not.toHaveBeenCalled();
+    expect(starProjectile.once).toHaveBeenCalledWith('destroy', expect.any(Function));
     expect(delayedCall).toHaveBeenCalled();
     expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(
       starProjectile,
@@ -250,6 +273,39 @@ let target: FakeTarget;
     );
     expect(target.destroy).toHaveBeenCalled();
     expect(inhaleSystem.releaseCapturedTarget).toHaveBeenCalled();
+  });
+
+  it('attaches a particle trail that follows the spit projectile', () => {
+    const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any, physicsSystem as any);
+
+    system.update(
+      buildActions({
+        spit: { isDown: true, justPressed: true },
+      }),
+    );
+
+    expect(addParticles).toHaveBeenCalledWith(0, 0, 'inhale-sparkle');
+    expect(particleEffect.setDepth).toHaveBeenCalledWith(expect.any(Number));
+    expect(particleEffect.startFollow).toHaveBeenCalledWith(starProjectile as any);
+  });
+
+  it('stops the projectile trail when the recycled projectile re-enters the pool', () => {
+    const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any, physicsSystem as any);
+
+    system.update(
+      buildActions({
+        spit: { isDown: true, justPressed: true },
+      }),
+    );
+
+    const registerArgs = physicsSystem.registerPlayerAttack.mock.calls[0];
+    const recycle = registerArgs?.[1]?.recycle;
+    expect(recycle).toBeInstanceOf(Function);
+
+    recycle?.(starProjectile as any);
+
+    expect(particleEffect.stop).toHaveBeenCalledWith(true);
+    expect(particleEffect.destroy).toHaveBeenCalled();
   });
 
   it('defers star projectile cleanup to the physics collision handler when available', () => {
