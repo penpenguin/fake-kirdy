@@ -6,6 +6,9 @@
 - Use `read_mcp_resource` (or the parameterized templates) instead of ad-hoc browsing when you need docs from `docs/` or historical decisions, and record new findings with `write_memory` so future agents inherit them.
 - Favor Serena's memory + resource workflow during hand-offs (e.g., summarize outstanding bugs, feature flags, or test gaps) to minimize institutional knowledge loss.
 
+## ExecPlans
+When writing complex features or significant refactors, use an ExecPlan (as described in .agent/PLANS.md) from design to implementation.
+
 ## Project Structure & Module Organization
 - `src/` contains runtime TypeScript; `src/main.ts` bootstraps Phaser and delegates to `src/game/` for scenes and physics helpers.
 - Tests sit next to their modules (e.g., `src/main.test.ts`) or under `test/` for tooling coverage like `vite-config.test.ts`.
