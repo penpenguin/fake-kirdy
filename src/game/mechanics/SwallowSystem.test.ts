@@ -2,8 +2,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type Phaser from 'phaser';
 import type { ActionStateMap } from './InhaleSystem';
 import { AbilitySystem } from './AbilitySystem';
+import { PhysicsCategory } from '../physics/PhysicsSystem';
 import { SwallowSystem } from './SwallowSystem';
 import { resolveForwardSpawnPosition } from './projectilePlacement';
+
+const STAR_PROJECTILE_SPEED = 350;
+const STAR_PROJECTILE_LIFETIME_MS = 2400;
+const STAR_PROJECTILE_STEP_INTERVAL = 100;
+const STAR_PROJECTILE_STEP_DISTANCE = (STAR_PROJECTILE_SPEED * STAR_PROJECTILE_STEP_INTERVAL) / 1000;
+const STAR_PROJECTILE_STEP_COUNT = Math.ceil(STAR_PROJECTILE_LIFETIME_MS / STAR_PROJECTILE_STEP_INTERVAL);
 
 type MockFn = ReturnType<typeof vi.fn>;
 
@@ -57,11 +64,30 @@ type StarProjectileStub = {
   destroy: MockFn;
 };
 
+function createCanvasTextureStub() {
+  const context = {
+    fillStyle: '',
+    fillRect: vi.fn(),
+  };
+
+  return {
+    fill: vi.fn(),
+    refresh: vi.fn(),
+    canvas: {
+      getContext: vi.fn(() => context),
+    },
+    getContext: vi.fn(() => context),
+    getCanvas: vi.fn(() => ({ getContext: vi.fn(() => context) })),
+    context,
+  };
+}
+
 describe('SwallowSystem', () => {
   let scene: Phaser.Scene;
   let playSound: ReturnType<typeof vi.fn>;
   let addSprite: ReturnType<typeof vi.fn>;
   let delayedCall: ReturnType<typeof vi.fn>;
+  let delayedCallHandlers: Array<{ delay: number; handler?: () => void; timer: { remove: ReturnType<typeof vi.fn> } }>;
   let physicsSystem: {
     registerPlayerAttack: ReturnType<typeof vi.fn>;
     destroyProjectile: ReturnType<typeof vi.fn>;
@@ -96,14 +122,24 @@ describe('SwallowSystem', () => {
     destroy: MockFn;
     setDepth: MockFn;
   };
+  let textureManager: any;
 
   beforeEach(() => {
     playSound = vi.fn();
-    const removeTimer = vi.fn();
-    delayedCall = vi.fn().mockReturnValue({ remove: removeTimer });
+    delayedCallHandlers = [];
+    delayedCall = vi.fn().mockImplementation((delay: number, handler?: () => void) => {
+      const timer = { remove: vi.fn() };
+      delayedCallHandlers.push({ delay, handler, timer });
+      return timer;
+    });
     physicsSystem = {
       registerPlayerAttack: vi.fn(),
       destroyProjectile: vi.fn(),
+    };
+
+    textureManager = {
+      exists: vi.fn().mockReturnValue(true),
+      createCanvas: vi.fn(() => createCanvasTextureStub()),
     };
 
     const starProjectileData = new Map<string, unknown>();
@@ -170,6 +206,7 @@ describe('SwallowSystem', () => {
       add: {
         particles: addParticles,
       },
+      textures: textureManager,
     } as unknown as Phaser.Scene;
 
     target = {
@@ -247,7 +284,7 @@ describe('SwallowSystem', () => {
     expect(inhaleSystem.releaseCapturedTarget).not.toHaveBeenCalled();
   });
 
-  it('spits a star projectile forward using the captured enemy', () => {
+  it('moves a star projectile forward in 0.1s steps using the captured enemy', () => {
     const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any, physicsSystem as any);
 
     system.update(
@@ -259,20 +296,54 @@ describe('SwallowSystem', () => {
     expect(playSound).toHaveBeenCalledWith('kirdy-spit');
     expect(addSprite).toHaveBeenCalledWith(0, 0, 'star-bullet');
     const spawn = resolveForwardSpawnPosition(kirdy.sprite as any, 1);
-    expect(starProjectile.setPosition).toHaveBeenCalledWith(spawn.x, spawn.y);
-    expect(starProjectile.setVelocityX).toHaveBeenCalledWith(350);
+    expect(starProjectile.setPosition).toHaveBeenCalledWith(spawn.x, kirdy.sprite.y);
     expect(starProjectile.setIgnoreGravity).toHaveBeenCalledWith(true);
     expect(starProjectile.setRectangle).toHaveBeenCalledWith(64, 64);
     expect(starProjectile.setSensor).toHaveBeenCalledWith(true);
+    expect(starProjectile.setCollidesWith).toHaveBeenCalledWith(PhysicsCategory.Enemy);
+    expect(starProjectile.setCollisionCategory).toHaveBeenCalledWith(PhysicsCategory.PlayerAttack);
     expect(starProjectile.setOnCollide).toHaveBeenCalledWith(expect.any(Function));
     expect(starProjectile.once).toHaveBeenCalledWith('destroy', expect.any(Function));
-    expect(delayedCall).toHaveBeenCalled();
+    expect(delayedCall).toHaveBeenCalledWith(STAR_PROJECTILE_STEP_INTERVAL, expect.any(Function));
     expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(
       starProjectile,
       expect.objectContaining({ damage: 3, recycle: expect.any(Function) }),
     );
     expect(target.destroy).toHaveBeenCalled();
     expect(inhaleSystem.releaseCapturedTarget).toHaveBeenCalled();
+
+    let handlerCursor = 0;
+    const nextStepHandler = () => {
+      while (handlerCursor < delayedCallHandlers.length) {
+        const candidate = delayedCallHandlers[handlerCursor];
+        handlerCursor += 1;
+        if (candidate.delay === STAR_PROJECTILE_STEP_INTERVAL) {
+          return candidate.handler;
+        }
+      }
+      return undefined;
+    };
+
+    const runNextStep = () => {
+      const handler = nextStepHandler();
+      expect(handler).toBeTypeOf('function');
+      handler?.();
+    };
+
+    runNextStep();
+    expect(starProjectile.setPosition).toHaveBeenLastCalledWith(
+      spawn.x + STAR_PROJECTILE_STEP_DISTANCE,
+      kirdy.sprite.y,
+    );
+
+    for (let i = 1; i < STAR_PROJECTILE_STEP_COUNT; i += 1) {
+      runNextStep();
+    }
+
+    const expectedFinalX = spawn.x + STAR_PROJECTILE_STEP_DISTANCE * STAR_PROJECTILE_STEP_COUNT;
+    expect(starProjectile.setPosition).toHaveBeenLastCalledWith(expectedFinalX, kirdy.sprite.y);
+    expect(physicsSystem.destroyProjectile).toHaveBeenCalledWith(starProjectile);
+    expect(starProjectile.setVelocityX).not.toHaveBeenCalled();
   });
 
   it('attaches a particle trail that follows the spit projectile', () => {
@@ -284,9 +355,30 @@ describe('SwallowSystem', () => {
       }),
     );
 
-    expect(addParticles).toHaveBeenCalledWith(0, 0, 'inhale-sparkle');
+    expect(addParticles).toHaveBeenCalledWith(0, 0, 'star-bullet');
     expect(particleEffect.setDepth).toHaveBeenCalledWith(expect.any(Number));
     expect(particleEffect.startFollow).toHaveBeenCalledWith(starProjectile as any);
+  });
+
+  it('rebuilds the star projectile texture when missing', () => {
+    textureManager.exists.mockImplementation((key: string) => key !== 'star-bullet');
+    const canvasTexture = createCanvasTextureStub();
+    textureManager.createCanvas.mockReturnValueOnce(canvasTexture);
+
+    const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any, physicsSystem as any);
+
+    system.update(
+      buildActions({
+        spit: { isDown: true, justPressed: true },
+      }),
+    );
+
+    expect(textureManager.createCanvas).toHaveBeenCalledWith(
+      'star-bullet',
+      expect.any(Number),
+      expect.any(Number),
+    );
+    expect(canvasTexture.refresh).toHaveBeenCalled();
   });
 
   it('stops the projectile trail when the recycled projectile re-enters the pool', () => {
@@ -373,7 +465,7 @@ describe('SwallowSystem', () => {
     warnSpy.mockRestore();
   });
 
-  it('still disposes the projectile if timed destruction fails', () => {
+  it('still disposes the projectile if scheduled destruction fails', () => {
     physicsSystem.destroyProjectile.mockImplementation(() => {
       throw new Error('timer destroy failed');
     });
@@ -388,10 +480,23 @@ describe('SwallowSystem', () => {
 
     starProjectile.setData('pooledProjectile', false);
 
-    const timerCallback = delayedCall.mock.calls[0]?.[1];
-    expect(timerCallback).toBeInstanceOf(Function);
+    let handlerCursor = 0;
+    const nextStepHandler = () => {
+      while (handlerCursor < delayedCallHandlers.length) {
+        const candidate = delayedCallHandlers[handlerCursor];
+        handlerCursor += 1;
+        if (candidate.delay === STAR_PROJECTILE_STEP_INTERVAL) {
+          return candidate.handler;
+        }
+      }
+      return undefined;
+    };
 
-    expect(() => timerCallback?.()).not.toThrow();
+    for (let i = 0; i < STAR_PROJECTILE_STEP_COUNT; i += 1) {
+      const handler = nextStepHandler();
+      expect(handler).toBeTypeOf('function');
+      expect(() => handler?.()).not.toThrow();
+    }
     expect(physicsSystem.destroyProjectile).toHaveBeenCalledWith(starProjectile);
     expect(warnSpy).toHaveBeenCalledWith('[SwallowSystem] failed to destroy star projectile', expect.any(Error));
 
@@ -423,7 +528,7 @@ describe('SwallowSystem', () => {
   it('handles star projectile setup errors without crashing', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const setupError = new Error("Cannot read properties of undefined (reading 'position')");
-    starProjectile.setVelocityX.mockImplementation(() => {
+    starProjectile.setRectangle.mockImplementation(() => {
       throw setupError;
     });
 
@@ -512,7 +617,7 @@ describe('SwallowSystem', () => {
     expect(setTexture).not.toHaveBeenCalledWith('kirdy', 'fire');
   });
 
-  it('flips projectile direction when Kirdy faces left', () => {
+  it('moves the star projectile leftward when Kirdy faces left', () => {
     kirdy.sprite.flipX = true;
 
     const system = new SwallowSystem(scene, kirdy as any, inhaleSystem as any, physicsSystem as any);
@@ -523,7 +628,28 @@ describe('SwallowSystem', () => {
       }),
     );
 
-    expect(starProjectile.setVelocityX).toHaveBeenCalledWith(-350);
+    const spawn = resolveForwardSpawnPosition(kirdy.sprite as any, -1);
+    expect(starProjectile.setPosition).toHaveBeenCalledWith(spawn.x, kirdy.sprite.y);
+
+    let handlerCursor = 0;
+    const nextStepHandler = () => {
+      while (handlerCursor < delayedCallHandlers.length) {
+        const candidate = delayedCallHandlers[handlerCursor];
+        handlerCursor += 1;
+        if (candidate.delay === STAR_PROJECTILE_STEP_INTERVAL) {
+          return candidate.handler;
+        }
+      }
+      return undefined;
+    };
+
+    nextStepHandler()?.();
+
+    expect(starProjectile.setPosition).toHaveBeenLastCalledWith(
+      spawn.x - STAR_PROJECTILE_STEP_DISTANCE,
+      kirdy.sprite.y,
+    );
+    expect(starProjectile.setVelocityX).not.toHaveBeenCalled();
   });
 
   it('does not spit when no enemy is captured', () => {
@@ -586,6 +712,6 @@ describe('SwallowSystem', () => {
     expect(starProjectile.setActive).toHaveBeenCalledWith(true);
     expect(starProjectile.setVisible).toHaveBeenCalledWith(true);
     const spawn = resolveForwardSpawnPosition(kirdy.sprite as any, 1);
-    expect(starProjectile.setPosition).toHaveBeenCalledWith(spawn.x, spawn.y);
+    expect(starProjectile.setPosition).toHaveBeenCalledWith(spawn.x, kirdy.sprite.y);
   });
 });

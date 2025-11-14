@@ -3,8 +3,21 @@ import type { Mock } from 'vitest';
 import type Phaser from 'phaser';
 import type { ActionStateMap } from './InhaleSystem';
 import { AbilitySystem, ABILITY_TYPES } from './AbilitySystem';
-import { PhysicsSystem } from '../physics/PhysicsSystem';
+import { PhysicsCategory, PhysicsSystem } from '../physics/PhysicsSystem';
 import { resolveForwardSpawnPosition } from './projectilePlacement';
+
+const FIRE_PROJECTILE_SPEED = 420;
+const FIRE_PROJECTILE_LIFETIME = 700;
+const FIRE_PROJECTILE_STEP_INTERVAL = 100;
+const FIRE_PROJECTILE_STEP_DISTANCE = (FIRE_PROJECTILE_SPEED * FIRE_PROJECTILE_STEP_INTERVAL) / 1000;
+const FIRE_PROJECTILE_STEP_COUNT = Math.ceil(FIRE_PROJECTILE_LIFETIME / FIRE_PROJECTILE_STEP_INTERVAL);
+const ICE_AOE_MARGIN = 128;
+const ICE_AOE_ALPHA = 0.6;
+const ICE_TEXTURE_SIZE = 128;
+const SWORD_STRIKE_WIDTH = 72;
+const SWORD_STRIKE_HEIGHT = 64;
+const SWORD_TEXTURE_WIDTH = 96;
+const SWORD_TEXTURE_HEIGHT = 32;
 
 function buildActions(
   overrides: Partial<{ [K in keyof ActionStateMap]: Partial<ActionStateMap[K]> }> = {},
@@ -33,6 +46,27 @@ function createTextureDescriptor(frames: string[] = []) {
   };
 }
 
+function createCanvasTextureStub() {
+  const context = {
+    fillStyle: '',
+    fillRect: vi.fn(),
+    clearRect: vi.fn(),
+  };
+
+  return {
+    fill: vi.fn(),
+    refresh: vi.fn(),
+    canvas: {
+      getContext: vi.fn(() => context),
+    },
+    getContext: vi.fn(() => context),
+    getCanvas: vi.fn(() => ({
+      getContext: vi.fn(() => context),
+    })),
+    context,
+  };
+}
+
 type ProjectileStub = {
   x: number;
   y: number;
@@ -41,10 +75,12 @@ type ProjectileStub = {
   setFixedRotation: ReturnType<typeof vi.fn>;
   setName: ReturnType<typeof vi.fn>;
   setSensor: ReturnType<typeof vi.fn>;
+  setCollidesWith: ReturnType<typeof vi.fn>;
   setPosition: ReturnType<typeof vi.fn>;
   setCircle: ReturnType<typeof vi.fn>;
   setBody: ReturnType<typeof vi.fn>;
   setRectangle: ReturnType<typeof vi.fn>;
+  setAlpha: ReturnType<typeof vi.fn>;
   once: Mock<[string, () => void], ProjectileStub>;
   destroy: ReturnType<typeof vi.fn>;
 };
@@ -107,10 +143,12 @@ describe('AbilitySystem', () => {
       setFixedRotation: vi.fn().mockReturnThis(),
       setName: vi.fn().mockReturnThis(),
       setSensor: vi.fn().mockReturnThis(),
+      setCollidesWith: vi.fn().mockReturnThis(),
       setPosition: vi.fn().mockReturnThis(),
       setCircle: vi.fn().mockReturnThis(),
       setBody: vi.fn().mockReturnThis(),
       setRectangle: vi.fn().mockReturnThis(),
+      setAlpha: vi.fn().mockReturnThis(),
       once: vi.fn(),
       destroy: vi.fn(),
     };
@@ -137,11 +175,32 @@ describe('AbilitySystem', () => {
       'kirdy-ice': createTextureDescriptor([]),
       'kirdy-sword': createTextureDescriptor([]),
       'kirdy-idle': createTextureDescriptor([]),
+      'fire-attack': createTextureDescriptor([]),
+      'ice-attack': createTextureDescriptor([]),
+      'sword-slash': createTextureDescriptor([]),
     };
+
+    const createCanvas = vi.fn((key: string, width: number, height: number) => {
+      const canvasContext = {
+        fillStyle: '',
+        fillRect: vi.fn(),
+      };
+      const canvasTexture = {
+        fill: vi.fn(),
+        refresh: vi.fn(),
+        canvas: {
+          getContext: vi.fn(() => canvasContext),
+        },
+        getContext: vi.fn(() => canvasContext),
+      };
+      textureDescriptors[key] = createTextureDescriptor([]);
+      return canvasTexture;
+    });
 
     textureManager = {
       exists: vi.fn((key: string) => Object.prototype.hasOwnProperty.call(textureDescriptors, key)),
       get: vi.fn((key: string) => textureDescriptors[key]),
+      createCanvas,
     };
 
     sceneAnims = {
@@ -226,7 +285,12 @@ describe('AbilitySystem', () => {
     });
 
     expect(addSprite).toHaveBeenCalledWith(128, 256, 'fire-attack');
-    expect(projectile.setVelocityX).toHaveBeenCalledWith(420);
+    const spawn = resolveForwardSpawnPosition(kirdy.sprite as any, 1);
+    expect(projectile.setPosition).toHaveBeenCalledWith(spawn.x, kirdy.sprite.y);
+    expect(scene.time?.delayedCall).toHaveBeenCalledWith(
+      FIRE_PROJECTILE_STEP_INTERVAL,
+      expect.any(Function),
+    );
   });
 
   it('exposes all core ability types', () => {
@@ -287,7 +351,15 @@ describe('AbilitySystem', () => {
     expect(system.getCurrentAbilityType()).toBe('ice');
   });
 
-  it('fires a flame projectile when Fire ability attacks', () => {
+  it('moves a flame projectile forward every 0.1s until it expires', () => {
+    const scheduledSteps: Array<() => void> = [];
+    delayedCall.mockImplementation((delay: number, handler?: () => void) => {
+      expect(delay).toBe(FIRE_PROJECTILE_STEP_INTERVAL);
+      if (typeof handler === 'function') {
+        scheduledSteps.push(handler);
+      }
+    });
+
     const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
     system.applySwallowedPayload({ abilityType: 'fire' });
 
@@ -299,13 +371,101 @@ describe('AbilitySystem', () => {
 
     expect(addSprite).toHaveBeenCalledWith(128, 256, 'fire-attack');
     const spawn = resolveForwardSpawnPosition(kirdy.sprite as any, 1);
-    expect(projectile.setPosition).toHaveBeenCalledWith(spawn.x, spawn.y);
-    expect(projectile.setVelocityX).toHaveBeenCalledWith(420);
+    expect(projectile.setPosition).toHaveBeenCalledWith(spawn.x, kirdy.sprite.y);
     expect(projectile.setIgnoreGravity).toHaveBeenCalledWith(true);
     expect(projectile.setSensor).toHaveBeenCalledWith(true);
     expect(projectile.setRectangle).toHaveBeenCalledWith(64, 64);
-    expect(scene.time?.delayedCall).toHaveBeenCalled();
+    expect(scene.time?.delayedCall).toHaveBeenCalledWith(
+      FIRE_PROJECTILE_STEP_INTERVAL,
+      expect.any(Function),
+    );
+    expect(scheduledSteps.length).toBeGreaterThan(0);
+
+    const runNextStep = () => {
+      const callback = scheduledSteps.shift();
+      callback?.();
+    };
+
+    runNextStep();
+    expect(projectile.setPosition).toHaveBeenLastCalledWith(
+      spawn.x + FIRE_PROJECTILE_STEP_DISTANCE,
+      kirdy.sprite.y,
+    );
+
+    for (let i = 1; i < FIRE_PROJECTILE_STEP_COUNT; i += 1) {
+      expect(scheduledSteps.length).toBeGreaterThan(0);
+      runNextStep();
+    }
+
+    const expectedFinalX = spawn.x + FIRE_PROJECTILE_STEP_DISTANCE * FIRE_PROJECTILE_STEP_COUNT;
+    expect(projectile.setPosition).toHaveBeenLastCalledWith(expectedFinalX, kirdy.sprite.y);
+    expect(physicsSystem.destroyProjectile).toHaveBeenCalledWith(projectile as any);
     expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(projectile, { damage: 3 });
+    expect(projectile.setCollidesWith).toHaveBeenCalledWith(PhysicsCategory.Enemy);
+  });
+
+  it('rebuilds the fire attack texture when missing so player sprites are never reused', () => {
+    delete textureDescriptors['fire-attack'];
+    const canvasTexture = createCanvasTextureStub();
+    textureManager.createCanvas.mockImplementationOnce(() => canvasTexture);
+
+    const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
+    system.applySwallowedPayload({ abilityType: 'fire' });
+
+    system.update(
+      buildActions({
+        spit: { isDown: true, justPressed: true },
+      }),
+    );
+
+    expect(textureManager.createCanvas).toHaveBeenCalledWith(
+      'fire-attack',
+      expect.any(Number),
+      expect.any(Number),
+    );
+    expect(canvasTexture.refresh).toHaveBeenCalled();
+  });
+
+  it('rebuilds the ice attack texture when missing so player sprites are never reused', () => {
+    delete textureDescriptors['ice-attack'];
+    const canvasTexture = createCanvasTextureStub();
+    textureManager.createCanvas.mockImplementationOnce(() => canvasTexture);
+
+    const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
+    system.applySwallowedPayload({ abilityType: 'ice' });
+
+    system.update(
+      buildActions({
+        spit: { isDown: true, justPressed: true },
+      }),
+    );
+
+    expect(textureManager.createCanvas).toHaveBeenCalledWith('ice-attack', ICE_TEXTURE_SIZE, ICE_TEXTURE_SIZE);
+    expect(canvasTexture.context.fillRect).toHaveBeenCalled();
+    expect(canvasTexture.refresh).toHaveBeenCalled();
+  });
+
+  it('rebuilds the sword slash texture when missing so player sprites are never reused', () => {
+    delete textureDescriptors['sword-slash'];
+    const canvasTexture = createCanvasTextureStub();
+    textureManager.createCanvas.mockImplementationOnce(() => canvasTexture);
+
+    const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
+    system.applySwallowedPayload({ abilityType: 'sword' });
+
+    system.update(
+      buildActions({
+        spit: { isDown: true, justPressed: true },
+      }),
+    );
+
+    expect(textureManager.createCanvas).toHaveBeenCalledWith(
+      'sword-slash',
+      SWORD_TEXTURE_WIDTH,
+      SWORD_TEXTURE_HEIGHT,
+    );
+    expect(canvasTexture.context.fillRect).toHaveBeenCalled();
+    expect(canvasTexture.refresh).toHaveBeenCalled();
   });
 
   it('follows fired projectiles with a particle trail until they are destroyed', () => {
@@ -318,7 +478,7 @@ describe('AbilitySystem', () => {
       }),
     );
 
-    expect(addParticles).toHaveBeenCalledWith(0, 0, 'inhale-sparkle');
+    expect(addParticles).toHaveBeenCalledWith(0, 0, 'fire-attack');
     expect(particleEffect.setDepth).toHaveBeenCalledWith(expect.any(Number));
     expect(particleEffect.startFollow).toHaveBeenCalledWith(projectile as any);
 
@@ -375,7 +535,7 @@ describe('AbilitySystem', () => {
     expect(kirdy.sprite.anims.play).not.toHaveBeenCalledWith('kirdy-fire-attack', true);
   });
 
-  it('launches ice shards in the faced direction', () => {
+  it('creates an ice burst that damages around Kirdy', () => {
     const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
     system.applySwallowedPayload({ abilityType: 'ice' });
 
@@ -385,17 +545,17 @@ describe('AbilitySystem', () => {
       setFixedRotation: vi.fn().mockReturnThis(),
       setName: vi.fn().mockReturnThis(),
       setSensor: vi.fn().mockReturnThis(),
+      setCollidesWith: vi.fn().mockReturnThis(),
       setCircle: vi.fn().mockReturnThis(),
       setBody: vi.fn().mockReturnThis(),
       setRectangle: vi.fn().mockReturnThis(),
       setPosition: vi.fn().mockReturnThis(),
+      setAlpha: vi.fn().mockReturnThis(),
       once: vi.fn().mockReturnThis(),
       destroy: vi.fn(),
     };
 
     addSprite.mockReturnValueOnce(iceProjectile as any);
-
-    kirdy.sprite.flipX = true;
 
     system.update(
       buildActions({
@@ -404,12 +564,16 @@ describe('AbilitySystem', () => {
     );
 
     expect(addSprite).toHaveBeenCalledWith(128, 256, 'ice-attack');
-    const spawn = resolveForwardSpawnPosition(kirdy.sprite as any, -1);
-    expect(iceProjectile.setPosition).toHaveBeenCalledWith(spawn.x, spawn.y);
-    expect(iceProjectile.setVelocityX).toHaveBeenCalledWith(-300);
+    expect(iceProjectile.setPosition).toHaveBeenCalledWith(kirdy.sprite.x, kirdy.sprite.y);
     expect(iceProjectile.setSensor).toHaveBeenCalledWith(true);
-    expect(iceProjectile.setRectangle).toHaveBeenCalledWith(64, 64);
+    const baseSize = Math.max(kirdy.sprite.displayWidth, 64);
+    const expectedSize = baseSize + ICE_AOE_MARGIN * 2;
+    expect(iceProjectile.setRectangle).toHaveBeenCalledWith(expectedSize, expectedSize);
+    expect(iceProjectile.setCollidesWith).toHaveBeenCalledWith(PhysicsCategory.Enemy);
     expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(iceProjectile as any, { damage: 3 });
+    expect(iceProjectile.setIgnoreGravity).toHaveBeenCalledWith(true);
+    expect(iceProjectile.setAlpha).toHaveBeenCalledWith(ICE_AOE_ALPHA);
+    expect(iceProjectile.setVelocityX).not.toHaveBeenCalled();
   });
 
   it('triggers a sword slash sensor instead of projectile', () => {
@@ -426,10 +590,14 @@ describe('AbilitySystem', () => {
       setFixedRotation: vi.fn().mockReturnThis(),
       setName: vi.fn().mockReturnThis(),
       setSensor: vi.fn().mockReturnThis(),
+      setCollidesWith: vi.fn().mockReturnThis(),
       setCircle: vi.fn().mockReturnThis(),
       setBody: vi.fn().mockReturnThis(),
       setRectangle: vi.fn().mockReturnThis(),
       setPosition: vi.fn().mockReturnThis(),
+      setAlpha: vi.fn().mockReturnThis(),
+      setAngle: vi.fn().mockReturnThis(),
+      setFlipX: vi.fn().mockReturnThis(),
       once: vi.fn().mockReturnThis(),
       destroy: vi.fn(),
     };
@@ -444,10 +612,17 @@ describe('AbilitySystem', () => {
 
     expect(addSprite).toHaveBeenCalledWith(128, 256, 'sword-slash');
     expect(slashStub.setSensor).toHaveBeenCalledWith(true);
-    expect(slashStub.setCircle).toHaveBeenCalledWith(32, 0, 0);
+    expect(slashStub.setRectangle).toHaveBeenCalledWith(SWORD_STRIKE_WIDTH, expect.any(Number));
+    const expectedX = kirdy.sprite.x + (SWORD_STRIKE_WIDTH / 2 + SWORD_STRIKE_WIDTH / 4);
+    expect(slashStub.setPosition).toHaveBeenCalledWith(expectedX, kirdy.sprite.y);
+    expect(slashStub.setCircle).not.toHaveBeenCalled();
     expect(slashStub.setBody).not.toHaveBeenCalled();
-    expect(slashStub.setPosition).toHaveBeenCalledWith(128, 256);
     expect(slashStub.setVelocityX).not.toHaveBeenCalled();
+    expect(slashStub.setIgnoreGravity).toHaveBeenCalledWith(true);
+    expect(slashStub.setAlpha).toHaveBeenCalledWith(0.9);
+    expect(slashStub.setAngle).toHaveBeenCalledWith(12);
+    expect(slashStub.setFlipX).toHaveBeenCalledWith(false);
+    expect(slashStub.setCollidesWith).toHaveBeenCalledWith(PhysicsCategory.Enemy);
     expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(slashStub as any, { damage: 3 });
   });
 

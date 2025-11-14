@@ -2,6 +2,7 @@ import type Phaser from 'phaser';
 import type { Kirdy } from '../characters/Kirdy';
 import type { ActionStateMap, InhaleSystem } from './InhaleSystem';
 import type { PhysicsSystem, MatterGameObject } from '../physics/PhysicsSystem';
+import { PhysicsCategory } from '../physics/PhysicsSystem';
 import { AbilitySystem } from './AbilitySystem';
 import type { AbilityMetadata } from './AbilitySystem';
 import { ObjectPool } from '../performance/ObjectPool';
@@ -14,11 +15,37 @@ export interface SwallowedPayload {
 }
 
 const STAR_PROJECTILE_SPEED = 350;
-const STAR_PROJECTILE_LIFETIME_MS = 1200;
+const STAR_PROJECTILE_LIFETIME_MS = 2400;
 const STAR_PROJECTILE_DAMAGE = 3;
 const STAR_PROJECTILE_TEXTURE = 'star-bullet';
 const STAR_PROJECTILE_POOL_SIZE = 6;
-const STAR_PROJECTILE_TRAIL_TEXTURES = ['inhale-sparkle', STAR_PROJECTILE_TEXTURE, 'kirdy'] as const;
+const STAR_PROJECTILE_TRAIL_TEXTURES = [STAR_PROJECTILE_TEXTURE, 'inhale-sparkle'] as const;
+const STAR_PROJECTILE_FALLBACK_COLOR = '#FFD966';
+const STAR_PROJECTILE_STEP_INTERVAL = 100;
+const STAR_PROJECTILE_STEP_DISTANCE = (STAR_PROJECTILE_SPEED * STAR_PROJECTILE_STEP_INTERVAL) / 1000;
+const STAR_PROJECTILE_STEP_COUNT = Math.max(1, Math.ceil(STAR_PROJECTILE_LIFETIME_MS / STAR_PROJECTILE_STEP_INTERVAL));
+
+type TextureManagerLike = {
+  exists?: (key: string) => boolean;
+};
+
+type CanvasContextLike = {
+  fillStyle?: string;
+  fillRect?: (x: number, y: number, width: number, height: number) => unknown;
+};
+
+type CanvasTextureLike = {
+  fill?: (red: number, green: number, blue: number, alpha?: number) => unknown;
+  refresh?: () => unknown;
+  canvas?: { getContext?: (contextType: string) => CanvasContextLike | null };
+  getContext?: (contextType: string) => CanvasContextLike | null;
+  getCanvas?: () => { getContext?: (contextType: string) => CanvasContextLike | null };
+  context?: CanvasContextLike | null;
+};
+
+type TextureManagerWithCanvas = TextureManagerLike & {
+  createCanvas?: (key: string, width: number, height: number) => CanvasTextureLike | undefined;
+};
 
 export class SwallowSystem {
   private swallowedPayload?: SwallowedPayload;
@@ -32,30 +59,21 @@ export class SwallowSystem {
   ) {
     this.starProjectilePool = new ObjectPool<Phaser.Physics.Matter.Sprite>({
       create: () => {
-        const sprite = this.scene.matter?.add?.sprite?.(0, 0, STAR_PROJECTILE_TEXTURE);
+        ensureStarProjectileTexture(this.scene);
+        const sprite = spawnStarProjectileSprite(this.scene, 0, 0);
         if (!sprite) {
           throw new Error('Failed to create star projectile');
         }
 
-        sprite.setIgnoreGravity?.(true);
-        sprite.setFixedRotation?.();
-        sprite.setName?.('kirdy-star-projectile');
         sprite.setActive?.(false);
         sprite.setVisible?.(false);
         sprite.setData?.('pooledProjectile', true);
-        sprite.setSensor?.(true);
-        configureProjectileHitbox(sprite);
         return sprite;
       },
       onAcquire: (sprite) => {
         sprite.setActive?.(true);
         sprite.setVisible?.(true);
-        sprite.setIgnoreGravity?.(true);
-        sprite.setFixedRotation?.();
-        sprite.setName?.('kirdy-star-projectile');
         sprite.setData?.('pooledProjectile', true);
-        sprite.setSensor?.(true);
-        configureProjectileHitbox(sprite);
       },
       onRelease: (sprite) => {
         sprite.setVelocity?.(0, 0);
@@ -64,6 +82,7 @@ export class SwallowSystem {
         sprite.setPosition?.(-10000, -10000);
         sprite.setOnCollide?.(() => undefined);
         sprite.setData?.('starProjectileExpire', undefined);
+        sprite.setData?.('starProjectileTrailTeardown', undefined);
       },
       maxSize: STAR_PROJECTILE_POOL_SIZE,
     });
@@ -114,31 +133,58 @@ export class SwallowSystem {
     const facingLeft = this.kirdy.sprite.flipX === true;
     const direction = facingLeft ? -1 : 1;
     const spawnPosition = resolveForwardSpawnPosition(this.kirdy.sprite, direction);
-    let projectile = this.acquireStarProjectile(spawnPosition.x, spawnPosition.y);
+    let projectile: Phaser.Physics.Matter.Sprite | undefined;
+    try {
+      projectile = this.acquireStarProjectile(spawnPosition.x, spawnPosition.y);
+    } catch (error) {
+      console.warn('[SwallowSystem] failed to prepare star projectile', error);
+      projectile = undefined;
+    }
     let projectileTrailTeardown: (() => void) | undefined;
+    let cleanupTrail: (() => void) | undefined;
+    let cancelStarMotion: (() => void) | undefined;
+    let lifetimeTimer: { remove?: () => void } | undefined;
 
     if (projectile) {
-      const velocityX = direction * STAR_PROJECTILE_SPEED;
       try {
-        projectile.setIgnoreGravity?.(true);
-        projectile.setFixedRotation?.();
-        projectile.setName?.('kirdy-star-projectile');
-        projectile.setSensor?.(true);
-        configureProjectileHitbox(projectile);
+        applyStarProjectilePhysics(projectile);
+        projectile.setPosition?.(spawnPosition.x, spawnPosition.y);
         projectileTrailTeardown = attachProjectileTrail(this.scene, projectile, {
           textureKeys: STAR_PROJECTILE_TRAIL_TEXTURES,
         });
-        projectile.setVelocityX?.(velocityX);
       } catch (error) {
         console.warn('[SwallowSystem] failed to prepare star projectile', error);
+        cancelStarMotion?.();
         this.disposeFailedProjectile(projectile);
-        projectileTrailTeardown?.();
         projectile = undefined;
       }
     }
 
     if (projectile) {
       const preparedProjectile = projectile;
+      cleanupTrail = () => {
+        if (!projectileTrailTeardown) {
+          return;
+        }
+        const teardown = projectileTrailTeardown;
+        projectileTrailTeardown = undefined;
+        teardown();
+        preparedProjectile.setData?.('starProjectileTrailTeardown', undefined);
+      };
+      preparedProjectile.setData?.('starProjectileTrailTeardown', cleanupTrail);
+
+      cancelStarMotion = this.startStarProjectileMotion({
+        projectile: preparedProjectile,
+        spawnX: spawnPosition.x,
+        spawnY: this.kirdy.sprite.y ?? spawnPosition.y,
+        direction,
+        onComplete: () => {
+          cleanupTrail?.();
+          this.destroyProjectileSafely(preparedProjectile);
+        },
+      });
+      preparedProjectile.setData?.('starProjectileMotionCancel', cancelStarMotion);
+
       preparedProjectile.setOnCollide?.(() => this.handleStarProjectileCollision(preparedProjectile));
 
       const isPooled = preparedProjectile.getData?.('pooledProjectile') === true;
@@ -148,33 +194,90 @@ export class SwallowSystem {
         });
       }
 
-      const lifetime = this.scene.time?.delayedCall?.(STAR_PROJECTILE_LIFETIME_MS, () => {
-        this.destroyProjectileSafely(preparedProjectile);
-      });
-
       let registered = true;
       try {
         this.physicsSystem?.registerPlayerAttack(preparedProjectile, {
           damage: STAR_PROJECTILE_DAMAGE,
-          recycle: (candidate) => {
-            projectileTrailTeardown?.();
-            return this.recycleStarProjectile(candidate);
-          },
+          recycle: (candidate) => this.recycleStarProjectile(candidate),
         });
+        preparedProjectile.setCollisionCategory?.(PhysicsCategory.PlayerAttack);
+        preparedProjectile.setCollidesWith?.(PhysicsCategory.Enemy);
       } catch (error) {
         registered = false;
         console.warn('[SwallowSystem] failed to register star projectile', error);
-        lifetime?.remove?.();
-        projectileTrailTeardown?.();
+        cancelStarMotion?.();
+        preparedProjectile.setData?.('starProjectileMotionCancel', undefined);
+        cleanupTrail?.();
         this.destroyProjectileSafely(preparedProjectile);
       }
 
-      preparedProjectile.setData?.('starProjectileExpire', registered ? lifetime : undefined);
+      if (registered) {
+        lifetimeTimer = this.scene.time?.delayedCall?.(STAR_PROJECTILE_LIFETIME_MS, () => {
+          this.stopStarProjectileMotion(preparedProjectile);
+          cleanupTrail?.();
+          this.destroyProjectileSafely(preparedProjectile);
+        });
+        preparedProjectile.setData?.('starProjectileExpire', lifetimeTimer);
+      }
     }
 
     target.setData?.('inMouth', false);
     target.destroy?.();
     this.inhaleSystem.releaseCapturedTarget();
+  }
+
+  private startStarProjectileMotion(options: {
+    projectile: Phaser.Physics.Matter.Sprite;
+    spawnX: number;
+    spawnY: number;
+    direction: number;
+    onComplete: () => void;
+  }) {
+    let stopped = false;
+    const motionTimers: Array<{ remove?: () => void }> = [];
+
+    const scheduleStep = (currentStep: number) => {
+      const executeStep = () => {
+        if (stopped) {
+          return;
+        }
+
+        const nextStep = currentStep + 1;
+        const offsetX = options.direction * STAR_PROJECTILE_STEP_DISTANCE * nextStep;
+        options.projectile.setPosition?.(options.spawnX + offsetX, options.spawnY);
+
+        if (nextStep >= STAR_PROJECTILE_STEP_COUNT) {
+          stopped = true;
+          options.projectile.setData?.('starProjectileMotionCancel', undefined);
+          options.onComplete();
+        } else {
+          scheduleStep(nextStep);
+        }
+      };
+
+      const timer = this.scene.time?.delayedCall?.(STAR_PROJECTILE_STEP_INTERVAL, executeStep);
+      if (timer) {
+        motionTimers.push(timer);
+      } else {
+        executeStep();
+      }
+    };
+
+    options.projectile.setPosition?.(options.spawnX, options.spawnY);
+    scheduleStep(0);
+
+    const cancel = () => {
+      if (stopped) {
+        return;
+      }
+      stopped = true;
+      motionTimers.forEach((timer) => timer?.remove?.());
+      options.projectile.setData?.('starProjectileMotionCancel', undefined);
+    };
+
+    options.projectile.once?.('destroy', () => cancel());
+
+    return cancel;
   }
 
   private acquireStarProjectile(x: number, y: number) {
@@ -186,19 +289,15 @@ export class SwallowSystem {
     } catch (error) {
       let fallback: Phaser.Physics.Matter.Sprite | undefined;
       try {
-        fallback = this.scene.matter?.add?.sprite?.(x, y, STAR_PROJECTILE_TEXTURE) ?? undefined;
+        ensureStarProjectileTexture(this.scene);
+        fallback = spawnStarProjectileSprite(this.scene, x, y) ?? undefined;
       } catch (creationError) {
         console.warn('[SwallowSystem] failed to spawn star projectile', { error, creationError });
         return undefined;
       }
 
       if (fallback) {
-        fallback.setIgnoreGravity?.(true);
-        fallback.setFixedRotation?.();
-        fallback.setName?.('kirdy-star-projectile');
         fallback.setData?.('pooledProjectile', false);
-        fallback.setSensor?.(true);
-        configureProjectileHitbox(fallback);
       }
       return fallback;
     }
@@ -214,6 +313,9 @@ export class SwallowSystem {
   }
 
   private destroyProjectileSafely(projectile: Phaser.Physics.Matter.Sprite) {
+    this.clearStarProjectileLifetime(projectile);
+    this.stopStarProjectileMotion(projectile);
+    this.cleanupStarProjectileTrail(projectile);
     if (this.physicsSystem) {
       try {
         this.physicsSystem.destroyProjectile(projectile);
@@ -230,6 +332,9 @@ export class SwallowSystem {
   }
 
   private disposeFailedProjectile(projectile: Phaser.Physics.Matter.Sprite) {
+    this.clearStarProjectileLifetime(projectile);
+    this.stopStarProjectileMotion(projectile);
+    this.cleanupStarProjectileTrail(projectile);
     try {
       projectile.setData?.('pooledProjectile', false);
     } catch {
@@ -251,9 +356,11 @@ export class SwallowSystem {
   }
 
   private recycleStarProjectile(projectile: MatterGameObject) {
-    const timer = projectile.getData?.('starProjectileExpire') as { remove?: () => void } | undefined;
-    timer?.remove?.();
-    projectile.setData?.('starProjectileExpire', undefined);
+    this.clearStarProjectileLifetime(projectile as Phaser.Physics.Matter.Sprite);
+
+    const sprite = projectile as Phaser.Physics.Matter.Sprite;
+    this.stopStarProjectileMotion(sprite);
+    this.cleanupStarProjectileTrail(sprite);
 
     this.scene.events?.emit?.('star-projectile-destroyed', projectile);
 
@@ -267,7 +374,100 @@ export class SwallowSystem {
     projectile.setVisible?.(false);
     projectile.setPosition?.(-10000, -10000);
     projectile.setOnCollide?.(() => undefined);
+    projectile.setData?.('starProjectileTrailTeardown', undefined);
+    projectile.setData?.('starProjectileMotionCancel', undefined);
     this.starProjectilePool.release(projectile as Phaser.Physics.Matter.Sprite);
     return true;
   }
+
+  private cleanupStarProjectileTrail(projectile: { getData?: (key: string) => unknown } | Phaser.Physics.Matter.Sprite) {
+    const cleanup = (projectile as Phaser.Physics.Matter.Sprite)?.getData?.('starProjectileTrailTeardown');
+    if (typeof cleanup === 'function') {
+      cleanup();
+      (projectile as Phaser.Physics.Matter.Sprite)?.setData?.('starProjectileTrailTeardown', undefined);
+    }
+  }
+
+  private stopStarProjectileMotion(projectile?: Phaser.Physics.Matter.Sprite) {
+    const cancel = projectile?.getData?.('starProjectileMotionCancel');
+    if (typeof cancel === 'function') {
+      cancel();
+      projectile?.setData?.('starProjectileMotionCancel', undefined);
+    }
+  }
+
+  private clearStarProjectileLifetime(projectile?: Phaser.Physics.Matter.Sprite | MatterGameObject) {
+    const timer = projectile?.getData?.('starProjectileExpire') as { remove?: () => void } | undefined;
+    timer?.remove?.();
+    projectile?.setData?.('starProjectileExpire', undefined);
+  }
+}
+
+function applyStarProjectilePhysics(sprite?: Phaser.Physics.Matter.Sprite) {
+  if (!sprite) {
+    return;
+  }
+
+  sprite.setIgnoreGravity?.(true);
+  sprite.setFixedRotation?.();
+  sprite.setName?.('kirdy-star-projectile');
+  sprite.setSensor?.(true);
+  sprite.setCollidesWith?.(PhysicsCategory.Enemy);
+  configureProjectileHitbox(sprite);
+}
+
+function spawnStarProjectileSprite(scene: Phaser.Scene, x: number, y: number) {
+  ensureStarProjectileTexture(scene);
+  return scene.matter?.add?.sprite?.(x, y, STAR_PROJECTILE_TEXTURE);
+}
+
+function ensureStarProjectileTexture(scene: Phaser.Scene) {
+  const textures = scene?.textures as TextureManagerWithCanvas | undefined;
+  if (!textures || textures.exists?.(STAR_PROJECTILE_TEXTURE)) {
+    return;
+  }
+
+  if (typeof textures.createCanvas !== 'function') {
+    return;
+  }
+
+  const size = 8;
+  const canvasTexture = textures.createCanvas(STAR_PROJECTILE_TEXTURE, size, size);
+  if (!canvasTexture) {
+    return;
+  }
+
+  const { red, green, blue } = parseHexColor(STAR_PROJECTILE_FALLBACK_COLOR);
+
+  if (typeof canvasTexture.fill === 'function') {
+    canvasTexture.fill(red, green, blue);
+  } else {
+    const fallbackCanvas = canvasTexture.getCanvas?.();
+    const context =
+      canvasTexture.context ??
+      canvasTexture.getContext?.('2d') ??
+      canvasTexture.canvas?.getContext?.('2d') ??
+      fallbackCanvas?.getContext?.('2d');
+    if (context) {
+      if (typeof context.fillStyle === 'string') {
+        context.fillStyle = STAR_PROJECTILE_FALLBACK_COLOR;
+      }
+      context.fillRect?.(0, 0, size, size);
+    }
+  }
+
+  canvasTexture.refresh?.();
+}
+
+function parseHexColor(color: string) {
+  const normalized = color.startsWith('#') ? color.slice(1) : color;
+  const parsed = Number.parseInt(normalized, 16);
+  if (Number.isNaN(parsed)) {
+    return { red: 255, green: 255, blue: 255 };
+  }
+  return {
+    red: (parsed >> 16) & 0xff,
+    green: (parsed >> 8) & 0xff,
+    blue: parsed & 0xff,
+  };
 }

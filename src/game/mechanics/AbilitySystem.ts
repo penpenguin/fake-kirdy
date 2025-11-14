@@ -3,6 +3,7 @@ import type { Kirdy } from '../characters/Kirdy';
 import type { ActionStateMap } from './InhaleSystem';
 import type { SwallowedPayload } from './SwallowSystem';
 import type { PhysicsSystem } from '../physics/PhysicsSystem';
+import { PhysicsCategory } from '../physics/PhysicsSystem';
 import type { AudioManager } from '../audio/AudioManager';
 import { configureProjectileHitbox, resolveForwardSpawnPosition } from './projectilePlacement';
 import { attachProjectileTrail } from './projectileTrail';
@@ -39,9 +40,18 @@ type AbilitySource =
 
 const FIRE_PROJECTILE_SPEED = 420;
 const FIRE_PROJECTILE_LIFETIME = 700;
-const ICE_PROJECTILE_SPEED = 300;
-const ICE_PROJECTILE_LIFETIME = 900;
+const FIRE_PROJECTILE_STEP_INTERVAL = 100;
+const FIRE_PROJECTILE_STEP_DISTANCE = (FIRE_PROJECTILE_SPEED * FIRE_PROJECTILE_STEP_INTERVAL) / 1000;
+const FIRE_PROJECTILE_STEP_COUNT = Math.max(1, Math.ceil(FIRE_PROJECTILE_LIFETIME / FIRE_PROJECTILE_STEP_INTERVAL));
+const ICE_AOE_MARGIN = 128;
+const ICE_AOE_LIFETIME = 200;
+const ICE_AOE_ALPHA = 0.6;
+const ICE_TEXTURE_SIZE = 128;
 const SWORD_SLASH_LIFETIME = 200;
+const SWORD_STRIKE_WIDTH = 72;
+const SWORD_STRIKE_HEIGHT = 64;
+const SWORD_TEXTURE_WIDTH = 96;
+const SWORD_TEXTURE_HEIGHT = 32;
 const ABILITY_PROJECTILE_DAMAGE = 3;
 
 const abilityCatalogueBase = {
@@ -65,9 +75,9 @@ const abilityTextureFallbacks: Record<AbilityType, readonly string[]> = {
 };
 
 const abilityTrailParticleCandidates: Record<AbilityType, readonly string[]> = {
-  fire: ['inhale-sparkle', 'fire-attack', 'kirdy-fire', 'kirdy'],
-  ice: ['inhale-sparkle', 'ice-attack', 'kirdy-ice', 'kirdy'],
-  sword: ['inhale-sparkle', 'kirdy-sword', 'kirdy'],
+  fire: ['fire-attack', 'inhale-sparkle'],
+  ice: ['ice-attack', 'inhale-sparkle'],
+  sword: ['sword-slash', 'inhale-sparkle'],
 };
 
 const BASE_TEXTURE_FALLBACKS = ['kirdy-idle'] as const;
@@ -81,6 +91,25 @@ type TextureEntry = {
 type TextureManagerLike = {
   exists?: (key: string) => boolean;
   get?: (key: string) => TextureEntry | undefined;
+};
+
+type CanvasContextLike = {
+  fillStyle?: string;
+  fillRect?: (x: number, y: number, width: number, height: number) => unknown;
+  clearRect?: (x: number, y: number, width: number, height: number) => unknown;
+};
+
+type CanvasTextureLike = {
+  fill?: (red: number, green: number, blue: number, alpha?: number) => unknown;
+  refresh?: () => unknown;
+  canvas?: { getContext?: (contextType: string) => CanvasContextLike | null };
+  getContext?: (contextType: string) => CanvasContextLike | null;
+  getCanvas?: () => { getContext?: (contextType: string) => CanvasContextLike | null };
+  context?: CanvasContextLike | null;
+};
+
+type TextureManagerWithCanvas = TextureManagerLike & {
+  createCanvas?: (key: string, width: number, height: number) => CanvasTextureLike | undefined;
 };
 
 function textureHasFrame(texture: TextureEntry | undefined, frame: string) {
@@ -163,6 +192,58 @@ function trySetKirdyTexture(
   }
 }
 
+type TextureCreationOptions = {
+  width?: number;
+  height?: number;
+  draw?: (context: CanvasContextLike) => void;
+  fallbackColor?: string;
+};
+
+function ensureAbilityTexture(
+  scene: Phaser.Scene,
+  textureKey: string,
+  color: string,
+  options: TextureCreationOptions = {},
+) {
+  const textures = scene?.textures as TextureManagerWithCanvas | undefined;
+  if (!textures || textures.exists?.(textureKey)) {
+    return;
+  }
+
+  if (typeof textures.createCanvas !== 'function') {
+    return;
+  }
+
+  const width = Math.max(2, Math.floor(options.width ?? 8));
+  const height = Math.max(2, Math.floor(options.height ?? options.width ?? 8));
+  const canvasTexture = textures.createCanvas(textureKey, width, height);
+  if (!canvasTexture) {
+    return;
+  }
+
+  const tint = hexToTint(color);
+  const red = (tint >> 16) & 0xff;
+  const green = (tint >> 8) & 0xff;
+  const blue = tint & 0xff;
+
+  const context =
+    canvasTexture.context ??
+    canvasTexture.getContext?.('2d') ??
+    canvasTexture.canvas?.getContext?.('2d') ??
+    canvasTexture.getCanvas?.()?.getContext?.('2d');
+
+  if (options.draw && context) {
+    options.draw(context);
+  } else if (typeof canvasTexture.fill === 'function') {
+    canvasTexture.fill(red, green, blue);
+  } else if (context) {
+    context.fillStyle = options.fallbackColor ?? `rgb(${red}, ${green}, ${blue})`;
+    context.fillRect?.(0, 0, width, height);
+  }
+
+  canvasTexture.refresh?.();
+}
+
 function playAbilitySound(context: AbilityContext, key: string) {
   if (context.audioManager) {
     context.audioManager.playSfx(key);
@@ -185,6 +266,7 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
     },
     performAttack: (context) => {
       const { scene, kirdy, physicsSystem } = context;
+      ensureAbilityTexture(scene, abilityCatalogue.fire.attack, abilityCatalogue.fire.color);
       const projectile = spawnProjectile({ scene, kirdy }, abilityCatalogue.fire.attack);
       if (!projectile) {
         return;
@@ -192,25 +274,60 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
 
       const direction = kirdy.sprite.flipX === true ? -1 : 1;
       const spawnPosition = resolveForwardSpawnPosition(kirdy.sprite, direction);
-      projectile.setPosition?.(spawnPosition.x, spawnPosition.y);
+      const spawnY = kirdy.sprite.y ?? spawnPosition.y;
+      projectile.setPosition?.(spawnPosition.x, spawnY);
       projectile.setIgnoreGravity?.(true);
       projectile.setFixedRotation?.();
       projectile.setSensor?.(true);
       configureProjectileHitbox(projectile);
       projectile.setName?.('kirdy-fire-attack');
-      projectile.setVelocityX?.(direction * FIRE_PROJECTILE_SPEED);
       attachProjectileTrail(scene, projectile, { textureKeys: abilityTrailParticleCandidates.fire });
-      projectile.once?.('destroy', () => {
-        scene.events?.emit?.('ability-attack-destroyed', { abilityType: 'fire', projectile });
-      });
-      scene.time?.delayedCall?.(FIRE_PROJECTILE_LIFETIME, () => {
+      let projectileDestroyed = false;
+
+      const destroyProjectile = () => {
+        if (projectileDestroyed) {
+          return;
+        }
+        projectileDestroyed = true;
         if (physicsSystem) {
           physicsSystem.destroyProjectile(projectile);
         } else {
           projectile.destroy?.();
         }
+      };
+
+      projectile.once?.('destroy', () => {
+        projectileDestroyed = true;
+        scene.events?.emit?.('ability-attack-destroyed', { abilityType: 'fire', projectile });
       });
+
+      const scheduleStep = (currentStep: number) => {
+        const executeStep = () => {
+          if (projectileDestroyed) {
+            return;
+          }
+
+          const nextStep = currentStep + 1;
+          const offsetX = direction * FIRE_PROJECTILE_STEP_DISTANCE * nextStep;
+          projectile.setPosition?.(spawnPosition.x + offsetX, spawnY);
+
+          if (nextStep >= FIRE_PROJECTILE_STEP_COUNT) {
+            destroyProjectile();
+          } else {
+            scheduleStep(nextStep);
+          }
+        };
+
+        if (scene.time?.delayedCall) {
+          scene.time.delayedCall(FIRE_PROJECTILE_STEP_INTERVAL, executeStep);
+        } else {
+          executeStep();
+        }
+      };
+
+      scheduleStep(0);
       physicsSystem?.registerPlayerAttack(projectile, { damage: abilityCatalogue.fire.damage });
+      projectile.setCollidesWith?.(PhysicsCategory.Enemy);
       playAbilitySound(context, 'ability-fire-attack');
     },
   },
@@ -226,25 +343,28 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
     },
     performAttack: (context) => {
       const { scene, kirdy, physicsSystem } = context;
+      ensureAbilityTexture(scene, abilityCatalogue.ice.attack, abilityCatalogue.ice.color, {
+        width: ICE_TEXTURE_SIZE,
+        height: ICE_TEXTURE_SIZE,
+        draw: (context) => drawIceBurstTexture(context, abilityCatalogue.ice.color),
+      });
       const projectile = spawnProjectile({ scene, kirdy }, abilityCatalogue.ice.attack);
       if (!projectile) {
         return;
       }
 
-      const direction = kirdy.sprite.flipX === true ? -1 : 1;
-      const spawnPosition = resolveForwardSpawnPosition(kirdy.sprite, direction);
-      projectile.setPosition?.(spawnPosition.x, spawnPosition.y);
+      projectile.setPosition?.(kirdy.sprite.x ?? 0, kirdy.sprite.y ?? 0);
       projectile.setIgnoreGravity?.(true);
       projectile.setFixedRotation?.();
       projectile.setSensor?.(true);
-      configureProjectileHitbox(projectile);
+      configureIceBurstHitbox(projectile, kirdy.sprite);
+      projectile.setAlpha?.(ICE_AOE_ALPHA);
       projectile.setName?.('kirdy-ice-attack');
-      projectile.setVelocityX?.(direction * ICE_PROJECTILE_SPEED);
       attachProjectileTrail(scene, projectile, { textureKeys: abilityTrailParticleCandidates.ice });
       projectile.once?.('destroy', () => {
         scene.events?.emit?.('ability-attack-destroyed', { abilityType: 'ice', projectile });
       });
-      scene.time?.delayedCall?.(ICE_PROJECTILE_LIFETIME, () => {
+      scene.time?.delayedCall?.(ICE_AOE_LIFETIME, () => {
         if (physicsSystem) {
           physicsSystem.destroyProjectile(projectile);
         } else {
@@ -252,6 +372,7 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
         }
       });
       physicsSystem?.registerPlayerAttack(projectile, { damage: abilityCatalogue.ice.damage });
+      projectile.setCollidesWith?.(PhysicsCategory.Enemy);
       playAbilitySound(context, 'ability-ice-attack');
     },
   },
@@ -267,6 +388,11 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
     },
     performAttack: (context) => {
       const { scene, kirdy, physicsSystem } = context;
+      ensureAbilityTexture(scene, abilityCatalogue.sword.attack, abilityCatalogue.sword.color, {
+        width: SWORD_TEXTURE_WIDTH,
+        height: SWORD_TEXTURE_HEIGHT,
+        draw: (context) => drawSwordSlashTexture(context, abilityCatalogue.sword.color),
+      });
       const slash = spawnSlash({ scene, kirdy }, abilityCatalogue.sword.attack);
       if (!slash) {
         return;
@@ -283,6 +409,7 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
         }
       });
       physicsSystem?.registerPlayerAttack(slash, { damage: abilityCatalogue.sword.damage });
+      slash.setCollidesWith?.(PhysicsCategory.Enemy);
       playAbilitySound(context, 'ability-sword-attack');
     },
   },
@@ -472,6 +599,36 @@ function spawnSlash(context: { scene: Phaser.Scene; kirdy: Kirdy }, texture: str
   return slash;
 }
 
+function configureIceBurstHitbox(
+  projectile?: Phaser.Physics.Matter.Sprite,
+  kirdySprite?: Phaser.Physics.Matter.Sprite,
+) {
+  if (!projectile) {
+    return;
+  }
+
+  const fallbackSize = 64;
+  const baseWidth = Math.max(
+    fallbackSize,
+    Math.round(kirdySprite?.displayWidth ?? kirdySprite?.width ?? projectile.displayWidth ?? projectile.width ?? fallbackSize),
+  );
+  const baseHeight = Math.max(
+    fallbackSize,
+    Math.round(kirdySprite?.displayHeight ?? kirdySprite?.height ?? projectile.displayHeight ?? projectile.height ?? fallbackSize),
+  );
+  const width = baseWidth + ICE_AOE_MARGIN * 2;
+  const height = baseHeight + ICE_AOE_MARGIN * 2;
+
+  if (typeof projectile.setRectangle === 'function') {
+    projectile.setRectangle(width, height);
+  } else if (typeof projectile.setBody === 'function') {
+    projectile.setBody({ type: 'rectangle', width, height });
+  } else if (typeof projectile.setCircle === 'function') {
+    const radius = Math.max(4, Math.round(Math.max(width, height) / 2));
+    projectile.setCircle(radius);
+  }
+}
+
 function configureSlashHitbox(
   slash?: Phaser.Physics.Matter.Sprite,
   kirdySprite?: Phaser.Physics.Matter.Sprite,
@@ -480,38 +637,78 @@ function configureSlashHitbox(
     return;
   }
 
-  slash.setOrigin?.(0.5, 0.5);
+  const strikeWidth = SWORD_STRIKE_WIDTH;
+  const strikeHeight = Math.max(
+    SWORD_STRIKE_HEIGHT,
+    Math.round(kirdySprite?.displayHeight ?? slash.displayHeight ?? slash.height ?? SWORD_STRIKE_HEIGHT),
+  );
 
-  const rawWidth = slash.displayWidth ?? slash.width ?? 0;
-  const rawHeight = slash.displayHeight ?? slash.height ?? 0;
-  const fallbackSize = 64;
-  const width = Number.isFinite(rawWidth) && rawWidth > 0 ? rawWidth : fallbackSize;
-  const height = Number.isFinite(rawHeight) && rawHeight > 0 ? rawHeight : fallbackSize;
-  const radius = Math.max(1, Math.round(Math.max(width, height) / 2));
-  const offsetX = Math.round(width / 2 - radius);
-  const offsetY = Math.round(height / 2 - radius);
-
-  if (typeof slash.setCircle === 'function') {
-    // Phaser runtime accepts (radius, offsetX, offsetY) but the type definition only exposes the options overload.
-    const setCircle = slash.setCircle as unknown as (
-      radius: number,
-      offsetX?: number,
-      offsetY?: number,
-    ) => Phaser.Physics.Matter.Sprite;
-    setCircle.call(slash, radius, offsetX, offsetY);
+  if (typeof slash.setRectangle === 'function') {
+    slash.setRectangle(strikeWidth, strikeHeight);
   } else if (typeof slash.setBody === 'function') {
-    slash.setBody({ type: 'circle', radius, x: offsetX, y: offsetY });
-  } else {
-    slash.setRectangle?.(radius * 2, radius * 2);
+    slash.setBody({ type: 'rectangle', width: strikeWidth, height: strikeHeight });
+  } else if (typeof slash.setCircle === 'function') {
+    const radius = Math.max(strikeWidth, strikeHeight) / 2;
+    slash.setCircle(radius);
   }
 
-  if (typeof slash.setPosition === 'function') {
-    const targetX = kirdySprite?.x ?? slash.x ?? 0;
-    const targetY = kirdySprite?.y ?? slash.y ?? 0;
-    slash.setPosition(targetX, targetY);
-  }
+  const direction = kirdySprite?.flipX === true ? -1 : 1;
+  const baseWidth = Math.max(
+    SWORD_STRIKE_WIDTH,
+    Math.round(kirdySprite?.displayWidth ?? slash.displayWidth ?? slash.width ?? SWORD_STRIKE_WIDTH),
+  );
+  const offsetX = direction * Math.round(baseWidth / 2 + strikeWidth / 4);
+  const targetX = (kirdySprite?.x ?? slash.x ?? 0) + offsetX;
+  const targetY = kirdySprite?.y ?? slash.y ?? 0;
+  slash.setPosition?.(targetX, targetY);
+  slash.setAlpha?.(0.9);
+  slash.setAngle?.(direction * 12);
+  slash.setFlipX?.(direction < 0);
 }
 
 export function isAbilityType(value: string | undefined): value is AbilityType {
   return (ABILITY_TYPES as readonly string[]).includes(value ?? '');
+}
+
+function drawIceBurstTexture(context: CanvasContextLike, color: string) {
+  const tint = hexToTint(color);
+  const red = (tint >> 16) & 0xff;
+  const green = (tint >> 8) & 0xff;
+  const blue = tint & 0xff;
+  const canvasLike = (context as { canvas?: { width?: number; height?: number } }).canvas;
+  const width = canvasLike?.width ?? ICE_TEXTURE_SIZE;
+  const height = canvasLike?.height ?? ICE_TEXTURE_SIZE;
+  const centerX = width / 2;
+  const centerY = height / 2;
+  const layers = 8;
+
+  context.clearRect?.(0, 0, width, height);
+
+  for (let i = 0; i < layers; i += 1) {
+    const progress = 1 - i / layers;
+    const size = Math.max(4, Math.round(Math.max(width, height) * progress));
+    const alpha = Math.max(0.1, ICE_AOE_ALPHA * progress);
+    context.fillStyle = `rgba(${red}, ${green}, ${blue}, ${alpha.toFixed(2)})`;
+    const offset = size / 2;
+    context.fillRect?.(centerX - offset, centerY - offset, size, size);
+  }
+}
+
+function drawSwordSlashTexture(context: CanvasContextLike, color: string) {
+  const tint = hexToTint(color);
+  const red = (tint >> 16) & 0xff;
+  const green = (tint >> 8) & 0xff;
+  const blue = tint & 0xff;
+  const canvasLike = (context as { canvas?: { width?: number; height?: number } }).canvas;
+  const width = canvasLike?.width ?? SWORD_TEXTURE_WIDTH;
+  const height = canvasLike?.height ?? SWORD_TEXTURE_HEIGHT;
+  context.clearRect?.(0, 0, width, height);
+
+  const strokeThickness = 6;
+  for (let i = -strokeThickness; i <= strokeThickness; i += 1) {
+    const alpha = Math.max(0.2, 0.9 - Math.abs(i) * 0.12);
+    context.fillStyle = `rgba(${red}, ${green}, ${blue}, ${alpha.toFixed(2)})`;
+    const offset = i * 3;
+    context.fillRect?.(offset + width * -0.1, i + height / 4, width * 1.2, 2);
+  }
 }
