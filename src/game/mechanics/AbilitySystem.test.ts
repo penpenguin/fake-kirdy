@@ -11,7 +11,8 @@ const FIRE_PROJECTILE_LIFETIME = 700;
 const FIRE_PROJECTILE_STEP_INTERVAL = 100;
 const FIRE_PROJECTILE_STEP_DISTANCE = (FIRE_PROJECTILE_SPEED * FIRE_PROJECTILE_STEP_INTERVAL) / 1000;
 const FIRE_PROJECTILE_STEP_COUNT = Math.ceil(FIRE_PROJECTILE_LIFETIME / FIRE_PROJECTILE_STEP_INTERVAL);
-const ICE_AOE_MARGIN = 128;
+const TILE_SIZE = 32;
+const ICE_AOE_MARGIN = TILE_SIZE;
 const ICE_AOE_ALPHA = 0.6;
 const ICE_TEXTURE_SIZE = 128;
 const SWORD_STRIKE_WIDTH = 72;
@@ -80,6 +81,7 @@ type ProjectileStub = {
   setCircle: ReturnType<typeof vi.fn>;
   setBody: ReturnType<typeof vi.fn>;
   setRectangle: ReturnType<typeof vi.fn>;
+  setDisplaySize: ReturnType<typeof vi.fn>;
   setAlpha: ReturnType<typeof vi.fn>;
   once: Mock<[string, () => void], ProjectileStub>;
   destroy: ReturnType<typeof vi.fn>;
@@ -148,6 +150,7 @@ describe('AbilitySystem', () => {
       setCircle: vi.fn().mockReturnThis(),
       setBody: vi.fn().mockReturnThis(),
       setRectangle: vi.fn().mockReturnThis(),
+      setDisplaySize: vi.fn().mockReturnThis(),
       setAlpha: vi.fn().mockReturnThis(),
       once: vi.fn(),
       destroy: vi.fn(),
@@ -549,6 +552,7 @@ describe('AbilitySystem', () => {
       setCircle: vi.fn().mockReturnThis(),
       setBody: vi.fn().mockReturnThis(),
       setRectangle: vi.fn().mockReturnThis(),
+      setDisplaySize: vi.fn().mockReturnThis(),
       setPosition: vi.fn().mockReturnThis(),
       setAlpha: vi.fn().mockReturnThis(),
       once: vi.fn().mockReturnThis(),
@@ -569,6 +573,7 @@ describe('AbilitySystem', () => {
     const baseSize = Math.max(kirdy.sprite.displayWidth, 64);
     const expectedSize = baseSize + ICE_AOE_MARGIN * 2;
     expect(iceProjectile.setRectangle).toHaveBeenCalledWith(expectedSize, expectedSize);
+    expect(iceProjectile.setDisplaySize).toHaveBeenCalledWith(expectedSize, expectedSize);
     expect(iceProjectile.setCollidesWith).toHaveBeenCalledWith(PhysicsCategory.Enemy);
     expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(iceProjectile as any, { damage: 3 });
     expect(iceProjectile.setIgnoreGravity).toHaveBeenCalledWith(true);

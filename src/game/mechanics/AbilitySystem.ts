@@ -43,7 +43,8 @@ const FIRE_PROJECTILE_LIFETIME = 700;
 const FIRE_PROJECTILE_STEP_INTERVAL = 100;
 const FIRE_PROJECTILE_STEP_DISTANCE = (FIRE_PROJECTILE_SPEED * FIRE_PROJECTILE_STEP_INTERVAL) / 1000;
 const FIRE_PROJECTILE_STEP_COUNT = Math.max(1, Math.ceil(FIRE_PROJECTILE_LIFETIME / FIRE_PROJECTILE_STEP_INTERVAL));
-const ICE_AOE_MARGIN = 128;
+const DEFAULT_TILE_SIZE = 32;
+const ICE_AOE_MARGIN = DEFAULT_TILE_SIZE;
 const ICE_AOE_LIFETIME = 200;
 const ICE_AOE_ALPHA = 0.6;
 const ICE_TEXTURE_SIZE = 128;
@@ -627,6 +628,8 @@ function configureIceBurstHitbox(
     const radius = Math.max(4, Math.round(Math.max(width, height) / 2));
     projectile.setCircle(radius);
   }
+
+  projectile.setDisplaySize?.(width, height);
 }
 
 function configureSlashHitbox(
