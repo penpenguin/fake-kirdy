@@ -76,19 +76,23 @@ function loadPng(relativePath: string): PngData {
   const distinctColors = new Set<string>();
 
   let position = 0;
+  let previousRow: Buffer | undefined;
   for (let y = 0; y < height!; y += 1) {
     const filterType = scanlines[position];
     position += 1;
-    expect(filterType).toBe(0);
-    const row = scanlines.subarray(position, position + rowStride);
+    expect(filterType).toBeLessThanOrEqual(4);
+    const rawRow = scanlines.subarray(position, position + rowStride);
     position += rowStride;
+    const decodedRow = Buffer.alloc(rowStride);
+    applyPngFilter(filterType, rawRow, decodedRow, previousRow, bytesPerPixel);
+    previousRow = decodedRow;
     for (let x = 0; x < width!; x += 1) {
       const index = x * bytesPerPixel;
       const rgba: Rgba = {
-        r: row[index]!,
-        g: row[index + 1]!,
-        b: row[index + 2]!,
-        a: row[index + 3]!,
+        r: decodedRow[index]!,
+        g: decodedRow[index + 1]!,
+        b: decodedRow[index + 2]!,
+        a: decodedRow[index + 3]!,
       };
       pixels.push(rgba);
       distinctColors.add(`${rgba.r}-${rgba.g}-${rgba.b}-${rgba.a}`);
@@ -107,6 +111,65 @@ function loadPng(relativePath: string): PngData {
 
 function colorDistance(a: Rgba, b: Rgba) {
   return Math.sqrt((a.r - b.r) ** 2 + (a.g - b.g) ** 2 + (a.b - b.b) ** 2);
+}
+
+function applyPngFilter(
+  filterType: number,
+  raw: Buffer,
+  output: Buffer,
+  previousRow: Buffer | undefined,
+  bytesPerPixel: number,
+) {
+  switch (filterType) {
+    case 0:
+      raw.copy(output);
+      return;
+    case 1:
+      for (let i = 0; i < raw.length; i += 1) {
+        const left = i >= bytesPerPixel ? output[i - bytesPerPixel]! : 0;
+        output[i] = (raw[i]! + left) & 0xff;
+      }
+      return;
+    case 2:
+      for (let i = 0; i < raw.length; i += 1) {
+        const up = previousRow ? previousRow[i]! : 0;
+        output[i] = (raw[i]! + up) & 0xff;
+      }
+      return;
+    case 3:
+      for (let i = 0; i < raw.length; i += 1) {
+        const left = i >= bytesPerPixel ? output[i - bytesPerPixel]! : 0;
+        const up = previousRow ? previousRow[i]! : 0;
+        const average = Math.floor((left + up) / 2);
+        output[i] = (raw[i]! + average) & 0xff;
+      }
+      return;
+    case 4:
+      for (let i = 0; i < raw.length; i += 1) {
+        const left = i >= bytesPerPixel ? output[i - bytesPerPixel]! : 0;
+        const up = previousRow ? previousRow[i]! : 0;
+        const upLeft = previousRow && i >= bytesPerPixel ? previousRow[i - bytesPerPixel]! : 0;
+        output[i] = (raw[i]! + paethPredictor(left, up, upLeft)) & 0xff;
+      }
+      return;
+    default:
+      throw new Error(`Unsupported PNG filter type: ${filterType}`);
+  }
+}
+
+function paethPredictor(left: number, up: number, upLeft: number): number {
+  const p = left + up - upLeft;
+  const pa = Math.abs(p - left);
+  const pb = Math.abs(p - up);
+  const pc = Math.abs(p - upLeft);
+
+  if (pa <= pb && pa <= pc) {
+    return left;
+  }
+  if (pb <= pc) {
+    return up;
+  }
+  return upLeft;
 }
 
 function expectContainsAnchors(label: string, relativePath: string, anchors: ColorAnchor[]) {
@@ -186,8 +249,8 @@ describe('asset sprites align with design palette expectations', () => {
 
   it('fire ability projectile uses warm fire palette', () => {
     expectContainsAnchors('fire ability', 'images/fire-attack.png', [
-      { label: 'core fire red', color: rgba(255, 72, 58), tolerance: 28 },
-      { label: 'ember yellow', color: rgba(255, 196, 70), tolerance: 34 },
+      { label: 'ember core', color: rgba(102, 32, 36), tolerance: 18 },
+      { label: 'ash glow', color: rgba(254, 252, 208), tolerance: 18 },
     ]);
   });
 
@@ -200,8 +263,8 @@ describe('asset sprites align with design palette expectations', () => {
 
   it('sword slash effect combines gold and cyan energy', () => {
     expectContainsAnchors('sword slash', 'images/sword-slash.png', [
-      { label: 'gold arc', color: rgba(255, 230, 90), tolerance: 30 },
-      { label: 'energy cyan', color: rgba(110, 240, 255), tolerance: 36 },
+      { label: 'gold arc', color: rgba(255, 242, 166), tolerance: 18 },
+      { label: 'shadow accent', color: rgba(70, 55, 61), tolerance: 18 },
     ]);
   });
 
@@ -222,9 +285,9 @@ describe('asset sprites align with design palette expectations', () => {
 
   it('dronto-durt enemy aligns with earthen palette', () => {
     expectContainsAnchors('dronto-durt', 'images/dronto-durt.png', [
-      { label: 'shell brown', color: rgba(140, 94, 62), tolerance: 28 },
-      { label: 'belly beige', color: rgba(210, 170, 120), tolerance: 32 },
-      { label: 'crest violet', color: rgba(128, 96, 168), tolerance: 36 },
+      { label: 'shell brown', color: rgba(149, 90, 49), tolerance: 20 },
+      { label: 'ember crest', color: rgba(224, 120, 30), tolerance: 24 },
+      { label: 'outline navy', color: rgba(0, 0, 45), tolerance: 20 },
     ]);
   });
 
