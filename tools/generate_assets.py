@@ -299,23 +299,43 @@ def generate_sword_slash():
     size = 64
     canvas = create_canvas(size, size)
     cx = size // 2
-    cy = size // 2
-    inner = 16
-    outer = 24
+    cy = size // 2 + 4
+    angle = math.radians(-32)
+    cos_a = math.cos(angle)
+    sin_a = math.sin(angle)
+    half_length = 30
+    core_width = 2.5
+    glow_width = 11
+
     for y in range(size):
         for x in range(size):
             dx = x - cx
             dy = y - cy
-            dist = math.sqrt(dx * dx + dy * dy)
-            if inner <= dist <= outer:
-                t = clamp((dist - inner) / (outer - inner))
-                color = blend(SWORD_GOLD, SWORD_CYAN, t)
-                if dy < 0:
-                    color = blend(color, STAR_WHITE, 0.2)
+            rx = dx * cos_a - dy * sin_a
+            ry = dx * sin_a + dy * cos_a
+            if -half_length <= rx <= half_length and abs(ry) <= glow_width:
+                distance = abs(ry)
+                glow_t = clamp(distance / glow_width)
+                stroke_t = glow_t ** 0.7
+                color = blend(SWORD_GOLD, SWORD_CYAN, stroke_t)
+                tip_t = clamp((rx + half_length) / (2 * half_length))
+                color = blend(color, SWORD_CYAN, tip_t * 0.35)
+                highlight = 0.12 if distance <= core_width else 0.05 * (1.0 - glow_t)
+                if highlight > 0:
+                    color = blend(color, STAR_WHITE, highlight)
                 set_pixel(canvas, x, y, color)
-    for i in range(-3, 4):
-        set_pixel(canvas, cx + i * 2, cy - outer - 4, SWORD_CYAN)
-    set_pixel(canvas, cx, cy + inner, SWORD_GOLD)
+
+    for offset in range(-8, 10, 2):
+        nx = int(cx - 18 + offset)
+        ny = int(cy + offset * 0.6)
+        for thickness in range(-1, 2):
+            set_pixel(canvas, nx, ny + thickness, blend(SWORD_CYAN, STAR_WHITE, 0.18))
+
+    spark_offsets = [(14, -14), (18, -18), (22, -20)]
+    for ox, oy in spark_offsets:
+        set_pixel(canvas, cx + ox, cy + oy, STAR_WHITE)
+        set_pixel(canvas, cx + ox + 1, cy + oy - 1, blend(STAR_WHITE, SWORD_CYAN, 0.3))
+
     return canvas
 
 
