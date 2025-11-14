@@ -142,15 +142,17 @@ describe('AreaManager', () => {
   it('中央ハブのエリア切替地点はドアタイルとして識別できる', () => {
     const current = manager.getCurrentAreaState();
     const tileMap = current.tileMap;
+    const doors = current.definition.doors ?? [];
+    const directions: AreaTransitionDirection[] = ['north', 'south', 'east', 'west'];
 
-    const doorCoordinates = [
-      { column: 1, row: Math.floor(tileMap.rows / 2) },
-      { column: tileMap.columns - 2, row: Math.floor(tileMap.rows / 2) },
-      { column: Math.floor(tileMap.columns / 2), row: 1 },
-      { column: Math.floor(tileMap.columns / 2), row: tileMap.rows - 2 },
-    ];
+    directions.forEach((direction) => {
+      const door = doors.find((candidate) => candidate.direction === direction);
+      expect(door).toBeDefined();
+      if (!door) {
+        throw new Error(`ドア metadata missing for ${direction}`);
+      }
 
-    doorCoordinates.forEach(({ column, row }) => {
+      const { column, row } = door.tile;
       expect(tileMap.getTileAt(column, row)).toBe('door');
     });
   });

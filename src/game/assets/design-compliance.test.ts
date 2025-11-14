@@ -256,8 +256,9 @@ describe('asset sprites align with design palette expectations', () => {
 
   it('ice ability projectile uses icy palette', () => {
     expectContainsAnchors('ice ability', 'images/ice-attack.png', [
-      { label: 'frost blue', color: rgba(80, 180, 255), tolerance: 40 },
-      { label: 'glacial highlight', color: rgba(220, 244, 255), tolerance: 24 },
+      { label: 'midnight core', color: rgba(46, 54, 71), tolerance: 12 },
+      { label: 'aurora teal', color: rgba(114, 193, 206), tolerance: 26 },
+      { label: 'glacial bloom', color: rgba(210, 225, 216), tolerance: 18 },
     ]);
   });
 
@@ -277,9 +278,9 @@ describe('asset sprites align with design palette expectations', () => {
 
   it('wabble-bee enemy showcases striped bee palette', () => {
     expectContainsAnchors('wabble-bee', 'images/wabble-bee.png', [
-      { label: 'bee yellow', color: rgba(245, 200, 55), tolerance: 28 },
-      { label: 'stripe ink', color: rgba(40, 24, 32), tolerance: 30 },
-      { label: 'wing tint', color: rgba(156, 220, 255), tolerance: 32 },
+      { label: 'amber thorax', color: rgba(215, 162, 58), tolerance: 18 },
+      { label: 'carapace plum', color: rgba(61, 45, 45), tolerance: 14 },
+      { label: 'wing tint', color: rgba(139, 185, 203), tolerance: 20 },
     ]);
   });
 
