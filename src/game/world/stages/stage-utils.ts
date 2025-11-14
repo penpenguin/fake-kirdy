@@ -17,6 +17,7 @@ export interface StageDefinitionConfig extends Omit<AreaDefinition, 'doors' | 'd
 }
 
 const DEFAULT_DOOR_BUFFER = 1;
+const DIRECTIONS: AreaTransitionDirection[] = ['north', 'south', 'east', 'west'];
 const DEAD_END_REWARDS: HealRewardType[] = ['health', 'max-health', 'revive'];
 
 type TileCoordinate = { column: number; row: number };
@@ -27,15 +28,104 @@ export function buildStageDefinition(config: StageDefinitionConfig): AreaDefinit
   const doors = deriveDoors(config.layout, config.tileSize, config.neighbors, doorBuffer);
   const deadEnds = deriveDeadEnds(config.layout, config.tileSize, config.deadEndOverrides);
   const resolvedGoal = resolveGoalMetadata(config.goal ?? null, doors);
+  const entryPoints = enforceEntryPointDoorSpacing(
+    cloneEntryPoints(config.entryPoints),
+    doors,
+    config.neighbors,
+    config.tileSize,
+    {
+      width: (config.layout[0]?.length ?? 0) * config.tileSize,
+      height: config.layout.length * config.tileSize,
+    },
+    doorBuffer,
+  );
 
   return {
     ...config,
+    entryPoints,
     metadata: config.metadata,
     doorBuffer,
     doors,
     deadEnds,
     goal: resolvedGoal,
   } satisfies AreaDefinition;
+}
+
+function cloneEntryPoints(entryPoints: AreaDefinition['entryPoints']): AreaDefinition['entryPoints'] {
+  const clone: AreaDefinition['entryPoints'] = {
+    default: {
+      position: { ...entryPoints.default.position },
+      ...(entryPoints.default.facing ? { facing: entryPoints.default.facing } : {}),
+    },
+  };
+
+  DIRECTIONS.forEach((direction) => {
+    const entry = entryPoints[direction];
+    if (!entry) {
+      return;
+    }
+
+    clone[direction] = {
+      position: { ...entry.position },
+      ...(entry.facing ? { facing: entry.facing } : {}),
+    };
+  });
+
+  return clone;
+}
+
+function enforceEntryPointDoorSpacing(
+  entryPoints: AreaDefinition['entryPoints'],
+  doors: AreaDoorDefinition[],
+  neighbors: AreaDefinition['neighbors'],
+  tileSize: number,
+  bounds: { width: number; height: number },
+  doorBuffer: number,
+): AreaDefinition['entryPoints'] {
+  if (!doors?.length) {
+    return entryPoints;
+  }
+
+  const minCoordinate = {
+    x: tileSize,
+    y: tileSize,
+  };
+  const maxCoordinate = {
+    x: Math.max(tileSize, bounds.width - tileSize),
+    y: Math.max(tileSize, bounds.height - tileSize),
+  };
+
+  DIRECTIONS.forEach((direction) => {
+    const entry = entryPoints[direction];
+    if (!entry) {
+      return;
+    }
+
+    const target = neighbors[direction];
+    if (!target) {
+      return;
+    }
+
+    const door = doors.find((candidate) => candidate.direction === direction && candidate.target === target);
+    if (!door) {
+      return;
+    }
+
+    const axis = direction === 'north' || direction === 'south' ? 'y' : 'x';
+    const inwardSign = direction === 'north' || direction === 'west' ? 1 : -1;
+    const distanceFromDoor = (entry.position[axis] - door.position[axis]) * inwardSign;
+    const safeRadiusTiles = Math.max(door.safeRadius ?? doorBuffer, doorBuffer);
+    const minDistance = (safeRadiusTiles + 1) * tileSize;
+    if (distanceFromDoor >= minDistance) {
+      return;
+    }
+
+    const candidate = door.position[axis] + minDistance * inwardSign;
+    const clamped = clamp(candidate, minCoordinate[axis], maxCoordinate[axis]);
+    entry.position[axis] = clamped;
+  });
+
+  return entryPoints;
 }
 
 function deriveDoors(
@@ -217,6 +307,10 @@ function tileToWorld(tile: TileCoordinate, tileSize: number): Vector2 {
     x: tile.column * tileSize + tileSize / 2,
     y: tile.row * tileSize + tileSize / 2,
   } satisfies Vector2;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
 }
 
 function isWalkableSymbol(symbol: string | undefined) {

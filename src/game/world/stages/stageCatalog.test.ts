@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { AreaTransitionDirection } from '../AreaManager';
 import { STAGE_DEFINITIONS } from './index';
 
 function findStage(id: string) {
@@ -6,6 +7,8 @@ function findStage(id: string) {
 }
 
 describe('Stage catalog', () => {
+  const DIRECTIONS: AreaTransitionDirection[] = ['north', 'south', 'east', 'west'];
+
   it('includes a goal sanctum area connected to the fire area', () => {
     const fireArea = findStage('fire-area');
     expect(fireArea).toBeDefined();
@@ -95,5 +98,36 @@ describe('Stage catalog', () => {
     const labyrinthEntry = findStage('labyrinth-001');
     expect(labyrinthEntry).toBeDefined();
     expect(labyrinthEntry?.neighbors?.west).toBe('forest-area');
+  });
+
+  it('keeps directional entry points safely away from their connecting doors', () => {
+    STAGE_DEFINITIONS.forEach((stage) => {
+      DIRECTIONS.forEach((direction) => {
+        const neighbor = stage.neighbors[direction];
+        if (!neighbor) {
+          return;
+        }
+
+        const entry = stage.entryPoints[direction];
+        expect(entry).toBeDefined();
+        if (!entry) {
+          throw new Error(`${stage.id} should define an entry point for ${direction}`);
+        }
+
+        const matchingDoor = stage.doors?.find((door) => door.direction === direction && door.target === neighbor);
+        expect(matchingDoor).toBeDefined();
+        if (!matchingDoor) {
+          throw new Error(`${stage.id} should define a door for ${direction}`);
+        }
+
+        const axis = direction === 'north' || direction === 'south' ? 'y' : 'x';
+        const inwardSign = direction === 'north' || direction === 'west' ? 1 : -1;
+        const separation = (entry.position[axis] - matchingDoor.position[axis]) * inwardSign;
+        const safeRadiusTiles = Math.max(matchingDoor.safeRadius ?? stage.doorBuffer ?? 1, 1);
+        const minDistance = (safeRadiusTiles + 1) * stage.tileSize;
+
+        expect(separation).toBeGreaterThanOrEqual(minDistance);
+      });
+    });
   });
 });
