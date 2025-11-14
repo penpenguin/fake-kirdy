@@ -195,17 +195,47 @@ class PlayerInputManager {
 
 ### 7. マップシステム
 
-```javascript
+`MapSystem` は 100 以上のエリア定義（迷宮ノード）を有機的に接続し、進行度・発見情報・ゴール遷移を一元管理する。各エリアは `AreaDefinition` で宣言され、`AreaManager` 経由で Phaser 上のタイルマップ・敵・アイテム・扉を生成する。
+
+#### 7.1 扉周囲の安全ポップ
+- すべての扉タイルには `doorId` と中心座標が付与され、チェビシェフ距離 1（3×3 グリッド）を「安全リング」として予約する。
+- `MapSystem.enforceDoorSpawnConstraints` はエリアロード・復活・再配置時に安全リング内のタイルをスポーン候補から除外し、`PlayerSpawner` へ許可済み座標リストを引き渡す。
+- ゴール扉・隠し扉を含む全ての扉が対象で、将来の扉半径拡張を見越して `doorSafeRadius` をデータ駆動で持つ。
+
+#### 7.2 デッドエンドへの回復配置
+- `AreaDefinition.deadEnds` には次数 1 の行き止まりタイル座標を列挙し、最低 1 つの回復アイテム（`health`, `max-health`, `revive`）を保証する。
+- `MapSystem.scatterDeadEndHeals` が行き止まり判定と空きタイル検索を担い、既存アイテムと重複しない位置を `ItemSpawner` に指示する。
+- DeadEnd 情報はミニマップ上でも緑色アイコンで示し、探索完了判定にも利用する。
+
+#### 7.3 迷宮規模と密度
+- 迷宮は 5 クラスタ（hub / forest / ice / fire / ruins）× 25〜30 エリアで構成し、ビルド時点で最低 128 個のユニークエリアを提供する。
+- 各エリアは `AreaDefinition.metadata.index` を持ち、`MapSystem` は index をもとにストーリーシードからルートを抽出する。ルート上に同一エリアが 1 度しか現れないよう `discoveredAreas` をチェックする。
+- バイオーム内で 20% 以上が支路（デッドエンド）となるよう、定義段階で次数チェックを CI へ追加する。
+
+#### 7.4 ゴール扉とリザルト表示
+- ゴールエリア（例: `goal-sanctuary`）には専用テクスチャ `goal-door` を割り当て、通常扉とは別スプライトシートで描画する。
+- プレイヤーがゴール扉のヒットボックスに触れると、`GoalDoorController` が `score`（`GameState.player.score`）と `elapsedTimeMs`（`RunTimer`）を収集し、HUD オーバーレイに即時表示する。
+- リザルトオーバーレイには「スコア」「クリアタイム」「残機ボーナス」を含め、キー入力か 3 秒経過で `ResultsScene` へ遷移する。
+
+#### 7.5 クラス構成
+
+```ts
 class MapSystem {
-  constructor() {
+  constructor(tileSize = 16) {
     this.areas = new Map();
     this.currentArea = 'central-hub';
-    this.discoveredAreas = new Set();
+    this.discoveredAreas = new Set(['central-hub']);
+    this.goalAreaId = 'goal-sanctuary';
+    this.goalDoorTexture = 'goal-door';
+    this.doorSafeRadius = 1;
   }
-  
-  loadArea(areaId) { /* エリア読み込み */ }
-  transitionToArea(areaId) { /* エリア遷移 */ }
+
+  loadArea(areaId, spawnDoorId) { /* エリア読み込み */ }
+  transitionToArea(areaId, doorId) { /* エリア遷移 */ }
   updateDiscovery(x, y) { /* 探索状況更新 */ }
+  enforceDoorSpawnConstraints(areaId) { /* 扉周囲 1 マスをスポーン禁止にする */ }
+  scatterDeadEndHeals(areaId) { /* 行き止まりに回復アイテムを配置 */ }
+  checkGoalContact(playerSprite) { /* ゴール扉接触時にスコアとタイムを表示 */ }
 }
 ```
 
@@ -226,7 +256,17 @@ const GameState = {
     currentArea: 'central-hub',
     discoveredAreas: [],
     completedAreas: [],
-    collectedItems: []
+    collectedItems: [],
+    goal: {
+      areaId: 'goal-sanctuary',
+      doorTexture: 'goal-door',
+      reached: false,
+      lastResult: { score: 0, timeMs: 0 }
+    }
+  },
+  run: {
+    elapsedTimeMs: 0,
+    lastDoorId: null
   },
   settings: {
     volume: 0.4,
@@ -244,6 +284,22 @@ const AreaData = {
     name: 'Central Hub',
     tilemap: 'central-hub-tilemap',
     background: 'hub-bg',
+    cluster: 'hub',
+    metadata: {
+      index: 0,
+      difficulty: 1,
+      doorBuffer: 1
+    },
+    spawn: {
+      initial: { x: 200, y: 360 }
+    },
+    doors: [
+      { id: 'north', target: 'ice-area', texture: 'door-standard', position: { x: 480, y: 64 } },
+      { id: 'east', target: 'fire-area', texture: 'door-standard', position: { x: 896, y: 256 } },
+      { id: 'south', target: 'forest-area', texture: 'door-standard', position: { x: 480, y: 448 } },
+      { id: 'west', target: 'cave-area', texture: 'door-standard', position: { x: 64, y: 256 } },
+      { id: 'goal', target: 'goal-sanctuary', texture: 'goal-door', position: { x: 960, y: 256 }, type: 'goal' }
+    ],
     enemies: [
       { type: 'waddle-dee', x: 200, y: 300 },
       { type: 'bronto-burt', x: 400, y: 200 }
@@ -252,13 +308,35 @@ const AreaData = {
       { type: 'health', x: 150, y: 250 },
       { type: 'star', x: 350, y: 180 }
     ],
-    exits: {
-      'north': 'ice-area',
-      'east': 'fire-area',
-      'south': 'forest-area',
-      'west': 'cave-area'
+    deadEnds: [
+      { x: 640, y: 384, reward: 'health' }
+    ],
+    goal: null
+  },
+  'goal-sanctuary': {
+    name: 'Goal Sanctuary',
+    tilemap: 'goal-sanctuary-tilemap',
+    background: 'goal-bg',
+    cluster: 'ruins',
+    metadata: {
+      index: 127,
+      difficulty: 5,
+      doorBuffer: 1,
+      isGoal: true
+    },
+    doors: [
+      { id: 'entry', target: 'ruins-27', texture: 'door-standard', position: { x: 64, y: 256 } }
+    ],
+    enemies: [],
+    items: [],
+    deadEnds: [],
+    goal: {
+      texture: 'goal-door',
+      scoreBonus: 5000,
+      resultOverlay: 'goal-results'
     }
-  }
+  },
+  // ... 126 以上の追加エリア定義
 };
 ```
 
