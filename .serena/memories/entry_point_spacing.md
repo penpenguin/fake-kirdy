@@ -1,0 +1,1 @@
+- Nov 2025: Added automated enforcement (src/game/world/stages/stage-utils.ts) so directional entry points are pushed at least safeRadius + 1 tiles away from their door. Tests in src/game/world/stages/stageCatalog.test.ts ensure every stage (including procedural) keeps spawn positions offset from doors.
