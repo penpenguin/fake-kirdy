@@ -1,4 +1,5 @@
 import type { AreaDefinition } from '../AreaManager';
+import { buildStageDefinition } from './stage-utils';
 
 const tileSize = 32;
 
@@ -18,7 +19,7 @@ const layout = [
 const width = layout[0].length * tileSize;
 const height = layout.length * tileSize;
 
-export const centralHub: AreaDefinition = {
+export const centralHub: AreaDefinition = buildStageDefinition({
   id: 'central-hub',
   name: 'Central Hub',
   tileSize,
@@ -44,4 +45,15 @@ export const centralHub: AreaDefinition = {
       { type: 'dronto-durt', limit: 1 },
     ],
   },
-};
+  metadata: {
+    cluster: 'hub',
+    index: 0,
+    difficulty: 1,
+  },
+  doorBuffer: 2,
+  goal: null,
+  deadEndOverrides: [
+    { column: 3, row: 2, reward: 'health' },
+    { column: 15, row: 7, reward: 'max-health' },
+  ],
+});

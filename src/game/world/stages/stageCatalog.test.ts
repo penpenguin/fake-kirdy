@@ -75,4 +75,25 @@ describe('Stage catalog', () => {
     const spawnSymbol = spawnRowLayout.charAt(spawnColumn);
     expect(['.', 'D'].includes(spawnSymbol)).toBe(true);
   });
+
+  it('annotates central hub door safety data and dead ends for heal placement', () => {
+    const centralHub = findStage('central-hub');
+    expect(centralHub).toBeDefined();
+    expect(centralHub?.doorBuffer).toBeGreaterThanOrEqual(1);
+    expect(centralHub?.doors?.length).toBeGreaterThanOrEqual(4);
+    const doorWithMetadata = centralHub?.doors?.find((door) => Boolean(door.id && door.safeRadius));
+    expect(doorWithMetadata?.direction).toBeTruthy();
+    expect(doorWithMetadata?.tile).toBeDefined();
+    expect(centralHub?.deadEnds?.length).toBeGreaterThan(0);
+    expect(centralHub?.deadEnds?.[0]?.reward).toBeTruthy();
+  });
+
+  it('connects the forest area to the labyrinth entry branch', () => {
+    const forest = findStage('forest-area');
+    expect(forest?.neighbors?.east).toBe('labyrinth-001');
+
+    const labyrinthEntry = findStage('labyrinth-001');
+    expect(labyrinthEntry).toBeDefined();
+    expect(labyrinthEntry?.neighbors?.west).toBe('forest-area');
+  });
 });

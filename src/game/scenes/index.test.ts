@@ -354,6 +354,7 @@ import {
   GameScene,
   MenuScene,
   PauseScene,
+  ResultsScene,
   SettingsScene,
   SceneKeys,
   coreScenes,
@@ -385,9 +386,10 @@ describe('Scene registration', () => {
     expect(SceneKeys.Boot).toBe('BootScene');
     expect(SceneKeys.Menu).toBe('MenuScene');
     expect(SceneKeys.Game).toBe('GameScene');
-     expect(SceneKeys.Settings).toBe('SettingsScene');
+    expect(SceneKeys.Settings).toBe('SettingsScene');
     expect(SceneKeys.Pause).toBe('PauseScene');
     expect(SceneKeys.GameOver).toBe('GameOverScene');
+    expect(SceneKeys.Results).toBe('ResultsScene');
   });
 
   it('boot scene queues assets and transitions after load completes', () => {
@@ -1828,6 +1830,7 @@ describe('Scene registration', () => {
       PauseScene,
       SettingsScene,
       GameOverScene,
+      ResultsScene,
     ]);
   });
 });

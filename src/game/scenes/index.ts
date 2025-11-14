@@ -24,10 +24,14 @@ import {
   type AreaManagerSnapshot,
   type Vector2,
   type AreaEnemySpawnConfig,
+  type AreaId,
 } from '../world/AreaManager';
+import { MapSystem, type SpawnTile } from '../world/MapSystem';
+import { STAGE_DEFINITIONS } from '../world/stages';
 import { MapOverlay, createMapSummaries } from '../ui/MapOverlay';
 import { Hud, type HudHPState } from '../ui/Hud';
 import { HUD_SAFE_AREA_HEIGHT, HUD_WORLD_MARGIN } from '../ui/hud-layout';
+import { ResultsOverlay, type GoalResultPayload } from '../ui/ResultsOverlay';
 import {
   SaveManager,
   type GameProgressSnapshot,
@@ -41,6 +45,8 @@ import { PerformanceMonitor, type PerformanceMetrics } from '../performance/Perf
 import { recordLowFpsEvent, recordStableFpsEvent } from '../performance/RenderingModePreference';
 import { AudioManager } from '../audio/AudioManager';
 import { ErrorHandler, type GameError } from '../errors/ErrorHandler';
+import { GoalDoorController } from '../mechanics/GoalDoorController';
+import { RunTimer } from '../performance/RunTimer';
 
 export const SceneKeys = {
   Boot: 'BootScene',
@@ -49,6 +55,7 @@ export const SceneKeys = {
   Settings: 'SettingsScene',
   Pause: 'PauseScene',
   GameOver: 'GameOverScene',
+  Results: 'ResultsScene',
 } as const;
 
 type SceneKey = (typeof SceneKeys)[keyof typeof SceneKeys];
@@ -61,8 +68,10 @@ const TERRAIN_FRAME_KEYS = {
   floor: 'floor',
 } as const;
 const DOOR_TEXTURE_KEY = 'door-marker';
+const GOAL_DOOR_TEXTURE_KEY = 'goal-door';
 const DOOR_MARKER_COLOR = 0xffdd66;
 const DOOR_MARKER_ALPHA = 0.8;
+const GOAL_DOOR_MARKER_COLOR = 0x66ffe3;
 const DOOR_MARKER_DEPTH = TERRAIN_VISUAL_DEPTH + 4;
 const CONTROL_SCHEME_SEQUENCE: ControlScheme[] = ['keyboard', 'touch', 'controller'];
 const DIFFICULTY_SEQUENCE: DifficultyLevel[] = ['easy', 'normal', 'hard'];
@@ -73,6 +82,7 @@ type TerrainTilePlacement = {
   centerX: number;
   centerY: number;
   tileSize: number;
+  doorType?: 'standard' | 'goal';
 };
 
 type StageEnemySpawnEntry = {
@@ -579,11 +589,15 @@ export class GameScene extends Phaser.Scene {
   private static readonly PLAYER_SPAWN = { x: 160, y: 360 } as const;
   private physicsSystem?: PhysicsSystem;
   private areaManager?: AreaManager;
+  private readonly mapSystem = new MapSystem(STAGE_DEFINITIONS);
+  private readonly runTimer = new RunTimer();
+  private goalDoorController?: GoalDoorController;
   private mapOverlay?: MapOverlay;
   private mapToggleHandler?: () => void;
   private pauseKeyHandler?: () => void;
   private lastAreaSummaryHash?: string;
   private hud?: Hud;
+  private resultsOverlay?: ResultsOverlay;
   private lastHudHp?: HudHPState;
   private readonly playerMaxHP = 6;
   private currentSettings: GameSettingsSnapshot = { ...DEFAULT_SETTINGS };
@@ -623,6 +637,7 @@ export class GameScene extends Phaser.Scene {
   private readonly playerContactDamage = 1;
   private readonly playerInvulnerabilityDurationMs = 2000;
   private playerInvulnerabilityRemainingMs = 0;
+  private readonly healSprites = new Map<string, Phaser.GameObjects.Sprite>();
 
   constructor() {
     super(buildConfig(SceneKeys.Game));
@@ -645,11 +660,12 @@ export class GameScene extends Phaser.Scene {
   };
 
   private readonly handleEnemyDefeated = () => {
-    if (!this.kirdy) {
+    const kirdy = this.kirdy;
+    if (!kirdy) {
       return;
     }
 
-    const updatedScore = this.kirdy.addScore(this.scorePerEnemy);
+    const updatedScore = kirdy.addScore(this.scorePerEnemy);
     this.hud?.updateScore(updatedScore);
     this.requestSave();
   };
@@ -663,6 +679,10 @@ export class GameScene extends Phaser.Scene {
     this.capturedSprites.add(sprite);
     this.enemyManager?.suspendEnemy(sprite);
     this.physicsSystem?.suspendEnemy(sprite);
+  };
+
+  private readonly handleGoalReached = (payload: GoalResultPayload) => {
+    this.resultsOverlay?.show(payload);
   };
 
   private readonly handleEnemyCaptureReleased = (event: { sprite?: Phaser.Physics.Matter.Sprite }) => {
@@ -693,7 +713,8 @@ export class GameScene extends Phaser.Scene {
   };
 
   private readonly handlePlayerEnemyCollision = (event: PlayerEnemyCollisionEvent) => {
-    if (!this.kirdy) {
+    const kirdy = this.kirdy;
+    if (!kirdy) {
       return;
     }
 
@@ -853,59 +874,17 @@ export class GameScene extends Phaser.Scene {
       onSample: (metrics) => this.handlePerformanceSample(metrics),
       onLowFps: (metrics) => this.handleLowFps(metrics),
     });
+    this.runTimer.reset();
+    this.runTimer.start();
 
     const areaSnapshot = savedProgress?.area as AreaManagerSnapshot | undefined;
     const startingAreaId = areaSnapshot?.currentAreaId ?? AREA_IDS.CentralHub;
     this.areaManager = new AreaManager(startingAreaId, undefined, areaSnapshot);
     this.mapOverlay = new MapOverlay(this);
     this.hud = new Hud(this);
-
-    this.rebuildTerrainColliders();
-    this.buildTerrainVisuals();
-
-    const spawn = this.determineSpawnPosition();
-    const savedPlayer = savedProgress?.player;
-    const kirdyOptions: KirdyOptions = {
-      maxHP: savedPlayer?.maxHP ?? this.playerMaxHP,
-      initialHP: savedPlayer?.hp ?? savedPlayer?.maxHP ?? this.playerMaxHP,
-      score: savedPlayer?.score ?? 0,
-      ability: savedPlayer?.ability,
-    };
-    this.pauseKeyHandler = () => this.pauseGame();
-    this.input?.keyboard?.on?.('keydown-ESC', this.pauseKeyHandler);
-    this.mapToggleHandler = () => this.toggleMapOverlay();
-    if (this.mapToggleHandler) {
-      this.input?.keyboard?.on?.('keydown-M', this.mapToggleHandler);
-    }
-
-    this.kirdy = createKirdy(this, spawn, kirdyOptions);
-    if (this.kirdy) {
-      this.lastSafePlayerPosition = { x: spawn.x, y: spawn.y };
-      this.physicsSystem?.registerPlayer(this.kirdy);
-      this.configureCamera();
-    }
-    this.playerInput = new PlayerInputManager(this);
-    this.playerInput?.setControlScheme?.(this.currentSettings.controls);
-    if (this.kirdy) {
-      this.inhaleSystem = new InhaleSystem(this, this.kirdy);
-      this.swallowSystem = new SwallowSystem(this, this.kirdy, this.inhaleSystem, this.physicsSystem);
-      this.abilitySystem = new AbilitySystem(this, this.kirdy, this.physicsSystem, this.audioManager);
-    }
-
-    this.initializeEnemyManager();
-
-    this.events?.on?.('ability-acquired', this.handleAbilityAcquired, this);
-    this.events?.on?.('ability-cleared', this.handleAbilityCleared, this);
-    this.events?.on?.('enemy-defeated', this.handleEnemyDefeated, this);
-    this.events?.on?.('enemy-captured', this.handleEnemyCaptured, this);
-    this.events?.on?.('enemy-capture-released', this.handleEnemyCaptureReleased, this);
-    this.events?.on?.('enemy-swallowed', this.handleEnemySwallowed, this);
-    this.events?.on?.('player-collided-with-enemy', this.handlePlayerEnemyCollision, this);
-
-    if (savedProgress?.player.ability) {
-      this.abilitySystem?.applySwallowedPayload({ abilityType: savedProgress.player.ability } as SwallowedPayload);
-    }
-
+    this.resultsOverlay = new ResultsOverlay(this, {
+      onComplete: (payload) => this.transitionToResults(payload),
+    });
     this.events?.once?.('shutdown', () => {
       this.deactivateMenuOverlay({ force: true });
       this.playerInput?.destroy();
@@ -937,10 +916,14 @@ export class GameScene extends Phaser.Scene {
       this.events?.off?.('enemy-capture-released', this.handleEnemyCaptureReleased, this);
       this.events?.off?.('enemy-swallowed', this.handleEnemySwallowed, this);
       this.events?.off?.('player-collided-with-enemy', this.handlePlayerEnemyCollision, this);
+      this.events?.off?.('goal:reached', this.handleGoalReached, this);
       this.hud?.destroy();
       this.hud = undefined;
+      this.resultsOverlay?.destroy();
+      this.resultsOverlay = undefined;
       this.lastHudHp = undefined;
       this.kirdy = undefined;
+      this.goalDoorController = undefined;
       if (this.isGameOver) {
         this.saveManager?.clear();
       }
@@ -952,9 +935,65 @@ export class GameScene extends Phaser.Scene {
       this.performanceMonitor = undefined;
       this.audioManager?.stopBgm();
       this.audioManager = undefined;
-      this.game?.events?.off?.('settings-updated', this.handleSettingsUpdated);
-      this.capturedSprites.clear();
+    this.game?.events?.off?.('settings-updated', this.handleSettingsUpdated);
+    this.capturedSprites.clear();
+    this.clearHealSprites();
+  });
+
+    this.rebuildTerrainColliders();
+    this.buildTerrainVisuals();
+    this.scatterDeadEndHeals();
+
+    const spawn = this.determineSpawnPosition();
+    const savedPlayer = savedProgress?.player;
+    const kirdyOptions: KirdyOptions = {
+      maxHP: savedPlayer?.maxHP ?? this.playerMaxHP,
+      initialHP: savedPlayer?.hp ?? savedPlayer?.maxHP ?? this.playerMaxHP,
+      score: savedPlayer?.score ?? 0,
+      ability: savedPlayer?.ability,
+    };
+    this.pauseKeyHandler = () => this.pauseGame();
+    this.input?.keyboard?.on?.('keydown-ESC', this.pauseKeyHandler);
+    this.mapToggleHandler = () => this.toggleMapOverlay();
+    if (this.mapToggleHandler) {
+      this.input?.keyboard?.on?.('keydown-M', this.mapToggleHandler);
+    }
+
+    this.kirdy = createKirdy(this, spawn, kirdyOptions);
+    if (this.kirdy) {
+      this.lastSafePlayerPosition = { x: spawn.x, y: spawn.y };
+      this.physicsSystem?.registerPlayer(this.kirdy);
+      this.configureCamera();
+    }
+    this.playerInput = new PlayerInputManager(this);
+    this.playerInput?.setControlScheme?.(this.currentSettings.controls);
+    if (this.kirdy) {
+      this.inhaleSystem = new InhaleSystem(this, this.kirdy);
+      this.swallowSystem = new SwallowSystem(this, this.kirdy, this.inhaleSystem, this.physicsSystem);
+      this.abilitySystem = new AbilitySystem(this, this.kirdy, this.physicsSystem, this.audioManager);
+    }
+
+    this.initializeEnemyManager();
+    this.goalDoorController = new GoalDoorController({
+      sceneEvents: this.events,
+      getAreaState: () => this.areaManager?.getCurrentAreaState(),
+      getPlayerPosition: () => this.getPlayerPosition(),
+      getScore: () => this.kirdy?.getScore() ?? 0,
+      runTimer: this.runTimer,
     });
+
+    this.events?.on?.('ability-acquired', this.handleAbilityAcquired, this);
+    this.events?.on?.('ability-cleared', this.handleAbilityCleared, this);
+    this.events?.on?.('enemy-defeated', this.handleEnemyDefeated, this);
+    this.events?.on?.('enemy-captured', this.handleEnemyCaptured, this);
+    this.events?.on?.('enemy-capture-released', this.handleEnemyCaptureReleased, this);
+    this.events?.on?.('enemy-swallowed', this.handleEnemySwallowed, this);
+    this.events?.on?.('player-collided-with-enemy', this.handlePlayerEnemyCollision, this);
+    this.events?.on?.('goal:reached', this.handleGoalReached, this);
+
+    if (savedProgress?.player.ability) {
+      this.abilitySystem?.applySwallowedPayload({ abilityType: savedProgress.player.ability } as SwallowedPayload);
+    }
 
     if (this.kirdy) {
       this.applyHudHp({ current: this.kirdy.getHP(), max: this.kirdy.getMaxHP() });
@@ -1069,6 +1108,11 @@ export class GameScene extends Phaser.Scene {
     this.scene.launch(SceneKeys.Pause);
   }
 
+  private transitionToResults(payload: GoalResultPayload) {
+    this.deactivateMenuOverlay({ force: true });
+    this.scene.start(SceneKeys.Results, payload);
+  }
+
   update(time: number, delta: number) {
     if (this.runtimeErrorCaptured) {
       return;
@@ -1103,7 +1147,9 @@ export class GameScene extends Phaser.Scene {
       this.enemyManager?.update(delta);
       this.maintainEnemyPopulation(delta);
       this.updateAreaState();
+      this.goalDoorController?.update();
       this.syncHudHpWithPlayer();
+      this.checkHealItemPickup();
 
       if (this.progressDirty) {
         this.persistProgress();
@@ -1313,7 +1359,125 @@ export class GameScene extends Phaser.Scene {
       spawns.push(spawn);
     });
 
-    return spawns.slice(0, this.enemyManagerConfig.maxActiveEnemies);
+    const filtered = this.filterDoorUnsafeSpawns(spawns, tileSize, areaState?.definition?.id);
+    return filtered.slice(0, this.enemyManagerConfig.maxActiveEnemies);
+  }
+
+  private scatterDeadEndHeals() {
+    const areaId = this.areaManager?.getCurrentAreaState()?.definition.id;
+    if (!areaId) {
+      this.clearHealSprites();
+      return;
+    }
+
+    this.mapSystem.scatterDeadEndHeals(areaId);
+    this.syncHealItemsWithScene(areaId);
+  }
+
+  private filterDoorUnsafeSpawns(spawns: EnemySpawn[], tileSize: number, areaId?: AreaId | null): EnemySpawn[] {
+    if (!areaId || spawns.length === 0) {
+      return spawns;
+    }
+
+    const spawnTiles: SpawnTile[] = spawns.map((spawn) => ({
+      column: Math.max(0, Math.floor(spawn.x / tileSize)),
+      row: Math.max(0, Math.floor(spawn.y / tileSize)),
+      x: spawn.x,
+      y: spawn.y,
+    }));
+
+    const constrained = this.mapSystem.enforceDoorSpawnConstraints(areaId, spawnTiles);
+    if (constrained.length === spawns.length) {
+      return spawns;
+    }
+
+    return constrained.map(({ x, y }) => ({ x, y } satisfies EnemySpawn));
+  }
+
+  private syncHealItemsWithScene(areaId?: AreaId | null) {
+    const targetAreaId = areaId ?? this.areaManager?.getCurrentAreaState()?.definition.id;
+    if (!targetAreaId) {
+      this.clearHealSprites();
+      return;
+    }
+
+    const activeHeals = this.mapSystem.getActiveHealItems(targetAreaId);
+    const activeIds = new Set(activeHeals.map((heal) => heal.id));
+
+    this.healSprites.forEach((sprite, healId) => {
+      if (!activeIds.has(healId)) {
+        sprite.destroy?.();
+        this.healSprites.delete(healId);
+      }
+    });
+
+    activeHeals.forEach((heal) => {
+      if (this.healSprites.has(heal.id)) {
+        return;
+      }
+
+      const sprite = this.add?.sprite?.(heal.position.x, heal.position.y, 'heal-orb');
+      sprite?.setDepth?.(900);
+      sprite?.setScrollFactor?.(1, 1);
+      sprite?.setOrigin?.(0.5);
+      sprite?.setData?.('heal-id', heal.id);
+
+      if (sprite) {
+        this.healSprites.set(heal.id, sprite as Phaser.GameObjects.Sprite);
+      }
+    });
+  }
+
+  private clearHealSprites() {
+    this.healSprites.forEach((sprite) => sprite.destroy?.());
+    this.healSprites.clear();
+  }
+
+  private checkHealItemPickup() {
+    const kirdy = this.kirdy;
+    if (!kirdy) {
+      return;
+    }
+
+    const areaId = this.areaManager?.getCurrentAreaState()?.definition.id;
+    if (!areaId) {
+      return;
+    }
+
+    const playerPosition = this.getPlayerPosition();
+    if (!playerPosition) {
+      return;
+    }
+
+    const tileSize = this.areaManager?.getCurrentAreaState()?.definition.tileSize ?? 32;
+    const pickupRadius = tileSize * 0.6;
+    const pickupRadiusSq = pickupRadius * pickupRadius;
+
+    this.healSprites.forEach((sprite, healId) => {
+      if (!sprite) {
+        return;
+      }
+
+      const dx = (sprite.x ?? 0) - playerPosition.x;
+      const dy = (sprite.y ?? 0) - playerPosition.y;
+      if (dx * dx + dy * dy > pickupRadiusSq) {
+        return;
+      }
+
+      const consumed = this.mapSystem.consumeHeal(areaId, healId);
+      if (!consumed) {
+        return;
+      }
+
+      sprite.destroy?.();
+      this.healSprites.delete(healId);
+
+      const previousHp = kirdy.getHP();
+      const currentHp = kirdy.heal(1);
+      if (currentHp !== previousHp) {
+        this.applyHudHp({ current: currentHp, max: kirdy.getMaxHP() });
+      }
+    });
   }
 
   private buildEnemySpawnPlan(config?: AreaEnemySpawnConfig | null): StageEnemySpawnPlan | undefined {
@@ -1521,8 +1685,10 @@ export class GameScene extends Phaser.Scene {
     if (result.areaChanged) {
       this.rebuildTerrainColliders();
       this.buildTerrainVisuals();
+      this.scatterDeadEndHeals();
       this.configureCamera();
       this.initializeEnemyManager();
+      this.goalDoorController?.handleAreaChanged();
     }
 
     this.trackExplorationProgress(result.areaChanged);
@@ -1589,6 +1755,13 @@ export class GameScene extends Phaser.Scene {
       return [];
     }
 
+    const doorMetadata = new Map<string, { type: 'standard' | 'goal' }>();
+    const definitionDoors = areaState?.definition?.doors ?? [];
+    definitionDoors.forEach((door) => {
+      const key = `${door.tile.column},${door.tile.row}`;
+      doorMetadata.set(key, { type: door.type });
+    });
+
     const placements: TerrainTilePlacement[] = [];
     for (let row = 0; row < rows; row += 1) {
       for (let column = 0; column < columns; column += 1) {
@@ -1599,7 +1772,9 @@ export class GameScene extends Phaser.Scene {
 
         const centerX = column * tileSize + tileSize / 2;
         const centerY = row * tileSize + tileSize / 2;
-        placements.push({ column, row, centerX, centerY, tileSize });
+        const key = `${column},${row}`;
+        const metadata = doorMetadata.get(key);
+        placements.push({ column, row, centerX, centerY, tileSize, doorType: metadata?.type });
       }
     }
 
@@ -1676,6 +1851,7 @@ export class GameScene extends Phaser.Scene {
     const wallTextureAvailable = Boolean(textureManager?.exists?.(WALL_TEXTURE_KEY));
     const terrainFrameAvailable = this.hasTerrainFrame(TERRAIN_FRAME_KEYS.wall);
     const doorTextureAvailable = Boolean(textureManager?.exists?.(DOOR_TEXTURE_KEY));
+    const goalDoorTextureAvailable = Boolean(textureManager?.exists?.(GOAL_DOOR_TEXTURE_KEY));
 
     wallPlacements.forEach(({ centerX, centerY, tileSize }) => {
       let visual: Phaser.GameObjects.Image | Phaser.GameObjects.Rectangle | undefined = undefined;
@@ -1729,16 +1905,19 @@ export class GameScene extends Phaser.Scene {
       this.terrainTiles.push(visual as Phaser.GameObjects.GameObject & { destroy?: () => void });
     });
 
-    doorPlacements.forEach(({ centerX, centerY, tileSize }) => {
+    doorPlacements.forEach(({ centerX, centerY, tileSize, doorType }) => {
       let marker: Phaser.GameObjects.Rectangle | Phaser.GameObjects.Image | undefined;
       let usedDoorTexture = false;
 
-      if (doorTextureAvailable) {
+      const shouldUseGoalTexture = doorType === 'goal' && goalDoorTextureAvailable;
+      const textureKey = shouldUseGoalTexture ? GOAL_DOOR_TEXTURE_KEY : DOOR_TEXTURE_KEY;
+      const textureAvailable = shouldUseGoalTexture ? goalDoorTextureAvailable : doorTextureAvailable;
+      if (textureAvailable) {
         try {
           marker = displayFactory.image?.(
             centerX,
             centerY,
-            DOOR_TEXTURE_KEY,
+            textureKey,
           ) as Phaser.GameObjects.Image | undefined;
           usedDoorTexture = Boolean(marker);
         } catch (_error) {
@@ -1754,8 +1933,8 @@ export class GameScene extends Phaser.Scene {
             centerY,
             tileSize,
             tileSize,
-            DOOR_MARKER_COLOR,
-            DOOR_MARKER_ALPHA,
+            doorType === 'goal' ? GOAL_DOOR_MARKER_COLOR : DOOR_MARKER_COLOR,
+            doorType === 'goal' ? 0.95 : DOOR_MARKER_ALPHA,
           ) as Phaser.GameObjects.Rectangle | undefined;
         } catch (_error) {
           marker = undefined;
@@ -1773,7 +1952,7 @@ export class GameScene extends Phaser.Scene {
       marker.setActive?.(true);
 
       if (!usedDoorTexture) {
-        marker.setAlpha?.(DOOR_MARKER_ALPHA);
+        marker.setAlpha?.(doorType === 'goal' ? 0.95 : DOOR_MARKER_ALPHA);
       }
 
       this.terrainTransitionMarkers.push(
@@ -2681,4 +2860,67 @@ export class GameOverScene extends Phaser.Scene {
   }
 }
 
-export const coreScenes = [BootScene, MenuScene, GameScene, PauseScene, SettingsScene, GameOverScene];
+export class ResultsScene extends Phaser.Scene {
+  public static readonly KEY = SceneKeys.Results;
+
+  constructor() {
+    super(buildConfig(SceneKeys.Results));
+  }
+
+  create(data?: GoalResultPayload) {
+    const score = data?.score ?? 0;
+    const timeMs = data?.timeMs ?? 0;
+    const width = this.scale?.width ?? 800;
+    const height = this.scale?.height ?? 600;
+    const formattedTime = this.formatTime(timeMs);
+
+    const title = this.add.text(width / 2, height * 0.25, 'Results', {
+      fontSize: '36px',
+      color: '#ffffff',
+    });
+    title.setOrigin(0.5);
+
+    const scoreText = this.add.text(width / 2, height * 0.4, `Score: ${score.toLocaleString()}`, {
+      fontSize: '26px',
+      color: '#f8e16c',
+    });
+    scoreText.setOrigin(0.5);
+
+    const timeText = this.add.text(width / 2, height * 0.48, `Time: ${formattedTime}`, {
+      fontSize: '24px',
+      color: '#a0d8ff',
+    });
+    timeText.setOrigin(0.5);
+
+    const hint = this.add.text(width / 2, height * 0.7, 'Press ENTER to return to menu', {
+      fontSize: '20px',
+      color: '#ffffff',
+    });
+    hint.setOrigin(0.5);
+
+    this.input?.keyboard?.once?.('keydown-ENTER', () => this.scene.start(SceneKeys.Menu));
+    this.input?.keyboard?.once?.('keydown-ESC', () => this.scene.start(SceneKeys.Menu));
+  }
+
+  private formatTime(timeMs: number) {
+    if (!Number.isFinite(timeMs) || timeMs < 0) {
+      return '0:00.0';
+    }
+
+    const totalSeconds = Math.floor(timeMs / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    const tenths = Math.floor((timeMs % 1000) / 100);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}.${tenths}`;
+  }
+}
+
+export const coreScenes = [
+  BootScene,
+  MenuScene,
+  GameScene,
+  PauseScene,
+  SettingsScene,
+  GameOverScene,
+  ResultsScene,
+];

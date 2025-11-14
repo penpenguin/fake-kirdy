@@ -13,8 +13,8 @@ export const AREA_IDS = {
   AuroraSpire: 'aurora-spire',
   StarlitKeep: 'starlit-keep',
 } as const;
-
-export type AreaId = (typeof AREA_IDS)[keyof typeof AREA_IDS];
+type ProceduralAreaId = `labyrinth-${number}`;
+export type AreaId = (typeof AREA_IDS)[keyof typeof AREA_IDS] | ProceduralAreaId;
 export type AreaTransitionDirection = 'north' | 'south' | 'east' | 'west';
 
 export type TileCode = 'wall' | 'floor' | 'door' | 'void';
@@ -35,6 +35,38 @@ export interface AreaEnemySpawnConfig {
   baseline: number;
   maxActive?: number;
   entries: AreaEnemySpawnEntry[];
+}
+
+export type HealRewardType = 'health' | 'max-health' | 'revive';
+
+export interface AreaDefinitionMetadata {
+  cluster: 'hub' | 'forest' | 'ice' | 'fire' | 'ruins' | 'sky' | 'void';
+  index: number;
+  difficulty?: number;
+}
+
+export interface AreaDoorDefinition {
+  id: string;
+  direction: AreaTransitionDirection;
+  tile: { column: number; row: number };
+  position: Vector2;
+  safeRadius: number;
+  type: 'standard' | 'goal';
+  target?: AreaId;
+}
+
+export interface DeadEndDefinition {
+  id: string;
+  tile: { column: number; row: number };
+  position: Vector2;
+  reward: HealRewardType;
+}
+
+export interface AreaGoalMetadata {
+  doorId: string;
+  texture?: string;
+  resultOverlayKey?: string;
+  scoreBonus?: number;
 }
 
 export interface AreaUpdateResult {
@@ -79,6 +111,11 @@ export interface AreaDefinition {
   layout: string[];
   neighbors: Partial<Record<AreaTransitionDirection, AreaId>>;
   entryPoints: { default: AreaEntryPoint } & Partial<Record<AreaTransitionDirection, AreaEntryPoint>>;
+  metadata?: AreaDefinitionMetadata;
+  doorBuffer?: number;
+  doors?: AreaDoorDefinition[];
+  deadEnds?: DeadEndDefinition[];
+  goal?: AreaGoalMetadata | null;
   enemySpawns?: AreaEnemySpawnConfig;
 }
 

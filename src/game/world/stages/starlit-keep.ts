@@ -1,4 +1,5 @@
 import type { AreaDefinition } from '../AreaManager';
+import { buildStageDefinition } from './stage-utils';
 
 const tileSize = 32;
 
@@ -35,7 +36,7 @@ const eastEntryColumnIndex =
     : columns - 3;
 const eastEntryX = (eastEntryColumnIndex + 0.5) * tileSize;
 
-export const starlitKeep: AreaDefinition = {
+export const starlitKeep: AreaDefinition = buildStageDefinition({
   id: 'starlit-keep',
   name: 'Starlit Keep',
   tileSize,
@@ -58,4 +59,11 @@ export const starlitKeep: AreaDefinition = {
       { type: 'wabble-bee', limit: 2 },
     ],
   },
-};
+  metadata: {
+    cluster: 'sky',
+    index: 9,
+    difficulty: 3,
+  },
+  doorBuffer: 2,
+  goal: null,
+});

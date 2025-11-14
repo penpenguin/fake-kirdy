@@ -1,4 +1,5 @@
 import type { AreaDefinition } from '../AreaManager';
+import { buildStageDefinition } from './stage-utils';
 
 const tileSize = 32;
 
@@ -31,7 +32,7 @@ const resolveDoorY = (rowIndex: number | undefined) => {
 const westEntryY = resolveDoorY(westDoorRowIndex);
 const eastEntryY = resolveDoorY(eastDoorRowIndex);
 
-export const skySanctum: AreaDefinition = {
+export const skySanctum: AreaDefinition = buildStageDefinition({
   id: 'sky-sanctum',
   name: 'Sky Sanctum',
   tileSize,
@@ -56,4 +57,11 @@ export const skySanctum: AreaDefinition = {
       { type: 'glacio-durt', limit: 2 },
     ],
   },
-};
+  metadata: {
+    cluster: 'sky',
+    index: 7,
+    difficulty: 4,
+  },
+  doorBuffer: 2,
+  goal: null,
+});

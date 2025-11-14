@@ -1,4 +1,5 @@
 import type { AreaDefinition } from '../AreaManager';
+import { buildStageDefinition } from './stage-utils';
 
 const tileSize = 32;
 
@@ -15,7 +16,7 @@ const layout = [
 const width = layout[0].length * tileSize;
 const height = layout.length * tileSize;
 
-export const caveArea: AreaDefinition = {
+export const caveArea: AreaDefinition = buildStageDefinition({
   id: 'cave-area',
   name: 'Cave Area',
   tileSize,
@@ -38,4 +39,11 @@ export const caveArea: AreaDefinition = {
       { type: 'dronto-durt', limit: 2 },
     ],
   },
-};
+  metadata: {
+    cluster: 'ruins',
+    index: 4,
+    difficulty: 2,
+  },
+  doorBuffer: 1,
+  goal: null,
+});

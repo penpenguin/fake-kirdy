@@ -1,4 +1,5 @@
 import type { AreaDefinition } from '../AreaManager';
+import { buildStageDefinition } from './stage-utils';
 
 const tileSize = 32;
 
@@ -13,7 +14,7 @@ const layout = [
 const width = layout[0].length * tileSize;
 const height = layout.length * tileSize;
 
-export const mirrorCorridor: AreaDefinition = {
+export const mirrorCorridor: AreaDefinition = buildStageDefinition({
   id: 'mirror-corridor',
   name: 'Mirror Corridor',
   tileSize,
@@ -37,4 +38,11 @@ export const mirrorCorridor: AreaDefinition = {
       { type: 'dronto-durt', limit: 1 },
     ],
   },
-};
+  metadata: {
+    cluster: 'ruins',
+    index: 1,
+    difficulty: 1,
+  },
+  doorBuffer: 1,
+  goal: null,
+});

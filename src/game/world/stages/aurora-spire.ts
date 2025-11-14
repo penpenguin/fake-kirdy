@@ -1,4 +1,5 @@
 import type { AreaDefinition } from '../AreaManager';
+import { buildStageDefinition } from './stage-utils';
 
 const tileSize = 32;
 
@@ -25,7 +26,7 @@ const height = layout.length * tileSize;
 const westDoorRowIndex = layout.findIndex((row) => row.indexOf('D') === 1);
 const westEntryY = (westDoorRowIndex >= 0 ? westDoorRowIndex + 0.5 : layout.length / 2) * tileSize;
 
-export const auroraSpire: AreaDefinition = {
+export const auroraSpire: AreaDefinition = buildStageDefinition({
   id: 'aurora-spire',
   name: 'Aurora Spire',
   tileSize,
@@ -48,4 +49,11 @@ export const auroraSpire: AreaDefinition = {
       { type: 'dronto-durt', limit: 2 },
     ],
   },
-};
+  metadata: {
+    cluster: 'sky',
+    index: 8,
+    difficulty: 4,
+  },
+  doorBuffer: 2,
+  goal: null,
+});

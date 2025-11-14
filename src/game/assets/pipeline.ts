@@ -128,6 +128,16 @@ const IMAGE_ASSETS: ReadonlyArray<ImageAsset> = [
     url: 'images/door-marker.png',
   },
   {
+    key: 'goal-door',
+    url: 'images/goal-door.png',
+    fallbackUrl: 'images/door-marker.png',
+  },
+  {
+    key: 'heal-orb',
+    url: 'images/heal-orb.png',
+    fallbackUrl: 'images/door-marker.png',
+  },
+  {
     key: 'virtual-controls',
     url: 'images/virtual-controls.png',
     fallbackUrl: 'images/fallbacks/virtual-controls.png',

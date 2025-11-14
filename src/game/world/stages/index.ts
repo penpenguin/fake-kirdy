@@ -9,6 +9,7 @@ import { goalSanctum } from './goal-sanctum';
 import { skySanctum } from './sky-sanctum';
 import { auroraSpire } from './aurora-spire';
 import { starlitKeep } from './starlit-keep';
+import { PROCEDURAL_STAGE_DEFINITIONS } from './procedural';
 
 export const STAGE_DEFINITIONS: ReadonlyArray<AreaDefinition> = [
   centralHub,
@@ -21,6 +22,7 @@ export const STAGE_DEFINITIONS: ReadonlyArray<AreaDefinition> = [
   skySanctum,
   auroraSpire,
   starlitKeep,
+  ...PROCEDURAL_STAGE_DEFINITIONS,
 ];
 
 const TRANSITIONS: AreaTransitionDirection[] = ['north', 'south', 'east', 'west'];
@@ -54,11 +56,45 @@ export function cloneStageDefinition(definition: AreaDefinition): AreaDefinition
       }
     : undefined;
 
+  const metadata = definition.metadata
+    ? {
+        cluster: definition.metadata.cluster,
+        index: definition.metadata.index,
+        difficulty: definition.metadata.difficulty,
+      }
+    : undefined;
+
+  const doors = definition.doors?.map((door) => ({
+    ...door,
+    tile: { ...door.tile },
+    position: { ...door.position },
+  }));
+
+  const deadEnds = definition.deadEnds?.map((deadEnd) => ({
+    ...deadEnd,
+    tile: { ...deadEnd.tile },
+    position: { ...deadEnd.position },
+  }));
+
+  const goal = definition.goal
+    ? {
+        doorId: definition.goal.doorId,
+        texture: definition.goal.texture,
+        resultOverlayKey: definition.goal.resultOverlayKey,
+        scoreBonus: definition.goal.scoreBonus,
+      }
+    : undefined;
+
   return {
     ...definition,
+    doorBuffer: definition.doorBuffer,
     layout,
     neighbors,
     entryPoints,
     enemySpawns,
+    metadata,
+    doors,
+    deadEnds,
+    goal: goal ?? null,
   } satisfies AreaDefinition;
 }

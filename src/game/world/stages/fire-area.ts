@@ -1,4 +1,5 @@
 import type { AreaDefinition } from '../AreaManager';
+import { buildStageDefinition } from './stage-utils';
 
 const tileSize = 32;
 
@@ -15,7 +16,7 @@ const layout = [
 const width = layout[0].length * tileSize;
 const height = layout.length * tileSize;
 
-export const fireArea: AreaDefinition = {
+export const fireArea: AreaDefinition = buildStageDefinition({
   id: 'fire-area',
   name: 'Fire Area',
   tileSize,
@@ -40,4 +41,11 @@ export const fireArea: AreaDefinition = {
       { type: 'glacio-durt', limit: 1 },
     ],
   },
-};
+  metadata: {
+    cluster: 'fire',
+    index: 5,
+    difficulty: 3,
+  },
+  doorBuffer: 1,
+  goal: null,
+});

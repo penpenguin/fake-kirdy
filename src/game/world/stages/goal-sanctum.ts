@@ -1,4 +1,5 @@
 import type { AreaDefinition } from '../AreaManager';
+import { buildStageDefinition } from './stage-utils';
 
 const tileSize = 32;
 
@@ -18,7 +19,7 @@ const southernDoorRowIndex = layout.length - 2;
 const southernDoorColumnIndex = layout[southernDoorRowIndex]?.indexOf('D') ?? -1;
 const southDoorX = southernDoorColumnIndex >= 0 ? (southernDoorColumnIndex + 1) * tileSize : width / 2;
 
-export const goalSanctum: AreaDefinition = {
+export const goalSanctum: AreaDefinition = buildStageDefinition({
   id: 'goal-sanctum',
   name: 'Goal Sanctum',
   tileSize,
@@ -42,4 +43,17 @@ export const goalSanctum: AreaDefinition = {
       { type: 'frost-wabble', limit: 1 },
     ],
   },
-};
+  metadata: {
+    cluster: 'ruins',
+    index: 6,
+    difficulty: 4,
+  },
+  doorBuffer: 2,
+  goal: {
+    doorId: 'north-0',
+    direction: 'north',
+    texture: 'goal-door',
+    resultOverlayKey: 'goal-results',
+    scoreBonus: 5000,
+  },
+});

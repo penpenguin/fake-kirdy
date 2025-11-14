@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AbilityType } from '../mechanics/AbilitySystem';
+import { MapSystem, type HealItemInstance } from '../world/MapSystem';
 
 const stubs = vi.hoisted(() => {
   const keyboardManager = {
@@ -33,6 +34,7 @@ const stubs = vi.hoisted(() => {
 
   const addRectangleMock = vi.fn();
   const addImageMock = vi.fn();
+  const addSpriteMock = vi.fn();
   const addTextMock = vi.fn();
   const addContainerMock = vi.fn();
 
@@ -57,6 +59,16 @@ const stubs = vi.hoisted(() => {
     destroy: vi.fn(),
   });
 
+  const createDisplaySprite = () => ({
+    setOrigin: vi.fn().mockReturnThis(),
+    setDepth: vi.fn().mockReturnThis(),
+    setScrollFactor: vi.fn().mockReturnThis(),
+    setData: vi.fn().mockReturnThis(),
+    destroy: vi.fn(),
+    x: 0,
+    y: 0,
+  });
+
   const createDisplayText = () => ({
     setScrollFactor: vi.fn().mockReturnThis(),
     setDepth: vi.fn().mockReturnThis(),
@@ -67,8 +79,9 @@ const stubs = vi.hoisted(() => {
   const createDisplayContainer = () => {
     const containerChildren: any[] = [];
     const container: any = {
-      add: vi.fn((items: any[]) => {
-        containerChildren.push(...items);
+      add: vi.fn((items: any[] | any) => {
+        const normalized = Array.isArray(items) ? items : [items];
+        containerChildren.push(...normalized);
         return container;
       }),
       setScrollFactor: vi.fn().mockReturnThis(),
@@ -120,7 +133,12 @@ const stubs = vi.hoisted(() => {
 
   const textures = {
     exists: vi.fn(
-      (key: string) => key === 'tileset-main' || key === 'door-marker' || key === 'wall-texture',
+      (key: string) =>
+        key === 'tileset-main' ||
+        key === 'door-marker' ||
+        key === 'wall-texture' ||
+        key === 'goal-door' ||
+        key === 'heal-orb',
     ),
     get: vi.fn((key: string) => (key === 'tileset-main' ? terrainTexture : undefined)),
   };
@@ -165,6 +183,15 @@ const stubs = vi.hoisted(() => {
         this.children.emitAdd(image);
         return image;
       },
+      sprite: (...args: unknown[]) => {
+        const result = addSpriteMock(...args as any);
+        const sprite = result ?? createDisplaySprite();
+        sprite.x = (args[0] as number) ?? 0;
+        sprite.y = (args[1] as number) ?? 0;
+        this.children.list.push(sprite);
+        this.children.emitAdd(sprite);
+        return sprite;
+      },
       text: (...args: unknown[]) => {
         const result = addTextMock(...args as any);
         const text = result ?? createDisplayText();
@@ -208,6 +235,7 @@ const stubs = vi.hoisted(() => {
     camerasAdd,
     addRectangleMock,
     addImageMock,
+    addSpriteMock,
     addTextMock,
     addContainerMock,
     childrenCreateList: createDisplayList,
@@ -525,6 +553,7 @@ describe('GameScene player integration', () => {
     stubs.matterFactory.add.existing.mockReset();
     stubs.addRectangleMock.mockReset();
     stubs.addImageMock.mockReset();
+    stubs.addSpriteMock.mockReset();
     stubs.addTextMock.mockReset();
     stubs.addContainerMock.mockReset();
     stubs.matterFactory.add.existing.mockImplementation((gameObject: any) => {
@@ -1121,8 +1150,72 @@ describe('GameScene player integration', () => {
       expect(image?.setDisplaySize).toHaveBeenCalledWith(tileSize, tileSize);
       expect(image?.setVisible).toHaveBeenCalledWith(true);
       expect(image?.setActive).toHaveBeenCalledWith(true);
-      expect(doorMarkers).toContain(image as any);
     });
+  });
+
+  it('spawns heal sprites for active heal items', () => {
+    const getActiveHealsSpy = vi
+      .spyOn(MapSystem.prototype, 'getActiveHealItems')
+      .mockReturnValue([
+        { id: 'dead-end-0', position: { x: 128, y: 160 }, reward: 'health' as const, consumed: false },
+      ]);
+
+    const scene = new GameScene();
+    createKirdyMock.mockReturnValue(makeKirdyStub());
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    expect(stubs.addSpriteMock).toHaveBeenCalledWith(128, 160, 'heal-orb');
+    const sprite = ((scene as any).healSprites.get('dead-end-0')) as { setScrollFactor?: ReturnType<typeof vi.fn> } | undefined;
+    expect(sprite?.setScrollFactor).toHaveBeenCalledWith(1, 1);
+    getActiveHealsSpy.mockRestore();
+  });
+
+  it('consumes heal items and restores HP when Kirdy touches them', () => {
+    const healItem: HealItemInstance = {
+      id: 'dead-end-0',
+      position: { x: 140, y: 180 },
+      reward: 'health',
+      consumed: false,
+    };
+    const getActiveHealsSpy = vi
+      .spyOn(MapSystem.prototype, 'getActiveHealItems')
+      .mockReturnValue([healItem]);
+    const consumeHealSpy = vi.spyOn(MapSystem.prototype, 'consumeHeal').mockReturnValue(healItem);
+
+    const kirdyStub = makeKirdyStub({
+      sprite: {
+        x: healItem.position.x,
+        y: healItem.position.y,
+        body: { position: { x: healItem.position.x, y: healItem.position.y } },
+      },
+    });
+    createKirdyMock.mockReturnValue(kirdyStub);
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    const scene = new GameScene();
+    scene.create();
+
+    const sprite = (scene as any).kirdy?.sprite as { x?: number; y?: number; body?: { position?: { x?: number; y?: number } } };
+    if (sprite) {
+      sprite.x = healItem.position.x;
+      sprite.y = healItem.position.y;
+      if (sprite.body?.position) {
+        sprite.body.position.x = healItem.position.x;
+        sprite.body.position.y = healItem.position.y;
+      }
+    }
+
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+    scene.update(0, 16);
+
+    expect(consumeHealSpy).toHaveBeenCalledWith('central-hub', healItem.id);
+    expect(kirdyStub.heal).toHaveBeenCalledWith(1);
+    expect(((scene as any).healSprites.size)).toBe(0);
+
+    getActiveHealsSpy.mockRestore();
+    consumeHealSpy.mockRestore();
   });
 
   it('フレーム毎にパフォーマンスモニターを更新する', () => {

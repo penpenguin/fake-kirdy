@@ -1,4 +1,5 @@
 import type { AreaDefinition } from '../AreaManager';
+import { buildStageDefinition } from './stage-utils';
 
 const tileSize = 32;
 
@@ -15,7 +16,7 @@ const layout = [
 const width = layout[0].length * tileSize;
 const height = layout.length * tileSize;
 
-export const iceArea: AreaDefinition = {
+export const iceArea: AreaDefinition = buildStageDefinition({
   id: 'ice-area',
   name: 'Ice Area',
   tileSize,
@@ -38,4 +39,11 @@ export const iceArea: AreaDefinition = {
       { type: 'glacio-durt', limit: 1 },
     ],
   },
-};
+  metadata: {
+    cluster: 'ice',
+    index: 2,
+    difficulty: 2,
+  },
+  doorBuffer: 1,
+  goal: null,
+});

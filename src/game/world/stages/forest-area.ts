@@ -1,12 +1,14 @@
-import type { AreaDefinition } from '../AreaManager';
+import type { AreaDefinition, AreaId } from '../AreaManager';
+import { buildStageDefinition } from './stage-utils';
 
 const tileSize = 32;
+const LABYRINTH_ENTRY_ID = 'labyrinth-001' as AreaId;
 
 const layout = [
   '########################',
   '#...........D..........#',
   '#..####..######..####..#',
-  '#......................#',
+  '#.....................D#',
   '#..####..######..####..#',
   '#......................#',
   '########################',
@@ -15,13 +17,14 @@ const layout = [
 const width = layout[0].length * tileSize;
 const height = layout.length * tileSize;
 
-export const forestArea: AreaDefinition = {
+export const forestArea: AreaDefinition = buildStageDefinition({
   id: 'forest-area',
   name: 'Forest Area',
   tileSize,
   layout,
   neighbors: {
     north: 'central-hub',
+    east: LABYRINTH_ENTRY_ID,
   },
   entryPoints: {
     default: { position: { x: width / 2, y: tileSize * 3 } },
@@ -38,4 +41,11 @@ export const forestArea: AreaDefinition = {
       { type: 'dronto-durt', limit: 2 },
     ],
   },
-};
+  metadata: {
+    cluster: 'forest',
+    index: 3,
+    difficulty: 1,
+  },
+  doorBuffer: 1,
+  goal: null,
+});
