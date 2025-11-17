@@ -1,11 +1,12 @@
 import type { AreaDefinition } from '../AreaManager';
 import { buildStageDefinition } from './stage-utils';
+import { getRuinsExpanseEntryId } from './procedural';
 
 const tileSize = 32;
 
 const layout = [
   '####################',
-  '#..................#',
+  '#.........D........#',
   '#..######..######..#',
   '#.................D#',
   '#..######..######..#',
@@ -23,6 +24,7 @@ export const caveArea: AreaDefinition = buildStageDefinition({
   layout,
   neighbors: {
     east: 'central-hub',
+    north: getRuinsExpanseEntryId(),
   },
   entryPoints: {
     default: { position: { x: width - tileSize * 3, y: height / 2 } },

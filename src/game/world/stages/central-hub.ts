@@ -26,7 +26,7 @@ export const centralHub: AreaDefinition = buildStageDefinition({
   layout,
   neighbors: {
     north: 'ice-area',
-    east: 'mirror-corridor',
+    east: 'fire-area',
     south: 'forest-area',
     west: 'cave-area',
   },

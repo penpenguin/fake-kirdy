@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   AREA_IDS,
   AreaManager,
+  type AreaDefinition,
+  type AreaId,
   type AreaManagerSnapshot,
   type AreaTransitionDirection,
   type AreaUpdateResult,
@@ -121,6 +123,17 @@ describe('AreaManager', () => {
     manager = new AreaManager();
   });
 
+  function createStubDefinition(id: AreaId, name: string): AreaDefinition {
+    return {
+      id,
+      name,
+      tileSize: 16,
+      layout: ['##', '##'],
+      neighbors: {},
+      entryPoints: { default: { position: { x: 0, y: 0 } } },
+    };
+  }
+
   it('中央ハブエリアを初期読み込みし、タイルの種類を参照できる', () => {
     const current = manager.getCurrentAreaState();
 
@@ -203,7 +216,7 @@ describe('AreaManager', () => {
       },
       {
         direction: 'east',
-        expectedArea: AREA_IDS.MirrorCorridor,
+        expectedArea: AREA_IDS.FireArea,
       },
     ];
 
@@ -231,20 +244,26 @@ describe('AreaManager', () => {
     }
   });
 
-  it('ミラー回廊をさらに探索すると火炎領域へ接続する', () => {
-    const hub = manager.getCurrentAreaState();
+  it('火炎エリアの東側を進むとミラー回廊へ接続する', () => {
+    const localManager = new AreaManager();
+    const hub = localManager.getCurrentAreaState();
 
-    // 東側のドアに乗ってミラー回廊へ
-    manager.updatePlayerPosition(getDoorWorldPosition(hub, 'east'));
+    const toFire = localManager.updatePlayerPosition(getDoorWorldPosition(hub, 'east'));
+    expect(toFire.areaChanged).toBe(true);
+    expect(toFire.transition?.to).toBe(AREA_IDS.FireArea);
 
-    const mirror = manager.getCurrentAreaState();
+    const fireArea = localManager.getCurrentAreaState();
+    const toMirror = localManager.updatePlayerPosition(getDoorWorldPosition(fireArea, 'east'));
+    expect(toMirror.areaChanged).toBe(true);
+    expect(toMirror.transition?.from).toBe(AREA_IDS.FireArea);
+    expect(toMirror.transition?.to).toBe(AREA_IDS.MirrorCorridor);
+    expect(toMirror.transition?.via).toBe('east');
 
-    const result = manager.updatePlayerPosition(getDoorWorldPosition(mirror, 'east'));
-
-    expect(result.areaChanged).toBe(true);
-    expect(result.transition?.from).toBe(AREA_IDS.MirrorCorridor);
-    expect(result.transition?.to).toBe(AREA_IDS.FireArea);
-    expect(result.transition?.via).toBe('east');
+    const mirror = localManager.getCurrentAreaState();
+    const backToFire = localManager.updatePlayerPosition(getDoorWorldPosition(mirror, 'west'));
+    expect(backToFire.areaChanged).toBe(true);
+    expect(backToFire.transition?.to).toBe(AREA_IDS.FireArea);
+    expect(backToFire.transition?.via).toBe('west');
   });
 
   it('森林エリアのスポーン地点は床タイルになる', () => {
@@ -383,6 +402,21 @@ describe('AreaManager', () => {
     );
   });
 
+  it('同名エリア定義を渡してもユニークな名称へ自動変換する', () => {
+    const duplicateA = createStubDefinition('labyrinth-900' as AreaId, 'Duplicate Area');
+    const duplicateB = createStubDefinition('labyrinth-901' as AreaId, 'Duplicate Area');
+
+    const customManager = new AreaManager(duplicateA.id, [duplicateA, duplicateB]);
+    const metadata = customManager
+      .getAllAreaMetadata()
+      .filter((entry) => entry.id === duplicateA.id || entry.id === duplicateB.id);
+
+    expect(metadata).toEqual([
+      { id: duplicateA.id, name: 'Duplicate Area' },
+      { id: duplicateB.id, name: 'Duplicate Area (2)' },
+    ]);
+  });
+
   it('探索状態をスナップショットとして保存できる', () => {
     const centralHub = manager.getCurrentAreaState();
 
@@ -392,9 +426,9 @@ describe('AreaManager', () => {
 
     const snapshot = manager.getPersistenceSnapshot();
 
-    expect(snapshot.currentAreaId).toBe(AREA_IDS.MirrorCorridor);
+    expect(snapshot.currentAreaId).toBe(AREA_IDS.FireArea);
     expect(snapshot.discoveredAreas).toEqual(
-      expect.arrayContaining([AREA_IDS.CentralHub, AREA_IDS.MirrorCorridor]),
+      expect.arrayContaining([AREA_IDS.CentralHub, AREA_IDS.FireArea]),
     );
     expect(snapshot.exploredTiles[AREA_IDS.CentralHub]?.length).toBeGreaterThan(0);
     expect(snapshot.lastKnownPlayerPosition).toEqual(manager.getLastKnownPlayerPosition());

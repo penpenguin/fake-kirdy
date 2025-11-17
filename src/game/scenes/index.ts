@@ -599,6 +599,7 @@ export class GameScene extends Phaser.Scene {
   private hud?: Hud;
   private resultsOverlay?: ResultsOverlay;
   private lastHudHp?: HudHPState;
+  private lastHudAreaName?: string;
   private readonly playerMaxHP = 6;
   private currentSettings: GameSettingsSnapshot = { ...DEFAULT_SETTINGS };
   private readonly handleSettingsUpdated = (settings?: GameSettingsSnapshot) => {
@@ -782,6 +783,23 @@ export class GameScene extends Phaser.Scene {
     this.lastHudHp = { current: state.current, max: state.max };
   }
 
+  private updateHudAreaLabel(force = false) {
+    if (!this.hud) {
+      return;
+    }
+
+    const rawName = this.areaManager?.getCurrentAreaState()?.definition.name;
+    const trimmedName = typeof rawName === 'string' ? rawName.trim() : '';
+    const resolvedName = trimmedName.length > 0 ? trimmedName : 'Unknown';
+
+    if (!force && this.lastHudAreaName === resolvedName) {
+      return;
+    }
+
+    this.hud.updateMapName(resolvedName);
+    this.lastHudAreaName = resolvedName;
+  }
+
   private syncHudHpWithPlayer() {
     if (!this.hud || !this.kirdy) {
       this.lastHudHp = undefined;
@@ -882,6 +900,7 @@ export class GameScene extends Phaser.Scene {
     this.areaManager = new AreaManager(startingAreaId, undefined, areaSnapshot);
     this.mapOverlay = new MapOverlay(this);
     this.hud = new Hud(this);
+    this.updateHudAreaLabel(true);
     this.resultsOverlay = new ResultsOverlay(this, {
       onComplete: (payload) => this.transitionToResults(payload),
     });
@@ -922,6 +941,7 @@ export class GameScene extends Phaser.Scene {
       this.resultsOverlay?.destroy();
       this.resultsOverlay = undefined;
       this.lastHudHp = undefined;
+      this.lastHudAreaName = undefined;
       this.kirdy = undefined;
       this.goalDoorController = undefined;
       if (this.isGameOver) {
@@ -1689,6 +1709,7 @@ export class GameScene extends Phaser.Scene {
       this.configureCamera();
       this.initializeEnemyManager();
       this.goalDoorController?.handleAreaChanged();
+      this.updateHudAreaLabel();
     }
 
     this.trackExplorationProgress(result.areaChanged);

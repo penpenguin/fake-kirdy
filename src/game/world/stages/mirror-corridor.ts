@@ -20,8 +20,8 @@ export const mirrorCorridor: AreaDefinition = buildStageDefinition({
   tileSize,
   layout,
   neighbors: {
-    west: 'central-hub',
-    east: 'fire-area',
+    west: 'fire-area',
+    east: 'goal-sanctum',
   },
   entryPoints: {
     default: { position: { x: width / 2, y: height / 2 } },

@@ -130,4 +130,83 @@ describe('Stage catalog', () => {
       });
     });
   });
+
+  it('limits forest expanse stages to five entries for focused debugging', () => {
+    const forestExpanses = STAGE_DEFINITIONS.filter(
+      (stage) => stage.metadata?.cluster === 'forest' && stage.name.startsWith('Forest Expanse'),
+    );
+
+    expect(forestExpanses).toHaveLength(5);
+  });
+
+  it('limits ice expanse stages to five entries for focused debugging', () => {
+    const iceExpanses = STAGE_DEFINITIONS.filter(
+      (stage) => stage.metadata?.cluster === 'ice' && stage.name.startsWith('Ice Expanse'),
+    );
+
+    expect(iceExpanses).toHaveLength(5);
+  });
+
+  it('connects the ice area directly to the first ice expanse', () => {
+    const iceArea = findStage('ice-area');
+    expect(iceArea).toBeDefined();
+
+    const iceExpanses = STAGE_DEFINITIONS.filter(
+      (stage) => stage.metadata?.cluster === 'ice' && stage.name.startsWith('Ice Expanse'),
+    );
+    const firstIce = iceExpanses.sort((a, b) => (a.metadata?.index ?? 0) - (b.metadata?.index ?? 0))[0];
+    expect(firstIce).toBeDefined();
+
+    expect(iceArea?.neighbors?.east).toBe(firstIce?.id);
+    expect(firstIce?.neighbors?.west).toBe('ice-area');
+
+    const eastDoor = iceArea?.doors?.find((door) => door.direction === 'east' && door.target === firstIce?.id);
+    expect(eastDoor).toBeDefined();
+  });
+
+  it('routes the fire expanse through the hub-connected fire area', () => {
+    const centralHub = findStage('central-hub');
+    const fireArea = findStage('fire-area');
+    expect(centralHub?.neighbors?.east).toBe('fire-area');
+    expect(fireArea?.neighbors?.west).toBe('central-hub');
+
+    const fireExpanses = STAGE_DEFINITIONS.filter(
+      (stage) => stage.metadata?.cluster === 'fire' && stage.name.startsWith('Fire Expanse'),
+    ).sort((a, b) => (a.metadata?.index ?? 0) - (b.metadata?.index ?? 0));
+
+    const firstFire = fireExpanses[0];
+    expect(firstFire).toBeDefined();
+
+    expect(fireArea?.neighbors?.south).toBe(firstFire?.id);
+    expect(firstFire?.neighbors?.south).toBe('fire-area');
+
+    const lastIce = STAGE_DEFINITIONS.filter((stage) => stage.metadata?.cluster === 'ice')
+      .sort((a, b) => (b.metadata?.index ?? 0) - (a.metadata?.index ?? 0))[0];
+    expect(lastIce).toBeDefined();
+    expect(lastIce?.neighbors?.north).not.toBe(firstFire?.id);
+    expect(firstFire?.neighbors?.north).toBeUndefined();
+  });
+
+  it('connects the cave area directly to the first ruins expanse and detaches it from the fire expanse', () => {
+    const caveArea = findStage('cave-area');
+    expect(caveArea).toBeDefined();
+
+    const ruinsExpanses = STAGE_DEFINITIONS.filter(
+      (stage) => stage.metadata?.cluster === 'ruins' && stage.name.startsWith('Ruins Expanse'),
+    );
+    const firstRuins = ruinsExpanses.sort((a, b) => (a.metadata?.index ?? 0) - (b.metadata?.index ?? 0))[0];
+    expect(firstRuins).toBeDefined();
+
+    expect(caveArea?.neighbors?.north).toBe(firstRuins?.id);
+    expect(firstRuins?.neighbors?.south).toBe('cave-area');
+
+    const northDoor = caveArea?.doors?.find((door) => door.direction === 'north' && door.target === firstRuins?.id);
+    expect(northDoor).toBeDefined();
+
+    const fireExpanses = STAGE_DEFINITIONS.filter((stage) => stage.metadata?.cluster === 'fire');
+    const lastFire = fireExpanses.sort((a, b) => (b.metadata?.index ?? 0) - (a.metadata?.index ?? 0))[0];
+    expect(lastFire).toBeDefined();
+    expect(lastFire?.neighbors?.south).not.toBe(firstRuins?.id);
+    expect(firstRuins?.neighbors?.north).toBeUndefined();
+  });
 });

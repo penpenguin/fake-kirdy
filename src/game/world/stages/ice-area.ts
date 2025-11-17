@@ -1,5 +1,6 @@
 import type { AreaDefinition } from '../AreaManager';
 import { buildStageDefinition } from './stage-utils';
+import { getIceExpanseEntryId } from './procedural';
 
 const tileSize = 32;
 
@@ -7,7 +8,7 @@ const layout = [
   '####################',
   '#....##......##....#',
   '#....##......##....#',
-  '#..................#',
+  '#.................D#',
   '#..####......####..#',
   '#.........D........#',
   '####################',
@@ -23,6 +24,7 @@ export const iceArea: AreaDefinition = buildStageDefinition({
   layout,
   neighbors: {
     south: 'central-hub',
+    east: getIceExpanseEntryId(),
   },
   entryPoints: {
     default: { position: { x: width / 2, y: height - tileSize * 3 } },

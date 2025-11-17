@@ -266,6 +266,7 @@ export class Hud {
   private hpLabel?: Phaser.GameObjects.Text;
   private abilityLabel?: Phaser.GameObjects.Text;
   private scoreLabel?: Phaser.GameObjects.Text;
+  private mapLabel?: Phaser.GameObjects.Text;
   private abilityIcon?: Phaser.GameObjects.Image;
   private abilityIconPosition: { x: number; y: number } = { x: 0, y: 0 };
 
@@ -330,9 +331,15 @@ export class Hud {
     scoreLabel.setScrollFactor?.(0, 0);
     scoreLabel.setDepth?.(4);
 
+    const mapLabelX = backgroundWidth - padding;
+    const mapLabel = add.text(mapLabelX, padding - 2, 'Map: Unknown', labelStyle);
+    mapLabel.setOrigin?.(1, 0);
+    mapLabel.setScrollFactor?.(0, 0);
+    mapLabel.setDepth?.(4);
+
     this.abilityIconPosition = { x: abilityIconX, y: abilityIconY };
 
-    container.add?.([background, border, hpBar, hpFill, hpLabel, abilityLabel, scoreLabel] as any);
+    container.add?.([background, border, hpBar, hpFill, hpLabel, abilityLabel, scoreLabel, mapLabel] as any);
 
     this.container = container;
     this.background = background;
@@ -342,6 +349,7 @@ export class Hud {
     this.hpLabel = hpLabel;
     this.abilityLabel = abilityLabel;
     this.scoreLabel = scoreLabel;
+    this.mapLabel = mapLabel;
   }
 
   updateHP(state: HudHPState) {
@@ -376,6 +384,16 @@ export class Hud {
     const normalized = Math.max(0, Math.floor(score));
     const formatted = normalized.toString().padStart(SCORE_DIGITS, '0').slice(-SCORE_DIGITS);
     this.scoreLabel.setText?.(`Score: ${formatted}`);
+  }
+
+  updateMapName(name?: string | null) {
+    if (!this.mapLabel) {
+      return;
+    }
+
+    const trimmed = typeof name === 'string' ? name.trim() : '';
+    const resolved = trimmed.length > 0 ? trimmed : 'Unknown';
+    this.mapLabel.setText?.(`Map: ${resolved}`);
   }
 
   private updateAbilityIcon(ability: AbilityType | undefined) {
@@ -482,6 +500,7 @@ export class Hud {
     this.hpLabel?.destroy?.();
     this.abilityLabel?.destroy?.();
     this.scoreLabel?.destroy?.();
+    this.mapLabel?.destroy?.();
     this.hpFill?.destroy?.();
     this.hpBar?.destroy?.();
     this.border?.destroy?.();
@@ -492,6 +511,7 @@ export class Hud {
     this.hpLabel = undefined;
     this.abilityLabel = undefined;
     this.scoreLabel = undefined;
+    this.mapLabel = undefined;
     this.hpFill = undefined;
     this.hpBar = undefined;
     this.container = undefined;

@@ -57,6 +57,7 @@ function createSceneStubs() {
   const hpLabel = createText();
   const abilityLabel = createText();
   const scoreLabel = createText();
+  const mapLabel = createText();
 
   let rectangleCall = 0;
   const addRectangle = vi.fn(() => {
@@ -83,7 +84,8 @@ function createSceneStubs() {
     .fn()
     .mockImplementationOnce(() => hpLabel)
     .mockImplementationOnce(() => abilityLabel)
-    .mockImplementationOnce(() => scoreLabel);
+    .mockImplementationOnce(() => scoreLabel)
+    .mockImplementationOnce(() => mapLabel);
 
   const abilityIcon = {
     setTexture: vi.fn().mockReturnThis(),
@@ -185,6 +187,7 @@ function createSceneStubs() {
     hpLabel,
     abilityLabel,
     scoreLabel,
+    mapLabel,
     abilityIcon,
     texturesGet,
     texturesExists,
@@ -223,6 +226,17 @@ describe('Hud', () => {
     hud.updateAbility(undefined);
     expect(abilityLabel.setText).toHaveBeenLastCalledWith('Ability: None');
     expect(abilityIcon.setVisible).toHaveBeenLastCalledWith(false);
+  });
+
+  it('displays the map name on the right side with a fallback when missing', () => {
+    const { scene, mapLabel } = createSceneStubs();
+    const hud = new Hud(scene);
+
+    hud.updateMapName('Central Hub');
+    expect(mapLabel.setText).toHaveBeenCalledWith('Map: Central Hub');
+
+    hud.updateMapName('   ');
+    expect(mapLabel.setText).toHaveBeenLastCalledWith('Map: Unknown');
   });
 
   it('能力アイコンはテクスチャのフォールバック順序を評価する', () => {
@@ -338,7 +352,7 @@ describe('Hud', () => {
     const addTextMock = scene.add.text as ReturnType<typeof vi.fn>;
     const createdTexts = addTextMock.mock.calls.map(([, , text]) => text);
 
-    expect(addTextMock).toHaveBeenCalledTimes(3);
+    expect(addTextMock).toHaveBeenCalledTimes(4);
     expect(createdTexts).not.toContain(expect.stringContaining('Controls:'));
     expect(createdTexts).not.toContain(expect.stringContaining('Touch:'));
   });

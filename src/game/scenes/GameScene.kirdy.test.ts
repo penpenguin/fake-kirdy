@@ -412,6 +412,7 @@ vi.mock('../world/AreaManager', () => ({
   AREA_IDS: {
     CentralHub: 'central-hub',
     MirrorCorridor: 'mirror-corridor',
+    FireArea: 'fire-area',
   },
   AreaManager: AreaManagerMock,
 }));
@@ -462,6 +463,7 @@ vi.mock('../ui/MapOverlay', async (importOriginal) => {
 const hudUpdateHPMock = vi.hoisted(() => vi.fn());
 const hudUpdateAbilityMock = vi.hoisted(() => vi.fn());
 const hudUpdateScoreMock = vi.hoisted(() => vi.fn());
+const hudUpdateMapNameMock = vi.hoisted(() => vi.fn());
 const hudDestroyMock = vi.hoisted(() => vi.fn());
 const HudMock = vi.hoisted(() =>
   vi.fn((scene: any) => {
@@ -477,6 +479,7 @@ const HudMock = vi.hoisted(() =>
       updateHP: hudUpdateHPMock,
       updateAbility: hudUpdateAbilityMock,
       updateScore: hudUpdateScoreMock,
+      updateMapName: hudUpdateMapNameMock,
       destroy: hudDestroyMock,
     };
   }),
@@ -579,6 +582,7 @@ describe('GameScene player integration', () => {
     hudUpdateHPMock.mockClear();
     hudUpdateAbilityMock.mockClear();
     hudUpdateScoreMock.mockClear();
+    hudUpdateMapNameMock.mockClear();
     hudDestroyMock.mockClear();
     HudMock.mockClear();
     SaveManagerMock.mockClear();
@@ -611,7 +615,7 @@ describe('GameScene player integration', () => {
     });
 
     defaultAreaState = {
-      definition: { id: 'central-hub' },
+      definition: { id: 'central-hub', name: 'Central Hub' },
       tileMap: {
         tileSize,
         columns,
@@ -633,7 +637,7 @@ describe('GameScene player integration', () => {
     });
     areaManagerGetAllDefinitionsMock.mockReturnValue([
       { id: 'central-hub', name: 'Central Hub' },
-      { id: 'mirror-corridor', name: 'Mirror Corridor' },
+      { id: 'fire-area', name: 'Fire Area' },
     ]);
     areaManagerGetLastKnownPositionMock.mockReturnValue(defaultAreaState.playerSpawnPosition);
     areaManagerGetSnapshotMock.mockReturnValue({
@@ -899,7 +903,7 @@ describe('GameScene player integration', () => {
     };
 
     const areaState = {
-      definition: { id: 'central-hub' },
+      definition: { id: 'central-hub', name: 'Central Hub' },
       tileMap: customTileMap,
       pixelBounds: { width: layout[0].length * tileSize, height: layout.length * tileSize },
       playerSpawnPosition: { x: tileSize * 1.5, y: tileSize * 1.5 },
@@ -982,7 +986,7 @@ describe('GameScene player integration', () => {
     };
 
     const areaState = {
-      definition: { id: 'central-hub' },
+      definition: { id: 'central-hub', name: 'Central Hub' },
       tileMap: customTileMap,
       pixelBounds: { width: layout[0].length * tileSize, height: layout.length * tileSize },
       playerSpawnPosition: { x: tileSize * 1.5, y: tileSize * 1.5 },
@@ -1407,7 +1411,7 @@ describe('GameScene player integration', () => {
       areaChanged: true,
       transition: {
         from: defaultAreaState.definition.id,
-        to: 'mirror-corridor',
+        to: 'fire-area',
         via: 'east',
         entryPosition,
       },
@@ -1527,7 +1531,7 @@ describe('GameScene player integration', () => {
     } as any;
 
     const savedAreaState = {
-      definition: { id: 'mirror-corridor' },
+      definition: { id: 'mirror-corridor', name: 'Mirror Corridor' },
       tileMap: {
         tileSize: 32,
         columns: 20,
@@ -1564,6 +1568,7 @@ describe('GameScene player integration', () => {
     expect(hudUpdateHPMock).toHaveBeenLastCalledWith({ current: 3, max: 6 });
     expect(hudUpdateScoreMock).toHaveBeenCalledWith(450);
     expect(hudUpdateAbilityMock).toHaveBeenCalledWith('ice');
+    expect(hudUpdateMapNameMock).toHaveBeenCalledWith('Mirror Corridor');
   });
 
   it('enemy-captured イベントで敵をサスペンドする', () => {
@@ -1809,7 +1814,7 @@ describe('GameScene player integration', () => {
     });
     areaManagerGetAllDefinitionsMock.mockReturnValue([
       { id: 'central-hub', name: 'Central Hub' },
-      { id: 'mirror-corridor', name: 'Mirror Corridor' },
+      { id: 'fire-area', name: 'Fire Area' },
     ]);
 
     const snapshot = createSnapshot();
@@ -1833,8 +1838,8 @@ describe('GameScene player integration', () => {
         exploration: { visitedTiles: 5, totalTiles: 20, completion: 0.25 },
       },
       {
-        id: 'mirror-corridor',
-        name: 'Mirror Corridor',
+        id: 'fire-area',
+        name: 'Fire Area',
         discovered: false,
         isCurrent: false,
         exploration: { visitedTiles: 0, totalTiles: 0, completion: 0 },
@@ -1843,7 +1848,7 @@ describe('GameScene player integration', () => {
     expect(mapOverlayShowMock).toHaveBeenCalled();
     expect(mapOverlayHideMock).not.toHaveBeenCalled();
     expect(areaManagerGetExplorationStateMock).toHaveBeenCalledWith('central-hub');
-    expect(areaManagerGetExplorationStateMock).not.toHaveBeenCalledWith('mirror-corridor');
+    expect(areaManagerGetExplorationStateMock).not.toHaveBeenCalledWith('fire-area');
   });
 
   it('hides the world map overlay when already visible', () => {
@@ -1879,6 +1884,7 @@ describe('GameScene player integration', () => {
     expect(hudUpdateHPMock).toHaveBeenCalledWith({ current: 6, max: 6 });
     expect(hudUpdateAbilityMock).toHaveBeenCalledWith(undefined);
     expect(hudUpdateScoreMock).toHaveBeenCalledWith(0);
+    expect(hudUpdateMapNameMock).toHaveBeenCalledWith('Central Hub');
   });
 
   it('能力イベントを受けてHUDを更新する', () => {
@@ -2164,8 +2170,8 @@ describe('GameScene player integration', () => {
     });
     createKirdyMock.mockReturnValue(kirdyInstance);
 
-    const mirrorCorridorState = {
-      definition: { id: 'mirror-corridor' },
+    const fireAreaState = {
+      definition: { id: 'fire-area', name: 'Fire Area' },
       tileMap: {
         tileSize: 32,
         columns: 20,
@@ -2179,7 +2185,7 @@ describe('GameScene player integration', () => {
     let currentState = defaultAreaState;
     const areaStates = {
       'central-hub': defaultAreaState,
-      'mirror-corridor': mirrorCorridorState,
+      'fire-area': fireAreaState,
     } as const;
 
     areaManagerGetStateMock.mockImplementation(() => currentState as any);
@@ -2192,7 +2198,7 @@ describe('GameScene player integration', () => {
         return { visitedTiles: 8, totalTiles: 20, completion: 0.4 };
       }
 
-      if (areaId === 'mirror-corridor') {
+      if (areaId === 'fire-area') {
         return { visitedTiles: 2, totalTiles: 10, completion: 0.2 };
       }
 
@@ -2201,19 +2207,19 @@ describe('GameScene player integration', () => {
 
     areaManagerGetAllDefinitionsMock.mockReturnValue([
       { id: 'central-hub', name: 'Central Hub' },
-      { id: 'mirror-corridor', name: 'Mirror Corridor' },
+      { id: 'fire-area', name: 'Fire Area' },
     ]);
 
     areaManagerUpdateMock.mockImplementationOnce(() => {
-      currentState = mirrorCorridorState as any;
-      discoveredAreas = ['central-hub', 'mirror-corridor'];
+      currentState = fireAreaState as any;
+      discoveredAreas = ['central-hub', 'fire-area'];
       return {
         areaChanged: true,
         transition: {
           from: 'central-hub',
-          to: 'mirror-corridor',
+          to: 'fire-area',
           via: 'east',
-          entryPosition: mirrorCorridorState.playerSpawnPosition,
+          entryPosition: fireAreaState.playerSpawnPosition,
         },
       };
     });
@@ -2241,8 +2247,8 @@ describe('GameScene player integration', () => {
         exploration: { visitedTiles: 8, totalTiles: 20, completion: 0.4 },
       },
       {
-        id: 'mirror-corridor',
-        name: 'Mirror Corridor',
+        id: 'fire-area',
+        name: 'Fire Area',
         discovered: false,
         isCurrent: false,
         exploration: { visitedTiles: 0, totalTiles: 0, completion: 0 },
@@ -2267,8 +2273,8 @@ describe('GameScene player integration', () => {
         exploration: { visitedTiles: 8, totalTiles: 20, completion: 0.4 },
       },
       {
-        id: 'mirror-corridor',
-        name: 'Mirror Corridor',
+        id: 'fire-area',
+        name: 'Fire Area',
         discovered: true,
         isCurrent: true,
         exploration: { visitedTiles: 2, totalTiles: 10, completion: 0.2 },
@@ -2313,8 +2319,8 @@ describe('GameScene player integration', () => {
         exploration: { visitedTiles: 5, totalTiles: 20, completion: 0.25 },
       },
       {
-        id: 'mirror-corridor',
-        name: 'Mirror Corridor',
+        id: 'fire-area',
+        name: 'Fire Area',
         discovered: false,
         isCurrent: false,
         exploration: { visitedTiles: 0, totalTiles: 0, completion: 0 },
@@ -2336,8 +2342,8 @@ describe('GameScene player integration', () => {
         exploration: { visitedTiles: 12, totalTiles: 20, completion: 0.6 },
       },
       {
-        id: 'mirror-corridor',
-        name: 'Mirror Corridor',
+        id: 'fire-area',
+        name: 'Fire Area',
         discovered: false,
         isCurrent: false,
         exploration: { visitedTiles: 0, totalTiles: 0, completion: 0 },

@@ -259,7 +259,8 @@ export class AreaManager {
     definitions = createDefaultAreaDefinitions(),
     snapshot?: AreaManagerSnapshot,
   ) {
-    this.definitions = new Map(definitions.map((def) => [def.id, def] as const));
+    const normalizedDefinitions = ensureUniqueAreaNames(definitions);
+    this.definitions = new Map(normalizedDefinitions.map((def) => [def.id, def] as const));
     this.currentArea = this.loadArea(startingAreaId);
     this.lastKnownPlayerPosition = this.currentArea.playerSpawnPosition;
 
@@ -698,4 +699,24 @@ function clampToBounds(position: Vector2, bounds: { width: number; height: numbe
 
 function createDefaultAreaDefinitions(): AreaDefinition[] {
   return STAGE_DEFINITIONS.map((definition) => cloneStageDefinition(definition));
+}
+
+function ensureUniqueAreaNames(definitions: AreaDefinition[]): AreaDefinition[] {
+  const seen = new Map<string, number>();
+
+  return definitions.map((definition) => {
+    const baseName = definition.name?.trim() ?? definition.id;
+    const occurrence = seen.get(baseName) ?? 0;
+    seen.set(baseName, occurrence + 1);
+
+    const resolvedName = occurrence === 0 ? baseName : `${baseName} (${occurrence + 1})`;
+    if (definition.name === resolvedName) {
+      return definition;
+    }
+
+    return {
+      ...definition,
+      name: resolvedName,
+    };
+  });
 }

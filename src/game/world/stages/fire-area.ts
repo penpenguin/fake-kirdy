@@ -1,5 +1,6 @@
 import type { AreaDefinition } from '../AreaManager';
 import { buildStageDefinition } from './stage-utils';
+import { getFireExpanseEntryId } from './procedural';
 
 const tileSize = 32;
 
@@ -7,9 +8,9 @@ const layout = [
   '########################',
   '#..........D...........#',
   '#..####..######..####..#',
-  '#D.....................#',
+  '#D....................D#',
   '#..####..######..####..#',
-  '#......................#',
+  '#.........D............#',
   '########################',
 ];
 
@@ -22,8 +23,10 @@ export const fireArea: AreaDefinition = buildStageDefinition({
   tileSize,
   layout,
   neighbors: {
-    west: 'mirror-corridor',
+    west: 'central-hub',
+    east: 'mirror-corridor',
     north: 'goal-sanctum',
+    south: getFireExpanseEntryId(),
   },
   entryPoints: {
     default: { position: { x: tileSize * 2, y: height / 2 } },
