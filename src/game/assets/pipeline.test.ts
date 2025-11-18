@@ -174,20 +174,20 @@ describe('asset pipeline manifest', () => {
     );
 
     const expectedAssets: Array<{ key: string; path: string }> = [
-      { key: 'kirdy', path: 'images/kirdy.png' },
-      { key: 'kirdy-run', path: 'images/kirdy-run.png' },
-      { key: 'kirdy-jump', path: 'images/kirdy-jump.png' },
-      { key: 'kirdy-hover', path: 'images/kirdy-hover.png' },
-      { key: 'kirdy-inhale', path: 'images/kirdy-inhale.png' },
-      { key: 'kirdy-swallow', path: 'images/kirdy-swallow.png' },
-      { key: 'kirdy-spit', path: 'images/kirdy-spit.png' },
-      { key: 'fire-attack', path: 'images/fire-attack.png' },
-      { key: 'ice-attack', path: 'images/ice-attack.png' },
-      { key: 'sword-slash', path: 'images/sword-slash.png' },
-      { key: 'star-bullet', path: 'images/star-bullet.png' },
-      { key: 'wabble-bee', path: 'images/wabble-bee.png' },
-      { key: 'dronto-durt', path: 'images/dronto-durt.png' },
-      { key: 'wall-texture', path: 'images/wall-texture.png' },
+      { key: 'kirdy', path: 'images/characters/kirdy/kirdy.png' },
+      { key: 'kirdy-run', path: 'images/characters/kirdy/kirdy-run.png' },
+      { key: 'kirdy-jump', path: 'images/characters/kirdy/kirdy-jump.png' },
+      { key: 'kirdy-hover', path: 'images/characters/kirdy/kirdy-hover.png' },
+      { key: 'kirdy-inhale', path: 'images/characters/kirdy/kirdy-inhale.png' },
+      { key: 'kirdy-swallow', path: 'images/characters/kirdy/kirdy-swallow.png' },
+      { key: 'kirdy-spit', path: 'images/characters/kirdy/kirdy-spit.png' },
+      { key: 'fire-attack', path: 'images/effects/fire-attack.png' },
+      { key: 'ice-attack', path: 'images/effects/ice-attack.png' },
+      { key: 'sword-slash', path: 'images/effects/sword-slash.png' },
+      { key: 'star-bullet', path: 'images/effects/star-bullet.png' },
+      { key: 'wabble-bee', path: 'images/enemies/wabble-bee.png' },
+      { key: 'dronto-durt', path: 'images/enemies/dronto-durt.png' },
+      { key: 'wall-texture', path: 'images/world/wall-texture.png' },
     ];
 
     expectedAssets.forEach(({ key, path }) => {
@@ -205,7 +205,7 @@ describe('asset pipeline manifest', () => {
     const asset = manifest.images.find((entry) => entry.key === 'virtual-controls');
 
     expect(asset).toBeDefined();
-    expect(asset?.url).toBe('images/virtual-controls.png');
+    expect(asset?.url).toBe('images/ui/virtual-controls.png');
     expect(asset?.fallbackUrl).toBe('images/fallbacks/virtual-controls.png');
   });
 

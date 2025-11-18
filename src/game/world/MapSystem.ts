@@ -157,7 +157,7 @@ function isWithinDoorRadius(tile: SpawnTile, door: AreaDoorDefinition, radius: n
   return chebyshev <= radius;
 }
 
-interface CollectibleItemInstance {
+export interface CollectibleItemInstance {
   id: string;
   position: Vector2;
   itemId: string;

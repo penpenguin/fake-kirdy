@@ -38,108 +38,108 @@ const DEFAULT_PATH = 'assets/';
 const IMAGE_ASSETS: ReadonlyArray<ImageAsset> = [
   {
     key: 'kirdy',
-    url: 'images/kirdy.png',
+    url: 'images/characters/kirdy/kirdy.png',
   },
   {
     key: 'kirdy-run',
-    url: 'images/kirdy-run.png',
+    url: 'images/characters/kirdy/kirdy-run.png',
   },
   {
     key: 'kirdy-jump',
-    url: 'images/kirdy-jump.png',
+    url: 'images/characters/kirdy/kirdy-jump.png',
   },
   {
     key: 'kirdy-hover',
-    url: 'images/kirdy-hover.png',
+    url: 'images/characters/kirdy/kirdy-hover.png',
   },
   {
     key: 'kirdy-inhale',
-    url: 'images/kirdy-inhale.png',
+    url: 'images/characters/kirdy/kirdy-inhale.png',
   },
   {
     key: 'kirdy-swallow',
-    url: 'images/kirdy-swallow.png',
+    url: 'images/characters/kirdy/kirdy-swallow.png',
   },
   {
     key: 'kirdy-spit',
-    url: 'images/kirdy-spit.png',
+    url: 'images/characters/kirdy/kirdy-spit.png',
   },
   {
     key: 'kirdy-fire',
-    url: 'images/kirdy-fire.png',
+    url: 'images/characters/kirdy/kirdy-fire.png',
     fallbackUrl: 'images/fallbacks/kirdy-placeholder.png',
   },
   {
     key: 'kirdy-ice',
-    url: 'images/kirdy-ice.png',
+    url: 'images/characters/kirdy/kirdy-ice.png',
     fallbackUrl: 'images/fallbacks/kirdy-placeholder.png',
   },
   {
     key: 'kirdy-sword',
-    url: 'images/kirdy-sword.png',
+    url: 'images/characters/kirdy/kirdy-sword.png',
     fallbackUrl: 'images/fallbacks/kirdy-placeholder.png',
   },
   {
     key: 'inhale-sparkle',
-    url: 'images/inhale-sparkle.png',
+    url: 'images/effects/inhale-sparkle.png',
     fallbackUrl: 'images/fallbacks/kirdy-placeholder.png',
   },
   {
     key: 'fire-attack',
-    url: 'images/fire-attack.png',
+    url: 'images/effects/fire-attack.png',
   },
   {
     key: 'ice-attack',
-    url: 'images/ice-attack.png',
+    url: 'images/effects/ice-attack.png',
   },
   {
     key: 'sword-slash',
-    url: 'images/sword-slash.png',
+    url: 'images/effects/sword-slash.png',
   },
   {
     key: 'star-bullet',
-    url: 'images/star-bullet.png',
+    url: 'images/effects/star-bullet.png',
   },
   {
     key: 'wabble-bee',
-    url: 'images/wabble-bee.png',
+    url: 'images/enemies/wabble-bee.png',
   },
   {
     key: 'dronto-durt',
-    url: 'images/dronto-durt.png',
+    url: 'images/enemies/dronto-durt.png',
   },
   {
     key: 'kirdy-idle',
-    url: 'images/kirdy-idle.png',
+    url: 'images/characters/kirdy/kirdy-idle.png',
     fallbackUrl: 'images/fallbacks/kirdy-placeholder.png',
   },
   {
     key: 'tileset-main',
-    url: 'images/tileset-main.png',
+    url: 'images/world/tileset-main.png',
     fallbackUrl: 'images/fallbacks/tileset-placeholder.png',
     frameConfig: { frameWidth: 32, frameHeight: 32 },
   },
   {
     key: 'wall-texture',
-    url: 'images/wall-texture.png',
+    url: 'images/world/wall-texture.png',
   },
   {
     key: 'door-marker',
-    url: 'images/door-marker.png',
+    url: 'images/ui/door-marker.png',
   },
   {
     key: 'goal-door',
-    url: 'images/goal-door.png',
-    fallbackUrl: 'images/door-marker.png',
+    url: 'images/ui/goal-door.png',
+    fallbackUrl: 'images/ui/door-marker.png',
   },
   {
     key: 'heal-orb',
-    url: 'images/heal-orb.png',
-    fallbackUrl: 'images/door-marker.png',
+    url: 'images/items/heal-orb.png',
+    fallbackUrl: 'images/ui/door-marker.png',
   },
   {
     key: 'virtual-controls',
-    url: 'images/virtual-controls.png',
+    url: 'images/ui/virtual-controls.png',
     fallbackUrl: 'images/fallbacks/virtual-controls.png',
   },
 ];

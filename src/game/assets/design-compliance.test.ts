@@ -233,14 +233,14 @@ describe('asset sprites align with design palette expectations', () => {
   ];
 
   const kirdyVariants = [
-    'images/kirdy.png',
-    'images/kirdy-run.png',
-    'images/kirdy-jump.png',
-    'images/kirdy-hover.png',
-    'images/kirdy-inhale.png',
-    'images/kirdy-swallow.png',
-    'images/kirdy-spit.png',
-    'images/kirdy-idle.png',
+    'images/characters/kirdy/kirdy.png',
+    'images/characters/kirdy/kirdy-run.png',
+    'images/characters/kirdy/kirdy-jump.png',
+    'images/characters/kirdy/kirdy-hover.png',
+    'images/characters/kirdy/kirdy-inhale.png',
+    'images/characters/kirdy/kirdy-swallow.png',
+    'images/characters/kirdy/kirdy-spit.png',
+    'images/characters/kirdy/kirdy-idle.png',
   ];
 
   it.each(kirdyVariants)('%s uses defined Kirdy palette', (relativePath) => {
@@ -248,14 +248,14 @@ describe('asset sprites align with design palette expectations', () => {
   });
 
   it('fire ability projectile uses warm fire palette', () => {
-    expectContainsAnchors('fire ability', 'images/fire-attack.png', [
+    expectContainsAnchors('fire ability', 'images/effects/fire-attack.png', [
       { label: 'ember core', color: rgba(102, 32, 36), tolerance: 18 },
       { label: 'ash glow', color: rgba(254, 252, 208), tolerance: 18 },
     ]);
   });
 
   it('ice ability projectile uses icy palette', () => {
-    expectContainsAnchors('ice ability', 'images/ice-attack.png', [
+    expectContainsAnchors('ice ability', 'images/effects/ice-attack.png', [
       { label: 'midnight core', color: rgba(46, 54, 71), tolerance: 12 },
       { label: 'aurora teal', color: rgba(114, 193, 206), tolerance: 26 },
       { label: 'glacial bloom', color: rgba(210, 225, 216), tolerance: 18 },
@@ -263,21 +263,21 @@ describe('asset sprites align with design palette expectations', () => {
   });
 
   it('sword slash effect combines gold and cyan energy', () => {
-    expectContainsAnchors('sword slash', 'images/sword-slash.png', [
+    expectContainsAnchors('sword slash', 'images/effects/sword-slash.png', [
       { label: 'gold arc', color: rgba(255, 242, 166), tolerance: 18 },
       { label: 'shadow accent', color: rgba(70, 55, 61), tolerance: 18 },
     ]);
   });
 
   it('star bullet sprite features bright star glow', () => {
-    expectContainsAnchors('star bullet', 'images/star-bullet.png', [
+    expectContainsAnchors('star bullet', 'images/effects/star-bullet.png', [
       { label: 'stellar yellow', color: rgba(255, 234, 90), tolerance: 24 },
       { label: 'core white', color: rgba(255, 255, 255), tolerance: 10 },
     ]);
   });
 
   it('wabble-bee enemy showcases striped bee palette', () => {
-    expectContainsAnchors('wabble-bee', 'images/wabble-bee.png', [
+    expectContainsAnchors('wabble-bee', 'images/enemies/wabble-bee.png', [
       { label: 'amber thorax', color: rgba(215, 162, 58), tolerance: 18 },
       { label: 'carapace plum', color: rgba(61, 45, 45), tolerance: 14 },
       { label: 'wing tint', color: rgba(139, 185, 203), tolerance: 20 },
@@ -285,7 +285,7 @@ describe('asset sprites align with design palette expectations', () => {
   });
 
   it('dronto-durt enemy aligns with earthen palette', () => {
-    expectContainsAnchors('dronto-durt', 'images/dronto-durt.png', [
+    expectContainsAnchors('dronto-durt', 'images/enemies/dronto-durt.png', [
       { label: 'shell brown', color: rgba(149, 90, 49), tolerance: 20 },
       { label: 'ember crest', color: rgba(224, 120, 30), tolerance: 24 },
       { label: 'outline navy', color: rgba(0, 0, 45), tolerance: 20 },
@@ -293,7 +293,7 @@ describe('asset sprites align with design palette expectations', () => {
   });
 
   it('virtual touch control sprite uses UI accent palette', () => {
-    expectContainsAnchors('virtual-controls', 'images/virtual-controls.png', [
+    expectContainsAnchors('virtual-controls', 'images/ui/virtual-controls.png', [
       { label: 'aura blue', color: rgba(108, 164, 255), tolerance: 30 },
       { label: 'highlight cyan', color: rgba(74, 212, 255), tolerance: 28 },
       { label: 'ability pink', color: rgba(255, 156, 214), tolerance: 28 },
@@ -310,7 +310,7 @@ describe('asset sprites align with design palette expectations', () => {
   });
 
   it('virtual control frames encode distinct glyph accents per action', () => {
-    const png = loadPng('images/virtual-controls.png');
+    const png = loadPng('images/ui/virtual-controls.png');
     expect(png.width).toBe(384);
     expect(png.height).toBe(192);
 
