@@ -114,14 +114,38 @@ const IMAGE_ASSETS: ReadonlyArray<ImageAsset> = [
     fallbackUrl: 'images/fallbacks/kirdy-placeholder.png',
   },
   {
-    key: 'tileset-main',
-    url: 'images/world/tileset-main.png',
-    fallbackUrl: 'images/fallbacks/tileset-placeholder.png',
-    frameConfig: { frameWidth: 32, frameHeight: 32 },
-  },
-  {
     key: 'wall-texture',
     url: 'images/world/wall-texture.png',
+  },
+  {
+    key: 'brick-tile',
+    url: 'images/world/brick-tile.png',
+    fallbackUrl: 'images/world/wall-texture.png',
+  },
+  {
+    key: 'forest-tile',
+    url: 'images/world/forest-tile.png',
+    fallbackUrl: 'images/world/wall-texture.png',
+  },
+  {
+    key: 'fire-tile',
+    url: 'images/world/fire-tile.png',
+    fallbackUrl: 'images/world/wall-texture.png',
+  },
+  {
+    key: 'ice-tile',
+    url: 'images/world/ice-tile.png',
+    fallbackUrl: 'images/world/wall-texture.png',
+  },
+  {
+    key: 'stone-tile',
+    url: 'images/world/stone-tile.png',
+    fallbackUrl: 'images/world/wall-texture.png',
+  },
+  {
+    key: 'royal-tile',
+    url: 'images/world/royal-tile.png',
+    fallbackUrl: 'images/world/wall-texture.png',
   },
   {
     key: 'door-marker',

@@ -193,6 +193,12 @@ describe('asset pipeline manifest', () => {
       { key: 'ruin-artifact', path: 'images/items/ruin-artifact.png' },
       { key: 'locked-door', path: 'images/ui/locked-door.png' },
       { key: 'wall-texture', path: 'images/world/wall-texture.png' },
+      { key: 'brick-tile', path: 'images/world/brick-tile.png' },
+      { key: 'forest-tile', path: 'images/world/forest-tile.png' },
+      { key: 'fire-tile', path: 'images/world/fire-tile.png' },
+      { key: 'ice-tile', path: 'images/world/ice-tile.png' },
+      { key: 'stone-tile', path: 'images/world/stone-tile.png' },
+      { key: 'royal-tile', path: 'images/world/royal-tile.png' },
     ];
 
     expectedAssets.forEach(({ key, path }) => {
@@ -202,6 +208,17 @@ describe('asset pipeline manifest', () => {
 
       const absolutePath = resolve(baseDir, path);
       expect(existsSync(absolutePath)).toBe(true);
+    });
+  });
+
+  it('クラスタ別の壁タイルはwall-textureへのフォールバックを指定する', () => {
+    const manifest = createAssetManifest();
+    const clusterTileKeys = ['brick-tile', 'forest-tile', 'fire-tile', 'ice-tile', 'stone-tile', 'royal-tile'];
+
+    clusterTileKeys.forEach((key) => {
+      const asset = manifest.images.find((entry) => entry.key === key);
+      expect(asset, `Missing manifest image entry for ${key}`).toBeDefined();
+      expect(asset?.fallbackUrl).toBe('images/world/wall-texture.png');
     });
   });
 
