@@ -124,15 +124,7 @@ const stubs = vi.hoisted(() => {
     },
   };
 
-  const terrainTexture = {
-    hasFrame: vi.fn((frame: string) => frame === 'wall'),
-    getFrame: vi.fn((frame: string) => (frame === 'wall' ? {} : undefined)),
-    getFrameNames: vi.fn(() => ['wall']),
-    frames: { wall: {} },
-  };
-
   const availableTextures = new Set([
-    'tileset-main',
     'door-marker',
     'wall-texture',
     'goal-door',
@@ -148,7 +140,7 @@ const stubs = vi.hoisted(() => {
 
   const textures = {
     exists: vi.fn((key: string) => availableTextures.has(key)),
-    get: vi.fn((key: string) => (key === 'tileset-main' ? terrainTexture : undefined)),
+    get: vi.fn(),
   };
 
   const cameraStartFollow = vi.fn();
@@ -249,7 +241,6 @@ const stubs = vi.hoisted(() => {
     childrenCreateList: createDisplayList,
     PhaserSceneMock,
     textures,
-    terrainTexture,
   };
 });
 

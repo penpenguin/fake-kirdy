@@ -114,12 +114,6 @@ const IMAGE_ASSETS: ReadonlyArray<ImageAsset> = [
     fallbackUrl: 'images/fallbacks/kirdy-placeholder.png',
   },
   {
-    key: 'tileset-main',
-    url: 'images/world/tileset-main.png',
-    fallbackUrl: 'images/fallbacks/tileset-placeholder.png',
-    frameConfig: { frameWidth: 32, frameHeight: 32 },
-  },
-  {
     key: 'wall-texture',
     url: 'images/world/wall-texture.png',
   },

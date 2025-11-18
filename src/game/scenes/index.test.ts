@@ -482,16 +482,7 @@ describe('Scene registration', () => {
     expect(textureManager.setDefaultFilter).toHaveBeenCalledWith(Phaser.Textures.FilterMode.NEAREST);
 
     const loadOnceMock = asMock(bootScene.load.once);
-    const pixelArtKeys = [
-      'tileset-main',
-      'wall-texture',
-      'brick-tile',
-      'forest-tile',
-      'fire-tile',
-      'ice-tile',
-      'stone-tile',
-      'royal-tile',
-    ];
+    const pixelArtKeys = ['wall-texture', 'brick-tile', 'forest-tile', 'fire-tile', 'ice-tile', 'stone-tile', 'royal-tile'];
 
     pixelArtKeys.forEach((key) => {
       const call = loadOnceMock.mock.calls.find(

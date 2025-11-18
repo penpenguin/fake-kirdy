@@ -63,7 +63,6 @@ export const SceneKeys = {
 
 type SceneKey = (typeof SceneKeys)[keyof typeof SceneKeys];
 
-const TERRAIN_TEXTURE_KEY = 'tileset-main';
 const WALL_TEXTURE_KEY = 'wall-texture';
 const CLUSTER_TILE_TEXTURE_KEYS = {
   hub: 'brick-tile',
@@ -77,12 +76,8 @@ const CLUSTER_TILE_TEXTURE_KEYS = {
 const WALL_TILE_TEXTURE_KEYS = Array.from(
   new Set<string>([WALL_TEXTURE_KEY, ...Object.values(CLUSTER_TILE_TEXTURE_KEYS)]),
 );
-const PIXEL_ART_TEXTURE_KEYS = [TERRAIN_TEXTURE_KEY, ...WALL_TILE_TEXTURE_KEYS];
+const PIXEL_ART_TEXTURE_KEYS = [...WALL_TILE_TEXTURE_KEYS];
 const TERRAIN_VISUAL_DEPTH = -50;
-const TERRAIN_FRAME_KEYS = {
-  wall: 'wall',
-  floor: 'floor',
-} as const;
 const DOOR_TEXTURE_KEY = 'door-marker';
 const GOAL_DOOR_TEXTURE_KEY = 'goal-door';
 const LOCKED_DOOR_TEXTURE_KEY = 'locked-door';
@@ -1957,61 +1952,6 @@ export class GameScene extends Phaser.Scene {
     return placements;
   }
 
-  private hasTerrainFrame(frameKey: string): boolean {
-    const textureManager = this.textures as
-      | {
-          exists?: (key: string) => boolean;
-          get?: (
-            key: string,
-          ) =>
-            | {
-                has?: (name: string) => boolean;
-                hasFrame?: (name: string) => boolean;
-                getFrame?: (name: string) => unknown;
-                getFrameNames?: () => string[];
-                frames?: Record<string, unknown>;
-              }
-            | undefined;
-        }
-      | undefined;
-
-    if (!textureManager) {
-      return false;
-    }
-
-    if (typeof textureManager.exists === 'function' && !textureManager.exists(TERRAIN_TEXTURE_KEY)) {
-      return false;
-    }
-
-    const texture = textureManager.get?.(TERRAIN_TEXTURE_KEY);
-    if (!texture) {
-      return false;
-    }
-
-    if (typeof texture.has === 'function') {
-      return texture.has(frameKey);
-    }
-
-    if (typeof texture.hasFrame === 'function') {
-      return texture.hasFrame(frameKey);
-    }
-
-    if (typeof texture.getFrame === 'function') {
-      return Boolean(texture.getFrame(frameKey));
-    }
-
-    const frameNames =
-      typeof texture.getFrameNames === 'function'
-        ? texture.getFrameNames()
-        : Object.keys(texture.frames ?? {});
-
-    if (!Array.isArray(frameNames) || frameNames.length === 0) {
-      return false;
-    }
-
-    return frameNames.includes(frameKey);
-  }
-
   private buildTerrainVisuals() {
     this.destroyTerrainVisuals();
 
@@ -2027,7 +1967,6 @@ export class GameScene extends Phaser.Scene {
     const textureManager = this.textures as TextureManagerLike;
     const areaCluster = areaState?.definition?.metadata?.cluster;
     const resolvedWallTextureKey = selectWallTextureForArea(textureManager, areaCluster);
-    const terrainFrameAvailable = this.hasTerrainFrame(TERRAIN_FRAME_KEYS.wall);
     const doorTextureAvailable = Boolean(textureManager?.exists?.(DOOR_TEXTURE_KEY));
     const goalDoorTextureAvailable = Boolean(textureManager?.exists?.(GOAL_DOOR_TEXTURE_KEY));
     const lockedDoorTextureAvailable = Boolean(textureManager?.exists?.(LOCKED_DOOR_TEXTURE_KEY));
@@ -2037,7 +1976,6 @@ export class GameScene extends Phaser.Scene {
 
     wallPlacements.forEach(({ centerX, centerY, tileSize }) => {
       let visual: Phaser.GameObjects.Image | Phaser.GameObjects.Rectangle | undefined = undefined;
-      let usedTerrainFrame = false;
 
       if (resolvedWallTextureKey) {
         try {
@@ -2048,21 +1986,6 @@ export class GameScene extends Phaser.Scene {
           ) as Phaser.GameObjects.Image | undefined;
         } catch (_error) {
           visual = undefined;
-        }
-      }
-
-      if (!visual && terrainFrameAvailable) {
-        try {
-          visual = displayFactory.image?.(
-            centerX,
-            centerY,
-            TERRAIN_TEXTURE_KEY,
-            TERRAIN_FRAME_KEYS.wall,
-          ) as Phaser.GameObjects.Image | undefined;
-          usedTerrainFrame = Boolean(visual);
-        } catch (_error) {
-          visual = undefined;
-          usedTerrainFrame = false;
         }
       }
 
@@ -2079,9 +2002,6 @@ export class GameScene extends Phaser.Scene {
       visual.setOrigin?.(0.5, 0.5);
       visual.setDepth?.(TERRAIN_VISUAL_DEPTH);
       visual.setDisplaySize?.(tileSize, tileSize);
-      if (usedTerrainFrame && 'setFrame' in visual) {
-        (visual as Phaser.GameObjects.Image).setFrame?.(TERRAIN_FRAME_KEYS.wall);
-      }
       visual.setVisible?.(true);
 
       this.terrainTiles.push(visual as Phaser.GameObjects.GameObject & { destroy?: () => void });
