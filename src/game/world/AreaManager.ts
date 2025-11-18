@@ -517,48 +517,116 @@ export class AreaManager {
     const cornerThresholdY = Math.max(height * 0.25, 1);
 
     if (position.x < 0) {
-      if (position.y < cornerThresholdY) {
-        return definition.neighbors.northwest ? 'northwest' : 'west';
+      if (position.y < cornerThresholdY && definition.neighbors.northwest) {
+        return 'northwest';
       }
 
-      if (position.y > height - cornerThresholdY) {
-        return definition.neighbors.southwest ? 'southwest' : 'west';
+      if (position.y > height - cornerThresholdY && definition.neighbors.southwest) {
+        return 'southwest';
+      }
+
+      if (definition.neighbors.west) {
+        return 'west';
+      }
+
+      const clampedY = Math.max(0, Math.min(position.y, height));
+      if (clampedY <= height / 2 && definition.neighbors.northwest) {
+        return 'northwest';
+      }
+
+      if (definition.neighbors.southwest) {
+        return 'southwest';
+      }
+
+      if (definition.neighbors.northwest) {
+        return 'northwest';
       }
 
       return 'west';
     }
 
     if (position.x >= width) {
-      if (position.y < cornerThresholdY) {
-        return definition.neighbors.northeast ? 'northeast' : 'east';
+      if (position.y < cornerThresholdY && definition.neighbors.northeast) {
+        return 'northeast';
       }
 
-      if (position.y > height - cornerThresholdY) {
-        return definition.neighbors.southeast ? 'southeast' : 'east';
+      if (position.y > height - cornerThresholdY && definition.neighbors.southeast) {
+        return 'southeast';
+      }
+
+      if (definition.neighbors.east) {
+        return 'east';
+      }
+
+      const clampedY = Math.max(0, Math.min(position.y, height));
+      if (clampedY <= height / 2 && definition.neighbors.northeast) {
+        return 'northeast';
+      }
+
+      if (definition.neighbors.southeast) {
+        return 'southeast';
+      }
+
+      if (definition.neighbors.northeast) {
+        return 'northeast';
       }
 
       return 'east';
     }
 
     if (position.y < 0) {
-      if (position.x < cornerThresholdX) {
-        return definition.neighbors.northwest ? 'northwest' : 'north';
+      if (position.x < cornerThresholdX && definition.neighbors.northwest) {
+        return 'northwest';
       }
 
-      if (position.x > width - cornerThresholdX) {
-        return definition.neighbors.northeast ? 'northeast' : 'north';
+      if (position.x > width - cornerThresholdX && definition.neighbors.northeast) {
+        return 'northeast';
+      }
+
+      if (definition.neighbors.north) {
+        return 'north';
+      }
+
+      const clampedX = Math.max(0, Math.min(position.x, width));
+      if (clampedX <= width / 2 && definition.neighbors.northwest) {
+        return 'northwest';
+      }
+
+      if (definition.neighbors.northeast) {
+        return 'northeast';
+      }
+
+      if (definition.neighbors.northwest) {
+        return 'northwest';
       }
 
       return 'north';
     }
 
     if (position.y >= height) {
-      if (position.x < cornerThresholdX) {
-        return definition.neighbors.southwest ? 'southwest' : 'south';
+      if (position.x < cornerThresholdX && definition.neighbors.southwest) {
+        return 'southwest';
       }
 
-      if (position.x > width - cornerThresholdX) {
-        return definition.neighbors.southeast ? 'southeast' : 'south';
+      if (position.x > width - cornerThresholdX && definition.neighbors.southeast) {
+        return 'southeast';
+      }
+
+      if (definition.neighbors.south) {
+        return 'south';
+      }
+
+      const clampedX = Math.max(0, Math.min(position.x, width));
+      if (clampedX <= width / 2 && definition.neighbors.southwest) {
+        return 'southwest';
+      }
+
+      if (definition.neighbors.southeast) {
+        return 'southeast';
+      }
+
+      if (definition.neighbors.southwest) {
+        return 'southwest';
       }
 
       return 'south';
