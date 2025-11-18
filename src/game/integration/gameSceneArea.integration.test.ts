@@ -128,7 +128,7 @@ describe('統合: GameScene と AreaManager', () => {
     scene.update(1000, 16);
 
     const currentAreaId = areaManager.getCurrentAreaState().definition.id;
-    expect(currentAreaId).toBe(AREA_IDS.MirrorCorridor);
+    expect(currentAreaId).toBe(AREA_IDS.FireArea);
 
     const spawn = areaManager.getCurrentAreaState().playerSpawnPosition;
     expect(playerSprite.x).toBe(spawn.x);
@@ -136,7 +136,7 @@ describe('統合: GameScene と AreaManager', () => {
     expect(playerSprite.body.velocity.x).toBe(0);
     expect(playerSprite.body.velocity.y).toBe(0);
 
-    expect(areaManager.getDiscoveredAreas()).toContain(AREA_IDS.MirrorCorridor);
+    expect(areaManager.getDiscoveredAreas()).toContain(AREA_IDS.FireArea);
     expect(requestSaveSpy).toHaveBeenCalledTimes(1);
   });
 });

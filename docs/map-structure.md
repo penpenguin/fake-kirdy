@@ -4,19 +4,51 @@
 | 表示名 | エリアID | 主な役割 | 隣接エリア |
 | --- | --- | --- | --- |
 | Central Hub | central-hub | ゲーム開始地点。各方向に基幹エリアを接続 | 北: Ice Area / 東: Fire Area / 南: Forest Area / 西: Cave Area |
-| Mirror Corridor | mirror-corridor | ハブ東側の細長い通路。Fire への入口 | 西: Central Hub / 東: Fire Area |
 | Ice Area | ice-area | 北方エリア。ハブ北ドアと接続し、Ice Expanse の入口を提供 | 南: Central Hub / 東: Ice Expanse 入口 |
 | Forest Area | forest-area | ハブ南口。Forest Expanse サイドルートへの入口 | 北: Central Hub / 東: Labyrinth-001 |
 | Cave Area | cave-area | ハブ西口。Ruins Expanse メインラインへの入口 | 東: Central Hub / 北: Ruins Expanse 入口 |
 | Fire Area | fire-area | Fire クラスタ入口。Goal Sanctum や Fire Expanse への分岐を束ねる | 西: Central Hub / 東: Mirror Corridor / 北: Goal Sanctum / 南: Fire Expanse 入口 |
-| Mirror Corridor | mirror-corridor | Fire Area から Goal Sanctum へ向かう細長い回廊 | 西: Fire Area / 東: Goal Sanctum |
+| Mirror Corridor | mirror-corridor | Fire Area 東端に接続するゴール前通路。Goal Sanctum への侵入を制御 | 西: Fire Area / 東: Goal Sanctum |
 | Goal Sanctum | goal-sanctum | ゴール判定とスコア集計 | 南: Fire Area / 北: Sky Sanctum |
 | Sky Sanctum | sky-sanctum | 空中分岐ハブ | 南: Goal Sanctum / 東: Aurora Spire / 西: Starlit Keep |
 | Aurora Spire | aurora-spire | 垂直タワー | 西: Sky Sanctum |
 | Starlit Keep | starlit-keep | 水平要塞 | 東: Sky Sanctum |
 
+### Sky Sanctum 拡張ステージ詳細
+
+`goal-sanctum` 北側の扉から接続する天空遺跡帯は 3 ステージ構成で、ホバリング・縦移動ギミックを中心に難易度を引き上げる。
+
+| ステージ ID | 表示名 | 接続 | 主な敵 | ギミック概要 |
+| --- | --- | --- | --- | --- |
+| `sky-sanctum` | Sky Sanctum | 南: goal-sanctum / 東: aurora-spire / 西: starlit-keep | Frost Wabble, Glacio Durt | 浮遊足場と中央気流で縦移動を生むホバリング導線 |
+| `aurora-spire` | Aurora Spire | 西: sky-sanctum | Wabble Bee, Dronto Durt | 螺旋状足場と落下避けトゲ床。上層への縦型タワー |
+| `starlit-keep` | Starlit Keep | 東: sky-sanctum | Glacio Durt, Wabble Bee | 時間で開閉するバリア床と狭い横穴による回避ルート |
+
+#### Sky Sanctum (`sky-sanctum`)
+- **テーマ:** ゴール聖域の上空に浮かぶ中央広場。気流の吹き上げで縦移動をサポート。
+- **ギミック:** マップ中央部に 2 本の細い足場列を配置し、その間を通過するプレイヤーは安全に上層へ移動できる。左右にサブルートを用意して敵配置種類を使い分ける。
+- **敵構成:** `frost-wabble`（冷気弾）と `glacio-durt`（突進）を 2:1 で巡回。
+- **接続:** 南側の扉を `goal-sanctum` の北出口に連結。東西扉は以下ステージへ接続。
+
+#### Aurora Spire (`aurora-spire`)
+- **テーマ:** 極光が差し込む縦長の塔内部。狭い螺旋階段と足場。
+- **ギミック:** 最下層にトゲ床、塔内部に 3 層の狭い足場を配置。落下リスクを高めつつ敵を避けながら上昇させる。
+- **敵構成:** 機動力の高い `wabble-bee` と直線突進の `dronto-durt` を配置し、縦移動中の被弾リスクを演出。
+- **接続:** `sky-sanctum` 東扉のみ。
+
+#### Starlit Keep (`starlit-keep`)
+- **テーマ:** 星明かりに照らされた古城の外縁。段差が多く横長。
+- **ギミック:** 特定の床タイルを 2 枚化し、一定ラインで段差を越えると上下の床が交互に開閉するようレイアウトする。
+- **敵構成:** `glacio-durt` と `wabble-bee` を 1:1 で配置。狭い横穴で追跡されないよう回避ルートを用意。
+- **接続:** `sky-sanctum` 西扉のみ。
+
+#### 実装メモ
+- `goal-sanctum` 北側扉のタイル座標 (`column: 14`, `row: 1`) を `sky-sanctum` に遷移させる。
+- 新ステージを `STAGE_DEFINITIONS` に追加し、`AreaManager.AREA_IDS` と `SaveManager` の初期探索データを更新する。
+- 各レイアウトに最低 2 種類の敵スポーンエントリを設定し、`baseline` 値は 2 以上を維持する。
+
 ## 手続き生成マップ
-`src/game/world/stages/procedural.ts` の `CLUSTERS` でクラスタごとの生成数と難易度を管理しています（2025-11-17 時点）。
+`src/game/world/stages/procedural.ts` の `CLUSTERS` でクラスタごとの生成数と難易度を管理しています（2025-11-18 時点）。
 
 | クラスタ | 生成数 | 表示名パターン | 難易度 | 接続の特徴 |
 | --- | --- | --- | --- | --- |
