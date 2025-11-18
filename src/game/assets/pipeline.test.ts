@@ -211,6 +211,17 @@ describe('asset pipeline manifest', () => {
     });
   });
 
+  it('クラスタ別の壁タイルはwall-textureへのフォールバックを指定する', () => {
+    const manifest = createAssetManifest();
+    const clusterTileKeys = ['brick-tile', 'forest-tile', 'fire-tile', 'ice-tile', 'stone-tile', 'royal-tile'];
+
+    clusterTileKeys.forEach((key) => {
+      const asset = manifest.images.find((entry) => entry.key === key);
+      expect(asset, `Missing manifest image entry for ${key}`).toBeDefined();
+      expect(asset?.fallbackUrl).toBe('images/world/wall-texture.png');
+    });
+  });
+
   it('クロスプラットフォームのタッチ操作向けvirtual-controlsスプライトを含む', () => {
     const manifest = createAssetManifest();
     const asset = manifest.images.find((entry) => entry.key === 'virtual-controls');

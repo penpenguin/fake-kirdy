@@ -126,26 +126,32 @@ const IMAGE_ASSETS: ReadonlyArray<ImageAsset> = [
   {
     key: 'brick-tile',
     url: 'images/world/brick-tile.png',
+    fallbackUrl: 'images/world/wall-texture.png',
   },
   {
     key: 'forest-tile',
     url: 'images/world/forest-tile.png',
+    fallbackUrl: 'images/world/wall-texture.png',
   },
   {
     key: 'fire-tile',
     url: 'images/world/fire-tile.png',
+    fallbackUrl: 'images/world/wall-texture.png',
   },
   {
     key: 'ice-tile',
     url: 'images/world/ice-tile.png',
+    fallbackUrl: 'images/world/wall-texture.png',
   },
   {
     key: 'stone-tile',
     url: 'images/world/stone-tile.png',
+    fallbackUrl: 'images/world/wall-texture.png',
   },
   {
     key: 'royal-tile',
     url: 'images/world/royal-tile.png',
+    fallbackUrl: 'images/world/wall-texture.png',
   },
   {
     key: 'door-marker',
