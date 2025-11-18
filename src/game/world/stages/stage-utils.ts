@@ -2,6 +2,7 @@ import type {
   AreaDefinition,
   AreaDoorDefinition,
   AreaDefinitionMetadata,
+  AreaCollectibleDefinition,
   AreaGoalMetadata,
   AreaTransitionDirection,
   DeadEndDefinition,
@@ -9,11 +10,12 @@ import type {
   Vector2,
 } from '../AreaManager';
 
-export interface StageDefinitionConfig extends Omit<AreaDefinition, 'doors' | 'deadEnds' | 'goal' | 'doorBuffer' | 'metadata'> {
+export interface StageDefinitionConfig extends Omit<AreaDefinition, 'doors' | 'deadEnds' | 'goal' | 'doorBuffer' | 'metadata' | 'collectibles'> {
   metadata: AreaDefinitionMetadata;
   doorBuffer?: number;
   goal?: (AreaGoalMetadata & { direction?: AreaTransitionDirection }) | null;
   deadEndOverrides?: DeadEndOverride[];
+  collectibles?: StageCollectibleConfig[];
 }
 
 const DEFAULT_DOOR_BUFFER = 1;
@@ -31,11 +33,13 @@ const DEAD_END_REWARDS: HealRewardType[] = ['health', 'max-health', 'revive'];
 
 type TileCoordinate = { column: number; row: number };
 type DeadEndOverride = TileCoordinate & { reward?: HealRewardType };
+type StageCollectibleConfig = TileCoordinate & { id: string; itemId: string };
 
 export function buildStageDefinition(config: StageDefinitionConfig): AreaDefinition {
   const doorBuffer = Math.max(1, config.doorBuffer ?? DEFAULT_DOOR_BUFFER);
   const doors = deriveDoors(config.layout, config.tileSize, config.neighbors, doorBuffer);
   const deadEnds = deriveDeadEnds(config.layout, config.tileSize, config.deadEndOverrides);
+  const collectibles = deriveCollectibles(config.collectibles, config.tileSize);
   const resolvedGoal = resolveGoalMetadata(config.goal ?? null, doors);
   const entryPoints = enforceEntryPointDoorSpacing(
     cloneEntryPoints(config.entryPoints),
@@ -56,6 +60,7 @@ export function buildStageDefinition(config: StageDefinitionConfig): AreaDefinit
     doorBuffer,
     doors,
     deadEnds,
+    collectibles,
     goal: resolvedGoal,
   } satisfies AreaDefinition;
 }
@@ -323,6 +328,21 @@ function deriveDeadEnds(layout: string[], tileSize: number, overrides?: DeadEndO
   }
 
   return deadEnds;
+}
+
+function deriveCollectibles(
+  configs: StageCollectibleConfig[] | undefined,
+  tileSize: number,
+): AreaCollectibleDefinition[] | undefined {
+  if (!configs || configs.length === 0) {
+    return undefined;
+  }
+
+  return configs.map((config) => ({
+    id: config.id,
+    itemId: config.itemId,
+    position: tileToWorld({ column: config.column, row: config.row }, tileSize),
+  } satisfies AreaCollectibleDefinition));
 }
 
 function resolveGoalMetadata(goal: (AreaGoalMetadata & { direction?: AreaTransitionDirection }) | null, doors: AreaDoorDefinition[]) {

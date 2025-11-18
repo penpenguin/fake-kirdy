@@ -1,4 +1,5 @@
 import type {
+  AreaCollectibleDefinition,
   AreaDefinition,
   AreaDoorDefinition,
   AreaId,
@@ -31,6 +32,7 @@ export interface HealItemInstance {
 export class MapSystem {
   private readonly areas = new Map<AreaId, AreaDefinition>();
   private readonly healItems = new Map<AreaId, Map<string, HealItemInstance>>();
+  private readonly collectibles = new Map<AreaId, Map<string, CollectibleItemInstance>>();
 
   constructor(definitions: Iterable<AreaDefinition>) {
     for (const definition of definitions) {
@@ -101,6 +103,47 @@ export class MapSystem {
     item.consumed = true;
     return { ...item } satisfies HealItemInstance;
   }
+
+  registerCollectibles(areaId: AreaId, isAlreadyCollected?: (itemId: string) => boolean) {
+    const area = this.areas.get(areaId);
+    if (!area || !area.collectibles || area.collectibles.length === 0) {
+      this.collectibles.delete(areaId);
+      return [] as CollectibleItemInstance[];
+    }
+
+    const instances = new Map<string, CollectibleItemInstance>();
+    area.collectibles.forEach((collectible) => {
+      instances.set(collectible.id, {
+        id: collectible.id,
+        position: { ...collectible.position },
+        itemId: collectible.itemId,
+        collected: Boolean(isAlreadyCollected?.(collectible.itemId)),
+      });
+    });
+
+    this.collectibles.set(areaId, instances);
+    return Array.from(instances.values());
+  }
+
+  getActiveCollectibles(areaId: AreaId): CollectibleItemInstance[] {
+    const map = this.collectibles.get(areaId);
+    if (!map) {
+      return [];
+    }
+
+    return Array.from(map.values()).filter((item) => !item.collected);
+  }
+
+  collectCollectible(areaId: AreaId, collectibleId: string): CollectibleItemInstance | undefined {
+    const map = this.collectibles.get(areaId);
+    const instance = map?.get(collectibleId);
+    if (!instance || instance.collected) {
+      return undefined;
+    }
+
+    instance.collected = true;
+    return { ...instance } satisfies CollectibleItemInstance;
+  }
 }
 
 function isWithinDoorRadius(tile: SpawnTile, door: AreaDoorDefinition, radius: number): boolean {
@@ -112,4 +155,11 @@ function isWithinDoorRadius(tile: SpawnTile, door: AreaDoorDefinition, radius: n
   const dy = Math.abs(tile.row - door.tile.row);
   const chebyshev = Math.max(dx, dy);
   return chebyshev <= radius;
+}
+
+interface CollectibleItemInstance {
+  id: string;
+  position: Vector2;
+  itemId: string;
+  collected: boolean;
 }

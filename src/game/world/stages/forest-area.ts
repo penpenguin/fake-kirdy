@@ -47,4 +47,7 @@ export const forestArea: AreaDefinition = buildStageDefinition({
   },
   doorBuffer: 1,
   goal: null,
+  collectibles: [
+    { id: 'forest-keystone', itemId: 'forest-keystone', column: 21, row: 3 },
+  ],
 });

@@ -128,27 +128,6 @@ function countReachableWalkableTiles(
   return visited.size;
 }
 
-function traverseDoor(manager: AreaManager, direction: AreaTransitionDirection) {
-  const currentArea = manager.getCurrentAreaState();
-  const door = getDoorWorldPosition(currentArea, direction);
-  const result = manager.updatePlayerPosition(door);
-  expect(result.areaChanged).toBe(true);
-  return result;
-}
-
-function collectBranchRelic(
-  manager: AreaManager,
-  entryDirection: AreaTransitionDirection,
-  relicDirection: AreaTransitionDirection,
-  returnDirections: AreaTransitionDirection[],
-) {
-  traverseDoor(manager, entryDirection);
-  traverseDoor(manager, relicDirection);
-  returnDirections.forEach((direction) => {
-    traverseDoor(manager, direction);
-  });
-}
-
 describe('AreaManager', () => {
   let manager: AreaManager;
 
@@ -291,10 +270,9 @@ describe('AreaManager', () => {
 
     expect(attemptBefore.areaChanged).toBe(false);
 
-    collectBranchRelic(localManager, 'southeast', 'east', ['west', 'northwest']); // Forest
-    collectBranchRelic(localManager, 'northwest', 'east', ['west', 'southeast']); // Ice
-    collectBranchRelic(localManager, 'northeast', 'south', ['south', 'southwest']); // Fire
-    collectBranchRelic(localManager, 'southwest', 'north', ['south', 'northeast']); // Cave
+    ['forest-keystone', 'ice-keystone', 'fire-keystone', 'cave-keystone'].forEach((itemId) => {
+      localManager.recordCollectibleItem(itemId);
+    });
 
     const snapshot = localManager.getPersistenceSnapshot();
     expect(snapshot.collectedItems).toEqual(

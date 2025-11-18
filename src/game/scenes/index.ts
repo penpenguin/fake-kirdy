@@ -639,6 +639,7 @@ export class GameScene extends Phaser.Scene {
   private readonly playerInvulnerabilityDurationMs = 2000;
   private playerInvulnerabilityRemainingMs = 0;
   private readonly healSprites = new Map<string, Phaser.GameObjects.Sprite>();
+  private readonly collectibleSprites = new Map<string, Phaser.GameObjects.Sprite>();
 
   constructor() {
     super(buildConfig(SceneKeys.Game));
@@ -958,6 +959,7 @@ export class GameScene extends Phaser.Scene {
     this.game?.events?.off?.('settings-updated', this.handleSettingsUpdated);
     this.capturedSprites.clear();
     this.clearHealSprites();
+    this.clearCollectibleSprites();
   });
 
     this.rebuildTerrainColliders();
@@ -1170,6 +1172,7 @@ export class GameScene extends Phaser.Scene {
       this.goalDoorController?.update();
       this.syncHudHpWithPlayer();
       this.checkHealItemPickup();
+      this.checkCollectiblePickup();
 
       if (this.progressDirty) {
         this.persistProgress();
@@ -1387,11 +1390,15 @@ export class GameScene extends Phaser.Scene {
     const areaId = this.areaManager?.getCurrentAreaState()?.definition.id;
     if (!areaId) {
       this.clearHealSprites();
+      this.clearCollectibleSprites();
       return;
     }
 
     this.mapSystem.scatterDeadEndHeals(areaId);
     this.syncHealItemsWithScene(areaId);
+
+    this.mapSystem.registerCollectibles(areaId, (itemId) => this.areaManager?.hasCollectedItem(itemId) ?? false);
+    this.syncCollectiblesWithScene(areaId);
   }
 
   private filterDoorUnsafeSpawns(spawns: EnemySpawn[], tileSize: number, areaId?: AreaId | null): EnemySpawn[] {
@@ -1453,6 +1460,46 @@ export class GameScene extends Phaser.Scene {
     this.healSprites.clear();
   }
 
+  private syncCollectiblesWithScene(areaId?: AreaId | null) {
+    const targetAreaId = areaId ?? this.areaManager?.getCurrentAreaState()?.definition.id;
+    if (!targetAreaId) {
+      this.clearCollectibleSprites();
+      return;
+    }
+
+    const activeCollectibles = this.mapSystem.getActiveCollectibles(targetAreaId);
+    const activeIds = new Set(activeCollectibles.map((item) => item.id));
+
+    this.collectibleSprites.forEach((sprite, collectibleId) => {
+      if (!activeIds.has(collectibleId)) {
+        sprite.destroy?.();
+        this.collectibleSprites.delete(collectibleId);
+      }
+    });
+
+    activeCollectibles.forEach((collectible) => {
+      if (this.collectibleSprites.has(collectible.id)) {
+        return;
+      }
+
+      const sprite = this.add?.sprite?.(collectible.position.x, collectible.position.y, 'heal-orb');
+      sprite?.setDepth?.(950);
+      sprite?.setScrollFactor?.(1, 1);
+      sprite?.setOrigin?.(0.5);
+      sprite?.setTint?.(0xffc857);
+      sprite?.setData?.('collectible-id', collectible.id);
+
+      if (sprite) {
+        this.collectibleSprites.set(collectible.id, sprite as Phaser.GameObjects.Sprite);
+      }
+    });
+  }
+
+  private clearCollectibleSprites() {
+    this.collectibleSprites.forEach((sprite) => sprite.destroy?.());
+    this.collectibleSprites.clear();
+  }
+
   private checkHealItemPickup() {
     const kirdy = this.kirdy;
     if (!kirdy) {
@@ -1497,6 +1544,49 @@ export class GameScene extends Phaser.Scene {
       if (currentHp !== previousHp) {
         this.applyHudHp({ current: currentHp, max: kirdy.getMaxHP() });
       }
+    });
+  }
+
+  private checkCollectiblePickup() {
+    const kirdy = this.kirdy;
+    if (!kirdy) {
+      return;
+    }
+
+    const areaId = this.areaManager?.getCurrentAreaState()?.definition.id;
+    if (!areaId) {
+      return;
+    }
+
+    const playerPosition = this.getPlayerPosition();
+    if (!playerPosition) {
+      return;
+    }
+
+    const tileSize = this.areaManager?.getCurrentAreaState()?.definition.tileSize ?? 32;
+    const pickupRadius = tileSize * 0.6;
+    const pickupRadiusSq = pickupRadius * pickupRadius;
+
+    this.collectibleSprites.forEach((sprite, collectibleId) => {
+      if (!sprite) {
+        return;
+      }
+
+      const dx = (sprite.x ?? 0) - playerPosition.x;
+      const dy = (sprite.y ?? 0) - playerPosition.y;
+      if (dx * dx + dy * dy > pickupRadiusSq) {
+        return;
+      }
+
+      const collected = this.mapSystem.collectCollectible(areaId, collectibleId);
+      if (!collected) {
+        return;
+      }
+
+      sprite.destroy?.();
+      this.collectibleSprites.delete(collectibleId);
+      this.areaManager?.recordCollectibleItem(collected.itemId);
+      this.requestSave();
     });
   }
 

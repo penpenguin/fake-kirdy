@@ -25,20 +25,7 @@ export type AreaTransitionDirection =
   | 'southeast'
   | 'southwest';
 
-type BranchRelicConfig = {
-  direction: AreaTransitionDirection;
-  itemId: string;
-};
-
-const BRANCH_RELIC_REQUIREMENTS: Partial<Record<AreaId, BranchRelicConfig>> = {
-  [AREA_IDS.ForestArea]: { direction: 'east', itemId: 'forest-keystone' },
-  [AREA_IDS.IceArea]: { direction: 'east', itemId: 'ice-keystone' },
-  [AREA_IDS.FireArea]: { direction: 'south', itemId: 'fire-keystone' },
-  [AREA_IDS.CaveArea]: { direction: 'north', itemId: 'cave-keystone' },
-};
-const MIRROR_UNLOCK_ITEMS = Object.values(BRANCH_RELIC_REQUIREMENTS)
-  .filter((config): config is BranchRelicConfig => Boolean(config))
-  .map((config) => config.itemId);
+const MIRROR_UNLOCK_ITEMS = ['forest-keystone', 'ice-keystone', 'fire-keystone', 'cave-keystone'] as const;
 
 export type TileCode = 'wall' | 'floor' | 'door' | 'void';
 
@@ -76,6 +63,12 @@ export interface AreaDoorDefinition {
   safeRadius: number;
   type: 'standard' | 'goal';
   target?: AreaId;
+}
+
+export interface AreaCollectibleDefinition {
+  id: string;
+  position: Vector2;
+  itemId: string;
 }
 
 export interface DeadEndDefinition {
@@ -138,6 +131,7 @@ export interface AreaDefinition {
   doorBuffer?: number;
   doors?: AreaDoorDefinition[];
   deadEnds?: DeadEndDefinition[];
+  collectibles?: AreaCollectibleDefinition[];
   goal?: AreaGoalMetadata | null;
   enemySpawns?: AreaEnemySpawnConfig;
 }
@@ -329,6 +323,18 @@ export class AreaManager {
     return Array.from(this.discoveredAreas.values());
   }
 
+  hasCollectedItem(itemId: string): boolean {
+    return this.collectedItems.has(itemId);
+  }
+
+  recordCollectibleItem(itemId: string) {
+    if (typeof itemId !== 'string' || itemId.trim().length === 0) {
+      return;
+    }
+
+    this.collectedItems.add(itemId);
+  }
+
   updatePlayerPosition(position: Vector2): AreaUpdateResult {
     this.lastKnownPlayerPosition = position;
 
@@ -352,7 +358,6 @@ export class AreaManager {
 
     const from = this.currentArea.definition.id;
     const entryDirection = getOppositeDirection(transitionDirection);
-    this.collectBranchRelic(from, transitionDirection);
     const nextArea = this.loadArea(targetAreaId, entryDirection);
     this.currentArea = nextArea;
     this.lastKnownPlayerPosition = nextArea.playerSpawnPosition;
@@ -598,19 +603,6 @@ export class AreaManager {
     return record as Record<AreaId, string[]>;
   }
 
-  private collectBranchRelic(areaId: AreaId, direction: AreaTransitionDirection) {
-    const requirement = BRANCH_RELIC_REQUIREMENTS[areaId];
-    if (!requirement || requirement.direction !== direction) {
-      return;
-    }
-
-    if (this.collectedItems.has(requirement.itemId)) {
-      return;
-    }
-
-    this.collectedItems.add(requirement.itemId);
-  }
-
   private isTransitionLocked(
     areaId: AreaId,
     direction: AreaTransitionDirection,
@@ -629,10 +621,6 @@ export class AreaManager {
   }
 
   private hasAllBranchRelics(): boolean {
-    if (MIRROR_UNLOCK_ITEMS.length === 0) {
-      return true;
-    }
-
     return MIRROR_UNLOCK_ITEMS.every((itemId) => this.collectedItems.has(itemId));
   }
 

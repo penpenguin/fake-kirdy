@@ -126,4 +126,35 @@ describe('MapSystem', () => {
     expect(activeAfter).toHaveLength(1);
     expect(activeAfter[0]?.id).toBe('dead-end-1');
   });
+
+  it('registers collectibles and respects previously collected items', () => {
+    const definition: AreaDefinition = {
+      id: 'ice-area',
+      name: 'Ice Area',
+      tileSize: 32,
+      layout: ['...'],
+      neighbors: {},
+      entryPoints: { default: { position: { x: 0, y: 0 } } },
+      metadata: { cluster: 'ice', index: 2 },
+      doorBuffer: 1,
+      doors: [],
+      deadEnds: [],
+      goal: null,
+      collectibles: [
+        { id: 'ice-keystone', itemId: 'ice-keystone', position: { x: 160, y: 64 } },
+        { id: 'forest-keystone', itemId: 'forest-keystone', position: { x: 32, y: 64 } },
+      ],
+    } satisfies AreaDefinition;
+
+    const mapSystem = new MapSystem([definition]);
+    mapSystem.registerCollectibles('ice-area', (itemId) => itemId === 'forest-keystone');
+
+    const active = mapSystem.getActiveCollectibles('ice-area');
+    expect(active).toHaveLength(1);
+    expect(active[0]?.itemId).toBe('ice-keystone');
+
+    const collected = mapSystem.collectCollectible('ice-area', 'ice-keystone');
+    expect(collected?.itemId).toBe('ice-keystone');
+    expect(mapSystem.getActiveCollectibles('ice-area')).toHaveLength(0);
+  });
 });

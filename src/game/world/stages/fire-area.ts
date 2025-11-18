@@ -47,4 +47,7 @@ export const fireArea: AreaDefinition = buildStageDefinition({
   },
   doorBuffer: 1,
   goal: null,
+  collectibles: [
+    { id: 'fire-keystone', itemId: 'fire-keystone', column: 12, row: 5 },
+  ],
 });
