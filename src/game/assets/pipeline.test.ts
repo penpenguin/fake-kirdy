@@ -187,6 +187,10 @@ describe('asset pipeline manifest', () => {
       { key: 'star-bullet', path: 'images/effects/star-bullet.png' },
       { key: 'wabble-bee', path: 'images/enemies/wabble-bee.png' },
       { key: 'dronto-durt', path: 'images/enemies/dronto-durt.png' },
+      { key: 'fire-artifact', path: 'images/items/fire-artifact.png' },
+      { key: 'ice-artifact', path: 'images/items/ice-artifact.png' },
+      { key: 'leaf-artifact', path: 'images/items/leaf-artifact.png' },
+      { key: 'ruin-artifact', path: 'images/items/ruin-artifact.png' },
       { key: 'wall-texture', path: 'images/world/wall-texture.png' },
     ];
 

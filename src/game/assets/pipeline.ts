@@ -138,6 +138,26 @@ const IMAGE_ASSETS: ReadonlyArray<ImageAsset> = [
     fallbackUrl: 'images/ui/door-marker.png',
   },
   {
+    key: 'fire-artifact',
+    url: 'images/items/fire-artifact.png',
+    fallbackUrl: 'images/ui/door-marker.png',
+  },
+  {
+    key: 'ice-artifact',
+    url: 'images/items/ice-artifact.png',
+    fallbackUrl: 'images/ui/door-marker.png',
+  },
+  {
+    key: 'leaf-artifact',
+    url: 'images/items/leaf-artifact.png',
+    fallbackUrl: 'images/ui/door-marker.png',
+  },
+  {
+    key: 'ruin-artifact',
+    url: 'images/items/ruin-artifact.png',
+    fallbackUrl: 'images/ui/door-marker.png',
+  },
+  {
     key: 'virtual-controls',
     url: 'images/ui/virtual-controls.png',
     fallbackUrl: 'images/fallbacks/virtual-controls.png',

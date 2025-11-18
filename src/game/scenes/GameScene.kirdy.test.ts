@@ -395,6 +395,8 @@ const areaManagerGetAllDefinitionsMock = vi.hoisted(() => vi.fn());
 const areaManagerGetLastKnownPositionMock = vi.hoisted(() => vi.fn());
 const areaManagerGetSnapshotMock = vi.hoisted(() => vi.fn());
 const areaManagerRestoreMock = vi.hoisted(() => vi.fn());
+const areaManagerHasCollectedItemMock = vi.hoisted(() => vi.fn());
+const areaManagerRecordCollectibleMock = vi.hoisted(() => vi.fn());
 const AreaManagerMock = vi.hoisted(() =>
   vi.fn(() => ({
     getCurrentAreaState: areaManagerGetStateMock,
@@ -405,6 +407,8 @@ const AreaManagerMock = vi.hoisted(() =>
     getLastKnownPlayerPosition: areaManagerGetLastKnownPositionMock,
     getPersistenceSnapshot: areaManagerGetSnapshotMock,
     restoreFromSnapshot: areaManagerRestoreMock,
+    hasCollectedItem: areaManagerHasCollectedItemMock,
+    recordCollectibleItem: areaManagerRecordCollectibleMock,
   })),
 );
 
@@ -571,6 +575,9 @@ describe('GameScene player integration', () => {
     areaManagerGetLastKnownPositionMock.mockClear();
     areaManagerGetSnapshotMock.mockClear();
     areaManagerRestoreMock.mockClear();
+    areaManagerHasCollectedItemMock.mockReset();
+    areaManagerHasCollectedItemMock.mockReturnValue(false);
+    areaManagerRecordCollectibleMock.mockReset();
     mapOverlayShowMock.mockClear();
     mapOverlayHideMock.mockClear();
     mapOverlayUpdateMock.mockClear();
@@ -1174,6 +1181,31 @@ describe('GameScene player integration', () => {
     const sprite = ((scene as any).healSprites.get('dead-end-0')) as { setScrollFactor?: ReturnType<typeof vi.fn> } | undefined;
     expect(sprite?.setScrollFactor).toHaveBeenCalledWith(1, 1);
     getActiveHealsSpy.mockRestore();
+  });
+
+  it('spawns collectible sprites with themed artifact textures', () => {
+    const collectibles = [
+      { id: 'forest-keystone', itemId: 'forest-keystone', position: { x: 96, y: 112 }, collected: false },
+    ];
+    const getActiveCollectiblesSpy = vi
+      .spyOn(MapSystem.prototype, 'getActiveCollectibles')
+      .mockReturnValue(collectibles as any);
+    const registerCollectiblesSpy = vi.spyOn(MapSystem.prototype, 'registerCollectibles').mockReturnValue(collectibles as any);
+    const scatterDeadEndsSpy = vi.spyOn(MapSystem.prototype, 'scatterDeadEndHeals').mockReturnValue([] as any);
+
+    const scene = new GameScene();
+    createKirdyMock.mockReturnValue(makeKirdyStub());
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    expect(stubs.addSpriteMock).toHaveBeenCalledWith(96, 112, 'leaf-artifact');
+    const sprite = (scene as any).collectibleSprites.get('forest-keystone');
+    expect(sprite?.setScrollFactor).toHaveBeenCalledWith(1, 1);
+
+    getActiveCollectiblesSpy.mockRestore();
+    registerCollectiblesSpy.mockRestore();
+    scatterDeadEndsSpy.mockRestore();
   });
 
   it('consumes heal items and restores HP when Kirdy touches them', () => {

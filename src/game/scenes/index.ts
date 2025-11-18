@@ -27,6 +27,7 @@ import {
   type AreaId,
 } from '../world/AreaManager';
 import { MapSystem, type SpawnTile } from '../world/MapSystem';
+import { resolveCollectibleTextureKey } from '../world/collectible-assets';
 import { STAGE_DEFINITIONS } from '../world/stages';
 import { MapOverlay, createMapSummaries } from '../ui/MapOverlay';
 import { Hud, type HudHPState } from '../ui/Hud';
@@ -1482,11 +1483,11 @@ export class GameScene extends Phaser.Scene {
         return;
       }
 
-      const sprite = this.add?.sprite?.(collectible.position.x, collectible.position.y, 'heal-orb');
+      const textureKey = resolveCollectibleTextureKey(collectible.itemId);
+      const sprite = this.add?.sprite?.(collectible.position.x, collectible.position.y, textureKey);
       sprite?.setDepth?.(950);
       sprite?.setScrollFactor?.(1, 1);
       sprite?.setOrigin?.(0.5);
-      sprite?.setTint?.(0xffc857);
       sprite?.setData?.('collectible-id', collectible.id);
 
       if (sprite) {
