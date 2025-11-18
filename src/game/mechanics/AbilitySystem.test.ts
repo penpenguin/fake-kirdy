@@ -72,6 +72,7 @@ type ProjectileStub = {
   x: number;
   y: number;
   setVelocityX: ReturnType<typeof vi.fn>;
+  setVelocity: ReturnType<typeof vi.fn>;
   setIgnoreGravity: ReturnType<typeof vi.fn>;
   setFixedRotation: ReturnType<typeof vi.fn>;
   setName: ReturnType<typeof vi.fn>;
@@ -83,6 +84,7 @@ type ProjectileStub = {
   setRectangle: ReturnType<typeof vi.fn>;
   setDisplaySize: ReturnType<typeof vi.fn>;
   setAlpha: ReturnType<typeof vi.fn>;
+  setAngle: ReturnType<typeof vi.fn>;
   setFlipX: ReturnType<typeof vi.fn>;
   once: Mock<[string, () => void], ProjectileStub>;
   destroy: ReturnType<typeof vi.fn>;
@@ -142,6 +144,7 @@ describe('AbilitySystem', () => {
       x: 128,
       y: 256,
       setVelocityX: vi.fn().mockReturnThis(),
+      setVelocity: vi.fn().mockReturnThis(),
       setIgnoreGravity: vi.fn().mockReturnThis(),
       setFixedRotation: vi.fn().mockReturnThis(),
       setName: vi.fn().mockReturnThis(),
@@ -153,6 +156,7 @@ describe('AbilitySystem', () => {
       setRectangle: vi.fn().mockReturnThis(),
       setDisplaySize: vi.fn().mockReturnThis(),
       setAlpha: vi.fn().mockReturnThis(),
+      setAngle: vi.fn().mockReturnThis(),
       setFlipX: vi.fn().mockReturnThis(),
       once: vi.fn(),
       destroy: vi.fn(),
@@ -358,11 +362,15 @@ describe('AbilitySystem', () => {
 
   it('moves a flame projectile forward every 0.1s until it expires', () => {
     const scheduledSteps: Array<() => void> = [];
+    const timerMocks: Array<{ remove: ReturnType<typeof vi.fn> }> = [];
     delayedCall.mockImplementation((delay: number, handler?: () => void) => {
       expect(delay).toBe(FIRE_PROJECTILE_STEP_INTERVAL);
       if (typeof handler === 'function') {
         scheduledSteps.push(handler);
       }
+      const mock = { remove: vi.fn() };
+      timerMocks.push(mock);
+      return mock;
     });
 
     const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
@@ -405,6 +413,7 @@ describe('AbilitySystem', () => {
     const expectedFinalX = spawn.x + FIRE_PROJECTILE_STEP_DISTANCE * FIRE_PROJECTILE_STEP_COUNT;
     expect(projectile.setPosition).toHaveBeenLastCalledWith(expectedFinalX, kirdy.sprite.y);
     expect(physicsSystem.destroyProjectile).toHaveBeenCalledWith(projectile as any);
+    expect(timerMocks.every((mock) => mock.remove.mock.calls.length > 0)).toBe(true);
     expect(physicsSystem.registerPlayerAttack).toHaveBeenCalledWith(projectile, { damage: 3 });
     expect(projectile.setCollidesWith).toHaveBeenCalledWith(PhysicsCategory.Enemy);
   });
@@ -483,14 +492,7 @@ describe('AbilitySystem', () => {
       }),
     );
 
-    expect(addParticles).toHaveBeenCalledWith(0, 0, 'fire-attack');
-    expect(particleEffect.setDepth).toHaveBeenCalledWith(expect.any(Number));
-    expect(particleEffect.startFollow).toHaveBeenCalledWith(projectile as any);
-
-    projectileEvents.destroy?.forEach((handler) => handler());
-
-    expect(particleEffect.stop).toHaveBeenCalledWith(true);
-    expect(particleEffect.destroy).toHaveBeenCalled();
+    expect(addParticles).not.toHaveBeenCalled();
   });
 
   it('aligns the fire projectile sprite to the facing direction', () => {
@@ -503,8 +505,10 @@ describe('AbilitySystem', () => {
       }),
     );
 
+    expect(projectile.setAngle).toHaveBeenCalledWith(0);
     expect(projectile.setFlipX).toHaveBeenCalledWith(false);
 
+    projectile.setAngle.mockClear();
     projectile.setFlipX.mockClear();
     kirdy.sprite.flipX = true;
 
@@ -514,6 +518,7 @@ describe('AbilitySystem', () => {
       }),
     );
 
+    expect(projectile.setAngle).toHaveBeenCalledWith(0);
     expect(projectile.setFlipX).toHaveBeenCalledWith(true);
   });
 

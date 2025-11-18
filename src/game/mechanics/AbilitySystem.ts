@@ -75,8 +75,9 @@ const abilityTextureFallbacks: Record<AbilityType, readonly string[]> = {
   sword: ['kirdy-sword'],
 };
 
+// Particle systems randomize angle by default, so fire trails must use orientation-agnostic textures.
 const abilityTrailParticleCandidates: Record<AbilityType, readonly string[]> = {
-  fire: ['fire-attack', 'inhale-sparkle'],
+  fire: [],
   ice: ['ice-attack', 'inhale-sparkle'],
   sword: ['sword-slash', 'inhale-sparkle'],
 };
@@ -276,21 +277,32 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
       const direction = kirdy.sprite.flipX === true ? -1 : 1;
       const spawnPosition = resolveForwardSpawnPosition(kirdy.sprite, direction);
       const spawnY = kirdy.sprite.y ?? spawnPosition.y;
+      const applyProjectileFacing = () => {
+        projectile.setAngle?.(0);
+        projectile.setFlipX?.(direction < 0);
+      };
       projectile.setPosition?.(spawnPosition.x, spawnY);
       projectile.setIgnoreGravity?.(true);
       projectile.setFixedRotation?.();
       projectile.setSensor?.(true);
       configureProjectileHitbox(projectile);
       projectile.setName?.('kirdy-fire-attack');
-      projectile.setFlipX?.(direction < 0);
+      applyProjectileFacing();
       attachProjectileTrail(scene, projectile, { textureKeys: abilityTrailParticleCandidates.fire });
       let projectileDestroyed = false;
+      const motionTimers: Array<{ remove?: () => void }> = [];
+
+      const clearMotionTimers = () => {
+        motionTimers.forEach((timer) => timer?.remove?.());
+        motionTimers.length = 0;
+      };
 
       const destroyProjectile = () => {
         if (projectileDestroyed) {
           return;
         }
         projectileDestroyed = true;
+        clearMotionTimers();
         if (physicsSystem) {
           physicsSystem.destroyProjectile(projectile);
         } else {
@@ -300,6 +312,7 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
 
       projectile.once?.('destroy', () => {
         projectileDestroyed = true;
+        clearMotionTimers();
         scene.events?.emit?.('ability-attack-destroyed', { abilityType: 'fire', projectile });
       });
 
@@ -312,6 +325,9 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
           const nextStep = currentStep + 1;
           const offsetX = direction * FIRE_PROJECTILE_STEP_DISTANCE * nextStep;
           projectile.setPosition?.(spawnPosition.x + offsetX, spawnY);
+          projectile.setVelocity?.(0, 0);
+          projectile.setIgnoreGravity?.(true);
+          applyProjectileFacing();
 
           if (nextStep >= FIRE_PROJECTILE_STEP_COUNT) {
             destroyProjectile();
@@ -321,7 +337,10 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
         };
 
         if (scene.time?.delayedCall) {
-          scene.time.delayedCall(FIRE_PROJECTILE_STEP_INTERVAL, executeStep);
+          const timer = scene.time.delayedCall(FIRE_PROJECTILE_STEP_INTERVAL, executeStep);
+          if (timer) {
+            motionTimers.push(timer);
+          }
         } else {
           executeStep();
         }

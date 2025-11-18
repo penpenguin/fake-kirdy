@@ -30,7 +30,13 @@ export function attachProjectileTrail(
     return undefined;
   }
 
-  const candidates = options.textureKeys?.length ? options.textureKeys : DEFAULT_PARTICLE_KEYS;
+  const hasCustomCandidates = Array.isArray(options.textureKeys);
+  const customCandidates = (hasCustomCandidates ? options.textureKeys : undefined) ?? [];
+  if (hasCustomCandidates && customCandidates.length === 0) {
+    return undefined;
+  }
+
+  const candidates = customCandidates.length > 0 ? customCandidates : DEFAULT_PARTICLE_KEYS;
   let effect: ParticleEffect | undefined;
 
   for (const key of candidates) {
