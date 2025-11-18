@@ -15,7 +15,30 @@ export const AREA_IDS = {
 } as const;
 type ProceduralAreaId = `labyrinth-${number}`;
 export type AreaId = (typeof AREA_IDS)[keyof typeof AREA_IDS] | ProceduralAreaId;
-export type AreaTransitionDirection = 'north' | 'south' | 'east' | 'west';
+export type AreaTransitionDirection =
+  | 'north'
+  | 'south'
+  | 'east'
+  | 'west'
+  | 'northeast'
+  | 'northwest'
+  | 'southeast'
+  | 'southwest';
+
+type BranchRelicConfig = {
+  direction: AreaTransitionDirection;
+  itemId: string;
+};
+
+const BRANCH_RELIC_REQUIREMENTS: Partial<Record<AreaId, BranchRelicConfig>> = {
+  [AREA_IDS.ForestArea]: { direction: 'east', itemId: 'forest-keystone' },
+  [AREA_IDS.IceArea]: { direction: 'east', itemId: 'ice-keystone' },
+  [AREA_IDS.FireArea]: { direction: 'south', itemId: 'fire-keystone' },
+  [AREA_IDS.CaveArea]: { direction: 'north', itemId: 'cave-keystone' },
+};
+const MIRROR_UNLOCK_ITEMS = Object.values(BRANCH_RELIC_REQUIREMENTS)
+  .filter((config): config is BranchRelicConfig => Boolean(config))
+  .map((config) => config.itemId);
 
 export type TileCode = 'wall' | 'floor' | 'door' | 'void';
 
@@ -143,6 +166,14 @@ function getOppositeDirection(direction: AreaTransitionDirection): AreaTransitio
       return 'west';
     case 'west':
       return 'east';
+    case 'northeast':
+      return 'southwest';
+    case 'northwest':
+      return 'southeast';
+    case 'southeast':
+      return 'northwest';
+    case 'southwest':
+      return 'northeast';
     default: {
       const _never: never = direction;
       return _never;
@@ -251,6 +282,7 @@ export class AreaManager {
   private readonly areaCache = new Map<AreaId, AreaDerivedData>();
   private readonly discoveredAreas = new Set<AreaId>();
   private readonly exploration = new Map<AreaId, Set<string>>();
+  private readonly collectedItems = new Set<string>();
   private currentArea: LoadedArea;
   private lastKnownPlayerPosition: Vector2;
 
@@ -314,8 +346,13 @@ export class AreaManager {
       return { areaChanged: false };
     }
 
+    if (this.isTransitionLocked(this.currentArea.definition.id, transitionDirection, targetAreaId)) {
+      return { areaChanged: false };
+    }
+
     const from = this.currentArea.definition.id;
     const entryDirection = getOppositeDirection(transitionDirection);
+    this.collectBranchRelic(from, transitionDirection);
     const nextArea = this.loadArea(targetAreaId, entryDirection);
     this.currentArea = nextArea;
     this.lastKnownPlayerPosition = nextArea.playerSpawnPosition;
@@ -343,7 +380,7 @@ export class AreaManager {
       exploredTiles: this.serializeExploredTiles(),
       lastKnownPlayerPosition: { ...this.lastKnownPlayerPosition },
       completedAreas: [],
-      collectedItems: [],
+      collectedItems: Array.from(this.collectedItems.values()),
     } satisfies AreaManagerSnapshot;
   }
 
@@ -352,12 +389,17 @@ export class AreaManager {
 
     this.discoveredAreas.clear();
     this.exploration.clear();
+    this.collectedItems.clear();
 
     this.currentArea = this.loadArea(sanitized.currentAreaId);
     this.lastKnownPlayerPosition = clampToBounds(
       sanitized.lastKnownPlayerPosition,
       this.currentArea.pixelBounds,
     );
+
+    sanitized.collectedItems?.forEach((item) => {
+      this.collectedItems.add(item);
+    });
 
     const discovered = new Set<AreaId>(sanitized.discoveredAreas);
     discovered.add(this.currentArea.definition.id);
@@ -464,22 +506,56 @@ export class AreaManager {
   }
 
   private detectBoundaryCross(position: Vector2): AreaTransitionDirection | undefined {
-    const { pixelBounds } = this.currentArea;
+    const { definition, pixelBounds } = this.currentArea;
     const { width, height } = pixelBounds;
+    const cornerThresholdX = Math.max(width * 0.25, 1);
+    const cornerThresholdY = Math.max(height * 0.25, 1);
 
     if (position.x < 0) {
+      if (position.y < cornerThresholdY) {
+        return definition.neighbors.northwest ? 'northwest' : 'west';
+      }
+
+      if (position.y > height - cornerThresholdY) {
+        return definition.neighbors.southwest ? 'southwest' : 'west';
+      }
+
       return 'west';
     }
 
     if (position.x >= width) {
+      if (position.y < cornerThresholdY) {
+        return definition.neighbors.northeast ? 'northeast' : 'east';
+      }
+
+      if (position.y > height - cornerThresholdY) {
+        return definition.neighbors.southeast ? 'southeast' : 'east';
+      }
+
       return 'east';
     }
 
     if (position.y < 0) {
+      if (position.x < cornerThresholdX) {
+        return definition.neighbors.northwest ? 'northwest' : 'north';
+      }
+
+      if (position.x > width - cornerThresholdX) {
+        return definition.neighbors.northeast ? 'northeast' : 'north';
+      }
+
       return 'north';
     }
 
     if (position.y >= height) {
+      if (position.x < cornerThresholdX) {
+        return definition.neighbors.southwest ? 'southwest' : 'south';
+      }
+
+      if (position.x > width - cornerThresholdX) {
+        return definition.neighbors.southeast ? 'southeast' : 'south';
+      }
+
       return 'south';
     }
 
@@ -522,6 +598,44 @@ export class AreaManager {
     return record as Record<AreaId, string[]>;
   }
 
+  private collectBranchRelic(areaId: AreaId, direction: AreaTransitionDirection) {
+    const requirement = BRANCH_RELIC_REQUIREMENTS[areaId];
+    if (!requirement || requirement.direction !== direction) {
+      return;
+    }
+
+    if (this.collectedItems.has(requirement.itemId)) {
+      return;
+    }
+
+    this.collectedItems.add(requirement.itemId);
+  }
+
+  private isTransitionLocked(
+    areaId: AreaId,
+    direction: AreaTransitionDirection,
+    targetAreaId: AreaId,
+  ): boolean {
+    if (
+      areaId === AREA_IDS.CentralHub &&
+      targetAreaId === AREA_IDS.MirrorCorridor &&
+      direction === 'north' &&
+      !this.hasAllBranchRelics()
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private hasAllBranchRelics(): boolean {
+    if (MIRROR_UNLOCK_ITEMS.length === 0) {
+      return true;
+    }
+
+    return MIRROR_UNLOCK_ITEMS.every((itemId) => this.collectedItems.has(itemId));
+  }
+
   private sanitizeSnapshot(snapshot: AreaManagerSnapshot): AreaManagerSnapshot {
     const validCurrentArea = this.definitions.has(snapshot?.currentAreaId)
       ? snapshot.currentAreaId
@@ -537,12 +651,14 @@ export class AreaManager {
 
     const exploredTiles = this.sanitizeExploredTiles(snapshot?.exploredTiles ?? {});
     const lastKnownPlayerPosition = this.sanitizeVector(snapshot?.lastKnownPlayerPosition);
+    const collectedItems = this.sanitizeCollectedItems(snapshot?.collectedItems ?? []);
 
     return {
       currentAreaId: validCurrentArea,
       discoveredAreas,
       exploredTiles,
       lastKnownPlayerPosition,
+      collectedItems,
     } satisfies AreaManagerSnapshot;
   }
 
@@ -575,6 +691,16 @@ export class AreaManager {
     const y = Number.isFinite(position?.y) ? (position!.y as number) : 0;
 
     return { x, y } satisfies Vector2;
+  }
+
+  private sanitizeCollectedItems(input: string[]): string[] {
+    if (!Array.isArray(input)) {
+      return [];
+    }
+
+    return Array.from(
+      new Set(input.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)),
+    );
   }
 
   private isValidTileKey(areaId: AreaId, tile: string) {
@@ -642,25 +768,82 @@ function inferDoorDirectionForTile(
   neighbors?: Partial<Record<AreaTransitionDirection, AreaId>>,
 ): AreaTransitionDirection | undefined {
   const edgeOffset = 1;
+  const touchesNorth = row <= edgeOffset;
+  const touchesSouth = row >= tileMap.rows - 1 - edgeOffset;
+  const touchesWest = column <= edgeOffset;
+  const touchesEast = column >= tileMap.columns - 1 - edgeOffset;
+
   const candidates: Array<{
     direction: AreaTransitionDirection;
     interior?: { column: number; row: number };
   }> = [];
 
-  if (row <= edgeOffset) {
-    candidates.push({ direction: 'north', interior: row + 1 < tileMap.rows ? { column, row: row + 1 } : undefined });
+  if (touchesNorth && touchesWest) {
+    candidates.push({
+      direction: 'northwest',
+      interior: {
+        column: Math.min(column + 1, tileMap.columns - 1),
+        row: Math.min(row + 1, tileMap.rows - 1),
+      },
+    });
   }
 
-  if (row >= tileMap.rows - 1 - edgeOffset) {
-    candidates.push({ direction: 'south', interior: row - 1 >= 0 ? { column, row: row - 1 } : undefined });
+  if (touchesNorth && touchesEast) {
+    candidates.push({
+      direction: 'northeast',
+      interior: {
+        column: Math.max(column - 1, 0),
+        row: Math.min(row + 1, tileMap.rows - 1),
+      },
+    });
   }
 
-  if (column <= edgeOffset) {
-    candidates.push({ direction: 'west', interior: column + 1 < tileMap.columns ? { column: column + 1, row } : undefined });
+  if (touchesSouth && touchesWest) {
+    candidates.push({
+      direction: 'southwest',
+      interior: {
+        column: Math.min(column + 1, tileMap.columns - 1),
+        row: Math.max(row - 1, 0),
+      },
+    });
   }
 
-  if (column >= tileMap.columns - 1 - edgeOffset) {
-    candidates.push({ direction: 'east', interior: column - 1 >= 0 ? { column: column - 1, row } : undefined });
+  if (touchesSouth && touchesEast) {
+    candidates.push({
+      direction: 'southeast',
+      interior: {
+        column: Math.max(column - 1, 0),
+        row: Math.max(row - 1, 0),
+      },
+    });
+  }
+
+  if (touchesNorth) {
+    candidates.push({
+      direction: 'north',
+      interior: row + 1 < tileMap.rows ? { column, row: row + 1 } : undefined,
+    });
+  }
+
+  if (touchesSouth) {
+    candidates.push({
+      direction: 'south',
+      interior: row - 1 >= 0 ? { column, row: row - 1 } : undefined,
+    });
+  }
+
+  if (touchesWest) {
+    candidates.push({
+      direction: 'west',
+      interior: column + 1 < tileMap.columns ? { column: column + 1, row } : undefined,
+    });
+  }
+
+  if (touchesEast) {
+    candidates.push({
+      direction: 'east',
+      interior: column - 1 >= 0 ? { column: column - 1, row } : undefined,
+    });
   }
 
   const isWalkableTile = (tile?: TileCode) => tile === 'floor' || tile === 'door';

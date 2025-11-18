@@ -25,7 +25,16 @@ export const STAGE_DEFINITIONS: ReadonlyArray<AreaDefinition> = [
   ...PROCEDURAL_STAGE_DEFINITIONS,
 ];
 
-const TRANSITIONS: AreaTransitionDirection[] = ['north', 'south', 'east', 'west'];
+const TRANSITIONS: AreaTransitionDirection[] = [
+  'north',
+  'south',
+  'east',
+  'west',
+  'northeast',
+  'northwest',
+  'southeast',
+  'southwest',
+];
 
 export function cloneStageDefinition(definition: AreaDefinition): AreaDefinition {
   const layout = [...definition.layout];

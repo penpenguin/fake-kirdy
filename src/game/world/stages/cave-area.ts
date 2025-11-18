@@ -6,9 +6,9 @@ const tileSize = 32;
 
 const layout = [
   '####################',
-  '#.........D........#',
+  '#.........D.......D#',
   '#..######..######..#',
-  '#.................D#',
+  '#..................#',
   '#..######..######..#',
   '#..................#',
   '####################',
@@ -23,15 +23,13 @@ export const caveArea: AreaDefinition = buildStageDefinition({
   tileSize,
   layout,
   neighbors: {
-    east: 'central-hub',
+    northeast: 'central-hub',
     north: getRuinsExpanseEntryId(),
   },
   entryPoints: {
     default: { position: { x: width - tileSize * 3, y: height / 2 } },
-    east: { position: { x: width - tileSize * 3, y: height / 2 } },
-    west: { position: { x: tileSize * 2, y: height / 2 } },
+    northeast: { position: { x: width - tileSize * 2, y: tileSize * 2 } },
     north: { position: { x: width / 2, y: tileSize * 2 } },
-    south: { position: { x: width / 2, y: height - tileSize * 2 } },
   },
   enemySpawns: {
     baseline: 3,

@@ -5,14 +5,14 @@ const tileSize = 32;
 
 const layout = [
   '####################',
-  '#.........D........#',
+  '#D.......D........D#',
+  '#..................#',
+  '#....####..####....#',
+  '#..................#',
   '#..................#',
   '#....####..####....#',
   '#..................#',
   '#D................D#',
-  '#....####..####....#',
-  '#..................#',
-  '#......D...........#',
   '####################',
 ];
 
@@ -25,17 +25,19 @@ export const centralHub: AreaDefinition = buildStageDefinition({
   tileSize,
   layout,
   neighbors: {
-    north: 'ice-area',
-    east: 'fire-area',
-    south: 'forest-area',
-    west: 'cave-area',
+    northwest: 'ice-area',
+    north: 'mirror-corridor',
+    northeast: 'fire-area',
+    southeast: 'forest-area',
+    southwest: 'cave-area',
   },
   entryPoints: {
     default: { position: { x: width / 2, y: height / 2 } },
-    east: { position: { x: width - tileSize * 3, y: height / 2 } },
-    west: { position: { x: tileSize * 2, y: height / 2 } },
     north: { position: { x: width / 2, y: tileSize * 2 } },
-    south: { position: { x: width / 2, y: height - tileSize * 3 } },
+    northwest: { position: { x: tileSize * 2, y: tileSize * 2 } },
+    northeast: { position: { x: width - tileSize * 2, y: tileSize * 2 } },
+    southeast: { position: { x: width - tileSize * 2, y: height - tileSize * 2 } },
+    southwest: { position: { x: tileSize * 2, y: height - tileSize * 2 } },
   },
   enemySpawns: {
     baseline: 3,

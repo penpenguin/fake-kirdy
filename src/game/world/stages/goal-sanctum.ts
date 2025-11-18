@@ -5,11 +5,11 @@ const tileSize = 32;
 
 const layout = [
   '####################',
-  '#.............D....#',
+  '#.........D........#',
   '#..................#',
   '#......####........#',
   '#..................#',
-  '#....D.............#',
+  '#.........D........#',
   '####################',
 ];
 
@@ -25,15 +25,13 @@ export const goalSanctum: AreaDefinition = buildStageDefinition({
   tileSize,
   layout,
   neighbors: {
-    south: 'fire-area',
+    south: 'mirror-corridor',
     north: 'sky-sanctum',
   },
   entryPoints: {
     default: { position: { x: southDoorX, y: height - tileSize * 2 } },
     south: { position: { x: southDoorX, y: height - tileSize * 2 }, facing: 'south' },
     north: { position: { x: width / 2, y: tileSize * 2 } },
-    east: { position: { x: width - tileSize * 3, y: height / 2 } },
-    west: { position: { x: tileSize * 2, y: height / 2 } },
   },
   enemySpawns: {
     baseline: 1,

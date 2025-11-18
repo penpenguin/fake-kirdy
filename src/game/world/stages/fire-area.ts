@@ -6,11 +6,11 @@ const tileSize = 32;
 
 const layout = [
   '########################',
-  '#..........D...........#',
+  '#......................#',
   '#..####..######..####..#',
-  '#D....................D#',
+  '#......................#',
   '#..####..######..####..#',
-  '#.........D............#',
+  '#D........D............#',
   '########################',
 ];
 
@@ -23,16 +23,12 @@ export const fireArea: AreaDefinition = buildStageDefinition({
   tileSize,
   layout,
   neighbors: {
-    west: 'central-hub',
-    east: 'mirror-corridor',
-    north: 'goal-sanctum',
+    southwest: 'central-hub',
     south: getFireExpanseEntryId(),
   },
   entryPoints: {
     default: { position: { x: tileSize * 2, y: height / 2 } },
-    west: { position: { x: tileSize * 2, y: height / 2 } },
-    east: { position: { x: width - tileSize * 3, y: height / 2 } },
-    north: { position: { x: width / 2, y: tileSize }, facing: 'north' },
+    southwest: { position: { x: tileSize * 2, y: height - tileSize * 2 } },
     south: { position: { x: width / 2, y: height - tileSize * 2 } },
   },
   enemySpawns: {

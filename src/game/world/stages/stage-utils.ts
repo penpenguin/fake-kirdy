@@ -17,7 +17,16 @@ export interface StageDefinitionConfig extends Omit<AreaDefinition, 'doors' | 'd
 }
 
 const DEFAULT_DOOR_BUFFER = 1;
-const DIRECTIONS: AreaTransitionDirection[] = ['north', 'south', 'east', 'west'];
+const DIRECTIONS: AreaTransitionDirection[] = [
+  'north',
+  'south',
+  'east',
+  'west',
+  'northeast',
+  'northwest',
+  'southeast',
+  'southwest',
+];
 const DEAD_END_REWARDS: HealRewardType[] = ['health', 'max-health', 'revive'];
 
 type TileCoordinate = { column: number; row: number };
@@ -111,8 +120,15 @@ function enforceEntryPointDoorSpacing(
       return;
     }
 
-    const axis = direction === 'north' || direction === 'south' ? 'y' : 'x';
-    const inwardSign = direction === 'north' || direction === 'west' ? 1 : -1;
+    const usesVerticalAxis = direction.includes('north') || direction.includes('south');
+    const axis = usesVerticalAxis ? 'y' : 'x';
+    const inwardSign = (() => {
+      if (axis === 'y') {
+        return direction.includes('north') ? 1 : -1;
+      }
+
+      return direction.includes('west') ? 1 : -1;
+    })();
     const distanceFromDoor = (entry.position[axis] - door.position[axis]) * inwardSign;
     const safeRadiusTiles = Math.max(door.safeRadius ?? doorBuffer, doorBuffer);
     const minDistance = (safeRadiusTiles + 1) * tileSize;
@@ -176,21 +192,65 @@ function inferDoorDirectionForTile(
   const rows = layout.length;
   const columns = layout[0]?.length ?? 0;
   const edgeOffset = 1;
+  const touchesNorth = row <= edgeOffset;
+  const touchesSouth = row >= rows - 1 - edgeOffset;
+  const touchesWest = column <= edgeOffset;
+  const touchesEast = column >= columns - 1 - edgeOffset;
   const candidates: Array<{ direction: AreaTransitionDirection; interior?: TileCoordinate }> = [];
 
-  if (row <= edgeOffset) {
+  if (touchesNorth && touchesWest) {
+    candidates.push({
+      direction: 'northwest',
+      interior: {
+        column: Math.min(column + 1, columns - 1),
+        row: Math.min(row + 1, rows - 1),
+      },
+    });
+  }
+
+  if (touchesNorth && touchesEast) {
+    candidates.push({
+      direction: 'northeast',
+      interior: {
+        column: Math.max(column - 1, 0),
+        row: Math.min(row + 1, rows - 1),
+      },
+    });
+  }
+
+  if (touchesSouth && touchesWest) {
+    candidates.push({
+      direction: 'southwest',
+      interior: {
+        column: Math.min(column + 1, columns - 1),
+        row: Math.max(row - 1, 0),
+      },
+    });
+  }
+
+  if (touchesSouth && touchesEast) {
+    candidates.push({
+      direction: 'southeast',
+      interior: {
+        column: Math.max(column - 1, 0),
+        row: Math.max(row - 1, 0),
+      },
+    });
+  }
+
+  if (touchesNorth) {
     candidates.push({ direction: 'north', interior: { column, row: Math.min(row + 1, rows - 1) } });
   }
 
-  if (row >= rows - 1 - edgeOffset) {
+  if (touchesSouth) {
     candidates.push({ direction: 'south', interior: { column, row: Math.max(row - 1, 0) } });
   }
 
-  if (column <= edgeOffset) {
+  if (touchesWest) {
     candidates.push({ direction: 'west', interior: { column: Math.min(column + 1, columns - 1), row } });
   }
 
-  if (column >= columns - 1 - edgeOffset) {
+  if (touchesEast) {
     candidates.push({ direction: 'east', interior: { column: Math.max(column - 1, 0), row } });
   }
 

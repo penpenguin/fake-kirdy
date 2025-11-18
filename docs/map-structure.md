@@ -3,16 +3,20 @@
 ## 固定マップ
 | 表示名 | エリアID | 主な役割 | 隣接エリア |
 | --- | --- | --- | --- |
-| Central Hub | central-hub | ゲーム開始地点。各方向に基幹エリアを接続 | 北: Ice Area / 東: Fire Area / 南: Forest Area / 西: Cave Area |
-| Ice Area | ice-area | 北方エリア。ハブ北ドアと接続し、Ice Expanse の入口を提供 | 南: Central Hub / 東: Ice Expanse 入口 |
-| Forest Area | forest-area | ハブ南口。Forest Expanse サイドルートへの入口 | 北: Central Hub / 東: Labyrinth-001 |
-| Cave Area | cave-area | ハブ西口。Ruins Expanse メインラインへの入口 | 東: Central Hub / 北: Ruins Expanse 入口 |
-| Fire Area | fire-area | Fire クラスタ入口。Goal Sanctum や Fire Expanse への分岐を束ねる | 西: Central Hub / 東: Mirror Corridor / 北: Goal Sanctum / 南: Fire Expanse 入口 |
-| Mirror Corridor | mirror-corridor | Fire Area 東端に接続するゴール前通路。Goal Sanctum への侵入を制御 | 西: Fire Area / 東: Goal Sanctum |
-| Goal Sanctum | goal-sanctum | ゴール判定とスコア集計 | 南: Fire Area / 北: Sky Sanctum |
+| Central Hub | central-hub | ゲーム開始地点。各方向に基幹エリアを接続 | 北: Mirror Corridor / 北西: Ice Area / 北東: Fire Area / 南東: Forest Area / 南西: Cave Area |
+| Ice Area | ice-area | 北方エリア。ハブ北西角ルートと接続し、Ice Expanse の入口を提供 | 南東: Central Hub / 東: Ice Expanse 入口 |
+| Forest Area | forest-area | ハブ南東角ルート。Forest Expanse サイドルートへの入口 | 北西: Central Hub / 東: Labyrinth-001 |
+| Cave Area | cave-area | ハブ南西角ルート。Ruins Expanse メインラインへの入口 | 北東: Central Hub / 北: Ruins Expanse 入口 |
+| Fire Area | fire-area | Fire クラスタ入口。Goal Sanctum から切り離され、Fire Expanse へのゲートのみ維持 | 南西: Central Hub / 南: Fire Expanse 入口 |
+| Mirror Corridor | mirror-corridor | Central Hub 北扉から侵入するゴール前通路。Goal Sanctum への侵入を制御 | 南: Central Hub / 北: Goal Sanctum |
+| Goal Sanctum | goal-sanctum | ゴール判定とスコア集計 | 南: Mirror Corridor / 北: Sky Sanctum |
 | Sky Sanctum | sky-sanctum | 空中分岐ハブ | 南: Goal Sanctum / 東: Aurora Spire / 西: Starlit Keep |
 | Aurora Spire | aurora-spire | 垂直タワー | 西: Sky Sanctum |
 | Starlit Keep | starlit-keep | 水平要塞 | 東: Sky Sanctum |
+
+中央ハブの出入口は北西・北東・南西・南東の四隅に再配置し、北中央の新設扉から Mirror Corridor へ入れるようになりました。これにより Fire Area とは物理的に分離された状態でゴール前通路へ進行できます。Fire Area 側の北扉は撤去され、Goal Sanctum への出入りは Mirror Corridor 経由のみに制限されています。
+
+また、Forest / Ice / Fire / Cave の 4 ブランチそれぞれの終端には「Keystone」系の遺物（`forest-keystone` / `ice-keystone` / `fire-keystone` / `cave-keystone`）を配置しました。これらをすべて集めるまで Central Hub 北扉はロックされ、Mirror Corridor へ進入できません。
 
 ### Sky Sanctum 拡張ステージ詳細
 
@@ -85,12 +89,13 @@ graph LR
     SK[Starlit Keep]
   end
 
-  CH -- east --> FIRE -- east --> MC -- east --> GOAL -- north --> SKY
-  FIRE -- north --> GOAL
+  CH -- north --> MC
+  MC -- north --> GOAL -- north --> SKY
+  CH --|北東|--> FIRE
+  CH --|北西|--> IA
+  CH --|南東|--> FA
+  CH --|南西|--> CA
   FIRE -- south --> FireExpanse1
-  CH -- north --> IA
-  CH -- south --> FA
-  CH -- west --> CA
   SKY -- east --> AS
   SKY -- west --> SK
   FA -- east --> ForestExpanse1

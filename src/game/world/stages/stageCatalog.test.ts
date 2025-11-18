@@ -6,17 +6,27 @@ function findStage(id: string) {
   return STAGE_DEFINITIONS.find((definition) => definition.id === id);
 }
 
-describe('Stage catalog', () => {
-  const DIRECTIONS: AreaTransitionDirection[] = ['north', 'south', 'east', 'west'];
+const DIRECTIONS: AreaTransitionDirection[] = [
+  'north',
+  'south',
+  'east',
+  'west',
+  'northeast',
+  'northwest',
+  'southeast',
+  'southwest',
+];
 
-  it('includes a goal sanctum area connected to the fire area', () => {
+describe('Stage catalog', () => {
+
+  it('connects goal sanctum north to sky sanctum and south to mirror corridor', () => {
     const fireArea = findStage('fire-area');
     expect(fireArea).toBeDefined();
-    expect(fireArea?.neighbors?.north).toBe('goal-sanctum');
+    expect(fireArea?.neighbors?.north).toBeUndefined();
 
     const goalSanctum = findStage('goal-sanctum');
     expect(goalSanctum).toBeDefined();
-    expect(goalSanctum?.neighbors?.south).toBe('fire-area');
+    expect(goalSanctum?.neighbors?.south).toBe('mirror-corridor');
     expect(goalSanctum?.neighbors?.north).toBe('sky-sanctum');
     expect(goalSanctum?.enemySpawns?.baseline).toBeGreaterThanOrEqual(1);
 
@@ -83,12 +93,22 @@ describe('Stage catalog', () => {
     const centralHub = findStage('central-hub');
     expect(centralHub).toBeDefined();
     expect(centralHub?.doorBuffer).toBeGreaterThanOrEqual(1);
-    expect(centralHub?.doors?.length).toBeGreaterThanOrEqual(4);
+    expect(centralHub?.doors?.length).toBe(5);
     const doorWithMetadata = centralHub?.doors?.find((door) => Boolean(door.id && door.safeRadius));
     expect(doorWithMetadata?.direction).toBeTruthy();
     expect(doorWithMetadata?.tile).toBeDefined();
     expect(centralHub?.deadEnds?.length).toBeGreaterThan(0);
     expect(centralHub?.deadEnds?.[0]?.reward).toBeTruthy();
+  });
+
+  it('routes the mirror corridor above the central hub and detaches it from the fire area', () => {
+    const centralHub = findStage('central-hub');
+    const mirror = findStage('mirror-corridor');
+
+    expect(centralHub?.neighbors?.north).toBe('mirror-corridor');
+    expect(mirror?.neighbors?.south).toBe('central-hub');
+    expect(mirror?.neighbors?.north).toBe('goal-sanctum');
+    expect(mirror?.neighbors?.west).toBeUndefined();
   });
 
   it('connects the forest area to the labyrinth entry branch', () => {
@@ -120,8 +140,9 @@ describe('Stage catalog', () => {
           throw new Error(`${stage.id} should define a door for ${direction}`);
         }
 
-        const axis = direction === 'north' || direction === 'south' ? 'y' : 'x';
-        const inwardSign = direction === 'north' || direction === 'west' ? 1 : -1;
+        const usesVerticalAxis = direction.includes('north') || direction.includes('south');
+        const axis = usesVerticalAxis ? 'y' : 'x';
+        const inwardSign = axis === 'y' ? (direction.includes('north') ? 1 : -1) : direction.includes('west') ? 1 : -1;
         const separation = (entry.position[axis] - matchingDoor.position[axis]) * inwardSign;
         const safeRadiusTiles = Math.max(matchingDoor.safeRadius ?? stage.doorBuffer ?? 1, 1);
         const minDistance = (safeRadiusTiles + 1) * stage.tileSize;
@@ -167,8 +188,8 @@ describe('Stage catalog', () => {
   it('routes the fire expanse through the hub-connected fire area', () => {
     const centralHub = findStage('central-hub');
     const fireArea = findStage('fire-area');
-    expect(centralHub?.neighbors?.east).toBe('fire-area');
-    expect(fireArea?.neighbors?.west).toBe('central-hub');
+    expect(centralHub?.neighbors?.northeast).toBe('fire-area');
+    expect(fireArea?.neighbors?.southwest).toBe('central-hub');
 
     const fireExpanses = STAGE_DEFINITIONS.filter(
       (stage) => stage.metadata?.cluster === 'fire' && stage.name.startsWith('Fire Expanse'),

@@ -10,7 +10,7 @@ const layout = [
   '#....##......##....#',
   '#.................D#',
   '#..####......####..#',
-  '#.........D........#',
+  '#.................D#',
   '####################',
 ];
 
@@ -23,15 +23,14 @@ export const iceArea: AreaDefinition = buildStageDefinition({
   tileSize,
   layout,
   neighbors: {
-    south: 'central-hub',
+    southeast: 'central-hub',
     east: getIceExpanseEntryId(),
   },
   entryPoints: {
     default: { position: { x: width / 2, y: height - tileSize * 3 } },
-    south: { position: { x: width / 2, y: height - tileSize * 3 } },
+    southeast: { position: { x: width - tileSize * 2, y: height - tileSize * 2 } },
     north: { position: { x: width / 2, y: tileSize * 2 } },
     east: { position: { x: width - tileSize * 2, y: height / 2 } },
-    west: { position: { x: tileSize * 2, y: height / 2 } },
   },
   enemySpawns: {
     baseline: 3,

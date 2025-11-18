@@ -5,9 +5,9 @@ const tileSize = 32;
 
 const layout = [
   '####################',
+  '#.........D........#',
   '#..................#',
-  '#D................D#',
-  '#..................#',
+  '#.........D........#',
   '####################',
 ];
 
@@ -20,13 +20,11 @@ export const mirrorCorridor: AreaDefinition = buildStageDefinition({
   tileSize,
   layout,
   neighbors: {
-    west: 'fire-area',
-    east: 'goal-sanctum',
+    south: 'central-hub',
+    north: 'goal-sanctum',
   },
   entryPoints: {
     default: { position: { x: width / 2, y: height / 2 } },
-    west: { position: { x: tileSize * 2, y: height / 2 } },
-    east: { position: { x: width - tileSize * 3, y: height / 2 } },
     north: { position: { x: width / 2, y: tileSize } },
     south: { position: { x: width / 2, y: height - tileSize } },
   },

@@ -6,7 +6,7 @@ const LABYRINTH_ENTRY_ID = 'labyrinth-001' as AreaId;
 
 const layout = [
   '########################',
-  '#...........D..........#',
+  '#D.....................#',
   '#..####..######..####..#',
   '#.....................D#',
   '#..####..######..####..#',
@@ -23,15 +23,14 @@ export const forestArea: AreaDefinition = buildStageDefinition({
   tileSize,
   layout,
   neighbors: {
-    north: 'central-hub',
+    northwest: 'central-hub',
     east: LABYRINTH_ENTRY_ID,
   },
   entryPoints: {
     default: { position: { x: width / 2, y: tileSize * 3 } },
-    north: { position: { x: width / 2, y: tileSize * 3 } },
+    northwest: { position: { x: tileSize * 2, y: tileSize * 2 } },
     south: { position: { x: width / 2, y: height - tileSize * 2 } },
     east: { position: { x: width - tileSize * 2, y: height / 2 } },
-    west: { position: { x: tileSize * 2, y: height / 2 } },
   },
   enemySpawns: {
     baseline: 3,
