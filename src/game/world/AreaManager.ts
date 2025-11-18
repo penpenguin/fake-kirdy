@@ -1,5 +1,6 @@
 import type { EnemyType } from '../enemies';
 import { STAGE_DEFINITIONS, cloneStageDefinition } from './stages';
+import { BRANCH_RELIC_ITEM_IDS } from './branch-relics';
 
 export const AREA_IDS = {
   CentralHub: 'central-hub',
@@ -24,8 +25,6 @@ export type AreaTransitionDirection =
   | 'northwest'
   | 'southeast'
   | 'southwest';
-
-const MIRROR_UNLOCK_ITEMS = ['forest-keystone', 'ice-keystone', 'fire-keystone', 'cave-keystone'] as const;
 
 export type TileCode = 'wall' | 'floor' | 'door' | 'void';
 
@@ -323,8 +322,16 @@ export class AreaManager {
     return Array.from(this.discoveredAreas.values());
   }
 
+  getCollectedItems(): string[] {
+    return Array.from(this.collectedItems.values());
+  }
+
   hasCollectedItem(itemId: string): boolean {
     return this.collectedItems.has(itemId);
+  }
+
+  hasCollectedAllBranchRelics(): boolean {
+    return BRANCH_RELIC_ITEM_IDS.every((itemId) => this.collectedItems.has(itemId));
   }
 
   recordCollectibleItem(itemId: string) {
@@ -680,16 +687,12 @@ export class AreaManager {
       areaId === AREA_IDS.CentralHub &&
       targetAreaId === AREA_IDS.MirrorCorridor &&
       direction === 'north' &&
-      !this.hasAllBranchRelics()
+      !this.hasCollectedAllBranchRelics()
     ) {
       return true;
     }
 
     return false;
-  }
-
-  private hasAllBranchRelics(): boolean {
-    return MIRROR_UNLOCK_ITEMS.every((itemId) => this.collectedItems.has(itemId));
   }
 
   private sanitizeSnapshot(snapshot: AreaManagerSnapshot): AreaManagerSnapshot {

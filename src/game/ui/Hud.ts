@@ -1,8 +1,15 @@
 import type Phaser from 'phaser';
 import type { AbilityType } from '../mechanics/AbilitySystem';
+import { BRANCH_RELIC_ITEM_IDS, type BranchRelicItemId } from '../world/branch-relics';
+import { resolveCollectibleTextureKey } from '../world/collectible-assets';
 import { HUD_LINE_SPACING, HUD_SAFE_AREA_HEIGHT } from './hud-layout';
 
 export const HUD_ABILITY_ICON_SIZE = 20;
+export const HUD_RELIC_LABEL_OFFSET = 120;
+const HUD_RELIC_ICON_SIZE = 20;
+const RELIC_ICON_DIM_ALPHA = 0.35;
+const RELIC_ICON_DIM_TINT = 0x4d4d4d;
+const RELIC_ICON_SPACING = 6;
 
 type CanvasTextureLike = {
   context?: CanvasRenderingContext2D | null;
@@ -269,6 +276,8 @@ export class Hud {
   private mapLabel?: Phaser.GameObjects.Text;
   private abilityIcon?: Phaser.GameObjects.Image;
   private abilityIconPosition: { x: number; y: number } = { x: 0, y: 0 };
+  private relicLabel?: Phaser.GameObjects.Text;
+  private relicIcons: Array<{ itemId: BranchRelicItemId; icon?: Phaser.GameObjects.Image }> = [];
 
   constructor(private readonly scene: Phaser.Scene) {
     const { add } = scene;
@@ -332,14 +341,38 @@ export class Hud {
     scoreLabel.setDepth?.(4);
 
     const mapLabelX = backgroundWidth - padding;
-    const mapLabel = add.text(mapLabelX, padding - 2, 'Map: Unknown', labelStyle);
+    const mapLabelY = padding - 2;
+    const mapLabel = add.text(mapLabelX, mapLabelY, 'Map: Unknown', labelStyle);
     mapLabel.setOrigin?.(1, 0);
     mapLabel.setScrollFactor?.(0, 0);
     mapLabel.setDepth?.(4);
 
+    const relicLabelX = mapLabelX - HUD_RELIC_LABEL_OFFSET;
+    const relicLabelY = mapLabelY + HUD_LINE_SPACING + 18;
+    const relicLabel = add.text(relicLabelX, relicLabelY, 'Relics:', labelStyle);
+    relicLabel.setOrigin?.(1, 0.5);
+    relicLabel.setScrollFactor?.(0, 0);
+    relicLabel.setDepth?.(4);
+
     this.abilityIconPosition = { x: abilityIconX, y: abilityIconY };
 
-    container.add?.([background, border, hpBar, hpFill, hpLabel, abilityLabel, scoreLabel, mapLabel] as any);
+    container.add?.([background, border, hpBar, hpFill, hpLabel, abilityLabel, scoreLabel, mapLabel, relicLabel] as any);
+
+    const relicIconBaseX = mapLabelX;
+    const relicIconY = relicLabelY;
+    BRANCH_RELIC_ITEM_IDS.forEach((itemId, index) => {
+      const iconX = relicIconBaseX - index * (HUD_RELIC_ICON_SIZE + RELIC_ICON_SPACING);
+      const icon = add.image(iconX, relicIconY, resolveCollectibleTextureKey(itemId));
+      icon.setOrigin?.(1, 0.5);
+      icon.setScrollFactor?.(0, 0);
+      icon.setDepth?.(4);
+      icon.setDisplaySize?.(HUD_RELIC_ICON_SIZE, HUD_RELIC_ICON_SIZE);
+      icon.setVisible?.(true);
+      icon.setAlpha?.(RELIC_ICON_DIM_ALPHA);
+      icon.setTint?.(RELIC_ICON_DIM_TINT);
+      container.add?.(icon as any);
+      this.relicIcons.push({ itemId, icon });
+    });
 
     this.container = container;
     this.background = background;
@@ -350,6 +383,7 @@ export class Hud {
     this.abilityLabel = abilityLabel;
     this.scoreLabel = scoreLabel;
     this.mapLabel = mapLabel;
+    this.relicLabel = relicLabel;
   }
 
   updateHP(state: HudHPState) {
@@ -394,6 +428,33 @@ export class Hud {
     const trimmed = typeof name === 'string' ? name.trim() : '';
     const resolved = trimmed.length > 0 ? trimmed : 'Unknown';
     this.mapLabel.setText?.(`Map: ${resolved}`);
+  }
+
+  updateRelics(collectedItems: string[] | undefined) {
+    if (this.relicIcons.length === 0) {
+      return;
+    }
+
+    const collectedSet = new Set(
+      (collectedItems ?? []).filter(
+        (itemId): itemId is string => typeof itemId === 'string' && itemId.trim().length > 0,
+      ),
+    );
+
+    this.relicIcons.forEach(({ itemId, icon }) => {
+      if (!icon) {
+        return;
+      }
+
+      if (collectedSet.has(itemId)) {
+        icon.clearTint?.();
+        icon.setAlpha?.(1);
+        return;
+      }
+
+      icon.setTint?.(RELIC_ICON_DIM_TINT);
+      icon.setAlpha?.(RELIC_ICON_DIM_ALPHA);
+    });
   }
 
   private updateAbilityIcon(ability: AbilityType | undefined) {
@@ -516,6 +577,10 @@ export class Hud {
     this.hpBar = undefined;
     this.container = undefined;
     this.abilityIcon = undefined;
+    this.relicLabel?.destroy?.();
+    this.relicIcons.forEach(({ icon }) => icon?.destroy?.());
+    this.relicIcons = [];
+    this.relicLabel = undefined;
   }
 
 }

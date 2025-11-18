@@ -303,6 +303,45 @@ describe('AreaManager', () => {
     expect(backToHub.transition?.via).toBe('south');
   });
 
+  it('HUD向けに現在の遺物収集リストを提供する', () => {
+    const manager = new AreaManager();
+
+    manager.recordCollectibleItem('forest-keystone');
+    manager.recordCollectibleItem('forest-keystone');
+
+    const getCollectedItems = (manager as any).getCollectedItems;
+    expect(typeof getCollectedItems).toBe('function');
+    if (typeof getCollectedItems !== 'function') {
+      return;
+    }
+
+    const items = getCollectedItems.call(manager);
+    expect(items).toEqual(['forest-keystone']);
+
+    items.push('ice-keystone');
+    expect(manager.hasCollectedItem('ice-keystone')).toBe(false);
+  });
+
+  it('4遺物すべてを取得したかどうかを判定できる', () => {
+    const manager = new AreaManager();
+    const hasAll = (manager as any).hasCollectedAllBranchRelics;
+    expect(typeof hasAll).toBe('function');
+    if (typeof hasAll !== 'function') {
+      return;
+    }
+
+    expect(hasAll.call(manager)).toBe(false);
+
+    ['forest-keystone', 'ice-keystone', 'fire-keystone', 'cave-keystone'].forEach((itemId, index) => {
+      manager.recordCollectibleItem(itemId);
+      if (index < 3) {
+        expect(hasAll.call(manager)).toBe(false);
+      }
+    });
+
+    expect(hasAll.call(manager)).toBe(true);
+  });
+
   it('Mirror Corridor の北扉から Goal Sanctum へ接続する', () => {
     const localManager = new AreaManager(AREA_IDS.MirrorCorridor);
     const mirror = localManager.getCurrentAreaState();

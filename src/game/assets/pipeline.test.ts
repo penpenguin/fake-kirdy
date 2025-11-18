@@ -191,6 +191,7 @@ describe('asset pipeline manifest', () => {
       { key: 'ice-artifact', path: 'images/items/ice-artifact.png' },
       { key: 'leaf-artifact', path: 'images/items/leaf-artifact.png' },
       { key: 'ruin-artifact', path: 'images/items/ruin-artifact.png' },
+      { key: 'locked-door', path: 'images/ui/locked-door.png' },
       { key: 'wall-texture', path: 'images/world/wall-texture.png' },
     ];
 

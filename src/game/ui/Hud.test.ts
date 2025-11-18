@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { Hud, HUD_ABILITY_ICON_SIZE } from './Hud';
+import { Hud, HUD_ABILITY_ICON_SIZE, HUD_RELIC_LABEL_OFFSET } from './Hud';
 import { HUD_SAFE_AREA_HEIGHT, HUD_LINE_SPACING } from './hud-layout';
 
 const EXPECTED_ICON_SIZE = 20;
@@ -58,6 +58,7 @@ function createSceneStubs() {
   const abilityLabel = createText();
   const scoreLabel = createText();
   const mapLabel = createText();
+  const relicLabel = createText();
 
   let rectangleCall = 0;
   const addRectangle = vi.fn(() => {
@@ -85,16 +86,25 @@ function createSceneStubs() {
     .mockImplementationOnce(() => hpLabel)
     .mockImplementationOnce(() => abilityLabel)
     .mockImplementationOnce(() => scoreLabel)
-    .mockImplementationOnce(() => mapLabel);
+    .mockImplementationOnce(() => mapLabel)
+    .mockImplementationOnce(() => relicLabel);
 
-  const abilityIcon = {
+  const createImage = () => ({
     setTexture: vi.fn().mockReturnThis(),
     setVisible: vi.fn().mockReturnThis(),
     setScrollFactor: vi.fn().mockReturnThis(),
     setDepth: vi.fn().mockReturnThis(),
     setOrigin: vi.fn().mockReturnThis(),
     setDisplaySize: vi.fn().mockReturnThis(),
-  };
+    setAlpha: vi.fn().mockReturnThis(),
+    setTint: vi.fn().mockReturnThis(),
+    clearTint: vi.fn().mockReturnThis(),
+    destroy: vi.fn(),
+  });
+
+  const abilityIcon = createImage();
+  const relicIcons: Array<ReturnType<typeof createImage>> = [];
+  const imageCalls: Array<{ x: number; y: number; textureKey: string; frame?: string }> = [];
 
   const createCanvasContextStub = () => {
     const ops: string[] = [];
@@ -160,7 +170,16 @@ function createSceneStubs() {
     };
   });
 
-  const addImage = vi.fn(() => abilityIcon);
+  const addImage = vi.fn((x: number, y: number, textureKey: string, frame?: string) => {
+    imageCalls.push({ x, y, textureKey, frame });
+    if (typeof textureKey === 'string' && (textureKey.startsWith('hud-ability') || textureKey.startsWith('kirdy'))) {
+      return abilityIcon;
+    }
+
+    const image = createImage();
+    relicIcons.push(image);
+    return image;
+  });
 
   const scene = {
     add: {
@@ -188,6 +207,9 @@ function createSceneStubs() {
     abilityLabel,
     scoreLabel,
     mapLabel,
+    relicLabel,
+    relicIcons,
+    relicIconCalls: imageCalls,
     abilityIcon,
     texturesGet,
     texturesExists,
@@ -237,6 +259,64 @@ describe('Hud', () => {
 
     hud.updateMapName('   ');
     expect(mapLabel.setText).toHaveBeenLastCalledWith('Map: Unknown');
+  });
+
+  it('HUDに遺物スロットを並べて取得状況をトラッキングする', () => {
+    const { scene, relicIcons, relicIconCalls } = createSceneStubs();
+    const hud = new Hud(scene);
+
+    const updateRelics = (hud as any).updateRelics;
+    expect(typeof updateRelics).toBe('function');
+    if (typeof updateRelics !== 'function') {
+      return;
+    }
+
+    expect(relicIcons).toHaveLength(4);
+
+    const artifactCalls = relicIconCalls.filter((entry) => (entry.textureKey ?? '').includes('artifact'));
+    const artifactKeys = artifactCalls.map((entry) => entry.textureKey);
+    expect(artifactKeys).toEqual(
+      expect.arrayContaining(['leaf-artifact', 'ice-artifact', 'fire-artifact', 'ruin-artifact']),
+    );
+
+    updateRelics.call(hud, ['forest-keystone', 'fire-keystone']);
+
+    const [forestIcon, iceIcon, fireIcon, caveIcon] = relicIcons;
+    expect(forestIcon.setAlpha).toHaveBeenLastCalledWith(1);
+    expect(forestIcon.clearTint).toHaveBeenCalled();
+
+    expect(iceIcon.setAlpha).toHaveBeenLastCalledWith(0.35);
+    expect(iceIcon.setTint).toHaveBeenCalledWith(0x4d4d4d);
+
+    expect(fireIcon.setAlpha).toHaveBeenLastCalledWith(1);
+    expect(fireIcon.clearTint).toHaveBeenCalled();
+
+    expect(caveIcon.setAlpha).toHaveBeenLastCalledWith(0.35);
+    expect(caveIcon.setTint).toHaveBeenCalledWith(0x4d4d4d);
+
+    const addTextMock = scene.add.text as ReturnType<typeof vi.fn>;
+    const mapLabelCall = addTextMock.mock.calls[3];
+    const relicLabelCall = addTextMock.mock.calls[4];
+    const mapLabelX = mapLabelCall?.[0];
+    const mapLabelY = mapLabelCall?.[1] ?? 0;
+    const relicLabelX = relicLabelCall?.[0];
+    const relicLabelY = relicLabelCall?.[1];
+
+    expect(relicLabelX).toBeLessThan(mapLabelX ?? 0);
+    expect((mapLabelX ?? 0) - (relicLabelX ?? 0)).toBe(HUD_RELIC_LABEL_OFFSET);
+    expect(relicLabelY).toBeGreaterThan(mapLabelY);
+
+    let previousX = Number.POSITIVE_INFINITY;
+    artifactCalls.forEach((entry, index) => {
+      expect(entry.y).toBe(relicLabelY);
+      expect(entry.x).toBeGreaterThan(relicLabelX ?? 0);
+      if (index === 0) {
+        expect(entry.x).toBe(mapLabelX);
+      } else {
+        expect(entry.x).toBeLessThan(previousX);
+      }
+      previousX = entry.x;
+    });
   });
 
   it('能力アイコンはテクスチャのフォールバック順序を評価する', () => {
@@ -352,7 +432,7 @@ describe('Hud', () => {
     const addTextMock = scene.add.text as ReturnType<typeof vi.fn>;
     const createdTexts = addTextMock.mock.calls.map(([, , text]) => text);
 
-    expect(addTextMock).toHaveBeenCalledTimes(4);
+    expect(addTextMock).toHaveBeenCalledTimes(5);
     expect(createdTexts).not.toContain(expect.stringContaining('Controls:'));
     expect(createdTexts).not.toContain(expect.stringContaining('Touch:'));
   });

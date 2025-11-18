@@ -83,6 +83,7 @@ type ProjectileStub = {
   setRectangle: ReturnType<typeof vi.fn>;
   setDisplaySize: ReturnType<typeof vi.fn>;
   setAlpha: ReturnType<typeof vi.fn>;
+  setFlipX: ReturnType<typeof vi.fn>;
   once: Mock<[string, () => void], ProjectileStub>;
   destroy: ReturnType<typeof vi.fn>;
 };
@@ -152,6 +153,7 @@ describe('AbilitySystem', () => {
       setRectangle: vi.fn().mockReturnThis(),
       setDisplaySize: vi.fn().mockReturnThis(),
       setAlpha: vi.fn().mockReturnThis(),
+      setFlipX: vi.fn().mockReturnThis(),
       once: vi.fn(),
       destroy: vi.fn(),
     };
@@ -489,6 +491,30 @@ describe('AbilitySystem', () => {
 
     expect(particleEffect.stop).toHaveBeenCalledWith(true);
     expect(particleEffect.destroy).toHaveBeenCalled();
+  });
+
+  it('aligns the fire projectile sprite to the facing direction', () => {
+    const system = new AbilitySystem(scene, kirdy as any, physicsSystem as any);
+    system.applySwallowedPayload({ abilityType: 'fire' });
+
+    system.update(
+      buildActions({
+        spit: { isDown: true, justPressed: true },
+      }),
+    );
+
+    expect(projectile.setFlipX).toHaveBeenCalledWith(false);
+
+    projectile.setFlipX.mockClear();
+    kirdy.sprite.flipX = true;
+
+    system.update(
+      buildActions({
+        spit: { isDown: true, justPressed: true },
+      }),
+    );
+
+    expect(projectile.setFlipX).toHaveBeenCalledWith(true);
   });
 
   it('routes ability attack sounds through the audio manager when available', () => {

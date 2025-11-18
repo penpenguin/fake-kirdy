@@ -25,6 +25,7 @@ import {
   type Vector2,
   type AreaEnemySpawnConfig,
   type AreaId,
+  type AreaTransitionDirection,
 } from '../world/AreaManager';
 import { MapSystem, type SpawnTile } from '../world/MapSystem';
 import { resolveCollectibleTextureKey } from '../world/collectible-assets';
@@ -70,9 +71,11 @@ const TERRAIN_FRAME_KEYS = {
 } as const;
 const DOOR_TEXTURE_KEY = 'door-marker';
 const GOAL_DOOR_TEXTURE_KEY = 'goal-door';
+const LOCKED_DOOR_TEXTURE_KEY = 'locked-door';
 const DOOR_MARKER_COLOR = 0xffdd66;
 const DOOR_MARKER_ALPHA = 0.8;
 const GOAL_DOOR_MARKER_COLOR = 0x66ffe3;
+const LOCKED_DOOR_MARKER_COLOR = 0x9fa8c9;
 const DOOR_MARKER_DEPTH = TERRAIN_VISUAL_DEPTH + 4;
 const CONTROL_SCHEME_SEQUENCE: ControlScheme[] = ['keyboard', 'touch', 'controller'];
 const DIFFICULTY_SEQUENCE: DifficultyLevel[] = ['easy', 'normal', 'hard'];
@@ -84,6 +87,8 @@ type TerrainTilePlacement = {
   centerY: number;
   tileSize: number;
   doorType?: 'standard' | 'goal';
+  doorTargetId?: AreaId;
+  doorDirection?: AreaTransitionDirection;
 };
 
 type StageEnemySpawnEntry = {
@@ -785,6 +790,15 @@ export class GameScene extends Phaser.Scene {
     this.lastHudHp = { current: state.current, max: state.max };
   }
 
+  private applyHudRelics() {
+    if (!this.hud) {
+      return;
+    }
+
+    const collectedItems = this.areaManager?.getCollectedItems?.() ?? [];
+    this.hud.updateRelics(collectedItems);
+  }
+
   private updateHudAreaLabel(force = false) {
     if (!this.hud) {
       return;
@@ -903,6 +917,7 @@ export class GameScene extends Phaser.Scene {
     this.mapOverlay = new MapOverlay(this);
     this.hud = new Hud(this);
     this.updateHudAreaLabel(true);
+    this.applyHudRelics();
     this.resultsOverlay = new ResultsOverlay(this, {
       onComplete: (payload) => this.transitionToResults(payload),
     });
@@ -1587,6 +1602,7 @@ export class GameScene extends Phaser.Scene {
       sprite.destroy?.();
       this.collectibleSprites.delete(collectibleId);
       this.areaManager?.recordCollectibleItem(collected.itemId);
+      this.applyHudRelics();
       this.requestSave();
     });
   }
@@ -1867,11 +1883,14 @@ export class GameScene extends Phaser.Scene {
       return [];
     }
 
-    const doorMetadata = new Map<string, { type: 'standard' | 'goal' }>();
+    const doorMetadata = new Map<
+      string,
+      { type: 'standard' | 'goal'; direction?: AreaTransitionDirection; target?: AreaId }
+    >();
     const definitionDoors = areaState?.definition?.doors ?? [];
     definitionDoors.forEach((door) => {
       const key = `${door.tile.column},${door.tile.row}`;
-      doorMetadata.set(key, { type: door.type });
+      doorMetadata.set(key, { type: door.type, direction: door.direction, target: door.target });
     });
 
     const placements: TerrainTilePlacement[] = [];
@@ -1886,7 +1905,16 @@ export class GameScene extends Phaser.Scene {
         const centerY = row * tileSize + tileSize / 2;
         const key = `${column},${row}`;
         const metadata = doorMetadata.get(key);
-        placements.push({ column, row, centerX, centerY, tileSize, doorType: metadata?.type });
+        placements.push({
+          column,
+          row,
+          centerX,
+          centerY,
+          tileSize,
+          doorType: metadata?.type,
+          doorTargetId: metadata?.target,
+          doorDirection: metadata?.direction,
+        });
       }
     }
 
@@ -1958,12 +1986,17 @@ export class GameScene extends Phaser.Scene {
 
     const wallPlacements = this.collectWallTiles();
     const doorPlacements = this.collectDoorTiles();
+    const areaState = this.areaManager?.getCurrentAreaState();
 
     const textureManager = this.textures as { exists?: (key: string) => boolean } | undefined;
     const wallTextureAvailable = Boolean(textureManager?.exists?.(WALL_TEXTURE_KEY));
     const terrainFrameAvailable = this.hasTerrainFrame(TERRAIN_FRAME_KEYS.wall);
     const doorTextureAvailable = Boolean(textureManager?.exists?.(DOOR_TEXTURE_KEY));
     const goalDoorTextureAvailable = Boolean(textureManager?.exists?.(GOAL_DOOR_TEXTURE_KEY));
+    const lockedDoorTextureAvailable = Boolean(textureManager?.exists?.(LOCKED_DOOR_TEXTURE_KEY));
+    const currentAreaId = areaState?.definition?.id;
+    const mirrorDoorLocked =
+      currentAreaId === AREA_IDS.CentralHub && !this.areaManager?.hasCollectedAllBranchRelics?.();
 
     wallPlacements.forEach(({ centerX, centerY, tileSize }) => {
       let visual: Phaser.GameObjects.Image | Phaser.GameObjects.Rectangle | undefined = undefined;
@@ -2017,13 +2050,23 @@ export class GameScene extends Phaser.Scene {
       this.terrainTiles.push(visual as Phaser.GameObjects.GameObject & { destroy?: () => void });
     });
 
-    doorPlacements.forEach(({ centerX, centerY, tileSize, doorType }) => {
+    doorPlacements.forEach(({ centerX, centerY, tileSize, doorType, doorDirection, doorTargetId }) => {
       let marker: Phaser.GameObjects.Rectangle | Phaser.GameObjects.Image | undefined;
       let usedDoorTexture = false;
 
-      const shouldUseGoalTexture = doorType === 'goal' && goalDoorTextureAvailable;
-      const textureKey = shouldUseGoalTexture ? GOAL_DOOR_TEXTURE_KEY : DOOR_TEXTURE_KEY;
-      const textureAvailable = shouldUseGoalTexture ? goalDoorTextureAvailable : doorTextureAvailable;
+      const shouldUseLockedTexture =
+        mirrorDoorLocked && doorDirection === 'north' && doorTargetId === AREA_IDS.MirrorCorridor;
+      const shouldUseGoalTexture = !shouldUseLockedTexture && doorType === 'goal' && goalDoorTextureAvailable;
+      const textureKey = shouldUseLockedTexture
+        ? LOCKED_DOOR_TEXTURE_KEY
+        : shouldUseGoalTexture
+          ? GOAL_DOOR_TEXTURE_KEY
+          : DOOR_TEXTURE_KEY;
+      const textureAvailable = shouldUseLockedTexture
+        ? lockedDoorTextureAvailable
+        : shouldUseGoalTexture
+          ? goalDoorTextureAvailable
+          : doorTextureAvailable;
       if (textureAvailable) {
         try {
           marker = displayFactory.image?.(
@@ -2040,13 +2083,21 @@ export class GameScene extends Phaser.Scene {
 
       if (!marker) {
         try {
+          const fillColor =
+            doorType === 'goal'
+              ? GOAL_DOOR_MARKER_COLOR
+              : shouldUseLockedTexture
+                ? LOCKED_DOOR_MARKER_COLOR
+                : DOOR_MARKER_COLOR;
+          const fillAlpha =
+            doorType === 'goal' ? 0.95 : shouldUseLockedTexture ? 1 : DOOR_MARKER_ALPHA;
           marker = displayFactory.rectangle?.(
             centerX,
             centerY,
             tileSize,
             tileSize,
-            doorType === 'goal' ? GOAL_DOOR_MARKER_COLOR : DOOR_MARKER_COLOR,
-            doorType === 'goal' ? 0.95 : DOOR_MARKER_ALPHA,
+            fillColor,
+            fillAlpha,
           ) as Phaser.GameObjects.Rectangle | undefined;
         } catch (_error) {
           marker = undefined;
@@ -2064,7 +2115,8 @@ export class GameScene extends Phaser.Scene {
       marker.setActive?.(true);
 
       if (!usedDoorTexture) {
-        marker.setAlpha?.(doorType === 'goal' ? 0.95 : DOOR_MARKER_ALPHA);
+        const alpha = doorType === 'goal' ? 0.95 : shouldUseLockedTexture ? 1 : DOOR_MARKER_ALPHA;
+        marker.setAlpha?.(alpha);
       }
 
       this.terrainTransitionMarkers.push(

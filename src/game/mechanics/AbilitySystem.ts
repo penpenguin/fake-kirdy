@@ -282,6 +282,7 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
       projectile.setSensor?.(true);
       configureProjectileHitbox(projectile);
       projectile.setName?.('kirdy-fire-attack');
+      projectile.setFlipX?.(direction < 0);
       attachProjectileTrail(scene, projectile, { textureKeys: abilityTrailParticleCandidates.fire });
       let projectileDestroyed = false;
 

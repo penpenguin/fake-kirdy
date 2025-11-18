@@ -138,6 +138,7 @@ const stubs = vi.hoisted(() => {
         key === 'door-marker' ||
         key === 'wall-texture' ||
         key === 'goal-door' ||
+        key === 'locked-door' ||
         key === 'heal-orb',
     ),
     get: vi.fn((key: string) => (key === 'tileset-main' ? terrainTexture : undefined)),
@@ -397,6 +398,8 @@ const areaManagerGetSnapshotMock = vi.hoisted(() => vi.fn());
 const areaManagerRestoreMock = vi.hoisted(() => vi.fn());
 const areaManagerHasCollectedItemMock = vi.hoisted(() => vi.fn());
 const areaManagerRecordCollectibleMock = vi.hoisted(() => vi.fn());
+const areaManagerGetCollectedItemsMock = vi.hoisted(() => vi.fn());
+const areaManagerHasAllRelicsMock = vi.hoisted(() => vi.fn());
 const AreaManagerMock = vi.hoisted(() =>
   vi.fn(() => ({
     getCurrentAreaState: areaManagerGetStateMock,
@@ -409,6 +412,8 @@ const AreaManagerMock = vi.hoisted(() =>
     restoreFromSnapshot: areaManagerRestoreMock,
     hasCollectedItem: areaManagerHasCollectedItemMock,
     recordCollectibleItem: areaManagerRecordCollectibleMock,
+    getCollectedItems: areaManagerGetCollectedItemsMock,
+    hasCollectedAllBranchRelics: areaManagerHasAllRelicsMock,
   })),
 );
 
@@ -468,6 +473,7 @@ const hudUpdateHPMock = vi.hoisted(() => vi.fn());
 const hudUpdateAbilityMock = vi.hoisted(() => vi.fn());
 const hudUpdateScoreMock = vi.hoisted(() => vi.fn());
 const hudUpdateMapNameMock = vi.hoisted(() => vi.fn());
+const hudUpdateRelicsMock = vi.hoisted(() => vi.fn());
 const hudDestroyMock = vi.hoisted(() => vi.fn());
 const HudMock = vi.hoisted(() =>
   vi.fn((scene: any) => {
@@ -484,6 +490,7 @@ const HudMock = vi.hoisted(() =>
       updateAbility: hudUpdateAbilityMock,
       updateScore: hudUpdateScoreMock,
       updateMapName: hudUpdateMapNameMock,
+      updateRelics: hudUpdateRelicsMock,
       destroy: hudDestroyMock,
     };
   }),
@@ -578,6 +585,10 @@ describe('GameScene player integration', () => {
     areaManagerHasCollectedItemMock.mockReset();
     areaManagerHasCollectedItemMock.mockReturnValue(false);
     areaManagerRecordCollectibleMock.mockReset();
+    areaManagerGetCollectedItemsMock.mockReset();
+    areaManagerGetCollectedItemsMock.mockReturnValue([]);
+    areaManagerHasAllRelicsMock.mockReset();
+    areaManagerHasAllRelicsMock.mockReturnValue(false);
     mapOverlayShowMock.mockClear();
     mapOverlayHideMock.mockClear();
     mapOverlayUpdateMock.mockClear();
@@ -590,6 +601,7 @@ describe('GameScene player integration', () => {
     hudUpdateAbilityMock.mockClear();
     hudUpdateScoreMock.mockClear();
     hudUpdateMapNameMock.mockClear();
+    hudUpdateRelicsMock.mockClear();
     hudDestroyMock.mockClear();
     HudMock.mockClear();
     SaveManagerMock.mockClear();
@@ -1164,6 +1176,68 @@ describe('GameScene player integration', () => {
     });
   });
 
+  it('Central Hub 北扉が未解放のとき locked-door テクスチャを使用する', () => {
+    const tileSize = defaultAreaState.tileMap.tileSize;
+    const doorColumn = Math.floor(defaultAreaState.tileMap.columns / 2);
+    const doorRow = 1;
+    const originalGetTileAt = defaultAreaState.tileMap.getTileAt;
+    const getTileAt = vi.fn((column: number, row: number) => {
+      if (column === doorColumn && row === doorRow) {
+        return 'door';
+      }
+
+      return originalGetTileAt(column, row);
+    });
+
+    const areaStateWithDoor = {
+      ...defaultAreaState,
+      definition: {
+        ...defaultAreaState.definition,
+        doors: [
+          {
+            id: 'north-0',
+            direction: 'north' as const,
+            tile: { column: doorColumn, row: doorRow },
+            position: {
+              x: doorColumn * tileSize + tileSize / 2,
+              y: doorRow * tileSize + tileSize / 2,
+            },
+            type: 'standard' as const,
+            target: 'mirror-corridor',
+            safeRadius: 2,
+          },
+        ],
+      },
+      tileMap: {
+        ...defaultAreaState.tileMap,
+        getTileAt,
+      },
+    };
+
+    areaManagerGetStateMock.mockReturnValue(areaStateWithDoor as any);
+    areaManagerHasAllRelicsMock.mockReturnValue(false);
+
+    const createdImages: Array<{ textureKey: string }> = [];
+    stubs.addImageMock.mockImplementation((x: number, y: number, textureKey: string, frame?: string) => {
+      const image = {
+        setOrigin: vi.fn().mockReturnThis(),
+        setDepth: vi.fn().mockReturnThis(),
+        setDisplaySize: vi.fn().mockReturnThis(),
+        setVisible: vi.fn().mockReturnThis(),
+        setActive: vi.fn().mockReturnThis(),
+        setFrame: vi.fn().mockReturnThis(),
+        destroy: vi.fn(),
+      };
+      createdImages.push({ textureKey });
+      return image;
+    });
+
+    const scene = new GameScene();
+    scene.create();
+
+    expect(createdImages.some((entry) => entry.textureKey === 'locked-door')).toBe(true);
+  });
+
   it('spawns heal sprites for active heal items', () => {
     const getActiveHealsSpy = vi
       .spyOn(MapSystem.prototype, 'getActiveHealItems')
@@ -1206,6 +1280,38 @@ describe('GameScene player integration', () => {
     getActiveCollectiblesSpy.mockRestore();
     registerCollectiblesSpy.mockRestore();
     scatterDeadEndsSpy.mockRestore();
+  });
+
+  it('遺物を取得するとHUDのインベントリを更新する', () => {
+    areaManagerGetCollectedItemsMock.mockReset();
+    areaManagerGetCollectedItemsMock.mockReturnValueOnce([]).mockReturnValue(['forest-keystone']);
+
+    const collectCollectibleSpy = vi
+      .spyOn(MapSystem.prototype, 'collectCollectible')
+      .mockReturnValue({ id: 'forest-keystone', itemId: 'forest-keystone' } as any);
+
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const sprite = {
+      x: kirdyInstance.sprite.x,
+      y: kirdyInstance.sprite.y,
+      destroy: vi.fn(),
+    };
+    (scene as any).collectibleSprites.set('forest-keystone', sprite as any);
+
+    const checkCollectibles = (scene as any).checkCollectiblePickup?.bind(scene);
+    expect(checkCollectibles).toBeInstanceOf(Function);
+    checkCollectibles?.();
+
+    expect(areaManagerRecordCollectibleMock).toHaveBeenCalledWith('forest-keystone');
+    expect(hudUpdateRelicsMock).toHaveBeenLastCalledWith(['forest-keystone']);
+
+    collectCollectibleSpy.mockRestore();
   });
 
   it('consumes heal items and restores HP when Kirdy touches them', () => {
@@ -1601,6 +1707,42 @@ describe('GameScene player integration', () => {
     expect(hudUpdateScoreMock).toHaveBeenCalledWith(450);
     expect(hudUpdateAbilityMock).toHaveBeenCalledWith('ice');
     expect(hudUpdateMapNameMock).toHaveBeenCalledWith('Mirror Corridor');
+  });
+
+  it('保存済みの遺物データをHUDへ同期する', () => {
+    const savedSnapshot = {
+      player: {
+        hp: 6,
+        maxHP: 6,
+        score: 0,
+        ability: undefined,
+        position: { x: 320, y: 160 },
+      },
+      area: {
+        currentAreaId: 'central-hub',
+        discoveredAreas: ['central-hub'],
+        exploredTiles: {},
+        lastKnownPlayerPosition: { x: 320, y: 160 },
+        collectedItems: ['forest-keystone', 'ice-keystone'],
+      },
+    } as any;
+
+    const savedAreaState = {
+      ...defaultAreaState,
+      playerSpawnPosition: { ...savedSnapshot.area.lastKnownPlayerPosition },
+    };
+
+    areaManagerGetStateMock.mockReturnValue(savedAreaState as any);
+    areaManagerGetLastKnownPositionMock.mockReturnValue(savedSnapshot.area.lastKnownPlayerPosition);
+    areaManagerGetCollectedItemsMock.mockReturnValue(['forest-keystone', 'ice-keystone']);
+    saveManagerLoadMock.mockReturnValue(savedSnapshot);
+
+    const scene = new GameScene();
+    createKirdyMock.mockReturnValue(makeKirdyStub());
+
+    scene.create();
+
+    expect(hudUpdateRelicsMock).toHaveBeenCalledWith(['forest-keystone', 'ice-keystone']);
   });
 
   it('enemy-captured イベントで敵をサスペンドする', () => {
