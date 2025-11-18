@@ -26,6 +26,7 @@ import {
   type AreaEnemySpawnConfig,
   type AreaId,
   type AreaTransitionDirection,
+  type AreaDefinitionMetadata,
 } from '../world/AreaManager';
 import { MapSystem, type SpawnTile } from '../world/MapSystem';
 import { resolveCollectibleTextureKey } from '../world/collectible-assets';
@@ -64,6 +65,19 @@ type SceneKey = (typeof SceneKeys)[keyof typeof SceneKeys];
 
 const TERRAIN_TEXTURE_KEY = 'tileset-main';
 const WALL_TEXTURE_KEY = 'wall-texture';
+const CLUSTER_TILE_TEXTURE_KEYS = {
+  hub: 'brick-tile',
+  forest: 'forest-tile',
+  fire: 'fire-tile',
+  ice: 'ice-tile',
+  ruins: 'stone-tile',
+  sky: 'royal-tile',
+  void: 'stone-tile',
+} as const satisfies Record<AreaDefinitionMetadata['cluster'], string>;
+const WALL_TILE_TEXTURE_KEYS = Array.from(
+  new Set<string>([WALL_TEXTURE_KEY, ...Object.values(CLUSTER_TILE_TEXTURE_KEYS)]),
+);
+const PIXEL_ART_TEXTURE_KEYS = [TERRAIN_TEXTURE_KEY, ...WALL_TILE_TEXTURE_KEYS];
 const TERRAIN_VISUAL_DEPTH = -50;
 const TERRAIN_FRAME_KEYS = {
   wall: 'wall',
@@ -101,6 +115,30 @@ type StageEnemySpawnPlan = {
   maxActive: number;
   entries: StageEnemySpawnEntry[];
 };
+
+type AreaCluster = AreaDefinitionMetadata['cluster'];
+type TextureManagerLike = { exists?: (key: string) => boolean } | undefined;
+
+function resolveWallTextureKey(cluster?: AreaCluster) {
+  if (!cluster) {
+    return WALL_TEXTURE_KEY;
+  }
+
+  return CLUSTER_TILE_TEXTURE_KEYS[cluster] ?? WALL_TEXTURE_KEY;
+}
+
+function selectWallTextureForArea(textureManager: TextureManagerLike, cluster?: AreaCluster) {
+  const desiredKey = resolveWallTextureKey(cluster);
+  if (textureManager?.exists?.(desiredKey)) {
+    return desiredKey;
+  }
+
+  if (desiredKey !== WALL_TEXTURE_KEY && textureManager?.exists?.(WALL_TEXTURE_KEY)) {
+    return WALL_TEXTURE_KEY;
+  }
+
+  return undefined;
+}
 
 type PlayerEnemyCollisionEvent = {
   enemy?: Enemy;
@@ -172,12 +210,10 @@ export class BootScene extends Phaser.Scene {
       texture?.setGenerateMipmaps?.(false);
     };
 
-    loader.once?.('filecomplete-image-tileset-main', () => {
-      applyPixelArtSettings(TERRAIN_TEXTURE_KEY);
-    });
-
-    loader.once?.('filecomplete-image-wall-texture', () => {
-      applyPixelArtSettings(WALL_TEXTURE_KEY);
+    PIXEL_ART_TEXTURE_KEYS.forEach((textureKey) => {
+      loader.once?.(`filecomplete-image-${textureKey}`, () => {
+        applyPixelArtSettings(textureKey);
+      });
     });
 
     const manifest = createAssetManifest();
@@ -1988,8 +2024,9 @@ export class GameScene extends Phaser.Scene {
     const doorPlacements = this.collectDoorTiles();
     const areaState = this.areaManager?.getCurrentAreaState();
 
-    const textureManager = this.textures as { exists?: (key: string) => boolean } | undefined;
-    const wallTextureAvailable = Boolean(textureManager?.exists?.(WALL_TEXTURE_KEY));
+    const textureManager = this.textures as TextureManagerLike;
+    const areaCluster = areaState?.definition?.metadata?.cluster;
+    const resolvedWallTextureKey = selectWallTextureForArea(textureManager, areaCluster);
     const terrainFrameAvailable = this.hasTerrainFrame(TERRAIN_FRAME_KEYS.wall);
     const doorTextureAvailable = Boolean(textureManager?.exists?.(DOOR_TEXTURE_KEY));
     const goalDoorTextureAvailable = Boolean(textureManager?.exists?.(GOAL_DOOR_TEXTURE_KEY));
@@ -2002,12 +2039,12 @@ export class GameScene extends Phaser.Scene {
       let visual: Phaser.GameObjects.Image | Phaser.GameObjects.Rectangle | undefined = undefined;
       let usedTerrainFrame = false;
 
-      if (wallTextureAvailable) {
+      if (resolvedWallTextureKey) {
         try {
           visual = displayFactory.image?.(
             centerX,
             centerY,
-            WALL_TEXTURE_KEY,
+            resolvedWallTextureKey,
           ) as Phaser.GameObjects.Image | undefined;
         } catch (_error) {
           visual = undefined;

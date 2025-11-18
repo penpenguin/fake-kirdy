@@ -131,16 +131,23 @@ const stubs = vi.hoisted(() => {
     frames: { wall: {} },
   };
 
+  const availableTextures = new Set([
+    'tileset-main',
+    'door-marker',
+    'wall-texture',
+    'goal-door',
+    'locked-door',
+    'heal-orb',
+    'brick-tile',
+    'forest-tile',
+    'fire-tile',
+    'ice-tile',
+    'stone-tile',
+    'royal-tile',
+  ]);
+
   const textures = {
-    exists: vi.fn(
-      (key: string) =>
-        key === 'tileset-main' ||
-        key === 'door-marker' ||
-        key === 'wall-texture' ||
-        key === 'goal-door' ||
-        key === 'locked-door' ||
-        key === 'heal-orb',
-    ),
+    exists: vi.fn((key: string) => availableTextures.has(key)),
     get: vi.fn((key: string) => (key === 'tileset-main' ? terrainTexture : undefined)),
   };
 
@@ -634,7 +641,7 @@ describe('GameScene player integration', () => {
     });
 
     defaultAreaState = {
-      definition: { id: 'central-hub', name: 'Central Hub' },
+      definition: { id: 'central-hub', name: 'Central Hub', metadata: { cluster: 'hub', index: 0 } },
       tileMap: {
         tileSize,
         columns,
@@ -726,6 +733,62 @@ describe('GameScene player integration', () => {
       pixelBounds: { width: columns * stageTileSize, height: rows * stageTileSize },
       playerSpawnPosition: { ...definition.entryPoints.default.position },
     };
+  }
+
+  type AreaCluster = NonNullable<AreaDefinition['metadata']>['cluster'];
+
+  function configureCustomWallArea(cluster?: AreaCluster) {
+    const tileSize = 24;
+    const layout: Array<Array<'wall' | 'floor'>> = [
+      ['wall', 'wall', 'wall'],
+      ['wall', 'floor', 'wall'],
+      ['wall', 'wall', 'wall'],
+    ];
+
+    const wallCoordinates: Array<{ column: number; row: number }> = [];
+    layout.forEach((rowTiles, rowIndex) => {
+      rowTiles.forEach((tile, columnIndex) => {
+        if (tile === 'wall') {
+          wallCoordinates.push({ column: columnIndex, row: rowIndex });
+        }
+      });
+    });
+
+    const getTileAt = vi.fn((column: number, row: number) => layout[row]?.[column]);
+
+    const tileMap = {
+      tileSize,
+      columns: layout[0].length,
+      rows: layout.length,
+      getClampedTileCoordinate: vi.fn().mockReturnValue({ column: 1, row: 1 }),
+      getTileAt,
+    };
+
+    const definition: Record<string, unknown> = {
+      id: cluster ? `${cluster}-area` : 'fallback-area',
+      name: 'Custom Area',
+    };
+    if (cluster) {
+      definition.metadata = { cluster, index: 99 };
+    }
+
+    const areaState = {
+      definition,
+      tileMap,
+      pixelBounds: { width: layout[0].length * tileSize, height: layout.length * tileSize },
+      playerSpawnPosition: { x: tileSize * 1.5, y: tileSize * 1.5 },
+    };
+
+    areaManagerGetStateMock.mockReturnValue(areaState as any);
+    areaManagerGetLastKnownPositionMock.mockReturnValue(areaState.playerSpawnPosition);
+    areaManagerGetSnapshotMock.mockReturnValue({
+      currentAreaId: areaState.definition.id as string,
+      discoveredAreas: [areaState.definition.id as string],
+      exploredTiles: {},
+      lastKnownPlayerPosition: { ...areaState.playerSpawnPosition },
+    });
+
+    return { tileSize, wallCoordinates };
   }
 
   function createSnapshot(overrides?: Partial<ReturnType<typeof playerInputUpdateMock>>) {
@@ -922,7 +985,7 @@ describe('GameScene player integration', () => {
     };
 
     const areaState = {
-      definition: { id: 'central-hub', name: 'Central Hub' },
+      definition: { id: 'central-hub', name: 'Central Hub', metadata: { cluster: 'hub', index: 1 } },
       tileMap: customTileMap,
       pixelBounds: { width: layout[0].length * tileSize, height: layout.length * tileSize },
       playerSpawnPosition: { x: tileSize * 1.5, y: tileSize * 1.5 },
@@ -1005,7 +1068,7 @@ describe('GameScene player integration', () => {
     };
 
     const areaState = {
-      definition: { id: 'central-hub', name: 'Central Hub' },
+      definition: { id: 'central-hub', name: 'Central Hub', metadata: { cluster: 'hub', index: 1 } },
       tileMap: customTileMap,
       pixelBounds: { width: layout[0].length * tileSize, height: layout.length * tileSize },
       playerSpawnPosition: { x: tileSize * 1.5, y: tileSize * 1.5 },
@@ -1053,13 +1116,13 @@ describe('GameScene player integration', () => {
 
     scene.create();
 
-    const wallImages = createdImages.filter((entry) => entry.textureKey === 'wall-texture');
-    expect(wallImages).toHaveLength(wallCoordinates.length);
+    const hubTiles = createdImages.filter((entry) => entry.textureKey === 'brick-tile');
+    expect(hubTiles).toHaveLength(wallCoordinates.length);
 
     wallCoordinates.forEach((position) => {
       const centerX = position.column * tileSize + tileSize / 2;
       const centerY = position.row * tileSize + tileSize / 2;
-      const entry = wallImages.find((image) => image.x === centerX && image.y === centerY);
+      const entry = hubTiles.find((image) => image.x === centerX && image.y === centerY);
 
       expect(entry).toBeDefined();
       const image = entry?.instance as any;
@@ -1073,7 +1136,7 @@ describe('GameScene player integration', () => {
       { destroy: ReturnType<typeof vi.fn> }
     >;
     expect(terrainTiles).toHaveLength(wallCoordinates.length);
-    wallImages.forEach((image) => {
+    hubTiles.forEach((image) => {
       expect(terrainTiles).toContain(image.instance as any);
     });
 
@@ -1086,6 +1149,84 @@ describe('GameScene player integration', () => {
       expect(image.instance.destroy).toHaveBeenCalled();
     });
     expect((scene as any).terrainTiles).toHaveLength(0);
+  });
+
+  it.each([
+    ['forest', 'forest-tile'],
+    ['fire', 'fire-tile'],
+    ['ice', 'ice-tile'],
+    ['ruins', 'stone-tile'],
+    ['sky', 'royal-tile'],
+  ] as Array<[AreaCluster, string]>)(`%s クラスタのエリアは %s テクスチャで壁を描画する`, (cluster, expectedTextureKey) => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    const { tileSize, wallCoordinates } = configureCustomWallArea(cluster);
+    const createdImages: Array<{ textureKey: string; instance: ReturnType<typeof stubs.addImageMock> }> = [];
+    stubs.addImageMock.mockImplementation((x: number, y: number, textureKey: string) => {
+      const image = {
+        x,
+        y,
+        texture: textureKey,
+        setOrigin: vi.fn().mockReturnThis(),
+        setDepth: vi.fn().mockReturnThis(),
+        setDisplaySize: vi.fn().mockReturnThis(),
+        setActive: vi.fn().mockReturnThis(),
+        setVisible: vi.fn().mockReturnThis(),
+        setFrame: vi.fn().mockReturnThis(),
+        destroy: vi.fn(),
+      };
+      createdImages.push({ textureKey, instance: image });
+      return image;
+    });
+
+    scene.create();
+
+    const wallImages = createdImages.filter((entry) => entry.textureKey === expectedTextureKey);
+    expect(wallImages).toHaveLength(wallCoordinates.length);
+    expect(createdImages.filter((entry) => entry.textureKey === 'wall-texture')).toHaveLength(0);
+
+    wallImages.forEach((entry) => {
+      expect(entry.instance.setDisplaySize).toHaveBeenCalledWith(tileSize, tileSize);
+      expect(entry.instance.setDepth).toHaveBeenCalledWith(-50);
+    });
+  });
+
+  it('クラスタ情報が欠けているエリアでは従来の壁テクスチャを使う', () => {
+    const scene = new GameScene();
+    const kirdyInstance = makeKirdyStub();
+    createKirdyMock.mockReturnValue(kirdyInstance);
+
+    const { tileSize, wallCoordinates } = configureCustomWallArea();
+    const createdImages: Array<{ textureKey: string; instance: ReturnType<typeof stubs.addImageMock> }> = [];
+    stubs.addImageMock.mockImplementation((x: number, y: number, textureKey: string) => {
+      const image = {
+        x,
+        y,
+        texture: textureKey,
+        setOrigin: vi.fn().mockReturnThis(),
+        setDepth: vi.fn().mockReturnThis(),
+        setDisplaySize: vi.fn().mockReturnThis(),
+        setActive: vi.fn().mockReturnThis(),
+        setVisible: vi.fn().mockReturnThis(),
+        setFrame: vi.fn().mockReturnThis(),
+        destroy: vi.fn(),
+      };
+      createdImages.push({ textureKey, instance: image });
+      return image;
+    });
+
+    scene.create();
+
+    const fallbackTiles = createdImages.filter((entry) => entry.textureKey === 'wall-texture');
+    expect(fallbackTiles).toHaveLength(wallCoordinates.length);
+    expect(createdImages.filter((entry) => entry.textureKey === 'brick-tile')).toHaveLength(0);
+
+    fallbackTiles.forEach((entry) => {
+      expect(entry.instance.setDisplaySize).toHaveBeenCalledWith(tileSize, tileSize);
+      expect(entry.instance.setDepth).toHaveBeenCalledWith(-50);
+    });
   });
 
   it('エリア切替用ドアタイルを視覚的に強調表示する', () => {

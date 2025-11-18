@@ -482,24 +482,31 @@ describe('Scene registration', () => {
     expect(textureManager.setDefaultFilter).toHaveBeenCalledWith(Phaser.Textures.FilterMode.NEAREST);
 
     const loadOnceMock = asMock(bootScene.load.once);
-    const tilesetCall = loadOnceMock.mock.calls.find(
-      ([event]) => event === 'filecomplete-image-tileset-main',
-    );
-    const wallTextureCall = loadOnceMock.mock.calls.find(
-      ([event]) => event === 'filecomplete-image-wall-texture',
-    );
-    expect(tilesetCall?.[1]).toBeTypeOf('function');
-    expect(wallTextureCall?.[1]).toBeTypeOf('function');
+    const pixelArtKeys = [
+      'tileset-main',
+      'wall-texture',
+      'brick-tile',
+      'forest-tile',
+      'fire-tile',
+      'ice-tile',
+      'stone-tile',
+      'royal-tile',
+    ];
 
-    const [, tilesetHandler] = tilesetCall ?? [];
-    const [, wallTextureHandler] = wallTextureCall ?? [];
+    pixelArtKeys.forEach((key) => {
+      const call = loadOnceMock.mock.calls.find(
+        ([event]) => event === `filecomplete-image-${key}`,
+      );
+      expect(call?.[1]).toBeTypeOf('function');
+      call?.[1]?.();
+    });
 
-    tilesetHandler?.();
-    wallTextureHandler?.();
-
-    expect(bootScene.textures.get).toHaveBeenCalledWith('tileset-main');
-    expect(bootScene.textures.get).toHaveBeenCalledWith('wall-texture');
+    pixelArtKeys.forEach((key) => {
+      expect(bootScene.textures.get).toHaveBeenCalledWith(key);
+    });
+    expect(texture.setFilter).toHaveBeenCalledTimes(pixelArtKeys.length);
     expect(texture.setFilter).toHaveBeenCalledWith(Phaser.Textures.FilterMode.NEAREST);
+    expect(texture.setGenerateMipmaps).toHaveBeenCalledTimes(pixelArtKeys.length);
     expect(texture.setGenerateMipmaps).toHaveBeenCalledWith(false);
   });
 

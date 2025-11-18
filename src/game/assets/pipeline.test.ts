@@ -193,6 +193,12 @@ describe('asset pipeline manifest', () => {
       { key: 'ruin-artifact', path: 'images/items/ruin-artifact.png' },
       { key: 'locked-door', path: 'images/ui/locked-door.png' },
       { key: 'wall-texture', path: 'images/world/wall-texture.png' },
+      { key: 'brick-tile', path: 'images/world/brick-tile.png' },
+      { key: 'forest-tile', path: 'images/world/forest-tile.png' },
+      { key: 'fire-tile', path: 'images/world/fire-tile.png' },
+      { key: 'ice-tile', path: 'images/world/ice-tile.png' },
+      { key: 'stone-tile', path: 'images/world/stone-tile.png' },
+      { key: 'royal-tile', path: 'images/world/royal-tile.png' },
     ];
 
     expectedAssets.forEach(({ key, path }) => {

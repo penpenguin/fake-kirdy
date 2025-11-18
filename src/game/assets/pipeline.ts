@@ -124,6 +124,30 @@ const IMAGE_ASSETS: ReadonlyArray<ImageAsset> = [
     url: 'images/world/wall-texture.png',
   },
   {
+    key: 'brick-tile',
+    url: 'images/world/brick-tile.png',
+  },
+  {
+    key: 'forest-tile',
+    url: 'images/world/forest-tile.png',
+  },
+  {
+    key: 'fire-tile',
+    url: 'images/world/fire-tile.png',
+  },
+  {
+    key: 'ice-tile',
+    url: 'images/world/ice-tile.png',
+  },
+  {
+    key: 'stone-tile',
+    url: 'images/world/stone-tile.png',
+  },
+  {
+    key: 'royal-tile',
+    url: 'images/world/royal-tile.png',
+  },
+  {
     key: 'door-marker',
     url: 'images/ui/door-marker.png',
   },
