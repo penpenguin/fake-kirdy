@@ -1215,8 +1215,8 @@ export class GameScene extends Phaser.Scene {
       this.abilitySystem?.update(snapshot.actions);
       this.enemyManager?.update(delta);
       this.maintainEnemyPopulation(delta);
-      this.updateAreaState();
       this.goalDoorController?.update();
+      this.updateAreaState();
       this.syncHudHpWithPlayer();
       this.checkHealItemPickup();
       this.checkCollectiblePickup();
