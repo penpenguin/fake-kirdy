@@ -42,6 +42,7 @@ Webベースのパロディゲームを開発します。
 2. WHEN Kirdyが特定の場所に到達する THEN 隠されたアイテムや通路が発見される SHALL
 3. WHEN プレイヤーがマップキー（Mキー）を押す THEN 現在の探索状況を示すマップが表示される SHALL
 4. IF エリアに未発見の要素がある THEN マップ上で視覚的に区別される SHALL
+5. WHEN プレイヤーが Forest / Ice / Fire / Ruins の各 Expanse 最終ノードへ到達する THEN 固定リリクアリエリアへ遷移し、対応する Keystone を入手するまで他クラスタへ抜けられない SHALL
 
 ### 要件 4: 敵キャラクターシステム
 

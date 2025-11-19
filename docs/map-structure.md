@@ -13,10 +13,14 @@
 | Sky Sanctum | sky-sanctum | 空中分岐ハブ | 南: Goal Sanctum / 東: Aurora Spire / 西: Starlit Keep |
 | Aurora Spire | aurora-spire | 垂直タワー | 西: Sky Sanctum |
 | Starlit Keep | starlit-keep | 水平要塞 | 東: Sky Sanctum |
+| Forest Reliquary | forest-reliquary | Forest Expanse 終端の儀式場。森林ルートの最終試練として keystone を守る | 西: Forest Expanse 5 |
+| Ice Reliquary | ice-reliquary | Ice Expanse 終端の氷柱神殿。滑走床と狭い足場で keystone を保護 | 西: Ice Expanse 5 |
+| Fire Reliquary | fire-reliquary | Fire Expanse 終端の溶岩祭壇。火炎トラップと連続足場で侵入を制限 | 西: Fire Expanse 22 |
+| Ruins Reliquary | ruins-reliquary | Ruins Expanse 終端の封印空間。Sky クラスタへのゲート兼 keystone 保管庫 | 西: Ruins Expanse 18 / 南: Sky Expanse 1 |
 
 中央ハブの出入口は北西・北東・南西・南東の四隅に再配置し、北中央の新設扉から Mirror Corridor へ入れるようになりました。これにより Fire Area とは物理的に分離された状態でゴール前通路へ進行できます。Fire Area 側の北扉は撤去され、Goal Sanctum への出入りは Mirror Corridor 経由のみに制限されています。
 
-また、Forest / Ice / Fire / Cave の 4 ブランチそれぞれの終端には「Keystone」系の遺物（`forest-keystone` / `ice-keystone` / `fire-keystone` / `cave-keystone`）を配置しました。これらをすべて集めるまで Central Hub 北扉はロックされ、Mirror Corridor へ進入できません。
+また、Forest / Ice / Fire / Cave（Ruins）ブランチの終端には固定リリクアリ（`forest-reliquary` / `ice-reliquary` / `fire-reliquary` / `ruins-reliquary`）を新設し、それぞれに「Keystone」系の遺物（`forest-keystone` / `ice-keystone` / `fire-keystone` / `cave-keystone`）を配置しました。これらをすべて集めるまで Central Hub 北扉はロックされ、Mirror Corridor へ進入できません。
 
 ### Sky Sanctum 拡張ステージ詳細
 
@@ -56,10 +60,10 @@
 
 | クラスタ | 生成数 | 表示名パターン | 難易度 | 接続の特徴 |
 | --- | --- | --- | --- | --- |
-| forest | 5 | Forest Expanse 1〜5 | 2 | Forest Area 東隣から一直線に生成。北方向とは接続せず、探索用の支線として機能する。 |
-| ice | 5 | Ice Expanse 1〜5 | 3 | Ice Area 東側と直接接続する支線。Ice Expanse から他クラスタへは接続せず、入口は Ice Area のみ。 |
-| fire | 22 | Fire Expanse 1〜22 | 3 | Fire Area 南から侵入する支線。内部は西⇔東に連結し、他クラスタとは直接接続しない。 |
-| ruins | 18 | Ruins Expanse 1〜18 | 2 | Cave Area から直接侵入し、クラスタ内の東西連結を辿って最後のノードが Sky クラスタへ接続。Fire クラスタとは分離。 |
+| forest | 5 | Forest Expanse 1〜5 | 2 | Forest Area 東隣から一直線に生成。最終ノード東側に Forest Reliquary を接続し、遺物ルームで行き止まり。 |
+| ice | 5 | Ice Expanse 1〜5 | 3 | Ice Area 東側と直接接続する支線。最終ノード東側に Ice Reliquary を接続し、遺物を取得して折り返す。 |
+| fire | 22 | Fire Expanse 1〜22 | 3 | Fire Area 南から侵入する支線。最終ノード東側に Fire Reliquary を接続し、他クラスタとは直接接続しない。 |
+| ruins | 18 | Ruins Expanse 1〜18 | 2 | Cave Area から直接侵入し、最終ノード東側で Ruins Reliquary を経由して Sky クラスタへ接続。Fire クラスタとは分離。 |
 | sky | 18 | Sky Expanse 1〜18 | 4 | ruins クラスタ北側に接続。 |
 | void | 64 | Void Expanse 1〜64 | 1 | sky 最終ノードの北側。Forest/Ice を削減した分をここで補い、全体で 132 面を維持。 |
 
@@ -103,11 +107,11 @@ graph LR
   CA -- north --> RuinsExpanse1
 
   subgraph Procedural
-    ForestExpanse1 -- east --> ForestExpanse5
-    IceExpanse1 -- east --> IceExpanse5
-    FireExpanse1 -- east --> FireExpanse22
-    RuinsExpanse1 -- east --> RuinsExpanse18
-    RuinsExpanse18 -- north --> SkyExpanse1 -- east --> SkyExpanse18
+    ForestExpanse1 -- east --> ForestExpanse5 -- east --> ForestReliquary
+    IceExpanse1 -- east --> IceExpanse5 -- east --> IceReliquary
+    FireExpanse1 -- east --> FireExpanse22 -- east --> FireReliquary
+    RuinsExpanse1 -- east --> RuinsExpanse18 -- east --> RuinsReliquary
+    RuinsReliquary -- south --> SkyExpanse1 -- east --> SkyExpanse18
     SkyExpanse18 -- north --> VoidExpanse1 -- east --> VoidExpanse64
   end
 ```

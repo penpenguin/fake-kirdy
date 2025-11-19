@@ -46,7 +46,4 @@ export const caveArea: AreaDefinition = buildStageDefinition({
   },
   doorBuffer: 1,
   goal: null,
-  collectibles: [
-    { id: 'cave-keystone', itemId: 'cave-keystone', column: 9, row: 1 },
-  ],
 });
