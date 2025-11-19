@@ -47,7 +47,4 @@ export const iceArea: AreaDefinition = buildStageDefinition({
   },
   doorBuffer: 1,
   goal: null,
-  collectibles: [
-    { id: 'ice-keystone', itemId: 'ice-keystone', column: 17, row: 5 },
-  ],
 });

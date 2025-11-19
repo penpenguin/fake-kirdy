@@ -10,6 +10,10 @@ import { skySanctum } from './sky-sanctum';
 import { auroraSpire } from './aurora-spire';
 import { starlitKeep } from './starlit-keep';
 import { PROCEDURAL_STAGE_DEFINITIONS } from './procedural';
+import { forestReliquary } from './forest-reliquary';
+import { iceReliquary } from './ice-reliquary';
+import { fireReliquary } from './fire-reliquary';
+import { ruinsReliquary } from './ruins-reliquary';
 
 export const STAGE_DEFINITIONS: ReadonlyArray<AreaDefinition> = [
   centralHub,
@@ -22,6 +26,10 @@ export const STAGE_DEFINITIONS: ReadonlyArray<AreaDefinition> = [
   skySanctum,
   auroraSpire,
   starlitKeep,
+  forestReliquary,
+  iceReliquary,
+  fireReliquary,
+  ruinsReliquary,
   ...PROCEDURAL_STAGE_DEFINITIONS,
 ];
 

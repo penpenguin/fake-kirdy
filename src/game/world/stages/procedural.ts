@@ -35,9 +35,19 @@ const ICE_AREA_ID = 'ice-area' as AreaId;
 const CAVE_AREA_ID = 'cave-area' as AreaId;
 const FIRE_AREA_ID = 'fire-area' as AreaId;
 
+export const FOREST_RELIQUARY_ID = 'forest-reliquary' as AreaId;
+export const ICE_RELIQUARY_ID = 'ice-reliquary' as AreaId;
+export const FIRE_RELIQUARY_ID = 'fire-reliquary' as AreaId;
+export const RUINS_RELIQUARY_ID = 'ruins-reliquary' as AreaId;
+
 let iceClusterEntryId: AreaId | undefined;
 let fireClusterEntryId: AreaId | undefined;
 let ruinsClusterEntryId: AreaId | undefined;
+let forestClusterExitId: AreaId | undefined;
+let iceClusterExitId: AreaId | undefined;
+let fireClusterExitId: AreaId | undefined;
+let ruinsClusterExitId: AreaId | undefined;
+let skyClusterEntryId: AreaId | undefined;
 
 export const PROCEDURAL_STAGE_DEFINITIONS: AreaDefinition[] = generateProceduralStages();
 
@@ -62,6 +72,41 @@ export function getRuinsExpanseEntryId(): AreaId {
   return ruinsClusterEntryId;
 }
 
+export function getForestExpanseExitId(): AreaId {
+  if (!forestClusterExitId) {
+    throw new Error('Forest expanse exit id is not initialized');
+  }
+  return forestClusterExitId;
+}
+
+export function getIceExpanseExitId(): AreaId {
+  if (!iceClusterExitId) {
+    throw new Error('Ice expanse exit id is not initialized');
+  }
+  return iceClusterExitId;
+}
+
+export function getFireExpanseExitId(): AreaId {
+  if (!fireClusterExitId) {
+    throw new Error('Fire expanse exit id is not initialized');
+  }
+  return fireClusterExitId;
+}
+
+export function getRuinsExpanseExitId(): AreaId {
+  if (!ruinsClusterExitId) {
+    throw new Error('Ruins expanse exit id is not initialized');
+  }
+  return ruinsClusterExitId;
+}
+
+export function getSkyExpanseEntryId(): AreaId {
+  if (!skyClusterEntryId) {
+    throw new Error('Sky expanse entry id is not initialized');
+  }
+  return skyClusterEntryId;
+}
+
 function generateProceduralStages(): AreaDefinition[] {
   const nodes: GeneratedNode[] = [];
   let areaIndex = 0;
@@ -71,6 +116,11 @@ function generateProceduralStages(): AreaDefinition[] {
   let iceEntryNode: GeneratedNode | undefined;
   let fireEntryNode: GeneratedNode | undefined;
   let ruinsEntryNode: GeneratedNode | undefined;
+  let forestExitNode: GeneratedNode | undefined;
+  let iceExitNode: GeneratedNode | undefined;
+  let fireExitNode: GeneratedNode | undefined;
+  let ruinsExitNode: GeneratedNode | undefined;
+  let skyEntryNode: GeneratedNode | undefined;
 
   CLUSTERS.forEach((blueprint) => {
     const clusterNodes: GeneratedNode[] = [];
@@ -100,30 +150,56 @@ function generateProceduralStages(): AreaDefinition[] {
       }
     });
 
-    if (previousClusterLast && clusterNodes.length > 0) {
+    const firstNode = clusterNodes[0];
+    const lastNode = clusterNodes.at(-1);
+
+    if (previousClusterLast && firstNode) {
       if (blueprint.cluster !== 'ice' && blueprint.cluster !== 'fire' && blueprint.cluster !== 'ruins') {
-        const first = clusterNodes[0];
-        first.neighbors.north = previousClusterLast.id;
-        previousClusterLast.neighbors.south = first.id;
+        firstNode.neighbors.north = previousClusterLast.id;
+        previousClusterLast.neighbors.south = firstNode.id;
       }
     }
 
-    previousClusterLast = clusterNodes.at(-1);
+    previousClusterLast = lastNode ?? previousClusterLast;
 
-    if (blueprint.cluster === 'forest' && !forestEntryNode) {
-      forestEntryNode = clusterNodes[0];
+    if (blueprint.cluster === 'forest') {
+      if (!forestEntryNode && firstNode) {
+        forestEntryNode = firstNode;
+      }
+      if (lastNode) {
+        forestExitNode = lastNode;
+      }
     }
 
-    if (blueprint.cluster === 'ice' && !iceEntryNode) {
-      iceEntryNode = clusterNodes[0];
+    if (blueprint.cluster === 'ice') {
+      if (!iceEntryNode && firstNode) {
+        iceEntryNode = firstNode;
+      }
+      if (lastNode) {
+        iceExitNode = lastNode;
+      }
     }
 
-    if (blueprint.cluster === 'fire' && !fireEntryNode) {
-      fireEntryNode = clusterNodes[0];
+    if (blueprint.cluster === 'fire') {
+      if (!fireEntryNode && firstNode) {
+        fireEntryNode = firstNode;
+      }
+      if (lastNode) {
+        fireExitNode = lastNode;
+      }
     }
 
-    if (blueprint.cluster === 'ruins' && !ruinsEntryNode) {
-      ruinsEntryNode = clusterNodes[0];
+    if (blueprint.cluster === 'ruins') {
+      if (!ruinsEntryNode && firstNode) {
+        ruinsEntryNode = firstNode;
+      }
+      if (lastNode) {
+        ruinsExitNode = lastNode;
+      }
+    }
+
+    if (blueprint.cluster === 'sky' && !skyEntryNode && firstNode) {
+      skyEntryNode = firstNode;
     }
   });
 
@@ -144,6 +220,34 @@ function generateProceduralStages(): AreaDefinition[] {
   if (ruinsEntryNode) {
     ruinsEntryNode.neighbors.south = CAVE_AREA_ID;
     ruinsClusterEntryId = ruinsEntryNode.id;
+  }
+
+  if (forestExitNode) {
+    forestExitNode.neighbors.east = FOREST_RELIQUARY_ID;
+    forestClusterExitId = forestExitNode.id;
+  }
+
+  if (iceExitNode) {
+    iceExitNode.neighbors.east = ICE_RELIQUARY_ID;
+    iceClusterExitId = iceExitNode.id;
+  }
+
+  if (fireExitNode) {
+    fireExitNode.neighbors.east = FIRE_RELIQUARY_ID;
+    fireClusterExitId = fireExitNode.id;
+  }
+
+  if (ruinsExitNode) {
+    if (skyEntryNode && ruinsExitNode.neighbors.south === skyEntryNode.id) {
+      delete ruinsExitNode.neighbors.south;
+    }
+    ruinsExitNode.neighbors.east = RUINS_RELIQUARY_ID;
+    ruinsClusterExitId = ruinsExitNode.id;
+  }
+
+  if (skyEntryNode) {
+    skyEntryNode.neighbors.north = RUINS_RELIQUARY_ID;
+    skyClusterEntryId = skyEntryNode.id;
   }
 
   return nodes.map((node, index) => {
