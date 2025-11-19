@@ -1266,6 +1266,54 @@ describe('Scene registration', () => {
     expect(enemyManagerUpdate).not.toHaveBeenCalled();
   });
 
+  it('GoalDoorController はエリア状態の更新より先に tick される', () => {
+    const gameScene = new GameScene();
+
+    gameScene.create();
+
+    const kirdyStub = {
+      update: vi.fn(),
+      getMouthContent: vi.fn(() => undefined),
+      getHP: vi.fn(() => 6),
+      getMaxHP: vi.fn(() => 6),
+      getScore: vi.fn(() => 0),
+      getAbility: vi.fn(() => undefined),
+    };
+    const swallowSystemStub = {
+      update: vi.fn(),
+      consumeSwallowedPayload: vi.fn(() => undefined),
+    };
+    const abilitySystemStub = {
+      update: vi.fn(),
+      applySwallowedPayload: vi.fn(),
+    };
+    const callOrder: string[] = [];
+    const goalDoorController = {
+      update: vi.fn(() => {
+        callOrder.push('goal');
+      }),
+      handleAreaChanged: vi.fn(),
+    };
+
+    (gameScene as any).kirdy = kirdyStub;
+    (gameScene as any).swallowSystem = swallowSystemStub;
+    (gameScene as any).abilitySystem = abilitySystemStub;
+    (gameScene as any).enemyManager = { update: vi.fn() };
+    (gameScene as any).maintainEnemyPopulation = vi.fn();
+    (gameScene as any).goalDoorController = goalDoorController;
+    (gameScene as any).updateAreaState = vi.fn(() => {
+      callOrder.push('area');
+    });
+    (gameScene as any).syncHudHpWithPlayer = vi.fn();
+    (gameScene as any).checkHealItemPickup = vi.fn();
+    (gameScene as any).checkCollectiblePickup = vi.fn();
+
+    gameScene.update(0, 16);
+
+    expect(callOrder).toEqual(['goal', 'area']);
+    expect(goalDoorController.update).toHaveBeenCalledTimes(1);
+  });
+
   it('game scene starts background music when created', () => {
     const gameScene = new GameScene();
 

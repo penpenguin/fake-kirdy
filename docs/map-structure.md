@@ -18,6 +18,8 @@
 
 また、Forest / Ice / Fire / Cave の 4 ブランチそれぞれの終端には「Keystone」系の遺物（`forest-keystone` / `ice-keystone` / `fire-keystone` / `cave-keystone`）を配置しました。これらをすべて集めるまで Central Hub 北扉はロックされ、Mirror Corridor へ進入できません。
 
+Goal Sanctum の北壁には役割の異なる 2 枚の扉を並べています。中央の `goal-door` タイルはリザルト演出専用でマップ遷移を伴わず、右側に追加した通常ドアが Sky Sanctum への遷移を担当します。これによりゴール演出中でもエリア遷移ロジックが干渉せず、ゲーム体験とマップ接続仕様を同時に満たせます。
+
 ### Sky Sanctum 拡張ステージ詳細
 
 `goal-sanctum` 北側の扉から接続する天空遺跡帯は 3 ステージ構成で、ホバリング・縦移動ギミックを中心に難易度を引き上げる。

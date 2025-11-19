@@ -496,6 +496,10 @@ export class AreaManager {
       return undefined;
     }
 
+    if (this.isGoalDoorCoordinate(definition, coordinate.column, coordinate.row)) {
+      return undefined;
+    }
+
     const doorKey = `${coordinate.column},${coordinate.row}`;
     const direction =
       derived.doorDirections.get(doorKey) ??
@@ -515,6 +519,17 @@ export class AreaManager {
     }
 
     return direction;
+  }
+
+  private isGoalDoorCoordinate(definition: AreaDefinition, column: number, row: number): boolean {
+    const doors = definition.doors;
+    if (!doors || doors.length === 0) {
+      return false;
+    }
+
+    return doors.some(
+      (door) => door.tile.column === column && door.tile.row === row && door.type === 'goal',
+    );
   }
 
   private detectBoundaryCross(position: Vector2): AreaTransitionDirection | undefined {

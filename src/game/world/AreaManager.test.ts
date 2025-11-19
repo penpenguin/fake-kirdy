@@ -3,6 +3,7 @@ import {
   AREA_IDS,
   AreaManager,
   type AreaDefinition,
+  type AreaDoorDefinition,
   type AreaId,
   type AreaManagerSnapshot,
   type AreaTransitionDirection,
@@ -50,6 +51,29 @@ function getDoorWorldPosition(
   }
 
   throw new Error(`Door for direction ${direction} not found`);
+}
+
+function tileToWorldPosition(
+  area: ReturnType<AreaManager['getCurrentAreaState']>,
+  tile: { column: number; row: number },
+) {
+  const tileSize = area.tileMap.tileSize;
+  return {
+    x: tile.column * tileSize + tileSize / 2,
+    y: tile.row * tileSize + tileSize / 2,
+  } as const;
+}
+
+function getDoorWorldPositionFromDefinition(
+  area: ReturnType<AreaManager['getCurrentAreaState']>,
+  predicate: (door: AreaDoorDefinition) => boolean,
+) {
+  const door = (area.definition.doors ?? []).find(predicate);
+  if (!door) {
+    throw new Error('Door matching predicate not found');
+  }
+
+  return tileToWorldPosition(area, door.tile);
 }
 
 function isDoorCoordinateForDirection(
@@ -420,13 +444,16 @@ describe('AreaManager', () => {
     expect(immediateUpdate.areaChanged).toBe(false);
   });
 
-  it('goal-sanctum の北扉から sky-sanctum へ遷移する', () => {
+  it('goal-sanctum の北遷移扉から sky-sanctum へ遷移する', () => {
     const branchManager = new AreaManager(AREA_IDS.GoalSanctum);
     const goalSanctumState = branchManager.getCurrentAreaState();
 
-    const result = branchManager.updatePlayerPosition(
-      getDoorWorldPosition(goalSanctumState, 'north'),
+    const transitionDoorPosition = getDoorWorldPositionFromDefinition(
+      goalSanctumState,
+      (door) => door.direction === 'north' && door.type !== 'goal',
     );
+
+    const result = branchManager.updatePlayerPosition(transitionDoorPosition);
 
     expect(result.areaChanged).toBe(true);
     expect(result.transition?.from).toBe(AREA_IDS.GoalSanctum);
@@ -435,6 +462,23 @@ describe('AreaManager', () => {
 
     const skySanctum = branchManager.getCurrentAreaState();
     expect(skySanctum.definition.id).toBe(AREA_IDS.SkySanctum);
+    const spawnTile = skySanctum.tileMap.getTileAtWorldPosition(skySanctum.playerSpawnPosition);
+    expect(spawnTile).toBe('floor');
+  });
+
+  it('goal-sanctum のゴール扉ではマップ遷移しない', () => {
+    const branchManager = new AreaManager(AREA_IDS.GoalSanctum);
+    const goalSanctumState = branchManager.getCurrentAreaState();
+
+    const goalDoorPosition = getDoorWorldPositionFromDefinition(
+      goalSanctumState,
+      (door) => door.type === 'goal',
+    );
+
+    const result = branchManager.updatePlayerPosition(goalDoorPosition);
+
+    expect(result.areaChanged).toBe(false);
+    expect(branchManager.getCurrentAreaState().definition.id).toBe(AREA_IDS.GoalSanctum);
   });
 
   it('aurora-spire の西扉から sky-sanctum へ遷移する', () => {
