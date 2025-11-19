@@ -183,8 +183,10 @@ class PlayerInputManager {
 
 ### 6. 設定オーバーレイ
 
-- `SettingsScene` はメニューまたはポーズ状態から `SceneManager.launch` で起動し、呼び出し元シーンを `pause` したまま中央に設定パネルをオーバーレイ表示する。
+- `SettingsScene` はメニューまたはポーズ状態から `SceneManager.launch` で起動し、MenuScene では呼び出し元を `pause` したまま、PauseScene では親シーンを動作させたまま中央に設定パネルをオーバーレイ表示する。
 - ポーズシーン経由で開く場合は `overlayManagedByParent` フラグを立て、ブラーやオーバーレイ深度の管理を PauseScene に委譲する。MenuScene など単独起動時は SettingsScene 自身が `GameScene.activateMenuOverlay`/`deactivateMenuOverlay` を直接呼び、呼び出し元へ復帰する時点でブラーを解除する。
+- PauseScene は設定オーバーレイを表示している間もアクティブで、ESC 1 回目で設定を閉じて PauseScene にフォーカスを戻し、2 回目でゲームを再開する。各ショートカット（`O` キーなど）は設定クローズ時に再登録し、常に PauseScene の子操作として扱う。
+- GPU のポストエフェクトパイプラインが利用できないレンダラー（Canvas フォールバックなど）では、`GameScene` がキャンバススナップショットを取得してぼかし描画を生成し、PauseScene/SettingsScene のテキストより背面に配置する。これにより WebGL が無効な環境でも背景をソフトにぼかした状態で各オーバーレイを表示できる。
 - キーボードショートカット:
   - `LEFT` / `RIGHT`: マスターボリュームを 10% 刻みで増減し、`AudioManager`へ即時反映する。
   - `UP` / `DOWN`: 難易度プリセット（`easy` / `normal` / `hard`）を循環させ、`SaveManager` のスナップショットへ記録する。
@@ -192,7 +194,7 @@ class PlayerInputManager {
   - `ESC`: オーバーレイを閉じて呼び出し元シーンを再開する。
 - すべての変更は `SaveManager.updateSettings` を通じて即時に LocalStorage へ保存され、`GameScene` は `settings-updated` グローバルイベントを購読して音量や入力スキームを再適用する。
 - MenuScene は `O` キーで設定、`R` キーで初期位置リセットを案内し、PauseScene からも同じショートカットで設定オーバーレイを開ける。
-- PauseScene が前面にある間は GameScene のメインカメラへ post-processing ブラーを追加し、SettingsScene から制御が戻った際にも PauseScene 側で深度を 1 だけ戻すことで背景演出を維持しつつ `resume` 時にまとめて解除する。
+- PauseScene が前面にある間は GameScene のメインカメラへ post-processing ブラーを追加し、SettingsScene クローズ時には PauseScene 側で深度を 1 だけ戻しつつ `settings-overlay-closed` 通知でキー入力を再バインドする。Canvas レンダラーではスナップショットベースの疑似ブラーを描画し、`deactivateMenuOverlay` が呼ばれたタイミングで破棄する。
 
 ### 7. マップシステム
 

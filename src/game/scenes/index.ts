@@ -77,6 +77,7 @@ const WALL_TILE_TEXTURE_KEYS = Array.from(
   new Set<string>([WALL_TEXTURE_KEY, ...Object.values(CLUSTER_TILE_TEXTURE_KEYS)]),
 );
 const PIXEL_ART_TEXTURE_KEYS = [...WALL_TILE_TEXTURE_KEYS];
+const MENU_BLUR_FALLBACK_TEXTURE_KEY = '__menu-blur-fallback';
 const TERRAIN_VISUAL_DEPTH = -50;
 const DOOR_TEXTURE_KEY = 'door-marker';
 const GOAL_DOOR_TEXTURE_KEY = 'goal-door';
@@ -671,6 +672,8 @@ export class GameScene extends Phaser.Scene {
   private cameraFollowConfigured = false;
   private readonly capturedSprites = new Set<Phaser.Physics.Matter.Sprite>();
   private menuBlurEffect?: { destroy?: () => void } | unknown;
+  private menuBlurFallback?: Phaser.GameObjects.Image;
+  private menuBlurSnapshotPending = false;
   private menuOverlayDepth = 0;
   private readonly playerContactDamage = 1;
   private readonly playerInvulnerabilityDurationMs = 2000;
@@ -1090,7 +1093,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private applyMenuBlur() {
-    if (this.menuBlurEffect) {
+    if (this.menuBlurEffect || this.menuBlurFallback || this.menuBlurSnapshotPending) {
       return;
     }
 
@@ -1105,6 +1108,7 @@ export class GameScene extends Phaser.Scene {
     const addBlur = postFX?.addBlur;
 
     if (!postFX || typeof addBlur !== 'function') {
+      this.createMenuBlurFallback();
       return;
     }
 
@@ -1114,10 +1118,12 @@ export class GameScene extends Phaser.Scene {
       effect = addBlur.call(postFX, 4, 1, 2);
     } catch (error) {
       console.warn?.('[GameScene] failed to add menu blur', error);
+      this.createMenuBlurFallback();
       return;
     }
 
     if (!effect) {
+      this.createMenuBlurFallback();
       return;
     }
 
@@ -1150,6 +1156,91 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.menuBlurEffect = undefined;
+    this.destroyMenuBlurFallback();
+  }
+
+  private createMenuBlurFallback() {
+    if (this.menuBlurFallback || this.menuBlurSnapshotPending) {
+      return;
+    }
+
+    const renderer = this.game?.renderer as { snapshot?: (callback: (snapshot: CanvasImageSource) => void) => void } | undefined;
+    const snapshot = renderer?.snapshot;
+    if (typeof snapshot !== 'function') {
+      return;
+    }
+
+    const width = typeof this.scale?.width === 'number' ? this.scale.width : 0;
+    const height = typeof this.scale?.height === 'number' ? this.scale.height : 0;
+    if (width <= 0 || height <= 0) {
+      return;
+    }
+
+    this.menuBlurSnapshotPending = true;
+    snapshot((raw) => {
+      this.menuBlurSnapshotPending = false;
+
+      if (this.menuOverlayDepth <= 0) {
+        return;
+      }
+
+      const canvas = this.buildBlurredSnapshotCanvas(raw, width, height);
+      if (!canvas) {
+        return;
+      }
+
+      try {
+        this.textures?.remove?.(MENU_BLUR_FALLBACK_TEXTURE_KEY);
+      } catch {
+        // ignore missing texture removal errors
+      }
+
+      this.textures?.addCanvas?.(MENU_BLUR_FALLBACK_TEXTURE_KEY, canvas);
+
+      const fallbackImage = this.add?.image?.(width / 2, height / 2, MENU_BLUR_FALLBACK_TEXTURE_KEY);
+      if (!fallbackImage) {
+        return;
+      }
+
+      fallbackImage.setScrollFactor?.(0, 0);
+      fallbackImage.setDepth?.(1995);
+      fallbackImage.setAlpha?.(0.92);
+      this.menuBlurFallback = fallbackImage as Phaser.GameObjects.Image;
+    });
+  }
+
+  private buildBlurredSnapshotCanvas(raw: CanvasImageSource, width: number, height: number) {
+    if (typeof document === 'undefined') {
+      return undefined;
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext('2d');
+    if (!context) {
+      return undefined;
+    }
+
+    context.filter = 'blur(6px)';
+    try {
+      context.drawImage(raw, 0, 0, width, height);
+    } catch {
+      return undefined;
+    }
+
+    return canvas;
+  }
+
+  private destroyMenuBlurFallback() {
+    this.menuBlurFallback?.destroy?.();
+    this.menuBlurFallback = undefined;
+    this.menuBlurSnapshotPending = false;
+    try {
+      this.textures?.remove?.(MENU_BLUR_FALLBACK_TEXTURE_KEY);
+    } catch {
+      // ignore cleanup failures
+    }
   }
 
   activateMenuOverlay() {
@@ -2544,6 +2635,8 @@ export class PauseScene extends Phaser.Scene {
   private readonly escapeHandler = () => {
     this.resumeGame();
   };
+  private menuElements: Array<Phaser.GameObjects.GameObject & { setVisible?: (visible: boolean) => unknown }> = [];
+  private openSettingsHotkey?: () => void;
 
   constructor() {
     super(buildConfig(SceneKeys.Pause));
@@ -2558,19 +2651,20 @@ export class PauseScene extends Phaser.Scene {
   }
 
   create() {
+    this.menuElements = [];
     const resumeHandler = () => this.resumeGame();
     const restartHandler = () => this.restartGame();
     const quitHandler = () => this.quitToMenu();
-    const settingsHandler = () => this.openSettings();
 
     this.bindEscapeHandler();
     this.input?.keyboard?.once?.('keydown-R', restartHandler);
     this.input?.keyboard?.once?.('keydown-Q', quitHandler);
-    this.input?.keyboard?.once?.('keydown-O', settingsHandler);
+    this.registerSettingsShortcut();
     this.input?.once?.('pointerdown', resumeHandler);
 
     this.events?.once?.('shutdown', () => {
       this.unbindEscapeHandler();
+      this.unregisterSettingsShortcut();
     });
 
     if (this.add?.text) {
@@ -2590,43 +2684,74 @@ export class PauseScene extends Phaser.Scene {
       const centerX = width / 2;
       const centerY = height / 2;
 
-      const title = this.add.text(centerX, centerY - 60, 'Game Paused', style);
+      const trackElement = <T extends Phaser.GameObjects.GameObject>(element: T) => {
+        this.menuElements.push(element);
+        return element;
+      };
+
+      const title = trackElement(this.add.text(centerX, centerY - 60, 'Game Paused', style));
       title.setOrigin?.(0.5, 0.5);
       title.setScrollFactor?.(0, 0);
       title.setDepth?.(2000);
 
-      const resumeOption = this.add.text(centerX, centerY - 10, 'Resume (ESC)', submenuStyle);
+      const resumeOption = trackElement(this.add.text(centerX, centerY - 10, 'Resume (ESC)', submenuStyle));
       resumeOption.setOrigin?.(0.5, 0.5);
       resumeOption.setScrollFactor?.(0, 0);
       resumeOption.setDepth?.(2000);
       resumeOption.setInteractive?.({ useHandCursor: true });
       resumeOption.on?.('pointerdown', resumeHandler);
 
-      const restartOption = this.add.text(centerX, centerY + 30, 'Restart (R)', submenuStyle);
+      const restartOption = trackElement(this.add.text(centerX, centerY + 30, 'Restart (R)', submenuStyle));
       restartOption.setOrigin?.(0.5, 0.5);
       restartOption.setScrollFactor?.(0, 0);
       restartOption.setDepth?.(2000);
       restartOption.setInteractive?.({ useHandCursor: true });
       restartOption.on?.('pointerdown', restartHandler);
 
-      const quitOption = this.add.text(centerX, centerY + 70, 'Quit to Menu (Q)', submenuStyle);
+      const quitOption = trackElement(this.add.text(centerX, centerY + 70, 'Quit to Menu (Q)', submenuStyle));
       quitOption.setOrigin?.(0.5, 0.5);
       quitOption.setScrollFactor?.(0, 0);
       quitOption.setDepth?.(2000);
       quitOption.setInteractive?.({ useHandCursor: true });
       quitOption.on?.('pointerdown', quitHandler);
 
-      const settingsOption = this.add.text(centerX, centerY + 110, 'Settings (O)', submenuStyle);
+      const settingsOption = trackElement(this.add.text(centerX, centerY + 110, 'Settings (O)', submenuStyle));
       settingsOption.setOrigin?.(0.5, 0.5);
       settingsOption.setScrollFactor?.(0, 0);
       settingsOption.setDepth?.(2000);
       settingsOption.setInteractive?.({ useHandCursor: true });
-      settingsOption.on?.('pointerdown', settingsHandler);
+      settingsOption.on?.('pointerdown', () => this.openSettings());
     }
+  }
+
+  private registerSettingsShortcut() {
+    const keyboard = this.input?.keyboard;
+    if (!keyboard) {
+      return;
+    }
+
+    this.unregisterSettingsShortcut();
+    const handler = () => {
+      this.openSettingsHotkey = undefined;
+      this.openSettings();
+    };
+
+    this.openSettingsHotkey = handler;
+    keyboard.once('keydown-O', handler);
+  }
+
+  private unregisterSettingsShortcut() {
+    if (!this.openSettingsHotkey) {
+      return;
+    }
+
+    this.input?.keyboard?.off?.('keydown-O', this.openSettingsHotkey);
+    this.openSettingsHotkey = undefined;
   }
 
   resumeGame() {
     this.unbindEscapeHandler();
+    this.unregisterSettingsShortcut();
     this.resolveGameScene()?.deactivateMenuOverlay?.();
     this.scene.stop(SceneKeys.Pause);
     this.scene.resume(SceneKeys.Game);
@@ -2634,6 +2759,7 @@ export class PauseScene extends Phaser.Scene {
 
   restartGame() {
     this.unbindEscapeHandler();
+    this.unregisterSettingsShortcut();
     this.saveManager.resetPlayerPosition();
     this.resolveGameScene()?.deactivateMenuOverlay?.({ force: true });
     this.scene.stop(SceneKeys.Pause);
@@ -2643,6 +2769,7 @@ export class PauseScene extends Phaser.Scene {
 
   quitToMenu() {
     this.unbindEscapeHandler();
+    this.unregisterSettingsShortcut();
     this.resolveGameScene()?.deactivateMenuOverlay?.({ force: true });
     this.scene.stop(SceneKeys.Pause);
     this.scene.stop(SceneKeys.Game);
@@ -2674,26 +2801,51 @@ export class PauseScene extends Phaser.Scene {
       gameScene?.activateMenuOverlay?.();
     }
 
+    this.unregisterSettingsShortcut();
     this.unbindEscapeHandler();
+    this.setMenuElementsVisible(false);
+    let cleanupTriggered = false;
+    const handleSettingsClosed = () => {
+      if (cleanupTriggered) {
+        return;
+      }
+      cleanupTriggered = true;
+      this.bindEscapeHandler();
+      this.registerSettingsShortcut();
+      this.setMenuElementsVisible(true);
+      try {
+        this.scene.bringToTop(SceneKeys.Pause);
+      } catch {
+        // ignore when scene manager is not available
+      }
+    };
+
+    const attachShutdownListener = () => {
+      try {
+        const settingsSceneInstance = this.scene.get?.(SceneKeys.Settings) as Phaser.Scene | undefined;
+        const shutdownEvents = settingsSceneInstance?.events;
+        if (shutdownEvents?.once) {
+          shutdownEvents.once('shutdown', handleSettingsClosed);
+          return true;
+        }
+      } catch {
+        return false;
+      }
+      return false;
+    };
+
+    this.events?.once?.('settings-overlay-closed', handleSettingsClosed);
 
     this.scene.launch(SceneKeys.Settings, {
       returnTo: SceneKeys.Pause,
       overlayManagedByParent,
     });
 
-    this.scene.pause(SceneKeys.Pause);
-    this.events?.once?.('resume', () => {
-      this.bindEscapeHandler();
-      if (overlayManagedByParent) {
-        gameScene?.deactivateMenuOverlay?.();
-      }
-      try {
-        this.scene.bringToTop(SceneKeys.Pause);
-      } catch {
-        // ignore when scene manager is not available
-      }
-    });
-    this.input?.keyboard?.once?.('keydown-O', () => this.openSettings());
+    if (!attachShutdownListener()) {
+      this.time?.delayedCall?.(0, () => {
+        attachShutdownListener();
+      });
+    }
   }
 
   private bindEscapeHandler() {
@@ -2703,6 +2855,10 @@ export class PauseScene extends Phaser.Scene {
 
   private unbindEscapeHandler() {
     this.input?.keyboard?.off?.('keydown-ESC', this.escapeHandler);
+  }
+
+  private setMenuElementsVisible(visible: boolean) {
+    this.menuElements.forEach((element) => element.setVisible?.(visible));
   }
 }
 
@@ -2878,12 +3034,38 @@ export class SettingsScene extends Phaser.Scene {
 
   private close() {
     const gameScene = this.resolveGameScene();
-    if (!this.overlayManagedByParent) {
-      const shouldForceClear = this.returnToScene !== SceneKeys.Pause;
+    const shouldForceClear = this.returnToScene !== SceneKeys.Pause;
+    if (this.overlayManagedByParent) {
+      gameScene?.deactivateMenuOverlay?.();
+    } else {
       gameScene?.deactivateMenuOverlay?.({ force: shouldForceClear });
     }
 
-    this.scene.resume(this.returnToScene);
+    const scenePlugin = this.scene as
+      | (Phaser.Scenes.ScenePlugin & {
+          isPaused?: (key: SceneKey) => boolean;
+        })
+      | undefined;
+    const returningToPause = this.returnToScene === SceneKeys.Pause;
+    const targetWasPaused = scenePlugin?.isPaused?.(this.returnToScene) === true;
+
+    if (returningToPause) {
+      try {
+        const pauseScene = this.scene.get?.(SceneKeys.Pause) as Phaser.Scene | undefined;
+        pauseScene?.events?.emit?.('settings-overlay-closed');
+      } catch {
+        // ignore when pause scene is not available
+      }
+    }
+
+    if (!returningToPause || !this.overlayManagedByParent || targetWasPaused) {
+      try {
+        this.scene.resume(this.returnToScene);
+      } catch {
+        // ignore when the scene manager is not available
+      }
+    }
+
     try {
       this.scene.bringToTop(this.returnToScene);
     } catch {

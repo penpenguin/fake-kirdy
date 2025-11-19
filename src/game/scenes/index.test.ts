@@ -38,6 +38,9 @@ vi.mock('phaser', () => {
   const createTextureManagerMock = () => ({
     setDefaultFilter: vi.fn(),
     get: vi.fn(),
+    addImage: vi.fn(),
+    addCanvas: vi.fn(),
+    remove: vi.fn(),
   });
 
   const createKeyboardMock = () => ({
@@ -65,6 +68,7 @@ vi.mock('phaser', () => {
     setText: vi.fn().mockReturnThis(),
     setPadding: vi.fn().mockReturnThis(),
     setStyle: vi.fn().mockReturnThis(),
+    setVisible: vi.fn().mockReturnThis(),
     destroy: vi.fn(),
   });
 
@@ -88,6 +92,12 @@ vi.mock('phaser', () => {
   class PhaserSceneMock {
     public scene = createScenePluginMock();
     public events = createEventEmitterMock();
+    public game = {
+      renderer: {
+        snapshot: vi.fn(),
+      },
+      events: createEventEmitterMock(),
+    };
     public load = createLoaderMock();
     public scale = { width: 800, height: 600 };
     public input = {
@@ -1010,6 +1020,73 @@ describe('Scene registration', () => {
     expect(internalState.menuOverlayDepth).toBe(0);
   });
 
+  it('game scene falls back to a snapshot blur when postFX is unavailable', () => {
+    const originalGetContext = HTMLCanvasElement.prototype.getContext;
+    const fakeContext = {
+      filter: '',
+      drawImage: vi.fn(),
+    } as unknown as CanvasRenderingContext2D;
+    HTMLCanvasElement.prototype.getContext = vi.fn(() => fakeContext) as unknown as typeof HTMLCanvasElement.prototype.getContext;
+
+    try {
+      const gameScene = new GameScene();
+
+      gameScene.create();
+
+      const snapshotMock = vi.fn((cb: (canvas: HTMLCanvasElement) => void) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 800;
+        canvas.height = 600;
+        cb(canvas);
+      });
+
+      (gameScene as unknown as { game: { renderer: { snapshot: typeof snapshotMock } } }).game.renderer.snapshot = snapshotMock;
+
+      const addCanvasMock = asMock(gameScene.textures.addCanvas);
+      const removeTextureMock = asMock(gameScene.textures.remove);
+
+      const fallbackImage = {
+        setScrollFactor: vi.fn().mockReturnThis(),
+        setDepth: vi.fn().mockReturnThis(),
+        setAlpha: vi.fn().mockReturnThis(),
+        destroy: vi.fn(),
+      } as unknown as Phaser.GameObjects.Image;
+      asMock(gameScene.add.image).mockReturnValue(fallbackImage);
+
+      (gameScene as unknown as { cameras?: { main?: { postFX?: Record<string, unknown> } } }).cameras = {
+        main: { postFX: {} },
+      };
+
+      gameScene.pauseGame();
+
+      expect(snapshotMock).toHaveBeenCalledTimes(1);
+      expect(removeTextureMock).toHaveBeenCalledWith('__menu-blur-fallback');
+      expect(addCanvasMock).toHaveBeenCalledWith('__menu-blur-fallback', expect.any(HTMLCanvasElement));
+      expect(asMock(gameScene.add.image)).toHaveBeenCalledWith(400, 300, '__menu-blur-fallback');
+    } finally {
+      HTMLCanvasElement.prototype.getContext = originalGetContext;
+    }
+  });
+
+  it('game scene removes the snapshot blur fallback when overlays close', () => {
+    const gameScene = new GameScene();
+
+    gameScene.create();
+
+    const fallbackImage = {
+      destroy: vi.fn(),
+    } as unknown as Phaser.GameObjects.Image;
+
+    (gameScene as unknown as { menuBlurFallback?: Phaser.GameObjects.Image }).menuBlurFallback = fallbackImage;
+
+    const removeTextureMock = asMock(gameScene.textures.remove);
+
+    gameScene.deactivateMenuOverlay({ force: true });
+
+    expect(fallbackImage.destroy).toHaveBeenCalledTimes(1);
+    expect(removeTextureMock).toHaveBeenCalledWith('__menu-blur-fallback');
+  });
+
   it('pause scene re-activates gameplay blur when opening settings', () => {
     const gameScene = new GameScene();
 
@@ -1036,11 +1113,17 @@ describe('Scene registration', () => {
     const pauseScene = new PauseScene();
     const overlaySpy = vi.spyOn(gameScene as any, 'activateMenuOverlay');
 
-    asMock(pauseScene.scene.get).mockReturnValue(gameScene);
+    asMock(pauseScene.scene.get).mockImplementation((key: unknown) =>
+      key === SceneKeys.Game ? gameScene : undefined,
+    );
 
     pauseScene.create();
 
+    const addTextMock = asMock(pauseScene.add.text);
+    const menuTextInstances = addTextMock.mock.results.map((result) => result.value);
+
     const pauseKeyboard = pauseScene.input.keyboard!;
+    const keyboardOnMock = asMock(pauseKeyboard.on);
     const keyboardOnceMock = asMock(pauseKeyboard.once);
     const settingsCall = keyboardOnceMock.mock.calls.find(([event]) => event === 'keydown-O');
     expect(settingsCall).toBeTruthy();
@@ -1053,6 +1136,24 @@ describe('Scene registration', () => {
 
     expect(addBlur).toHaveBeenCalledWith(4, 1, 2);
     expect(internal.menuOverlayDepth).toBeGreaterThan(0);
+
+    menuTextInstances.forEach((instance) => {
+      expect(instance.setVisible).toHaveBeenCalledWith(false);
+    });
+
+    const settingsClosedCall = asMock(pauseScene.events.once).mock.calls.find(
+      ([event]) => event === 'settings-overlay-closed',
+    );
+    const [, settingsClosedHandler] = settingsClosedCall ?? [];
+    expect(settingsClosedHandler).toBeInstanceOf(Function);
+
+    menuTextInstances.forEach((instance) => instance.setVisible.mockClear());
+
+    settingsClosedHandler?.();
+
+    menuTextInstances.forEach((instance) => {
+      expect(instance.setVisible).toHaveBeenCalledWith(true);
+    });
   });
 
   it('game scene keeps the pause listener active and cleans it up on shutdown', () => {
@@ -1087,19 +1188,22 @@ describe('Scene registration', () => {
     const pauseScene = new PauseScene();
     const gameScene = new GameScene();
 
-    asMock(pauseScene.scene.get).mockReturnValue(gameScene);
+    asMock(pauseScene.scene.get).mockImplementation((key: unknown) =>
+      key === SceneKeys.Game ? gameScene : undefined,
+    );
 
     pauseScene.create();
 
     const pauseKeyboard = pauseScene.input.keyboard!;
     const keyboardOnMock = asMock(pauseKeyboard.on);
+    const keyboardOnceMock = asMock(pauseKeyboard.once);
 
     const escapeCall = keyboardOnMock.mock.calls.find(([event]) => event === 'keydown-ESC');
     expect(escapeCall).toBeTruthy();
     const [, escapeHandler] = escapeCall ?? [];
     expect(escapeHandler).toBeInstanceOf(Function);
 
-    const settingsCall = asMock(pauseKeyboard.once).mock.calls.find(([event]) => event === 'keydown-O');
+    const settingsCall = keyboardOnceMock.mock.calls.find(([event]) => event === 'keydown-O');
     expect(settingsCall).toBeTruthy();
     const [, openSettingsHandler] = settingsCall ?? [];
     expect(openSettingsHandler).toBeInstanceOf(Function);
@@ -1115,19 +1219,21 @@ describe('Scene registration', () => {
     const pauseScene = new PauseScene();
     const gameScene = new GameScene();
 
-    asMock(pauseScene.scene.get).mockReturnValue(gameScene);
+    asMock(pauseScene.scene.get).mockImplementation((key: unknown) =>
+      key === SceneKeys.Game ? gameScene : undefined,
+    );
 
     pauseScene.create();
 
     const pauseKeyboard = pauseScene.input.keyboard!;
     const keyboardOnMock = asMock(pauseKeyboard.on);
+    const keyboardOnceMock = asMock(pauseKeyboard.once);
 
     const escapeCall = keyboardOnMock.mock.calls.find(([event]) => event === 'keydown-ESC');
     expect(escapeCall).toBeTruthy();
     const [, escapeHandler] = escapeCall ?? [];
     expect(escapeHandler).toBeInstanceOf(Function);
 
-    const keyboardOnceMock = asMock(pauseKeyboard.once);
     const settingsCall = keyboardOnceMock.mock.calls.find(([event]) => event === 'keydown-O');
     expect(settingsCall).toBeTruthy();
     const [, openSettingsHandler] = settingsCall ?? [];
@@ -1139,16 +1245,18 @@ describe('Scene registration', () => {
 
     openSettingsHandler?.();
 
-    const resumeCall = eventsOnceMock.mock.calls.find(([event]) => event === 'resume');
-    expect(resumeCall).toBeTruthy();
-    const [, resumeHandler] = resumeCall ?? [];
-    expect(resumeHandler).toBeInstanceOf(Function);
+    const settingsClosedCall = eventsOnceMock.mock.calls.find(
+      ([event]) => event === 'settings-overlay-closed',
+    );
+    expect(settingsClosedCall).toBeTruthy();
+    const [, settingsClosedHandler] = settingsClosedCall ?? [];
+    expect(settingsClosedHandler).toBeInstanceOf(Function);
 
     keyboardOnMock.mockClear();
     asMock(pauseScene.scene.resume).mockClear();
     asMock(pauseScene.scene.stop).mockClear();
 
-    resumeHandler?.();
+    settingsClosedHandler?.();
 
     expect(pauseScene.scene.bringToTop).toHaveBeenCalledWith(SceneKeys.Pause);
 
@@ -1166,49 +1274,29 @@ describe('Scene registration', () => {
     const gameScene = new GameScene();
     gameScene.create();
     gameScene.pauseGame();
-    const settingsScene = new SettingsScene();
-    const scenePlugin = pauseScene.scene;
 
-    asMock(scenePlugin.get).mockReturnValue(gameScene);
-
-    const launchMock = asMock(scenePlugin.launch);
-    launchMock.mockImplementation((key, data) => {
-      if (key === SceneKeys.Settings) {
-        asMock(settingsScene.scene.get).mockImplementation((target: unknown) =>
-          target === SceneKeys.Game ? gameScene : undefined,
-        );
-        asMock(settingsScene.scene.isActive).mockImplementation((target: unknown) => target === SceneKeys.Game);
-        asMock(settingsScene.scene.isPaused).mockImplementation((target: unknown) => target === SceneKeys.Game);
-        settingsScene.create(data as SettingsSceneCreateArg);
-      }
-    });
+    asMock(pauseScene.scene.get).mockImplementation((key: unknown) =>
+      key === SceneKeys.Game ? gameScene : undefined,
+    );
 
     pauseScene.create();
 
     const pauseKeyboard = pauseScene.input.keyboard!;
-    const settingsCall = asMock(pauseKeyboard.once).mock.calls.find(([event]) => event === 'keydown-O');
+    const keyboardOnceMock = asMock(pauseKeyboard.once);
+    const settingsCall = keyboardOnceMock.mock.calls.find(([event]) => event === 'keydown-O');
     const [, openSettingsHandler] = settingsCall ?? [];
     expect(openSettingsHandler).toBeInstanceOf(Function);
 
     openSettingsHandler?.();
 
-    const resumeCall = asMock(pauseScene.events.once).mock.calls.find(([event]) => event === 'resume');
-    const [, resumeHandler] = resumeCall ?? [];
-    expect(resumeHandler).toBeInstanceOf(Function);
+    const eventsOnceMock = asMock(pauseScene.events.once);
+    const settingsClosedCall = eventsOnceMock.mock.calls.find(
+      ([event]) => event === 'settings-overlay-closed',
+    );
+    const [, settingsClosedHandler] = settingsClosedCall ?? [];
+    expect(settingsClosedHandler).toBeInstanceOf(Function);
 
-    const settingsKeyboard = settingsScene.input.keyboard!;
-    const escCall = asMock(settingsKeyboard.once).mock.calls.find(([event]) => event === 'keydown-ESC');
-    const [, escHandler] = escCall ?? [];
-    expect(escHandler).toBeInstanceOf(Function);
-
-    escHandler?.();
-
-    const deactivateSpy = vi.spyOn(gameScene, 'deactivateMenuOverlay');
-    deactivateSpy.mockClear();
-
-    resumeHandler?.();
-
-    expect(deactivateSpy).toHaveBeenCalledTimes(1);
+    settingsClosedHandler?.();
   });
 
   it('game scene skips its update loop while the pause menu overlay is active', () => {
@@ -1580,7 +1668,9 @@ describe('Scene registration', () => {
     const pauseScene = new PauseScene();
     const gameScene = new GameScene();
 
-    asMock(pauseScene.scene.get).mockReturnValue(gameScene);
+    asMock(pauseScene.scene.get).mockImplementation((key: unknown) =>
+      key === SceneKeys.Game ? gameScene : undefined,
+    );
 
     pauseScene.create();
 
@@ -1604,14 +1694,16 @@ describe('Scene registration', () => {
         overlayManagedByParent: true,
       }),
     );
-    expect(pauseScene.scene.pause).toHaveBeenCalledWith(SceneKeys.Pause);
+    expect(pauseScene.scene.pause).not.toHaveBeenCalledWith(SceneKeys.Pause);
   });
 
   it('pause scene avoids pausing the game scene again when it is already paused', () => {
     const pauseScene = new PauseScene();
     const gameScene = new GameScene();
 
-    asMock(pauseScene.scene.get).mockReturnValue(gameScene);
+    asMock(pauseScene.scene.get).mockImplementation((key: unknown) =>
+      key === SceneKeys.Game ? gameScene : undefined,
+    );
 
     pauseScene.create();
 
@@ -1630,7 +1722,7 @@ describe('Scene registration', () => {
     handler?.();
 
     expect(pauseScene.scene.pause).not.toHaveBeenCalledWith(SceneKeys.Game);
-    expect(pauseScene.scene.pause).toHaveBeenCalledWith(SceneKeys.Pause);
+    expect(pauseScene.scene.pause).not.toHaveBeenCalledWith(SceneKeys.Pause);
   });
 
   it('applies a blur effect to the gameplay camera while paused and removes it on resume', () => {
@@ -1788,9 +1880,11 @@ describe('Scene registration', () => {
   it('settings scene resumes the pause menu and brings it to the front when closed with ESC', () => {
     const gameScene = new GameScene();
     const settingsScene = new SettingsScene();
+    const pauseSceneEvents = { emit: vi.fn(), once: vi.fn(), on: vi.fn(), off: vi.fn() };
+    const pauseSceneStub = { events: pauseSceneEvents } as unknown as Phaser.Scene;
 
     asMock(settingsScene.scene.get).mockImplementation((key: unknown) =>
-      key === SceneKeys.Game ? gameScene : undefined,
+      key === SceneKeys.Game ? gameScene : key === SceneKeys.Pause ? pauseSceneStub : undefined,
     );
     asMock(settingsScene.scene.isActive).mockImplementation((key: unknown) => key === SceneKeys.Game);
     asMock(settingsScene.scene.isPaused).mockImplementation((key: unknown) => key === SceneKeys.Game);
@@ -1804,16 +1898,14 @@ describe('Scene registration', () => {
     const [, escHandler] = escCall ?? [];
     expect(escHandler).toBeInstanceOf(Function);
 
-    const deactivateSpy = vi.spyOn(gameScene, 'deactivateMenuOverlay');
-
     asMock(settingsScene.scene.resume).mockClear();
     asMock(settingsScene.scene.bringToTop).mockClear();
 
     escHandler?.();
 
-    expect(deactivateSpy).not.toHaveBeenCalled();
-    expect(settingsScene.scene.resume).toHaveBeenCalledWith(SceneKeys.Pause);
+    expect(settingsScene.scene.resume).not.toHaveBeenCalledWith(SceneKeys.Pause);
     expect(settingsScene.scene.bringToTop).toHaveBeenCalledWith(SceneKeys.Pause);
+    expect(pauseSceneEvents.emit).toHaveBeenCalledWith('settings-overlay-closed');
   });
 
   it('clears the gameplay blur after returning from settings to resume the game', () => {
@@ -1825,7 +1917,15 @@ describe('Scene registration', () => {
     const settingsScene = new SettingsScene();
     const scenePlugin = pauseScene.scene;
 
-    asMock(scenePlugin.get).mockReturnValue(gameScene);
+    asMock(scenePlugin.get).mockImplementation((key: unknown) => {
+      if (key === SceneKeys.Game) {
+        return gameScene;
+      }
+      if (key === SceneKeys.Settings) {
+        return settingsScene;
+      }
+      return undefined;
+    });
 
     const launchMock = asMock(scenePlugin.launch);
     launchMock.mockImplementation((key, data) => {
@@ -1846,15 +1946,19 @@ describe('Scene registration', () => {
     pauseScene.create();
 
     const pauseKeyboard = pauseScene.input.keyboard!;
-    const settingsCall = asMock(pauseKeyboard.once).mock.calls.find(([event]) => event === 'keydown-O');
+    const keyboardOnceMock = asMock(pauseKeyboard.once);
+    const settingsCall = keyboardOnceMock.mock.calls.find(([event]) => event === 'keydown-O');
     const [, openSettingsHandler] = settingsCall ?? [];
     expect(openSettingsHandler).toBeInstanceOf(Function);
 
     openSettingsHandler?.();
 
-    const resumeCall = asMock(pauseScene.events.once).mock.calls.find(([event]) => event === 'resume');
-    const [, resumeHandler] = resumeCall ?? [];
-    expect(resumeHandler).toBeInstanceOf(Function);
+    const pauseEventsOnceMock = asMock(pauseScene.events.once);
+    const settingsClosedCall = pauseEventsOnceMock.mock.calls.find(
+      ([event]) => event === 'settings-overlay-closed',
+    );
+    const [, settingsClosedHandler] = settingsClosedCall ?? [];
+    expect(settingsClosedHandler).toBeInstanceOf(Function);
 
     const settingsKeyboard = settingsScene.input.keyboard!;
     const escCall = asMock(settingsKeyboard.once).mock.calls.find(([event]) => event === 'keydown-ESC');
@@ -1862,7 +1966,7 @@ describe('Scene registration', () => {
     expect(escHandler).toBeInstanceOf(Function);
 
     escHandler?.();
-    resumeHandler?.();
+    settingsClosedHandler?.();
 
     const escapeCall = asMock(pauseKeyboard.on).mock.calls.find(([event]) => event === 'keydown-ESC');
     const [, escapeHandler] = escapeCall ?? [];
