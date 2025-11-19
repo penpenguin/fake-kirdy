@@ -2651,6 +2651,7 @@ export class PauseScene extends Phaser.Scene {
 
   private openSettings() {
     const gameScene = this.resolveGameScene();
+    const overlayManagedByParent = Boolean(gameScene);
 
     const scenePlugin = this.scene as
       | (Phaser.Scenes.ScenePlugin & {
@@ -2669,15 +2670,23 @@ export class PauseScene extends Phaser.Scene {
       }
     }
 
-    gameScene?.activateMenuOverlay?.();
+    if (overlayManagedByParent) {
+      gameScene?.activateMenuOverlay?.();
+    }
 
     this.unbindEscapeHandler();
 
-    this.scene.launch(SceneKeys.Settings, { returnTo: SceneKeys.Pause });
+    this.scene.launch(SceneKeys.Settings, {
+      returnTo: SceneKeys.Pause,
+      overlayManagedByParent,
+    });
 
     this.scene.pause(SceneKeys.Pause);
     this.events?.once?.('resume', () => {
       this.bindEscapeHandler();
+      if (overlayManagedByParent) {
+        gameScene?.deactivateMenuOverlay?.();
+      }
       try {
         this.scene.bringToTop(SceneKeys.Pause);
       } catch {
@@ -2699,6 +2708,7 @@ export class PauseScene extends Phaser.Scene {
 
 interface SettingsSceneData {
   returnTo?: SceneKey;
+  overlayManagedByParent?: boolean;
 }
 
 export class SettingsScene extends Phaser.Scene {
@@ -2708,6 +2718,7 @@ export class SettingsScene extends Phaser.Scene {
   private summaryText?: Phaser.GameObjects.Text;
   private instructionsText?: Phaser.GameObjects.Text;
   private returnToScene: SceneKey = SceneKeys.Menu;
+  private overlayManagedByParent = false;
 
   constructor() {
     super(buildConfig(SceneKeys.Settings));
@@ -2723,6 +2734,7 @@ export class SettingsScene extends Phaser.Scene {
 
   create(data?: SettingsSceneData) {
     this.returnToScene = data?.returnTo ?? SceneKeys.Menu;
+    this.overlayManagedByParent = Boolean(data?.overlayManagedByParent);
     const snapshot = this.saveManager.load();
     if (snapshot?.settings) {
       this.currentSettings = { ...snapshot.settings };
@@ -2766,7 +2778,9 @@ export class SettingsScene extends Phaser.Scene {
 
     const gameScene = this.resolveGameScene();
     if (gameScene) {
-      gameScene.activateMenuOverlay();
+      if (!this.overlayManagedByParent) {
+        gameScene.activateMenuOverlay();
+      }
       const scenePlugin = this.scene as
         | (Phaser.Scenes.ScenePlugin & {
             isActive?: (key: SceneKey) => boolean;
@@ -2864,9 +2878,9 @@ export class SettingsScene extends Phaser.Scene {
 
   private close() {
     const gameScene = this.resolveGameScene();
-    gameScene?.deactivateMenuOverlay();
-    if (this.returnToScene === SceneKeys.Pause) {
-      gameScene?.deactivateMenuOverlay();
+    if (!this.overlayManagedByParent) {
+      const shouldForceClear = this.returnToScene !== SceneKeys.Pause;
+      gameScene?.deactivateMenuOverlay?.({ force: shouldForceClear });
     }
 
     this.scene.resume(this.returnToScene);

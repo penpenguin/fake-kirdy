@@ -1161,6 +1161,56 @@ describe('Scene registration', () => {
     expect(pauseScene.scene.resume).toHaveBeenCalledWith(SceneKeys.Game);
   });
 
+  it('pause scene releases the settings overlay when settings resumes control back to it', () => {
+    const pauseScene = new PauseScene();
+    const gameScene = new GameScene();
+    gameScene.create();
+    gameScene.pauseGame();
+    const settingsScene = new SettingsScene();
+    const scenePlugin = pauseScene.scene;
+
+    asMock(scenePlugin.get).mockReturnValue(gameScene);
+
+    const launchMock = asMock(scenePlugin.launch);
+    launchMock.mockImplementation((key, data) => {
+      if (key === SceneKeys.Settings) {
+        asMock(settingsScene.scene.get).mockImplementation((target: unknown) =>
+          target === SceneKeys.Game ? gameScene : undefined,
+        );
+        asMock(settingsScene.scene.isActive).mockImplementation((target: unknown) => target === SceneKeys.Game);
+        asMock(settingsScene.scene.isPaused).mockImplementation((target: unknown) => target === SceneKeys.Game);
+        settingsScene.create(data as SettingsSceneCreateArg);
+      }
+    });
+
+    pauseScene.create();
+
+    const pauseKeyboard = pauseScene.input.keyboard!;
+    const settingsCall = asMock(pauseKeyboard.once).mock.calls.find(([event]) => event === 'keydown-O');
+    const [, openSettingsHandler] = settingsCall ?? [];
+    expect(openSettingsHandler).toBeInstanceOf(Function);
+
+    openSettingsHandler?.();
+
+    const resumeCall = asMock(pauseScene.events.once).mock.calls.find(([event]) => event === 'resume');
+    const [, resumeHandler] = resumeCall ?? [];
+    expect(resumeHandler).toBeInstanceOf(Function);
+
+    const settingsKeyboard = settingsScene.input.keyboard!;
+    const escCall = asMock(settingsKeyboard.once).mock.calls.find(([event]) => event === 'keydown-ESC');
+    const [, escHandler] = escCall ?? [];
+    expect(escHandler).toBeInstanceOf(Function);
+
+    escHandler?.();
+
+    const deactivateSpy = vi.spyOn(gameScene, 'deactivateMenuOverlay');
+    deactivateSpy.mockClear();
+
+    resumeHandler?.();
+
+    expect(deactivateSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('game scene skips its update loop while the pause menu overlay is active', () => {
     const gameScene = new GameScene();
 
@@ -1528,6 +1578,9 @@ describe('Scene registration', () => {
 
   it('pause scene opens the settings overlay while keeping gameplay paused', () => {
     const pauseScene = new PauseScene();
+    const gameScene = new GameScene();
+
+    asMock(pauseScene.scene.get).mockReturnValue(gameScene);
 
     pauseScene.create();
 
@@ -1546,7 +1599,10 @@ describe('Scene registration', () => {
 
     expect(pauseScene.scene.launch).toHaveBeenCalledWith(
       SceneKeys.Settings,
-      expect.objectContaining({ returnTo: SceneKeys.Pause }),
+      expect.objectContaining({
+        returnTo: SceneKeys.Pause,
+        overlayManagedByParent: true,
+      }),
     );
     expect(pauseScene.scene.pause).toHaveBeenCalledWith(SceneKeys.Pause);
   });
@@ -1724,7 +1780,7 @@ describe('Scene registration', () => {
     asMock(settingsScene.scene.isPaused).mockImplementation((key: unknown) => key === SceneKeys.Game);
     asMock(settingsScene.scene.pause).mockClear();
 
-    settingsScene.create({ returnTo: SceneKeys.Pause });
+    settingsScene.create({ returnTo: SceneKeys.Pause, overlayManagedByParent: true });
 
     expect(settingsScene.scene.pause).not.toHaveBeenCalledWith(SceneKeys.Game);
   });
@@ -1739,7 +1795,7 @@ describe('Scene registration', () => {
     asMock(settingsScene.scene.isActive).mockImplementation((key: unknown) => key === SceneKeys.Game);
     asMock(settingsScene.scene.isPaused).mockImplementation((key: unknown) => key === SceneKeys.Game);
 
-    settingsScene.create({ returnTo: SceneKeys.Pause });
+    settingsScene.create({ returnTo: SceneKeys.Pause, overlayManagedByParent: true });
 
     const escCall = asMock(settingsScene.input.keyboard!.once).mock.calls.find(
       ([event]) => event === 'keydown-ESC',
@@ -1755,7 +1811,7 @@ describe('Scene registration', () => {
 
     escHandler?.();
 
-    expect(deactivateSpy).toHaveBeenCalledTimes(2);
+    expect(deactivateSpy).not.toHaveBeenCalled();
     expect(settingsScene.scene.resume).toHaveBeenCalledWith(SceneKeys.Pause);
     expect(settingsScene.scene.bringToTop).toHaveBeenCalledWith(SceneKeys.Pause);
   });

@@ -184,6 +184,7 @@ class PlayerInputManager {
 ### 6. 設定オーバーレイ
 
 - `SettingsScene` はメニューまたはポーズ状態から `SceneManager.launch` で起動し、呼び出し元シーンを `pause` したまま中央に設定パネルをオーバーレイ表示する。
+- ポーズシーン経由で開く場合は `overlayManagedByParent` フラグを立て、ブラーやオーバーレイ深度の管理を PauseScene に委譲する。MenuScene など単独起動時は SettingsScene 自身が `GameScene.activateMenuOverlay`/`deactivateMenuOverlay` を直接呼び、呼び出し元へ復帰する時点でブラーを解除する。
 - キーボードショートカット:
   - `LEFT` / `RIGHT`: マスターボリュームを 10% 刻みで増減し、`AudioManager`へ即時反映する。
   - `UP` / `DOWN`: 難易度プリセット（`easy` / `normal` / `hard`）を循環させ、`SaveManager` のスナップショットへ記録する。
@@ -191,7 +192,7 @@ class PlayerInputManager {
   - `ESC`: オーバーレイを閉じて呼び出し元シーンを再開する。
 - すべての変更は `SaveManager.updateSettings` を通じて即時に LocalStorage へ保存され、`GameScene` は `settings-updated` グローバルイベントを購読して音量や入力スキームを再適用する。
 - MenuScene は `O` キーで設定、`R` キーで初期位置リセットを案内し、PauseScene からも同じショートカットで設定オーバーレイを開ける。
-- PauseScene が前面にある間は GameScene のメインカメラへ post-processing ブラーを追加し、`resume` で解除して背景をソフトに演出する。
+- PauseScene が前面にある間は GameScene のメインカメラへ post-processing ブラーを追加し、SettingsScene から制御が戻った際にも PauseScene 側で深度を 1 だけ戻すことで背景演出を維持しつつ `resume` 時にまとめて解除する。
 
 ### 7. マップシステム
 
