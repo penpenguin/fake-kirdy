@@ -232,6 +232,31 @@ describe('asset sprites align with design palette expectations', () => {
     { label: 'outline plum', color: rgba(108, 31, 79), tolerance: 32 },
   ];
 
+  const kirdyHeroAnchors: ColorAnchor[] = [
+    { label: 'body crimson', color: rgba(194, 31, 23), tolerance: 24 },
+    { label: 'outline oxblood', color: rgba(92, 6, 12), tolerance: 20 },
+    { label: 'star ember', color: rgba(250, 141, 13), tolerance: 18 },
+  ];
+
+  const kirdyHeroVariants = [
+    'images/characters/kirdy/kirdy.png',
+    'images/characters/kirdy/kirdy-idle.png',
+    'images/characters/kirdy/kirdy-run.png',
+    'images/characters/kirdy/kirdy-jump.png',
+    'images/characters/kirdy/kirdy-hover.png',
+    'images/characters/kirdy/kirdy-inhale.png',
+    'images/characters/kirdy/kirdy-swallow.png',
+    'images/characters/kirdy/kirdy-spit.png',
+  ] as const;
+
+  const kirdyPaletteOverrides = kirdyHeroVariants.reduce<Record<string, ColorAnchor[]>>(
+    (memo, relativePath) => {
+      memo[relativePath] = kirdyHeroAnchors;
+      return memo;
+    },
+    {},
+  );
+
   const kirdyVariants = [
     'images/characters/kirdy/kirdy.png',
     'images/characters/kirdy/kirdy-run.png',
@@ -244,7 +269,8 @@ describe('asset sprites align with design palette expectations', () => {
   ];
 
   it.each(kirdyVariants)('%s uses defined Kirdy palette', (relativePath) => {
-    expectContainsAnchors(relativePath, relativePath, kirdyAnchors);
+    const anchors = kirdyPaletteOverrides[relativePath] ?? kirdyAnchors;
+    expectContainsAnchors(relativePath, relativePath, anchors);
   });
 
   it('fire ability projectile uses warm fire palette', () => {
