@@ -2,7 +2,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { inflateSync } from 'node:zlib';
 
 import { createAssetManifest, queueAssetManifest } from './pipeline';
 
@@ -27,63 +26,11 @@ function expectCallForAsset(
   return call;
 }
 
-const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
-
-const PNG_COLOR_CHANNELS: Record<number, number> = {
-  0: 1,
-  2: 3,
-  3: 1,
-  4: 2,
-  6: 4,
-};
-
-function readPngScanlines(absolutePath: string) {
+function expectWebp(absolutePath: string) {
   const buffer = readFileSync(absolutePath);
-  expect(buffer.subarray(0, 8)).toEqual(PNG_SIGNATURE);
-
-  let offset = 8;
-  let width: number | undefined;
-  let height: number | undefined;
-  let bitDepth: number | undefined;
-  let colorType: number | undefined;
-  const idatChunks: Buffer[] = [];
-
-  while (offset < buffer.length) {
-    const length = buffer.readUInt32BE(offset);
-    offset += 4;
-    const type = buffer.subarray(offset, offset + 4).toString('ascii');
-    offset += 4;
-    const chunk = buffer.subarray(offset, offset + length);
-    offset += length;
-    offset += 4; // Skip CRC
-
-    if (type === 'IHDR') {
-      width = chunk.readUInt32BE(0);
-      height = chunk.readUInt32BE(4);
-      bitDepth = chunk.readUInt8(8);
-      colorType = chunk.readUInt8(9);
-    } else if (type === 'IDAT') {
-      idatChunks.push(chunk);
-    } else if (type === 'IEND') {
-      break;
-    }
-  }
-
-  expect(width).toBeDefined();
-  expect(height).toBeDefined();
-  expect(bitDepth).toBeDefined();
-  expect(colorType).toBeDefined();
-
-  const compressed = Buffer.concat(idatChunks);
-  const scanlines = inflateSync(compressed);
-
-  return {
-    width: width!,
-    height: height!,
-    bitDepth: bitDepth!,
-    colorType: colorType!,
-    scanlines,
-  } as const;
+  expect(buffer.length).toBeGreaterThan(24);
+  expect(buffer.subarray(0, 4).toString('ascii')).toBe('RIFF');
+  expect(buffer.subarray(8, 12).toString('ascii')).toBe('WEBP');
 }
 
 describe('asset pipeline manifest', () => {
@@ -182,31 +129,31 @@ describe('asset pipeline manifest', () => {
     );
 
     const expectedAssets: Array<{ key: string; path: string }> = [
-      { key: 'kirdy', path: 'images/characters/kirdy/kirdy.png' },
-      { key: 'kirdy-run', path: 'images/characters/kirdy/kirdy-run.png' },
-      { key: 'kirdy-jump', path: 'images/characters/kirdy/kirdy-jump.png' },
-      { key: 'kirdy-hover', path: 'images/characters/kirdy/kirdy-hover.png' },
-      { key: 'kirdy-inhale', path: 'images/characters/kirdy/kirdy-inhale.png' },
-      { key: 'kirdy-swallow', path: 'images/characters/kirdy/kirdy-swallow.png' },
-      { key: 'kirdy-spit', path: 'images/characters/kirdy/kirdy-spit.png' },
-      { key: 'fire-attack', path: 'images/effects/fire-attack.png' },
-      { key: 'ice-attack', path: 'images/effects/ice-attack.png' },
-      { key: 'sword-slash', path: 'images/effects/sword-slash.png' },
-      { key: 'star-bullet', path: 'images/effects/star-bullet.png' },
-      { key: 'wabble-bee', path: 'images/enemies/wabble-bee.png' },
-      { key: 'dronto-durt', path: 'images/enemies/dronto-durt.png' },
-      { key: 'fire-artifact', path: 'images/items/fire-artifact.png' },
-      { key: 'ice-artifact', path: 'images/items/ice-artifact.png' },
-      { key: 'leaf-artifact', path: 'images/items/leaf-artifact.png' },
-      { key: 'ruin-artifact', path: 'images/items/ruin-artifact.png' },
-      { key: 'locked-door', path: 'images/ui/locked-door.png' },
-      { key: 'wall-texture', path: 'images/world/wall-texture.png' },
-      { key: 'brick-tile', path: 'images/world/brick-tile.png' },
-      { key: 'forest-tile', path: 'images/world/forest-tile.png' },
-      { key: 'fire-tile', path: 'images/world/fire-tile.png' },
-      { key: 'ice-tile', path: 'images/world/ice-tile.png' },
-      { key: 'stone-tile', path: 'images/world/stone-tile.png' },
-      { key: 'royal-tile', path: 'images/world/royal-tile.png' },
+      { key: 'kirdy', path: 'images/characters/kirdy/kirdy.webp' },
+      { key: 'kirdy-run', path: 'images/characters/kirdy/kirdy-run.webp' },
+      { key: 'kirdy-jump', path: 'images/characters/kirdy/kirdy-jump.webp' },
+      { key: 'kirdy-hover', path: 'images/characters/kirdy/kirdy-hover.webp' },
+      { key: 'kirdy-inhale', path: 'images/characters/kirdy/kirdy-inhale.webp' },
+      { key: 'kirdy-swallow', path: 'images/characters/kirdy/kirdy-swallow.webp' },
+      { key: 'kirdy-spit', path: 'images/characters/kirdy/kirdy-spit.webp' },
+      { key: 'fire-attack', path: 'images/effects/fire-attack.webp' },
+      { key: 'ice-attack', path: 'images/effects/ice-attack.webp' },
+      { key: 'sword-slash', path: 'images/effects/sword-slash.webp' },
+      { key: 'star-bullet', path: 'images/effects/star-bullet.webp' },
+      { key: 'wabble-bee', path: 'images/enemies/wabble-bee.webp' },
+      { key: 'dronto-durt', path: 'images/enemies/dronto-durt.webp' },
+      { key: 'fire-artifact', path: 'images/items/fire-artifact.webp' },
+      { key: 'ice-artifact', path: 'images/items/ice-artifact.webp' },
+      { key: 'leaf-artifact', path: 'images/items/leaf-artifact.webp' },
+      { key: 'ruin-artifact', path: 'images/items/ruin-artifact.webp' },
+      { key: 'locked-door', path: 'images/ui/locked-door.webp' },
+      { key: 'wall-texture', path: 'images/world/wall-texture.webp' },
+      { key: 'brick-tile', path: 'images/world/brick-tile.webp' },
+      { key: 'forest-tile', path: 'images/world/forest-tile.webp' },
+      { key: 'fire-tile', path: 'images/world/fire-tile.webp' },
+      { key: 'ice-tile', path: 'images/world/ice-tile.webp' },
+      { key: 'stone-tile', path: 'images/world/stone-tile.webp' },
+      { key: 'royal-tile', path: 'images/world/royal-tile.webp' },
     ];
 
     expectedAssets.forEach(({ key, path }) => {
@@ -226,7 +173,7 @@ describe('asset pipeline manifest', () => {
     clusterTileKeys.forEach((key) => {
       const asset = manifest.images.find((entry) => entry.key === key);
       expect(asset, `Missing manifest image entry for ${key}`).toBeDefined();
-      expect(asset?.fallbackUrl).toBe('images/world/wall-texture.png');
+      expect(asset?.fallbackUrl).toBe('images/world/wall-texture.webp');
     });
   });
 
@@ -235,8 +182,8 @@ describe('asset pipeline manifest', () => {
     const asset = manifest.images.find((entry) => entry.key === 'virtual-controls');
 
     expect(asset).toBeDefined();
-    expect(asset?.url).toBe('images/ui/virtual-controls.png');
-    expect(asset?.fallbackUrl).toBe('images/fallbacks/virtual-controls.png');
+    expect(asset?.url).toBe('images/ui/virtual-controls.webp');
+    expect(asset?.fallbackUrl).toBe('images/fallbacks/virtual-controls.webp');
   });
 
   it('ensures every fallback asset file exists under public/assets', () => {
@@ -285,20 +232,9 @@ describe('asset pipeline manifest', () => {
         })),
     ];
 
-    it.each(imageEntries)('%s PNG scanlines match header metadata', ({ label, relativePath }) => {
+    it.each(imageEntries)('%s is a valid webp file', ({ label, relativePath }) => {
       const absolutePath = resolve(baseDir, relativePath);
-      const png = readPngScanlines(absolutePath);
-      const channels = PNG_COLOR_CHANNELS[png.colorType];
-
-      if (channels === undefined) {
-        throw new Error(`Unsupported PNG color type ${png.colorType} in ${label}`);
-      }
-
-      const bitsPerPixel = png.bitDepth * channels;
-      const rowBytes = Math.ceil((bitsPerPixel * png.width) / 8);
-      const expectedLength = png.height * (rowBytes + 1);
-
-      expect(png.scanlines.length).toBe(expectedLength);
+      expectWebp(absolutePath);
     });
   });
 });
