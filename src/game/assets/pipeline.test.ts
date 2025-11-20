@@ -166,6 +166,14 @@ describe('asset pipeline manifest', () => {
     );
   });
 
+  it('does not bundle unused stage layout data assets', () => {
+    const manifest = createAssetManifest();
+    const dataKeys = manifest.data.map((asset) => asset.key);
+
+    expect(dataKeys).not.toContain('stage-layouts');
+    expect(manifest.data.length).toBe(0);
+  });
+
   it('主要なキャラクターテクスチャと攻撃エフェクトをマニフェストに含める', () => {
     const manifest = createAssetManifest();
     const baseDir = resolve(

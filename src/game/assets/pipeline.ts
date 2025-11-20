@@ -231,13 +231,7 @@ const AUDIO_ASSETS: ReadonlyArray<AudioAsset> = [
   },
 ];
 
-const DATA_ASSETS: ReadonlyArray<DataAsset> = [
-  {
-    key: 'stage-layouts',
-    url: 'data/stage-layouts.json',
-    fallbackUrl: 'data/stage-layouts-fallback.json',
-  },
-];
+const DATA_ASSETS: ReadonlyArray<DataAsset> = [];
 
 function cloneImageAsset(asset: ImageAsset): ImageAsset {
   return { ...asset };
