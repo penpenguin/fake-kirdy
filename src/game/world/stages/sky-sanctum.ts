@@ -1,11 +1,12 @@
 import type { AreaDefinition } from '../AreaManager';
+import { getSkyExpanseEntryId } from './procedural';
 import { buildStageDefinition } from './stage-utils';
 
 const tileSize = 32;
 
 const layout = [
   '########################',
-  '#....###......###......#',
+  '#....###..D...###......#',
   '#......................#',
   '#D..####....####......D#',
   '#......................#',
@@ -41,6 +42,7 @@ export const skySanctum: AreaDefinition = buildStageDefinition({
     south: 'goal-sanctum',
     east: 'aurora-spire',
     west: 'starlit-keep',
+    north: getSkyExpanseEntryId(),
   },
   entryPoints: {
     default: { position: { x: southDoorX, y: height - tileSize * 2 } },

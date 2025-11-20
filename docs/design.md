@@ -214,7 +214,7 @@ class PlayerInputManager {
 - 迷宮は 5 クラスタ（hub / forest / ice / fire / ruins）× 25〜30 エリアで構成し、ビルド時点で最低 128 個のユニークエリアを提供する。
 - 各エリアは `AreaDefinition.metadata.index` を持ち、`MapSystem` は index をもとにストーリーシードからルートを抽出する。ルート上に同一エリアが 1 度しか現れないよう `discoveredAreas` をチェックする。
 - バイオーム内で 20% 以上が支路（デッドエンド）となるよう、定義段階で次数チェックを CI へ追加する。
-- Forest / Ice / Fire / Ruins の各クラスタ終端には固定マップ（Forest / Ice / Fire / Ruins Reliquary）を必ず接続し、分岐探索のゴールと Keystone 収納室を兼ねる。リリクアリは `STAGE_DEFINITIONS` で固定 ID を持ち、Procedural Expanse の最後の `neighbors.east` がそれぞれを指す。Ruins Reliquary からのみ Sky Expanse への南扉が開く。
+- Forest / Ice / Fire / Ruins の各クラスタ終端には固定マップ（Forest / Ice / Fire / Ruins Reliquary）を必ず接続し、分岐探索のゴールと Keystone 収納室を兼ねる。リリクアリは `STAGE_DEFINITIONS` で固定 ID を持ち、Procedural Expanse の最後の `neighbors.east` がそれぞれを指す。Ruins Reliquary は行き止まりとして完結し、Sky / Void クラスタは Central Hub 北中央ハイエンド扉 → Sky Sanctum → Sky Expanse の独立ルートから開始する。
 
 #### 7.4 ゴール扉とリザルト表示
 - ゴールエリア（例: `goal-sanctuary`）には専用テクスチャ `goal-door` を割り当て、通常扉とは別スプライトシートで描画する。

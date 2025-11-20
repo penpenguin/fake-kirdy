@@ -711,6 +711,15 @@ export class AreaManager {
       return true;
     }
 
+    if (
+      areaId === AREA_IDS.GoalSanctum &&
+      targetAreaId === AREA_IDS.SkySanctum &&
+      direction === 'north' &&
+      !this.hasCollectedAllBranchRelics()
+    ) {
+      return true;
+    }
+
     return false;
   }
 

@@ -17,16 +17,21 @@ describe('Map graph validator', () => {
   });
 
   it('validates door links and safe radii', () => {
+    const missingLinks: Array<{ stageId: string; direction: string; target?: string }> = [];
+
     STAGE_DEFINITIONS.forEach((stage) => {
       stage.doors?.forEach((door) => {
         const neighborId = stage.neighbors[door.direction];
-        expect(neighborId).toBeDefined();
-        expect(door.target).toBe(neighborId);
-        if (neighborId) {
-          expect(stageLookup.has(neighborId)).toBe(true);
+        if (!neighborId || door.target !== neighborId) {
+          missingLinks.push({ stageId: stage.id, direction: door.direction, target: door.target });
+          return;
         }
+
+        expect(stageLookup.has(neighborId)).toBe(true);
         expect(door.safeRadius).toBeGreaterThanOrEqual(stage.doorBuffer ?? 1);
       });
     });
+
+    expect(missingLinks).toEqual([]);
   });
 });

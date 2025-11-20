@@ -286,13 +286,20 @@ describe('AreaManager', () => {
     }
   });
 
-  it('中央ハブ北扉は4つの遺物を集めるまで開放されない', () => {
+  it('中央ハブの北扉とハイエンド扉は4つの遺物を集めるまで開放されない', () => {
     const localManager = new AreaManager();
     const attemptBefore = localManager.updatePlayerPosition(
       getDoorWorldPosition(localManager.getCurrentAreaState(), 'north'),
     );
 
     expect(attemptBefore.areaChanged).toBe(false);
+
+    const goalLockedManager = new AreaManager(AREA_IDS.GoalSanctum);
+    const lockedGoalAttempt = goalLockedManager.updatePlayerPosition(
+      getDoorWorldPosition(goalLockedManager.getCurrentAreaState(), 'north'),
+    );
+
+    expect(lockedGoalAttempt.areaChanged).toBe(false);
 
     ['forest-keystone', 'ice-keystone', 'fire-keystone', 'cave-keystone'].forEach((itemId) => {
       localManager.recordCollectibleItem(itemId);
@@ -318,13 +325,20 @@ describe('AreaManager', () => {
     expect(unlockedAttempt.transition?.via).toBe('north');
 
     const mirror = localManager.getCurrentAreaState();
-    const backToHub = localManager.updatePlayerPosition(
-      getDoorWorldPosition(mirror, getOpposite('north')),
+    const toGoal = localManager.updatePlayerPosition(getDoorWorldPosition(mirror, 'north'));
+
+    expect(toGoal.areaChanged).toBe(true);
+    expect(toGoal.transition?.to).toBe(AREA_IDS.GoalSanctum);
+    expect(toGoal.transition?.via).toBe('north');
+
+    const goalSanctum = localManager.getCurrentAreaState();
+    const unlockedSkyAttempt = localManager.updatePlayerPosition(
+      getDoorWorldPosition(goalSanctum, 'north'),
     );
 
-    expect(backToHub.areaChanged).toBe(true);
-    expect(backToHub.transition?.to).toBe(AREA_IDS.CentralHub);
-    expect(backToHub.transition?.via).toBe('south');
+    expect(unlockedSkyAttempt.areaChanged).toBe(true);
+    expect(unlockedSkyAttempt.transition?.to).toBe(AREA_IDS.SkySanctum);
+    expect(unlockedSkyAttempt.transition?.via).toBe('north');
   });
 
   it('HUD向けに現在の遺物収集リストを提供する', () => {
@@ -380,9 +394,8 @@ describe('AreaManager', () => {
     const goal = localManager.getCurrentAreaState();
     const backToMirror = localManager.updatePlayerPosition(getDoorWorldPosition(goal, 'south'));
 
-    expect(backToMirror.areaChanged).toBe(true);
-    expect(backToMirror.transition?.to).toBe(AREA_IDS.MirrorCorridor);
-    expect(backToMirror.transition?.via).toBe('south');
+    expect(backToMirror.areaChanged).toBe(false);
+    expect(localManager.getCurrentAreaState().definition.id).toBe(AREA_IDS.GoalSanctum);
   });
 
   it('Fire Area からは Mirror Corridor や Goal Sanctum へ直接進入できない', () => {
@@ -444,26 +457,19 @@ describe('AreaManager', () => {
     expect(immediateUpdate.areaChanged).toBe(false);
   });
 
-  it('goal-sanctum の北遷移扉から sky-sanctum へ遷移する', () => {
+  it('goal-sanctum の北扉は遺物未取得なら遷移しない', () => {
     const branchManager = new AreaManager(AREA_IDS.GoalSanctum);
     const goalSanctumState = branchManager.getCurrentAreaState();
 
-    const transitionDoorPosition = getDoorWorldPositionFromDefinition(
+    const northDoorPosition = getDoorWorldPositionFromDefinition(
       goalSanctumState,
-      (door) => door.direction === 'north' && door.type !== 'goal',
+      (door) => door.direction === 'north',
     );
 
-    const result = branchManager.updatePlayerPosition(transitionDoorPosition);
+    const result = branchManager.updatePlayerPosition(northDoorPosition);
 
-    expect(result.areaChanged).toBe(true);
-    expect(result.transition?.from).toBe(AREA_IDS.GoalSanctum);
-    expect(result.transition?.to).toBe(AREA_IDS.SkySanctum);
-    expect(result.transition?.via).toBe('north');
-
-    const skySanctum = branchManager.getCurrentAreaState();
-    expect(skySanctum.definition.id).toBe(AREA_IDS.SkySanctum);
-    const spawnTile = skySanctum.tileMap.getTileAtWorldPosition(skySanctum.playerSpawnPosition);
-    expect(spawnTile).toBe('floor');
+    expect(result.areaChanged).toBe(false);
+    expect(branchManager.getCurrentAreaState().definition.id).toBe(AREA_IDS.GoalSanctum);
   });
 
   it('goal-sanctum のゴール扉ではマップ遷移しない', () => {
@@ -479,6 +485,25 @@ describe('AreaManager', () => {
 
     expect(result.areaChanged).toBe(false);
     expect(branchManager.getCurrentAreaState().definition.id).toBe(AREA_IDS.GoalSanctum);
+  });
+
+  it('goal-sanctum の北扉から sky-sanctum へ遷移できる', () => {
+    const branchManager = new AreaManager(AREA_IDS.GoalSanctum);
+    ['forest-keystone', 'ice-keystone', 'fire-keystone', 'cave-keystone'].forEach((itemId) =>
+      branchManager.recordCollectibleItem(itemId),
+    );
+
+    const goalSanctumState = branchManager.getCurrentAreaState();
+    const northDoorPosition = getDoorWorldPositionFromDefinition(
+      goalSanctumState,
+      (door) => door.direction === 'north',
+    );
+
+    const result = branchManager.updatePlayerPosition(northDoorPosition);
+
+    expect(result.areaChanged).toBe(true);
+    expect(result.transition?.to).toBe(AREA_IDS.SkySanctum);
+    expect(result.transition?.via).toBe('north');
   });
 
   it('aurora-spire の西扉から sky-sanctum へ遷移する', () => {

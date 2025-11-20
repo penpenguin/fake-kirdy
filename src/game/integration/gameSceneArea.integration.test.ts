@@ -86,8 +86,14 @@ describe('統合: GameScene と AreaManager', () => {
 
   it('境界を越えると隣接エリアへ遷移し、プレイヤー座標とセーブ要求が更新される', () => {
     const scene = new GameScene();
-    const areaManager = new AreaManager(AREA_IDS.CentralHub);
-    const playerSprite = new FakeMatterSprite('kirdy').setPosition(650, 160);
+    const areaManager = new AreaManager(AREA_IDS.GoalSanctum);
+    const goalState = areaManager.getCurrentAreaState();
+    const northDoor = goalState.definition.doors?.find((door) => door.direction === 'north');
+    expect(northDoor).toBeDefined();
+    const playerSprite = new FakeMatterSprite('kirdy').setPosition(
+      northDoor?.position.x ?? 0,
+      northDoor?.position.y ?? 0,
+    );
 
     const kirdyStub = {
       sprite: playerSprite as unknown,
@@ -123,12 +129,16 @@ describe('統合: GameScene と AreaManager', () => {
       progressDirty: false,
     });
 
-    (scene as any).lastSavedTileKey = 'central-hub:10,5';
+    (scene as any).lastSavedTileKey = 'goal-sanctum:10,5';
+
+    ['forest-keystone', 'ice-keystone', 'fire-keystone', 'cave-keystone'].forEach((itemId) => {
+      areaManager.recordCollectibleItem(itemId);
+    });
 
     scene.update(1000, 16);
 
     const currentAreaId = areaManager.getCurrentAreaState().definition.id;
-    expect(currentAreaId).toBe(AREA_IDS.FireArea);
+    expect(currentAreaId).toBe(AREA_IDS.SkySanctum);
 
     const spawn = areaManager.getCurrentAreaState().playerSpawnPosition;
     expect(playerSprite.x).toBe(spawn.x);
@@ -136,7 +146,7 @@ describe('統合: GameScene と AreaManager', () => {
     expect(playerSprite.body.velocity.x).toBe(0);
     expect(playerSprite.body.velocity.y).toBe(0);
 
-    expect(areaManager.getDiscoveredAreas()).toContain(AREA_IDS.FireArea);
+    expect(areaManager.getDiscoveredAreas()).toContain(AREA_IDS.SkySanctum);
     expect(requestSaveSpy).toHaveBeenCalledTimes(1);
   });
 });

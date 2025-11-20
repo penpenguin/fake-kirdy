@@ -2066,8 +2066,7 @@ export class GameScene extends Phaser.Scene {
     const goalDoorTextureAvailable = Boolean(textureManager?.exists?.(GOAL_DOOR_TEXTURE_KEY));
     const lockedDoorTextureAvailable = Boolean(textureManager?.exists?.(LOCKED_DOOR_TEXTURE_KEY));
     const currentAreaId = areaState?.definition?.id;
-    const mirrorDoorLocked =
-      currentAreaId === AREA_IDS.CentralHub && !this.areaManager?.hasCollectedAllBranchRelics?.();
+    const hasAllBranchRelics = this.areaManager?.hasCollectedAllBranchRelics?.();
 
     wallPlacements.forEach(({ centerX, centerY, tileSize }) => {
       let visual: Phaser.GameObjects.Image | Phaser.GameObjects.Rectangle | undefined = undefined;
@@ -2106,8 +2105,16 @@ export class GameScene extends Phaser.Scene {
       let marker: Phaser.GameObjects.Rectangle | Phaser.GameObjects.Image | undefined;
       let usedDoorTexture = false;
 
-      const shouldUseLockedTexture =
-        mirrorDoorLocked && doorDirection === 'north' && doorTargetId === AREA_IDS.MirrorCorridor;
+      const isLockedDoor =
+        hasAllBranchRelics === false &&
+        ((currentAreaId === AREA_IDS.CentralHub &&
+          doorDirection === 'north' &&
+          doorTargetId === AREA_IDS.MirrorCorridor) ||
+          (currentAreaId === AREA_IDS.GoalSanctum &&
+            doorDirection === 'north' &&
+            doorTargetId === AREA_IDS.SkySanctum));
+
+      const shouldUseLockedTexture = isLockedDoor;
       const shouldUseGoalTexture = !shouldUseLockedTexture && doorType === 'goal' && goalDoorTextureAvailable;
       const textureKey = shouldUseLockedTexture
         ? LOCKED_DOOR_TEXTURE_KEY

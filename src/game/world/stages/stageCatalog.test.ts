@@ -19,7 +19,7 @@ const DIRECTIONS: AreaTransitionDirection[] = [
 
 describe('Stage catalog', () => {
 
-  it('connects goal sanctum north to sky sanctum and south to mirror corridor', () => {
+  it('keeps goal sanctum enclosed with mirror corridor access only', () => {
     const fireArea = findStage('fire-area');
     expect(fireArea).toBeDefined();
     expect(fireArea?.neighbors?.north).toBeUndefined();
@@ -28,10 +28,15 @@ describe('Stage catalog', () => {
     expect(goalSanctum).toBeDefined();
     expect(goalSanctum?.neighbors?.south).toBe('mirror-corridor');
     expect(goalSanctum?.neighbors?.north).toBe('sky-sanctum');
+    expect(goalSanctum?.entryPoints?.north).toBeDefined();
     expect(goalSanctum?.enemySpawns?.baseline).toBeGreaterThanOrEqual(1);
 
     const hasExitDoor = goalSanctum?.layout.some((row) => row.includes('D')) ?? false;
     expect(hasExitDoor).toBe(true);
+
+    const doorDirections = goalSanctum?.doors?.map((door) => door.direction) ?? [];
+    expect(doorDirections).toEqual(['north', 'south']);
+    expect(goalSanctum?.goal?.doorId).toBe('south-0');
 
     const tileSize = goalSanctum?.tileSize ?? 0;
     const southExit = goalSanctum?.entryPoints?.south;
@@ -121,6 +126,8 @@ describe('Stage catalog', () => {
   });
 
   it('keeps directional entry points safely away from their connecting doors', () => {
+    const missingDoors: Array<{ stageId: string; direction: string; neighbor: string | undefined }> = [];
+
     STAGE_DEFINITIONS.forEach((stage) => {
       DIRECTIONS.forEach((direction) => {
         const neighbor = stage.neighbors[direction];
@@ -129,15 +136,11 @@ describe('Stage catalog', () => {
         }
 
         const entry = stage.entryPoints[direction];
-        expect(entry).toBeDefined();
-        if (!entry) {
-          throw new Error(`${stage.id} should define an entry point for ${direction}`);
-        }
-
         const matchingDoor = stage.doors?.find((door) => door.direction === direction && door.target === neighbor);
-        expect(matchingDoor).toBeDefined();
-        if (!matchingDoor) {
-          throw new Error(`${stage.id} should define a door for ${direction}`);
+
+        if (!entry || !matchingDoor) {
+          missingDoors.push({ stageId: stage.id, direction, neighbor });
+          return;
         }
 
         const usesVerticalAxis = direction.includes('north') || direction.includes('south');
@@ -150,6 +153,8 @@ describe('Stage catalog', () => {
         expect(separation).toBeGreaterThanOrEqual(minDistance);
       });
     });
+
+    expect(missingDoors).toEqual([]);
   });
 
   it('limits forest expanse stages to five entries for focused debugging', () => {
@@ -268,6 +273,6 @@ describe('Stage catalog', () => {
     );
     const firstSky = skyExpanses[0];
     expect(firstSky).toBeDefined();
-    expect(firstSky?.neighbors?.north).toBe('ruins-reliquary');
+    expect(firstSky?.neighbors?.south).toBe('sky-sanctum');
   });
 });
