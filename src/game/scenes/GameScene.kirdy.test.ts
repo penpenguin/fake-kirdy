@@ -420,6 +420,7 @@ vi.mock('../world/AreaManager', () => ({
     CentralHub: 'central-hub',
     MirrorCorridor: 'mirror-corridor',
     FireArea: 'fire-area',
+    SkySanctum: 'sky-sanctum',
   },
   AreaManager: AreaManagerMock,
 }));
@@ -1336,6 +1337,68 @@ describe('GameScene player integration', () => {
             },
             type: 'standard' as const,
             target: 'mirror-corridor',
+            safeRadius: 2,
+          },
+        ],
+      },
+      tileMap: {
+        ...defaultAreaState.tileMap,
+        getTileAt,
+      },
+    };
+
+    areaManagerGetStateMock.mockReturnValue(areaStateWithDoor as any);
+    areaManagerHasAllRelicsMock.mockReturnValue(false);
+
+    const createdImages: Array<{ textureKey: string }> = [];
+    stubs.addImageMock.mockImplementation((x: number, y: number, textureKey: string, frame?: string) => {
+      const image = {
+        setOrigin: vi.fn().mockReturnThis(),
+        setDepth: vi.fn().mockReturnThis(),
+        setDisplaySize: vi.fn().mockReturnThis(),
+        setVisible: vi.fn().mockReturnThis(),
+        setActive: vi.fn().mockReturnThis(),
+        setFrame: vi.fn().mockReturnThis(),
+        destroy: vi.fn(),
+      };
+      createdImages.push({ textureKey });
+      return image;
+    });
+
+    const scene = new GameScene();
+    scene.create();
+
+    expect(createdImages.some((entry) => entry.textureKey === 'locked-door')).toBe(true);
+  });
+
+  it('Central Hub 東扉が未解放のとき locked-door テクスチャを使用する', () => {
+    const tileSize = defaultAreaState.tileMap.tileSize;
+    const doorColumn = defaultAreaState.tileMap.columns - 2;
+    const doorRow = Math.floor(defaultAreaState.tileMap.rows / 2);
+    const originalGetTileAt = defaultAreaState.tileMap.getTileAt;
+    const getTileAt = vi.fn((column: number, row: number) => {
+      if (column === doorColumn && row === doorRow) {
+        return 'door';
+      }
+
+      return originalGetTileAt(column, row);
+    });
+
+    const areaStateWithDoor = {
+      ...defaultAreaState,
+      definition: {
+        ...defaultAreaState.definition,
+        doors: [
+          {
+            id: 'east-0',
+            direction: 'east' as const,
+            tile: { column: doorColumn, row: doorRow },
+            position: {
+              x: doorColumn * tileSize + tileSize / 2,
+              y: doorRow * tileSize + tileSize / 2,
+            },
+            type: 'standard' as const,
+            target: 'sky-sanctum',
             safeRadius: 2,
           },
         ],
