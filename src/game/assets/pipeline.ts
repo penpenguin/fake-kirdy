@@ -38,158 +38,158 @@ const DEFAULT_PATH = 'assets/';
 const IMAGE_ASSETS: ReadonlyArray<ImageAsset> = [
   {
     key: 'kirdy',
-    url: 'images/characters/kirdy/kirdy.png',
+    url: 'images/characters/kirdy/kirdy.webp',
   },
   {
     key: 'kirdy-run',
-    url: 'images/characters/kirdy/kirdy-run.png',
+    url: 'images/characters/kirdy/kirdy-run.webp',
   },
   {
     key: 'kirdy-jump',
-    url: 'images/characters/kirdy/kirdy-jump.png',
+    url: 'images/characters/kirdy/kirdy-jump.webp',
   },
   {
     key: 'kirdy-hover',
-    url: 'images/characters/kirdy/kirdy-hover.png',
+    url: 'images/characters/kirdy/kirdy-hover.webp',
   },
   {
     key: 'kirdy-inhale',
-    url: 'images/characters/kirdy/kirdy-inhale.png',
+    url: 'images/characters/kirdy/kirdy-inhale.webp',
   },
   {
     key: 'kirdy-swallow',
-    url: 'images/characters/kirdy/kirdy-swallow.png',
+    url: 'images/characters/kirdy/kirdy-swallow.webp',
   },
   {
     key: 'kirdy-spit',
-    url: 'images/characters/kirdy/kirdy-spit.png',
+    url: 'images/characters/kirdy/kirdy-spit.webp',
   },
   {
     key: 'kirdy-fire',
-    url: 'images/characters/kirdy/kirdy-fire.png',
-    fallbackUrl: 'images/fallbacks/kirdy-placeholder.png',
+    url: 'images/characters/kirdy/kirdy-fire.webp',
+    fallbackUrl: 'images/fallbacks/kirdy-placeholder.webp',
   },
   {
     key: 'kirdy-ice',
-    url: 'images/characters/kirdy/kirdy-ice.png',
-    fallbackUrl: 'images/fallbacks/kirdy-placeholder.png',
+    url: 'images/characters/kirdy/kirdy-ice.webp',
+    fallbackUrl: 'images/fallbacks/kirdy-placeholder.webp',
   },
   {
     key: 'kirdy-sword',
-    url: 'images/characters/kirdy/kirdy-sword.png',
-    fallbackUrl: 'images/fallbacks/kirdy-placeholder.png',
+    url: 'images/characters/kirdy/kirdy-sword.webp',
+    fallbackUrl: 'images/fallbacks/kirdy-placeholder.webp',
   },
   {
     key: 'inhale-sparkle',
-    url: 'images/effects/inhale-sparkle.png',
-    fallbackUrl: 'images/fallbacks/kirdy-placeholder.png',
+    url: 'images/effects/inhale-sparkle.webp',
+    fallbackUrl: 'images/fallbacks/kirdy-placeholder.webp',
   },
   {
     key: 'fire-attack',
-    url: 'images/effects/fire-attack.png',
+    url: 'images/effects/fire-attack.webp',
   },
   {
     key: 'ice-attack',
-    url: 'images/effects/ice-attack.png',
+    url: 'images/effects/ice-attack.webp',
   },
   {
     key: 'sword-slash',
-    url: 'images/effects/sword-slash.png',
+    url: 'images/effects/sword-slash.webp',
   },
   {
     key: 'star-bullet',
-    url: 'images/effects/star-bullet.png',
+    url: 'images/effects/star-bullet.webp',
   },
   {
     key: 'wabble-bee',
-    url: 'images/enemies/wabble-bee.png',
+    url: 'images/enemies/wabble-bee.webp',
   },
   {
     key: 'dronto-durt',
-    url: 'images/enemies/dronto-durt.png',
+    url: 'images/enemies/dronto-durt.webp',
   },
   {
     key: 'kirdy-idle',
-    url: 'images/characters/kirdy/kirdy-idle.png',
-    fallbackUrl: 'images/fallbacks/kirdy-placeholder.png',
+    url: 'images/characters/kirdy/kirdy-idle.webp',
+    fallbackUrl: 'images/fallbacks/kirdy-placeholder.webp',
   },
   {
     key: 'wall-texture',
-    url: 'images/world/wall-texture.png',
+    url: 'images/world/wall-texture.webp',
   },
   {
     key: 'brick-tile',
-    url: 'images/world/brick-tile.png',
-    fallbackUrl: 'images/world/wall-texture.png',
+    url: 'images/world/brick-tile.webp',
+    fallbackUrl: 'images/world/wall-texture.webp',
   },
   {
     key: 'forest-tile',
-    url: 'images/world/forest-tile.png',
-    fallbackUrl: 'images/world/wall-texture.png',
+    url: 'images/world/forest-tile.webp',
+    fallbackUrl: 'images/world/wall-texture.webp',
   },
   {
     key: 'fire-tile',
-    url: 'images/world/fire-tile.png',
-    fallbackUrl: 'images/world/wall-texture.png',
+    url: 'images/world/fire-tile.webp',
+    fallbackUrl: 'images/world/wall-texture.webp',
   },
   {
     key: 'ice-tile',
-    url: 'images/world/ice-tile.png',
-    fallbackUrl: 'images/world/wall-texture.png',
+    url: 'images/world/ice-tile.webp',
+    fallbackUrl: 'images/world/wall-texture.webp',
   },
   {
     key: 'stone-tile',
-    url: 'images/world/stone-tile.png',
-    fallbackUrl: 'images/world/wall-texture.png',
+    url: 'images/world/stone-tile.webp',
+    fallbackUrl: 'images/world/wall-texture.webp',
   },
   {
     key: 'royal-tile',
-    url: 'images/world/royal-tile.png',
-    fallbackUrl: 'images/world/wall-texture.png',
+    url: 'images/world/royal-tile.webp',
+    fallbackUrl: 'images/world/wall-texture.webp',
   },
   {
     key: 'door-marker',
-    url: 'images/ui/door-marker.png',
+    url: 'images/ui/door-marker.webp',
   },
   {
     key: 'goal-door',
-    url: 'images/ui/goal-door.png',
-    fallbackUrl: 'images/ui/door-marker.png',
+    url: 'images/ui/goal-door.webp',
+    fallbackUrl: 'images/ui/door-marker.webp',
   },
   {
     key: 'locked-door',
-    url: 'images/ui/locked-door.png',
-    fallbackUrl: 'images/ui/door-marker.png',
+    url: 'images/ui/locked-door.webp',
+    fallbackUrl: 'images/ui/door-marker.webp',
   },
   {
     key: 'heal-orb',
-    url: 'images/items/heal-orb.png',
-    fallbackUrl: 'images/ui/door-marker.png',
+    url: 'images/items/heal-orb.webp',
+    fallbackUrl: 'images/ui/door-marker.webp',
   },
   {
     key: 'fire-artifact',
-    url: 'images/items/fire-artifact.png',
-    fallbackUrl: 'images/ui/door-marker.png',
+    url: 'images/items/fire-artifact.webp',
+    fallbackUrl: 'images/ui/door-marker.webp',
   },
   {
     key: 'ice-artifact',
-    url: 'images/items/ice-artifact.png',
-    fallbackUrl: 'images/ui/door-marker.png',
+    url: 'images/items/ice-artifact.webp',
+    fallbackUrl: 'images/ui/door-marker.webp',
   },
   {
     key: 'leaf-artifact',
-    url: 'images/items/leaf-artifact.png',
-    fallbackUrl: 'images/ui/door-marker.png',
+    url: 'images/items/leaf-artifact.webp',
+    fallbackUrl: 'images/ui/door-marker.webp',
   },
   {
     key: 'ruin-artifact',
-    url: 'images/items/ruin-artifact.png',
-    fallbackUrl: 'images/ui/door-marker.png',
+    url: 'images/items/ruin-artifact.webp',
+    fallbackUrl: 'images/ui/door-marker.webp',
   },
   {
     key: 'virtual-controls',
-    url: 'images/ui/virtual-controls.png',
-    fallbackUrl: 'images/fallbacks/virtual-controls.png',
+    url: 'images/ui/virtual-controls.webp',
+    fallbackUrl: 'images/fallbacks/virtual-controls.webp',
   },
 ];
 
@@ -231,13 +231,7 @@ const AUDIO_ASSETS: ReadonlyArray<AudioAsset> = [
   },
 ];
 
-const DATA_ASSETS: ReadonlyArray<DataAsset> = [
-  {
-    key: 'stage-layouts',
-    url: 'data/stage-layouts.json',
-    fallbackUrl: 'data/stage-layouts-fallback.json',
-  },
-];
+const DATA_ASSETS: ReadonlyArray<DataAsset> = [];
 
 function cloneImageAsset(asset: ImageAsset): ImageAsset {
   return { ...asset };
