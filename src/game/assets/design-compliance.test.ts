@@ -297,8 +297,8 @@ describe('asset sprites align with design palette expectations', () => {
 
   it('star bullet sprite features bright star glow', () => {
     expectContainsAnchors('star bullet', 'images/effects/star-bullet.png', [
-      { label: 'stellar yellow', color: rgba(255, 234, 90), tolerance: 24 },
-      { label: 'core white', color: rgba(255, 255, 255), tolerance: 10 },
+      { label: 'flare core', color: rgba(255, 233, 32), tolerance: 16 },
+      { label: 'ember trail', color: rgba(128, 0, 0), tolerance: 12 },
     ]);
   });
 
