@@ -209,6 +209,7 @@ const saveManagerStubs = vi.hoisted(() => {
     save: ReturnType<typeof vi.fn>;
     resetPlayerPosition: ReturnType<typeof vi.fn>;
     clear: ReturnType<typeof vi.fn>;
+    clearProgressPreservingSettings: ReturnType<typeof vi.fn>;
     updateSettings: ReturnType<typeof vi.fn>;
   };
 
@@ -219,6 +220,7 @@ const saveManagerStubs = vi.hoisted(() => {
     const save = vi.fn() as ReturnType<typeof vi.fn>;
     const resetPlayerPosition = vi.fn() as ReturnType<typeof vi.fn>;
     const clear = vi.fn() as ReturnType<typeof vi.fn>;
+    const clearProgressPreservingSettings = vi.fn() as ReturnType<typeof vi.fn>;
     const updateSettings = vi.fn(() => ({
       volume: 0.4,
       controls: 'keyboard',
@@ -230,6 +232,7 @@ const saveManagerStubs = vi.hoisted(() => {
       save,
       resetPlayerPosition,
       clear,
+      clearProgressPreservingSettings,
       updateSettings,
     };
 
@@ -1504,6 +1507,33 @@ describe('Scene registration', () => {
       controls: 'touch',
       difficulty: 'hard',
     });
+  });
+
+  it('ゲームオーバー終了時に設定を残したまま進行状況をリセットする', () => {
+    const clearProgressPreservingSettings = vi.fn();
+    saveManagerStubs.mock.mockImplementation(() => {
+      const instance = saveManagerStubs.createInstance();
+      Object.assign(instance, { clearProgressPreservingSettings });
+      return instance;
+    });
+
+    const gameScene = new GameScene();
+    gameScene.create();
+
+    const shutdownCall = asMock(gameScene.events.once).mock.calls.find(([event]) => event === 'shutdown');
+    expect(shutdownCall).toBeTruthy();
+    const [, shutdownHandler] = shutdownCall ?? [];
+
+    const latestSettings = {
+      volume: 0.2,
+      controls: 'controller' as const,
+      difficulty: 'hard' as const,
+    };
+    Object.assign(gameScene as any, { currentSettings: latestSettings, isGameOver: true });
+
+    shutdownHandler?.();
+
+    expect(clearProgressPreservingSettings).toHaveBeenCalledWith(latestSettings);
   });
 
   it('ゲームシーンは壁タイルのフレームが存在しない場合に矩形描画へフォールバックする', () => {
