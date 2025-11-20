@@ -27,15 +27,15 @@ describe('Stage catalog', () => {
     const goalSanctum = findStage('goal-sanctum');
     expect(goalSanctum).toBeDefined();
     expect(goalSanctum?.neighbors?.south).toBe('mirror-corridor');
-    expect(goalSanctum?.neighbors?.north).toBeUndefined();
-    expect(goalSanctum?.entryPoints?.north).toBeUndefined();
+    expect(goalSanctum?.neighbors?.north).toBe('sky-sanctum');
+    expect(goalSanctum?.entryPoints?.north).toBeDefined();
     expect(goalSanctum?.enemySpawns?.baseline).toBeGreaterThanOrEqual(1);
 
     const hasExitDoor = goalSanctum?.layout.some((row) => row.includes('D')) ?? false;
     expect(hasExitDoor).toBe(true);
 
     const doorDirections = goalSanctum?.doors?.map((door) => door.direction) ?? [];
-    expect(doorDirections).toEqual(['south']);
+    expect(doorDirections).toEqual(['north', 'south']);
     expect(goalSanctum?.goal?.doorId).toBe('south-0');
 
     const tileSize = goalSanctum?.tileSize ?? 0;
@@ -57,10 +57,10 @@ describe('Stage catalog', () => {
     expect(southExit?.position.x).toBeCloseTo(expectedX, 6);
   });
 
-  it('includes the sky sanctum branch connected north of the central hub', () => {
+  it('includes the sky sanctum branch connected north of the goal sanctum', () => {
     const skySanctum = findStage('sky-sanctum');
     expect(skySanctum).toBeDefined();
-    expect(skySanctum?.neighbors?.south).toBe('central-hub');
+    expect(skySanctum?.neighbors?.south).toBe('goal-sanctum');
     expect(skySanctum?.neighbors?.east).toBe('aurora-spire');
     expect(skySanctum?.neighbors?.west).toBe('starlit-keep');
 
@@ -98,7 +98,7 @@ describe('Stage catalog', () => {
     const centralHub = findStage('central-hub');
     expect(centralHub).toBeDefined();
     expect(centralHub?.doorBuffer).toBeGreaterThanOrEqual(1);
-    expect(centralHub?.doors?.length).toBe(6);
+    expect(centralHub?.doors?.length).toBe(5);
     const doorWithMetadata = centralHub?.doors?.find((door) => Boolean(door.id && door.safeRadius));
     expect(doorWithMetadata?.direction).toBeTruthy();
     expect(doorWithMetadata?.tile).toBeDefined();

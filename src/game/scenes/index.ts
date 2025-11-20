@@ -2102,10 +2102,13 @@ export class GameScene extends Phaser.Scene {
       let usedDoorTexture = false;
 
       const isLockedDoor =
-        currentAreaId === AREA_IDS.CentralHub &&
         hasAllBranchRelics === false &&
-        ((doorDirection === 'north' && doorTargetId === AREA_IDS.MirrorCorridor) ||
-          (doorDirection === 'east' && doorTargetId === AREA_IDS.SkySanctum));
+        ((currentAreaId === AREA_IDS.CentralHub &&
+          doorDirection === 'north' &&
+          doorTargetId === AREA_IDS.MirrorCorridor) ||
+          (currentAreaId === AREA_IDS.GoalSanctum &&
+            doorDirection === 'north' &&
+            doorTargetId === AREA_IDS.SkySanctum));
 
       const shouldUseLockedTexture = isLockedDoor;
       const shouldUseGoalTexture = !shouldUseLockedTexture && doorType === 'goal' && goalDoorTextureAvailable;

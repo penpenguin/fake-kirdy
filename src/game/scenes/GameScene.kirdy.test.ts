@@ -420,6 +420,7 @@ vi.mock('../world/AreaManager', () => ({
     CentralHub: 'central-hub',
     MirrorCorridor: 'mirror-corridor',
     FireArea: 'fire-area',
+    GoalSanctum: 'goal-sanctum',
     SkySanctum: 'sky-sanctum',
   },
   AreaManager: AreaManagerMock,
@@ -1371,27 +1372,28 @@ describe('GameScene player integration', () => {
     expect(createdImages.some((entry) => entry.textureKey === 'locked-door')).toBe(true);
   });
 
-  it('Central Hub 東扉が未解放のとき locked-door テクスチャを使用する', () => {
+  it('Goal Sanctum 北扉が未解放のとき locked-door テクスチャを使用する', () => {
     const tileSize = defaultAreaState.tileMap.tileSize;
-    const doorColumn = defaultAreaState.tileMap.columns - 2;
-    const doorRow = Math.floor(defaultAreaState.tileMap.rows / 2);
-    const originalGetTileAt = defaultAreaState.tileMap.getTileAt;
+    const doorColumn = Math.floor(defaultAreaState.tileMap.columns / 2);
+    const doorRow = 1;
     const getTileAt = vi.fn((column: number, row: number) => {
       if (column === doorColumn && row === doorRow) {
         return 'door';
       }
 
-      return originalGetTileAt(column, row);
+      return 'floor';
     });
 
     const areaStateWithDoor = {
       ...defaultAreaState,
       definition: {
         ...defaultAreaState.definition,
+        id: 'goal-sanctum',
+        name: 'Goal Sanctum',
         doors: [
           {
-            id: 'east-0',
-            direction: 'east' as const,
+            id: 'north-0',
+            direction: 'north' as const,
             tile: { column: doorColumn, row: doorRow },
             position: {
               x: doorColumn * tileSize + tileSize / 2,
