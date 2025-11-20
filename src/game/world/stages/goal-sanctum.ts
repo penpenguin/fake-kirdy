@@ -5,7 +5,7 @@ const tileSize = 32;
 
 const layout = [
   '####################',
-  '#.........D..D.....#',
+  '#..................#',
   '#..................#',
   '#......####........#',
   '#..................#',
@@ -26,12 +26,10 @@ export const goalSanctum: AreaDefinition = buildStageDefinition({
   layout,
   neighbors: {
     south: 'mirror-corridor',
-    north: 'sky-sanctum',
   },
   entryPoints: {
     default: { position: { x: southDoorX, y: height - tileSize * 2 } },
     south: { position: { x: southDoorX, y: height - tileSize * 2 }, facing: 'south' },
-    north: { position: { x: width / 2, y: tileSize * 2 } },
   },
   enemySpawns: {
     baseline: 1,
@@ -48,8 +46,8 @@ export const goalSanctum: AreaDefinition = buildStageDefinition({
   },
   doorBuffer: 2,
   goal: {
-    doorId: 'north-0',
-    direction: 'north',
+    doorId: 'south-0',
+    direction: 'south',
     texture: 'goal-door',
     resultOverlayKey: 'goal-results',
     scoreBonus: 5000,
