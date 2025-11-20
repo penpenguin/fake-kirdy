@@ -320,18 +320,18 @@ describe('asset sprites align with design palette expectations', () => {
 
   it('virtual touch control sprite uses UI accent palette', () => {
     expectContainsAnchors('virtual-controls', 'images/ui/virtual-controls.png', [
-      { label: 'aura blue', color: rgba(108, 164, 255), tolerance: 30 },
-      { label: 'highlight cyan', color: rgba(74, 212, 255), tolerance: 28 },
-      { label: 'ability pink', color: rgba(255, 156, 214), tolerance: 28 },
-      { label: 'action gold', color: rgba(255, 232, 128), tolerance: 26 },
+      { label: 'soft sky', color: rgba(175, 225, 243), tolerance: 12 },
+      { label: 'mint glow', color: rgba(176, 236, 198), tolerance: 18 },
+      { label: 'rose accent', color: rgba(246, 163, 170), tolerance: 18 },
+      { label: 'ice edge', color: rgba(165, 220, 243), tolerance: 14 },
     ]);
   });
 
   it('fallback virtual control icon stays readable with high-contrast cues', () => {
     expectContainsAnchors('virtual-controls fallback', 'images/fallbacks/virtual-controls.png', [
-      { label: 'outline navy', color: rgba(24, 32, 96), tolerance: 12 },
-      { label: 'interface pink', color: rgba(255, 156, 214), tolerance: 20 },
-      { label: 'spark highlight', color: rgba(255, 232, 128), tolerance: 16 },
+      { label: 'soft sky', color: rgba(175, 225, 243), tolerance: 12 },
+      { label: 'mint glow', color: rgba(176, 236, 198), tolerance: 18 },
+      { label: 'rose accent', color: rgba(246, 163, 170), tolerance: 18 },
     ]);
   });
 
@@ -341,13 +341,13 @@ describe('asset sprites align with design palette expectations', () => {
     expect(png.height).toBe(192);
 
     const glyphAnchors: Record<keyof typeof VIRTUAL_CONTROL_LAYOUT, ColorAnchor> = {
-      'dpad-up': { label: 'up arrow aqua', color: rgba(122, 218, 255), tolerance: 24 },
-      'dpad-left': { label: 'left arrow cyan', color: rgba(90, 208, 255), tolerance: 22 },
-      'dpad-down': { label: 'down arrow mint', color: rgba(132, 232, 172), tolerance: 20 },
-      'dpad-right': { label: 'right arrow gold', color: rgba(255, 210, 112), tolerance: 20 },
-      spit: { label: 'spit star ember', color: rgba(255, 190, 96), tolerance: 20 },
-      discard: { label: 'discard cross magenta', color: rgba(255, 108, 144), tolerance: 20 },
-      inhale: { label: 'inhale swirl pink', color: rgba(255, 150, 216), tolerance: 24 },
+      'dpad-up': { label: 'up arrow sky', color: rgba(175, 225, 243), tolerance: 10 },
+      'dpad-left': { label: 'left arrow sky', color: rgba(176, 224, 243), tolerance: 10 },
+      'dpad-down': { label: 'down arrow sky', color: rgba(177, 224, 243), tolerance: 10 },
+      'dpad-right': { label: 'right arrow sky', color: rgba(174, 223, 243), tolerance: 10 },
+      spit: { label: 'spit star mint', color: rgba(176, 236, 198), tolerance: 14 },
+      discard: { label: 'discard cross teal', color: rgba(165, 220, 243), tolerance: 12 },
+      inhale: { label: 'inhale swirl rose', color: rgba(246, 163, 170), tolerance: 14 },
     };
 
     (Object.keys(VIRTUAL_CONTROL_LAYOUT) as Array<keyof typeof VIRTUAL_CONTROL_LAYOUT>).forEach(
