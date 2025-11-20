@@ -1,3 +1,1 @@
-- Run `npm run test` and `npm run build` locally before requesting review.
-- Follow Takuto Wada TDD history: commit small increments (test, implementation, refactor) with short imperative subjects referencing relevant spec/task.
-- Update docs/ scope or gameplay specs when behavior changes; include media for visual updates; highlight any deferred work.
+2025-11-20: Converted all game assets to WebP (manifest/tests updated) and removed unused stage layout data. Later deleted deprecated asset generator script tools/generate_assets.py after review feedback. Recent commits: 9cea4a4 "Convert images to webp", 3fbeabd "Remove deprecated asset generator". Tests: npm run check:test green after WebP conversion; target test/index-html.test.ts after favicon; prior full run after stage-layout removal. Branch assets-update pushed to origin.
