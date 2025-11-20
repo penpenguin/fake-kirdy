@@ -154,7 +154,12 @@ function generateProceduralStages(): AreaDefinition[] {
     const lastNode = clusterNodes.at(-1);
 
     if (previousClusterLast && firstNode) {
-      if (blueprint.cluster !== 'ice' && blueprint.cluster !== 'fire' && blueprint.cluster !== 'ruins') {
+      if (
+        blueprint.cluster !== 'ice' &&
+        blueprint.cluster !== 'fire' &&
+        blueprint.cluster !== 'ruins' &&
+        blueprint.cluster !== 'sky'
+      ) {
         firstNode.neighbors.north = previousClusterLast.id;
         previousClusterLast.neighbors.south = firstNode.id;
       }
@@ -238,15 +243,12 @@ function generateProceduralStages(): AreaDefinition[] {
   }
 
   if (ruinsExitNode) {
-    if (skyEntryNode && ruinsExitNode.neighbors.south === skyEntryNode.id) {
-      delete ruinsExitNode.neighbors.south;
-    }
     ruinsExitNode.neighbors.east = RUINS_RELIQUARY_ID;
     ruinsClusterExitId = ruinsExitNode.id;
   }
 
   if (skyEntryNode) {
-    skyEntryNode.neighbors.north = RUINS_RELIQUARY_ID;
+    skyEntryNode.neighbors.south = 'sky-sanctum';
     skyClusterEntryId = skyEntryNode.id;
   }
 

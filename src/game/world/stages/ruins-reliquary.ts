@@ -1,6 +1,6 @@
 import type { AreaDefinition } from '../AreaManager';
 import { buildStageDefinition } from './stage-utils';
-import { RUINS_RELIQUARY_ID, getRuinsExpanseExitId, getSkyExpanseEntryId } from './procedural';
+import { RUINS_RELIQUARY_ID, getRuinsExpanseExitId } from './procedural';
 
 const tileSize = 32;
 
@@ -10,7 +10,7 @@ const layout = [
   '#..####......####..#',
   '#..................#',
   '#..######..######..#',
-  '#..............D...#',
+  '#..................#',
   '####################',
 ];
 
@@ -24,12 +24,10 @@ export const ruinsReliquary: AreaDefinition = buildStageDefinition({
   layout,
   neighbors: {
     west: getRuinsExpanseExitId(),
-    south: getSkyExpanseEntryId(),
   },
   entryPoints: {
     default: { position: { x: width - tileSize * 4, y: height / 2 } },
     west: { position: { x: tileSize * 2, y: height / 2 } },
-    south: { position: { x: width / 2, y: height - tileSize * 2 } },
   },
   enemySpawns: {
     baseline: 3,
