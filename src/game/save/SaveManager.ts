@@ -180,6 +180,16 @@ export class SaveManager {
     tryRemoveItem(this.fallbackStorage, this.fallbackKey);
   }
 
+  clearProgressPreservingSettings(settings?: GameSettingsSnapshot) {
+    const preservedSettings = sanitizeSettings(settings ?? this.load()?.settings);
+
+    this.save({
+      player: { ...DEFAULT_PLAYER },
+      area: { ...DEFAULT_AREA },
+      settings: preservedSettings,
+    });
+  }
+
   resetPlayerPosition() {
     const snapshot = this.load() ?? {
       player: { ...DEFAULT_PLAYER },

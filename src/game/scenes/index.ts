@@ -996,7 +996,7 @@ export class GameScene extends Phaser.Scene {
       this.kirdy = undefined;
       this.goalDoorController = undefined;
       if (this.isGameOver) {
-        this.saveManager?.clear();
+        this.saveManager?.clearProgressPreservingSettings?.(this.currentSettings);
       }
       this.isGameOver = false;
       this.saveManager = undefined;

@@ -195,6 +195,41 @@ describe('SaveManager', () => {
     warn.mockRestore();
   });
 
+  it('進行状況を初期化しても設定を保持する', () => {
+    const payload = {
+      version: 1,
+      savedAt: nowStub(),
+      data: {
+        player: snapshot.player,
+        area: snapshot.area,
+        settings: {
+          volume: 0.75,
+          controls: 'controller' as const,
+          difficulty: 'hard',
+        },
+      },
+    };
+    storage.getItem.mockReturnValue(JSON.stringify(payload));
+
+    saveManager.clearProgressPreservingSettings();
+
+    expect(storage.setItem).toHaveBeenCalledTimes(1);
+    const [, serialized] = storage.setItem.mock.calls.at(-1)!;
+    const parsed = JSON.parse(serialized);
+
+    expect(parsed).toMatchObject({
+      data: {
+        player: { hp: 6, maxHP: 6, score: 0 },
+        area: { currentAreaId: AREA_IDS.CentralHub },
+        settings: {
+          volume: 0.75,
+          controls: 'controller',
+          difficulty: 'hard',
+        },
+      },
+    });
+  });
+
   it('ストレージ書き込みが例外を投げてもエラーを伝播しない', () => {
     const error = new Error('quota exceeded');
     storage.setItem.mockImplementation(() => {
