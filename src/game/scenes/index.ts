@@ -1459,12 +1459,21 @@ export class GameScene extends Phaser.Scene {
     const areaState = this.areaManager?.getCurrentAreaState();
     this.enemySpawnPlan = this.buildEnemySpawnPlan(areaState?.definition?.enemySpawns);
     this.nextEnemyTypeIndex = 0;
-    this.enemyManagerConfig = this.createEnemyManagerConfig(this.enemySpawnPlan);
 
-    if (this.enemyManager) {
-      this.enemyManager.destroy();
+    // 中央ハブやゴールサンクタムなど、敵スポーン設定がない/無効なエリアでは自動スポーンを止める
+    const shouldAutoSpawn =
+      !!this.enemySpawnPlan && this.enemySpawnPlan.baseline > 0 && this.enemySpawnPlan.entries.length > 0;
+    this.enemyAutoSpawnEnabled = shouldAutoSpawn;
+
+    if (!shouldAutoSpawn) {
+      this.enemyBaselinePopulation = 0;
+      this.enemySpawnPoints = [];
+      this.enemyManager?.destroy();
       this.enemyManager = undefined;
+      return;
     }
+
+    this.enemyManagerConfig = this.createEnemyManagerConfig(this.enemySpawnPlan);
 
     this.enemyManager = new EnemyManager({
       scene: this,
