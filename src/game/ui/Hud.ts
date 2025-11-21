@@ -1,5 +1,5 @@
 import type Phaser from 'phaser';
-import type { AbilityType } from '../mechanics/AbilitySystem';
+import { ABILITY_TYPES, type AbilityType } from '../mechanics/AbilitySystem';
 import { BRANCH_RELIC_ITEM_IDS, type BranchRelicItemId } from '../world/branch-relics';
 import { resolveCollectibleTextureKey } from '../world/collectible-assets';
 import { HUD_LINE_SPACING, HUD_SAFE_AREA_HEIGHT } from './hud-layout';
@@ -55,27 +55,37 @@ const DEFAULT_ABILITY_ICON_THEME: AbilityIconTheme = {
   glyphColor: '#1f1f1f',
 };
 
-const ABILITY_ICON_THEMES: Record<AbilityType, AbilityIconTheme> = {
-  fire: {
-    background: '#2b0d1a',
-    border: '#ffb347',
-    shapePrimary: '#ff6b3d',
-    shapeSecondary: '#ffd166',
+const ABILITY_ICON_THEMES: Record<AbilityType, AbilityIconTheme> = ABILITY_TYPES.reduce(
+  (acc, type) => {
+    if (type === 'fire') {
+      acc[type] = {
+        background: '#2b0d1a',
+        border: '#ffb347',
+        shapePrimary: '#ff6b3d',
+        shapeSecondary: '#ffd166',
+      };
+    } else if (type === 'ice') {
+      acc[type] = {
+        background: '#0b1a33',
+        border: '#8ee1ff',
+        shapePrimary: '#c3f3ff',
+        shapeSecondary: '#78c0e0',
+      };
+    } else if (type === 'sword') {
+      acc[type] = {
+        background: '#eae8dc',
+        border: '#4f5d75',
+        shapePrimary: '#bcc5d3',
+        shapeSecondary: '#f4a259',
+        detail: '#2d3142',
+      };
+    } else {
+      acc[type] = { ...DEFAULT_ABILITY_ICON_THEME };
+    }
+    return acc;
   },
-  ice: {
-    background: '#0b1a33',
-    border: '#8ee1ff',
-    shapePrimary: '#c3f3ff',
-    shapeSecondary: '#78c0e0',
-  },
-  sword: {
-    background: '#eae8dc',
-    border: '#4f5d75',
-    shapePrimary: '#bcc5d3',
-    shapeSecondary: '#f4a259',
-    detail: '#2d3142',
-  },
-};
+  {} as Record<AbilityType, AbilityIconTheme>,
+);
 
 type AbilityIconRenderer = (context: CanvasRenderingContext2D, theme: AbilityIconTheme) => void;
 

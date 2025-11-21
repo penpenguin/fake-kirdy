@@ -8,7 +8,24 @@ import type { AudioManager } from '../audio/AudioManager';
 import { configureProjectileHitbox, resolveForwardSpawnPosition } from './projectilePlacement';
 import { attachProjectileTrail } from './projectileTrail';
 
-export const ABILITY_TYPES = ['fire', 'ice', 'sword'] as const;
+export const ABILITY_TYPES = [
+  'fire',
+  'ice',
+  'sword',
+  'leaf',
+  'spike',
+  'sticky',
+  'ice-arrow',
+  'guard',
+  'magma-shield',
+  'dash-fire',
+  'beam',
+  'curse',
+  'warp',
+  'wind',
+  'thunder',
+  'prism',
+] as const;
 export type AbilityType = (typeof ABILITY_TYPES)[number];
 
 export type AbilityMetadata = {
@@ -59,28 +76,57 @@ const abilityCatalogueBase = {
   fire: { type: 'fire', name: 'Fire', attack: 'fire-attack', color: '#FF7B4A', damage: ABILITY_PROJECTILE_DAMAGE },
   ice: { type: 'ice', name: 'Ice', attack: 'ice-attack', color: '#9FD8FF', damage: ABILITY_PROJECTILE_DAMAGE },
   sword: { type: 'sword', name: 'Sword', attack: 'sword-slash', color: '#E9E48D', damage: ABILITY_PROJECTILE_DAMAGE },
+  leaf: { type: 'leaf', name: 'Leaf', attack: 'leaf-attack', color: '#A8E063', damage: ABILITY_PROJECTILE_DAMAGE },
+  spike: { type: 'spike', name: 'Spike', attack: 'spike-attack', color: '#7C6F64', damage: ABILITY_PROJECTILE_DAMAGE },
+  sticky: { type: 'sticky', name: 'Sticky', attack: 'sticky-shot', color: '#D4A373', damage: ABILITY_PROJECTILE_DAMAGE },
+  'ice-arrow': { type: 'ice-arrow', name: 'Ice Arrow', attack: 'ice-arrow-attack', color: '#B7E3FF', damage: ABILITY_PROJECTILE_DAMAGE },
+  guard: { type: 'guard', name: 'Guard', attack: 'guard-block', color: '#C5C5C5', damage: ABILITY_PROJECTILE_DAMAGE },
+  'magma-shield': { type: 'magma-shield', name: 'Magma Shield', attack: 'magma-shield', color: '#FF9E63', damage: ABILITY_PROJECTILE_DAMAGE },
+  'dash-fire': { type: 'dash-fire', name: 'Dash Fire', attack: 'dash-fire', color: '#FFB347', damage: ABILITY_PROJECTILE_DAMAGE },
+  beam: { type: 'beam', name: 'Beam', attack: 'beam-attack', color: '#9FA8DA', damage: ABILITY_PROJECTILE_DAMAGE },
+  curse: { type: 'curse', name: 'Curse', attack: 'curse-breath', color: '#B48EAD', damage: ABILITY_PROJECTILE_DAMAGE },
+  warp: { type: 'warp', name: 'Warp', attack: 'warp-blink', color: '#8CE0FF', damage: ABILITY_PROJECTILE_DAMAGE },
+  wind: { type: 'wind', name: 'Wind', attack: 'wind-gust', color: '#9EE7FF', damage: ABILITY_PROJECTILE_DAMAGE },
+  thunder: { type: 'thunder', name: 'Thunder', attack: 'thunder-strike', color: '#F5D147', damage: ABILITY_PROJECTILE_DAMAGE },
+  prism: { type: 'prism', name: 'Prism', attack: 'prism-dash', color: '#D8B4FE', damage: ABILITY_PROJECTILE_DAMAGE },
 } as const satisfies Record<AbilityType, AbilityMetadata>;
 
-const abilityCatalogue: Record<AbilityType, AbilityMetadata> = {
-  fire: Object.freeze({ ...abilityCatalogueBase.fire }),
-  ice: Object.freeze({ ...abilityCatalogueBase.ice }),
-  sword: Object.freeze({ ...abilityCatalogueBase.sword }),
-};
+const abilityCatalogue = Object.freeze(
+  Object.fromEntries(
+    (ABILITY_TYPES as readonly AbilityType[]).map((type) => [type, Object.freeze({ ...abilityCatalogueBase[type] })]),
+  ) as Record<AbilityType, AbilityMetadata>,
+);
 
-Object.freeze(abilityCatalogue);
-
-const abilityTextureFallbacks: Record<AbilityType, readonly string[]> = {
-  fire: ['kirdy-fire'],
-  ice: ['kirdy-ice'],
-  sword: ['kirdy-sword'],
-};
+const abilityTextureFallbacks = Object.freeze(
+  ABILITY_TYPES.reduce((acc, type) => {
+    if (type === 'fire') {
+      acc[type] = ['kirdy-fire'];
+    } else if (type === 'ice') {
+      acc[type] = ['kirdy-ice'];
+    } else if (type === 'sword') {
+      acc[type] = ['kirdy-sword'];
+    } else {
+      acc[type] = ['kirdy'];
+    }
+    return acc;
+  }, {} as Record<AbilityType, readonly string[]>),
+);
 
 // Particle systems randomize angle by default, so fire trails must use orientation-agnostic textures.
-const abilityTrailParticleCandidates: Record<AbilityType, readonly string[]> = {
-  fire: [],
-  ice: ['ice-attack', 'inhale-sparkle'],
-  sword: ['sword-slash', 'inhale-sparkle'],
-};
+const abilityTrailParticleCandidates = Object.freeze(
+  ABILITY_TYPES.reduce((acc, type) => {
+    if (type === 'fire') {
+      acc[type] = [];
+    } else if (type === 'ice') {
+      acc[type] = ['ice-attack', 'inhale-sparkle'];
+    } else if (type === 'sword') {
+      acc[type] = ['sword-slash', 'inhale-sparkle'];
+    } else {
+      acc[type] = ['inhale-sparkle'];
+    }
+    return acc;
+  }, {} as Record<AbilityType, readonly string[]>),
+);
 
 const BASE_TEXTURE_FALLBACKS = ['kirdy-idle'] as const;
 
@@ -255,7 +301,34 @@ function playAbilitySound(context: AbilityContext, key: string) {
   context.scene.sound?.play?.(key);
 }
 
+const placeholderAbilities = ABILITY_TYPES.filter(
+  (type) => type !== 'fire' && type !== 'ice' && type !== 'sword',
+) as AbilityType[];
+
+const placeholderAbilityDefinitions = placeholderAbilities.reduce<Partial<Record<AbilityType, AbilityDefinition>>>(
+  (acc, type) => {
+    const meta = abilityCatalogue[type];
+    acc[type] = {
+      ...meta,
+      onAcquire: (context) => {
+        context.kirdy.sprite.clearTint?.();
+        trySetKirdyTexture(context, 'kirdy', undefined, abilityTextureFallbacks[type] ?? BASE_TEXTURE_FALLBACKS);
+      },
+      onRemove: (context) => {
+        context.kirdy.sprite.clearTint?.();
+        trySetKirdyTexture(context, 'kirdy', undefined, BASE_TEXTURE_FALLBACKS);
+      },
+      performAttack: () => {
+        // placeholder: real VFX/SFX will be added with assets
+      },
+    };
+    return acc;
+  },
+  {} as Partial<Record<AbilityType, AbilityDefinition>>,
+);
+
 const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
+  ...placeholderAbilityDefinitions,
   fire: {
     ...abilityCatalogue.fire,
     onAcquire: (context) => {
@@ -434,7 +507,7 @@ const abilityDefinitions: Record<AbilityType, AbilityDefinition> = {
       playAbilitySound(context, 'ability-sword-attack');
     },
   },
-};
+} as Record<AbilityType, AbilityDefinition>;
 
 export class AbilitySystem {
   static readonly abilities: Readonly<Record<AbilityType, AbilityMetadata>> = abilityCatalogue;

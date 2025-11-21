@@ -36,8 +36,9 @@ export const forestArea: AreaDefinition = buildStageDefinition({
     baseline: 3,
     maxActive: 3,
     entries: [
-      { type: 'wabble-bee', limit: 1 },
-      { type: 'dronto-durt', limit: 2 },
+      { type: 'vine-hopper', limit: 1 },
+      { type: 'thorn-roller', limit: 1 },
+      { type: 'sap-spitter', limit: 1 },
     ],
   },
   metadata: {

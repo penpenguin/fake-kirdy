@@ -55,8 +55,9 @@ export const skySanctum: AreaDefinition = buildStageDefinition({
     baseline: 3,
     maxActive: 4,
     entries: [
-      { type: 'frost-wabble', limit: 2 },
-      { type: 'glacio-durt', limit: 2 },
+      { type: 'gale-kite', limit: 1 },
+      { type: 'nimbus-knight', limit: 1 },
+      { type: 'prism-wraith', limit: 1 },
     ],
   },
   metadata: {

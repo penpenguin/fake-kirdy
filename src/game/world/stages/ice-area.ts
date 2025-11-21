@@ -36,8 +36,11 @@ export const iceArea: AreaDefinition = buildStageDefinition({
     baseline: 3,
     maxActive: 3,
     entries: [
-      { type: 'frost-wabble', limit: 2 },
+      { type: 'frost-wabble', limit: 1 },
       { type: 'glacio-durt', limit: 1 },
+      { type: 'chill-wisp', limit: 1 },
+      { type: 'glacier-golem', limit: 1 },
+      { type: 'frost-archer', limit: 1 },
     ],
   },
   metadata: {

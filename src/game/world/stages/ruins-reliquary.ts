@@ -33,8 +33,9 @@ export const ruinsReliquary: AreaDefinition = buildStageDefinition({
     baseline: 3,
     maxActive: 4,
     entries: [
-      { type: 'wabble-bee', limit: 1 },
-      { type: 'dronto-durt', limit: 1 },
+      { type: 'stone-sentinel', limit: 1 },
+      { type: 'curse-bat', limit: 1 },
+      { type: 'relic-thief', limit: 1 },
     ],
   },
   metadata: {
