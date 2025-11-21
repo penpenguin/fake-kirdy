@@ -318,8 +318,8 @@ const placeholderAbilityDefinitions = placeholderAbilities.reduce<Partial<Record
         context.kirdy.sprite.clearTint?.();
         trySetKirdyTexture(context, 'kirdy', undefined, BASE_TEXTURE_FALLBACKS);
       },
-      performAttack: () => {
-        // placeholder: real VFX/SFX will be added with assets
+      performAttack: (context) => {
+        performBasicProjectileAttack(type, context);
       },
     };
     return acc;
@@ -678,6 +678,34 @@ function spawnProjectile(context: { scene: Phaser.Scene; kirdy: Kirdy }, texture
   const spawnX = kirdy.sprite.x ?? 0;
   const spawnY = kirdy.sprite.y ?? 0;
   return scene.matter?.add?.sprite?.(spawnX, spawnY, texture);
+}
+
+function performBasicProjectileAttack(type: AbilityType, context: AbilityContext) {
+  const meta = abilityCatalogue[type];
+  const { scene, kirdy, physicsSystem } = context;
+  ensureAbilityTexture(scene, meta.attack, meta.color);
+
+  const projectile = spawnProjectile({ scene, kirdy }, meta.attack);
+  if (!projectile) {
+    return;
+  }
+
+  const direction = kirdy.sprite.flipX === true ? -1 : 1;
+  const spawnPosition = resolveForwardSpawnPosition(kirdy.sprite, direction);
+  const spawnY = kirdy.sprite.y ?? spawnPosition.y;
+
+  projectile.setPosition?.(spawnPosition.x, spawnY);
+  projectile.setIgnoreGravity?.(true);
+  projectile.setFixedRotation?.();
+  projectile.setSensor?.(true);
+  configureProjectileHitbox(projectile);
+  projectile.setVelocity?.(direction * FIRE_PROJECTILE_SPEED, 0);
+  projectile.setActive?.(true);
+  projectile.setVisible?.(true);
+  projectile.setName?.(`${type}-projectile`);
+
+  physicsSystem?.registerPlayerAttack(projectile, { damage: meta.damage });
+  playAbilitySound(context, 'kirdy-attack');
 }
 
 function spawnSlash(context: { scene: Phaser.Scene; kirdy: Kirdy }, texture: string) {

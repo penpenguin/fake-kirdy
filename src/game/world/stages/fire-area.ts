@@ -35,6 +35,8 @@ export const fireArea: AreaDefinition = buildStageDefinition({
     baseline: 3,
     maxActive: 3,
     entries: [
+      { type: 'wabble-bee', limit: 1 },
+      { type: 'dronto-durt', limit: 1 },
       { type: 'ember-imp', limit: 1 },
       { type: 'magma-crab', limit: 1 },
       { type: 'blaze-strider', limit: 1 },
