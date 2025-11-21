@@ -136,6 +136,10 @@ const IMAGE_ASSETS: ReadonlyArray<ImageAsset> = [
   { key: 'gale-kite', url: 'images/enemies/gale-kite.webp', fallbackUrl: 'images/fallbacks/placeholder.webp' },
   { key: 'nimbus-knight', url: 'images/enemies/nimbus-knight.webp', fallbackUrl: 'images/fallbacks/placeholder.webp' },
   { key: 'prism-wraith', url: 'images/enemies/prism-wraith.webp', fallbackUrl: 'images/fallbacks/placeholder.webp' },
+  { key: 'guardian-treant', url: 'images/enemies/guardian-treant.webp', fallbackUrl: 'images/fallbacks/placeholder.webp' },
+  { key: 'frost-colossus', url: 'images/enemies/frost-colossus.webp', fallbackUrl: 'images/fallbacks/placeholder.webp' },
+  { key: 'magma-hydra', url: 'images/enemies/magma-hydra.webp', fallbackUrl: 'images/fallbacks/placeholder.webp' },
+  { key: 'relic-warden', url: 'images/enemies/relic-warden.webp', fallbackUrl: 'images/fallbacks/placeholder.webp' },
   {
     key: 'kirdy-idle',
     url: 'images/characters/kirdy/kirdy-idle.webp',
