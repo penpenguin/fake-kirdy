@@ -127,37 +127,10 @@ class AbilitySystem {
 
 ### 4. 敵管理システム
 
-```javascript
-class EnemyManager {
-  constructor(scene) {
-    this.enemies = [];
-    this.maxEnemies = 3; // Kirdyに優しい制限
-    this.spawnCooldown = 2000; // 2秒間隔
-  }
-  
-  spawnEnemy(type, x, y) {
-    if (this.enemies.length >= this.maxEnemies) return;
-    // 敵生成処理
-  }
-  
-  checkProximity(kirdy) {
-    // Kirdyの周囲2体制限チェック
-    const nearbyEnemies = this.enemies.filter(enemy => 
-      Phaser.Math.Distance.Between(kirdy.x, kirdy.y, enemy.x, enemy.y) < 100
-    );
-    
-    if (nearbyEnemies.length >= 2) {
-      this.disperseEnemies(kirdy);
-    }
-  }
-}
-```
+詳細な仕様は `docs/enemy-specs.md` を参照。ここでは設計全体の流れのみを記載する。
 
-#### ステージ別スポーン構成
-
-- `src/game/world/stages/*.ts` に各エリアのレイアウトと `enemySpawns` 設定を切り出し、上限数や出現比率をステージ単位で管理する。
-- `GameScene` の自動スポーンは構成されたエントリ（例: Wabble Bee 2体 + Dronto Durt 1体）をローテーションし、`EnemyManager` の型別アクティブ数を確認してから出現させる。
-- ユニットテスト `GameScene.kirdy.test.ts` の「ステージ設定に従って異なるタイプの敵を自動スポーンする」でマルチタイプ出現を保証する。
+- `EnemyManager` が敵生成・サスペンド・密集分散・カリングを司り、吸い込みフロー（InhaleSystem）と物理登録を連携させる。
+- ステージ別スポーン構成は `src/game/world/stages/*.ts` で管理し、GameScene の自動スポーンがそれを利用してアクティブ数を制御する。
 
 ### 5. 入力管理
 
