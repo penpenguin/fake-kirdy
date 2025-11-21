@@ -7,6 +7,6 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178C6?logo=typescript&logoColor=white)
 ![Node.js](https://img.shields.io/badge/node-%3E%3D18-339933?logo=node.js&logoColor=white)
 
-![Kirdy key visual](docs/Key%20visual.png)
+![Kirdy key visual](docs/key_visual.gif)
 
 > 🌟 **今すぐプレイ:** ふわふわホバリングで冒険するアクション『Fake Kirdy』は [こちらから体験](https://penpenguin.github.io/fake-kirdy/)できます。
