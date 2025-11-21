@@ -1,6 +1,6 @@
 import type { AreaDefinition } from '../AreaManager';
 import { buildStageDefinition } from './stage-utils';
-import { ICE_RELIQUARY_ID, getIceExpanseExitId } from './procedural';
+import { ICE_RELIQUARY_ID, getIceBossId } from './procedural';
 
 const tileSize = 32;
 
@@ -23,7 +23,7 @@ export const iceReliquary: AreaDefinition = buildStageDefinition({
   tileSize,
   layout,
   neighbors: {
-    west: getIceExpanseExitId(),
+    west: getIceBossId(),
   },
   entryPoints: {
     default: { position: { x: width - tileSize * 3, y: height / 2 } },

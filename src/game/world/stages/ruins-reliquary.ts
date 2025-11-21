@@ -1,6 +1,6 @@
 import type { AreaDefinition } from '../AreaManager';
 import { buildStageDefinition } from './stage-utils';
-import { RUINS_RELIQUARY_ID, getRuinsExpanseExitId } from './procedural';
+import { RUINS_RELIQUARY_ID, getRuinsBossId } from './procedural';
 
 const tileSize = 32;
 
@@ -23,7 +23,7 @@ export const ruinsReliquary: AreaDefinition = buildStageDefinition({
   tileSize,
   layout,
   neighbors: {
-    west: getRuinsExpanseExitId(),
+    west: getRuinsBossId(),
   },
   entryPoints: {
     default: { position: { x: width - tileSize * 4, y: height / 2 } },

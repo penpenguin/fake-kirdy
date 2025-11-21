@@ -1,6 +1,6 @@
 import type { AreaDefinition } from '../AreaManager';
 import { buildStageDefinition } from './stage-utils';
-import { FOREST_RELIQUARY_ID, getForestExpanseExitId } from './procedural';
+import { FOREST_RELIQUARY_ID, getForestBossId } from './procedural';
 
 const tileSize = 32;
 
@@ -23,7 +23,7 @@ export const forestReliquary: AreaDefinition = buildStageDefinition({
   tileSize,
   layout,
   neighbors: {
-    west: getForestExpanseExitId(),
+    west: getForestBossId(),
   },
   entryPoints: {
     default: { position: { x: width - tileSize * 3, y: height / 2 } },

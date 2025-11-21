@@ -39,6 +39,10 @@ export const FOREST_RELIQUARY_ID = 'forest-reliquary' as AreaId;
 export const ICE_RELIQUARY_ID = 'ice-reliquary' as AreaId;
 export const FIRE_RELIQUARY_ID = 'fire-reliquary' as AreaId;
 export const RUINS_RELIQUARY_ID = 'ruins-reliquary' as AreaId;
+export const FOREST_BOSS_ID = 'forest-boss' as AreaId;
+export const ICE_BOSS_ID = 'ice-boss' as AreaId;
+export const FIRE_BOSS_ID = 'fire-boss' as AreaId;
+export const RUINS_BOSS_ID = 'ruins-boss' as AreaId;
 
 let iceClusterEntryId: AreaId | undefined;
 let fireClusterEntryId: AreaId | undefined;
@@ -48,6 +52,10 @@ let iceClusterExitId: AreaId | undefined;
 let fireClusterExitId: AreaId | undefined;
 let ruinsClusterExitId: AreaId | undefined;
 let skyClusterEntryId: AreaId | undefined;
+let forestBossId: AreaId = FOREST_BOSS_ID;
+let iceBossId: AreaId = ICE_BOSS_ID;
+let fireBossId: AreaId = FIRE_BOSS_ID;
+let ruinsBossId: AreaId = RUINS_BOSS_ID;
 
 export const PROCEDURAL_STAGE_DEFINITIONS: AreaDefinition[] = generateProceduralStages();
 
@@ -98,6 +106,22 @@ export function getRuinsExpanseExitId(): AreaId {
     throw new Error('Ruins expanse exit id is not initialized');
   }
   return ruinsClusterExitId;
+}
+
+export function getForestBossId(): AreaId {
+  return forestBossId;
+}
+
+export function getIceBossId(): AreaId {
+  return iceBossId;
+}
+
+export function getFireBossId(): AreaId {
+  return fireBossId;
+}
+
+export function getRuinsBossId(): AreaId {
+  return ruinsBossId;
 }
 
 export function getSkyExpanseEntryId(): AreaId {
@@ -228,23 +252,27 @@ function generateProceduralStages(): AreaDefinition[] {
   }
 
   if (forestExitNode) {
-    forestExitNode.neighbors.east = FOREST_RELIQUARY_ID;
+    forestExitNode.neighbors.east = FOREST_BOSS_ID;
     forestClusterExitId = forestExitNode.id;
+    forestBossId = FOREST_BOSS_ID;
   }
 
   if (iceExitNode) {
-    iceExitNode.neighbors.east = ICE_RELIQUARY_ID;
+    iceExitNode.neighbors.east = ICE_BOSS_ID;
     iceClusterExitId = iceExitNode.id;
+    iceBossId = ICE_BOSS_ID;
   }
 
   if (fireExitNode) {
-    fireExitNode.neighbors.east = FIRE_RELIQUARY_ID;
+    fireExitNode.neighbors.east = FIRE_BOSS_ID;
     fireClusterExitId = fireExitNode.id;
+    fireBossId = FIRE_BOSS_ID;
   }
 
   if (ruinsExitNode) {
-    ruinsExitNode.neighbors.east = RUINS_RELIQUARY_ID;
+    ruinsExitNode.neighbors.east = RUINS_BOSS_ID;
     ruinsClusterExitId = ruinsExitNode.id;
+    ruinsBossId = RUINS_BOSS_ID;
   }
 
   if (skyEntryNode) {
