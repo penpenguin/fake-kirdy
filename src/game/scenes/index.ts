@@ -1467,6 +1467,11 @@ export class GameScene extends Phaser.Scene {
     this.enemyAutoSpawnEnabled = shouldAutoSpawn;
     this.enemyManagerConfig = this.createEnemyManagerConfig(this.enemySpawnPlan);
 
+    if (this.enemyManager) {
+      this.enemyManager.destroy();
+      this.enemyManager = undefined;
+    }
+
     this.enemyManager = new EnemyManager({
       scene: this,
       inhaleSystem: this.inhaleSystem,
