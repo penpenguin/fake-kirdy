@@ -34,12 +34,9 @@ export const goalSanctum: AreaDefinition = buildStageDefinition({
     north: { position: { x: width / 2, y: tileSize * 2 }, facing: 'north' },
   },
   enemySpawns: {
-    baseline: 1,
-    maxActive: 2,
-    entries: [
-      { type: 'glacio-durt', limit: 1 },
-      { type: 'frost-wabble', limit: 1 },
-    ],
+    baseline: 0,
+    maxActive: 0,
+    entries: [],
   },
   metadata: {
     cluster: 'ruins',

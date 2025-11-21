@@ -14,6 +14,10 @@ import { forestReliquary } from './forest-reliquary';
 import { iceReliquary } from './ice-reliquary';
 import { fireReliquary } from './fire-reliquary';
 import { ruinsReliquary } from './ruins-reliquary';
+import { forestBoss } from './forest-boss';
+import { iceBoss } from './ice-boss';
+import { fireBoss } from './fire-boss';
+import { ruinsBoss } from './ruins-boss';
 
 export const STAGE_DEFINITIONS: ReadonlyArray<AreaDefinition> = [
   centralHub,
@@ -27,9 +31,13 @@ export const STAGE_DEFINITIONS: ReadonlyArray<AreaDefinition> = [
   auroraSpire,
   starlitKeep,
   forestReliquary,
+  forestBoss,
   iceReliquary,
+  iceBoss,
   fireReliquary,
+  fireBoss,
   ruinsReliquary,
+  ruinsBoss,
   ...PROCEDURAL_STAGE_DEFINITIONS,
 ];
 

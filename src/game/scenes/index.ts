@@ -1391,6 +1391,66 @@ export class GameScene extends Phaser.Scene {
     return this.enemyManager?.spawnGlacioDurt(spawn, options);
   }
 
+  spawnVineHopper(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnVineHopper(spawn);
+  }
+
+  spawnThornRoller(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnThornRoller(spawn);
+  }
+
+  spawnSapSpitter(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnSapSpitter(spawn);
+  }
+
+  spawnChillWisp(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnChillWisp(spawn);
+  }
+
+  spawnGlacierGolem(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnGlacierGolem(spawn);
+  }
+
+  spawnFrostArcher(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnFrostArcher(spawn);
+  }
+
+  spawnEmberImp(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnEmberImp(spawn);
+  }
+
+  spawnMagmaCrab(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnMagmaCrab(spawn);
+  }
+
+  spawnBlazeStrider(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnBlazeStrider(spawn);
+  }
+
+  spawnStoneSentinel(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnStoneSentinel(spawn);
+  }
+
+  spawnCurseBat(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnCurseBat(spawn);
+  }
+
+  spawnRelicThief(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnRelicThief(spawn);
+  }
+
+  spawnGaleKite(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnGaleKite(spawn);
+  }
+
+  spawnNimbusKnight(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnNimbusKnight(spawn);
+  }
+
+  spawnPrismWraith(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnPrismWraith(spawn);
+  }
+
   private initializeEnemyManager() {
     if (!this.inhaleSystem || !this.physicsSystem) {
       return;
@@ -1399,6 +1459,12 @@ export class GameScene extends Phaser.Scene {
     const areaState = this.areaManager?.getCurrentAreaState();
     this.enemySpawnPlan = this.buildEnemySpawnPlan(areaState?.definition?.enemySpawns);
     this.nextEnemyTypeIndex = 0;
+
+    // 中央ハブやゴールサンクタムなど、敵スポーン設定がない/無効なエリアでは自動スポーンを止めるが、
+    // 手動スポーン用に EnemyManager 自体は維持する。
+    const shouldAutoSpawn =
+      !!this.enemySpawnPlan && this.enemySpawnPlan.baseline > 0 && this.enemySpawnPlan.entries.length > 0;
+    this.enemyAutoSpawnEnabled = shouldAutoSpawn;
     this.enemyManagerConfig = this.createEnemyManagerConfig(this.enemySpawnPlan);
 
     if (this.enemyManager) {
@@ -1418,11 +1484,11 @@ export class GameScene extends Phaser.Scene {
     this.enemyManager.resetSpawnCooldown();
     this.enemySpawnPoints = this.collectInitialEnemySpawns();
     const spawnCapacity = this.enemySpawnPoints.length;
-    const plannedBaseline = this.enemySpawnPlan?.baseline ?? this.enemyManagerConfig.maxActiveEnemies;
+    const plannedBaseline = shouldAutoSpawn ? this.enemySpawnPlan?.baseline ?? 0 : 0;
     this.enemyBaselinePopulation = Math.min(
       this.enemyManagerConfig.maxActiveEnemies,
       spawnCapacity,
-      plannedBaseline,
+      Math.max(0, plannedBaseline),
     );
     this.nextEnemySpawnIndex = 0;
     this.enemyAutoSpawnTimer = 0;
@@ -1816,6 +1882,36 @@ export class GameScene extends Phaser.Scene {
         return this.spawnGlacioDurt(spawn);
       case 'dronto-durt':
         return this.spawnDrontoDurt(spawn);
+      case 'vine-hopper':
+        return this.spawnVineHopper(spawn);
+      case 'thorn-roller':
+        return this.spawnThornRoller(spawn);
+      case 'sap-spitter':
+        return this.spawnSapSpitter(spawn);
+      case 'chill-wisp':
+        return this.spawnChillWisp(spawn);
+      case 'glacier-golem':
+        return this.spawnGlacierGolem(spawn);
+      case 'frost-archer':
+        return this.spawnFrostArcher(spawn);
+      case 'ember-imp':
+        return this.spawnEmberImp(spawn);
+      case 'magma-crab':
+        return this.spawnMagmaCrab(spawn);
+      case 'blaze-strider':
+        return this.spawnBlazeStrider(spawn);
+      case 'stone-sentinel':
+        return this.spawnStoneSentinel(spawn);
+      case 'curse-bat':
+        return this.spawnCurseBat(spawn);
+      case 'relic-thief':
+        return this.spawnRelicThief(spawn);
+      case 'gale-kite':
+        return this.spawnGaleKite(spawn);
+      case 'nimbus-knight':
+        return this.spawnNimbusKnight(spawn);
+      case 'prism-wraith':
+        return this.spawnPrismWraith(spawn);
       case 'wabble-bee':
       default:
         return this.spawnWabbleBee(spawn);

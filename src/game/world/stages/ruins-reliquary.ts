@@ -1,6 +1,6 @@
 import type { AreaDefinition } from '../AreaManager';
 import { buildStageDefinition } from './stage-utils';
-import { RUINS_RELIQUARY_ID, getRuinsExpanseExitId } from './procedural';
+import { RUINS_RELIQUARY_ID, getRuinsBossId } from './procedural';
 
 const tileSize = 32;
 
@@ -23,7 +23,7 @@ export const ruinsReliquary: AreaDefinition = buildStageDefinition({
   tileSize,
   layout,
   neighbors: {
-    west: getRuinsExpanseExitId(),
+    west: getRuinsBossId(),
   },
   entryPoints: {
     default: { position: { x: width - tileSize * 4, y: height / 2 } },
@@ -33,8 +33,10 @@ export const ruinsReliquary: AreaDefinition = buildStageDefinition({
     baseline: 3,
     maxActive: 4,
     entries: [
-      { type: 'wabble-bee', limit: 1 },
       { type: 'dronto-durt', limit: 1 },
+      { type: 'stone-sentinel', limit: 1 },
+      { type: 'curse-bat', limit: 1 },
+      { type: 'relic-thief', limit: 1 },
     ],
   },
   metadata: {

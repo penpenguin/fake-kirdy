@@ -9,7 +9,26 @@ const FROST_WABBLE_CHASE_SPEED = DEFAULT_ENEMY_SPEED;
 const DRONTO_CHARGE_SPEED = DEFAULT_ENEMY_SPEED * 1.125;
 const GLACIO_DURT_CHARGE_SPEED = DEFAULT_ENEMY_SPEED * 0.95;
 
-export type EnemyType = 'wabble-bee' | 'dronto-durt' | 'frost-wabble' | 'glacio-durt';
+export type EnemyType =
+  | 'wabble-bee'
+  | 'dronto-durt'
+  | 'frost-wabble'
+  | 'glacio-durt'
+  | 'vine-hopper'
+  | 'thorn-roller'
+  | 'sap-spitter'
+  | 'chill-wisp'
+  | 'glacier-golem'
+  | 'frost-archer'
+  | 'ember-imp'
+  | 'magma-crab'
+  | 'blaze-strider'
+  | 'stone-sentinel'
+  | 'curse-bat'
+  | 'relic-thief'
+  | 'gale-kite'
+  | 'nimbus-knight'
+  | 'prism-wraith';
 
 type WabbleBeeEnemyType = Extract<EnemyType, 'wabble-bee' | 'frost-wabble'>;
 type DrontoDurtEnemyType = Extract<EnemyType, 'dronto-durt' | 'glacio-durt'>;
@@ -429,4 +448,307 @@ export function createGlacioDurt(scene: Phaser.Scene, spawn: EnemySpawn, options
     defaultAbility: 'ice',
     tint: 0x9fd8ff,
   });
+}
+
+class PassiveEnemy extends BaseEnemy {
+  protected updateAI(_delta: number) {
+    // Placeholder enemies stay idle until bespoke AI is implemented.
+    this.sprite.setVelocityX?.(0);
+  }
+}
+
+type PlaceholderEnemyOptions = EnemyCommonOptions & {
+  scale?: number;
+  tint?: number;
+  ignoreGravity?: boolean;
+  body?: { width: number; height: number; isSensor?: boolean };
+  displayName?: string;
+};
+
+function createPlaceholderEnemy(
+  scene: Phaser.Scene,
+  spawn: EnemySpawn,
+  config: {
+    enemyType: EnemyType;
+    defaultAbility: AbilityType;
+    textureKey: string;
+    defaultHP?: number;
+    displayName?: string;
+    scale?: number;
+    tint?: number;
+    ignoreGravity?: boolean;
+    body?: { width: number; height: number; isSensor?: boolean };
+  },
+  options: PlaceholderEnemyOptions = {},
+) {
+  const sprite = ensureSprite(scene.matter?.add?.sprite?.(spawn.x, spawn.y, config.textureKey), config.enemyType);
+  sprite.setName?.(config.displayName ?? config.enemyType);
+  sprite.setOrigin?.(0.5, 0.5);
+  sprite.setFixedRotation?.();
+  sprite.setIgnoreGravity?.(config.ignoreGravity ?? options.ignoreGravity ?? false);
+  sprite.setScale?.(config.scale ?? options.scale ?? 0.85);
+  if (config.tint !== undefined) {
+    sprite.setTint?.(config.tint);
+  } else {
+    sprite.clearTint?.();
+  }
+
+  const bodyConfig = config.body ?? options.body;
+  if (bodyConfig) {
+    if (typeof sprite.setBody === 'function') {
+      sprite.setBody?.({
+        type: 'rectangle',
+        width: bodyConfig.width,
+        height: bodyConfig.height,
+      });
+    } else {
+      sprite.setRectangle?.(bodyConfig.width, bodyConfig.height);
+    }
+    if (bodyConfig.isSensor) {
+      sprite.setSensor?.(true);
+    }
+  }
+
+  const resolvedAbility = options.abilityType ?? config.defaultAbility;
+  return new PassiveEnemy(scene, sprite, config.enemyType, {
+    defaultHP: Math.max(1, options.maxHP ?? config.defaultHP ?? 1),
+    defaultAbility: resolvedAbility,
+    abilityType: resolvedAbility,
+    getPlayerPosition: options.getPlayerPosition,
+    maxHP: options.maxHP,
+  });
+}
+
+export function createVineHopper(scene: Phaser.Scene, spawn: EnemySpawn, options: PlaceholderEnemyOptions = {}) {
+  return createPlaceholderEnemy(
+    scene,
+    spawn,
+    { enemyType: 'vine-hopper', defaultAbility: 'leaf', textureKey: 'vine-hopper', displayName: 'Vine Hopper' },
+    options,
+  );
+}
+
+export function createThornRoller(scene: Phaser.Scene, spawn: EnemySpawn, options: PlaceholderEnemyOptions = {}) {
+  return createPlaceholderEnemy(
+    scene,
+    spawn,
+    {
+      enemyType: 'thorn-roller',
+      defaultAbility: 'spike',
+      textureKey: 'thorn-roller',
+      displayName: 'Thorn Roller',
+      body: { width: 40, height: 32 },
+    },
+    options,
+  );
+}
+
+export function createSapSpitter(scene: Phaser.Scene, spawn: EnemySpawn, options: PlaceholderEnemyOptions = {}) {
+  return createPlaceholderEnemy(
+    scene,
+    spawn,
+    {
+      enemyType: 'sap-spitter',
+      defaultAbility: 'sticky',
+      textureKey: 'sap-spitter',
+      displayName: 'Sap Spitter',
+      body: { width: 32, height: 28 },
+    },
+    options,
+  );
+}
+
+export function createChillWisp(scene: Phaser.Scene, spawn: EnemySpawn, options: PlaceholderEnemyOptions = {}) {
+  return createPlaceholderEnemy(
+    scene,
+    spawn,
+    {
+      enemyType: 'chill-wisp',
+      defaultAbility: 'ice',
+      textureKey: 'chill-wisp',
+      displayName: 'Chill Wisp',
+      ignoreGravity: true,
+      scale: 0.75,
+    },
+    options,
+  );
+}
+
+export function createGlacierGolem(scene: Phaser.Scene, spawn: EnemySpawn, options: PlaceholderEnemyOptions = {}) {
+  return createPlaceholderEnemy(
+    scene,
+    spawn,
+    {
+      enemyType: 'glacier-golem',
+      defaultAbility: 'guard',
+      textureKey: 'glacier-golem',
+      displayName: 'Glacier Golem',
+      scale: 1.1,
+      body: { width: 48, height: 56 },
+      defaultHP: 3,
+    },
+    options,
+  );
+}
+
+export function createFrostArcher(scene: Phaser.Scene, spawn: EnemySpawn, options: PlaceholderEnemyOptions = {}) {
+  return createPlaceholderEnemy(
+    scene,
+    spawn,
+    {
+      enemyType: 'frost-archer',
+      defaultAbility: 'ice-arrow',
+      textureKey: 'frost-archer',
+      displayName: 'Frost Archer',
+      body: { width: 30, height: 46 },
+    },
+    options,
+  );
+}
+
+export function createEmberImp(scene: Phaser.Scene, spawn: EnemySpawn, options: PlaceholderEnemyOptions = {}) {
+  return createPlaceholderEnemy(
+    scene,
+    spawn,
+    {
+      enemyType: 'ember-imp',
+      defaultAbility: 'fire',
+      textureKey: 'ember-imp',
+      displayName: 'Ember Imp',
+      ignoreGravity: true,
+      scale: 0.8,
+    },
+    options,
+  );
+}
+
+export function createMagmaCrab(scene: Phaser.Scene, spawn: EnemySpawn, options: PlaceholderEnemyOptions = {}) {
+  return createPlaceholderEnemy(
+    scene,
+    spawn,
+    {
+      enemyType: 'magma-crab',
+      defaultAbility: 'magma-shield',
+      textureKey: 'magma-crab',
+      displayName: 'Magma Crab',
+      body: { width: 42, height: 28 },
+      scale: 0.9,
+    },
+    options,
+  );
+}
+
+export function createBlazeStrider(scene: Phaser.Scene, spawn: EnemySpawn, options: PlaceholderEnemyOptions = {}) {
+  return createPlaceholderEnemy(
+    scene,
+    spawn,
+    {
+      enemyType: 'blaze-strider',
+      defaultAbility: 'dash-fire',
+      textureKey: 'blaze-strider',
+      displayName: 'Blaze Strider',
+      scale: 0.95,
+      body: { width: 40, height: 32 },
+    },
+    options,
+  );
+}
+
+export function createStoneSentinel(scene: Phaser.Scene, spawn: EnemySpawn, options: PlaceholderEnemyOptions = {}) {
+  return createPlaceholderEnemy(
+    scene,
+    spawn,
+    {
+      enemyType: 'stone-sentinel',
+      defaultAbility: 'beam',
+      textureKey: 'stone-sentinel',
+      displayName: 'Stone Sentinel',
+      scale: 1.05,
+      body: { width: 52, height: 52 },
+      defaultHP: 3,
+    },
+    options,
+  );
+}
+
+export function createCurseBat(scene: Phaser.Scene, spawn: EnemySpawn, options: PlaceholderEnemyOptions = {}) {
+  return createPlaceholderEnemy(
+    scene,
+    spawn,
+    {
+      enemyType: 'curse-bat',
+      defaultAbility: 'curse',
+      textureKey: 'curse-bat',
+      displayName: 'Curse Bat',
+      ignoreGravity: true,
+      scale: 0.8,
+    },
+    options,
+  );
+}
+
+export function createRelicThief(scene: Phaser.Scene, spawn: EnemySpawn, options: PlaceholderEnemyOptions = {}) {
+  return createPlaceholderEnemy(
+    scene,
+    spawn,
+    {
+      enemyType: 'relic-thief',
+      defaultAbility: 'warp',
+      textureKey: 'relic-thief',
+      displayName: 'Relic Thief',
+      scale: 0.9,
+      body: { width: 32, height: 36 },
+    },
+    options,
+  );
+}
+
+export function createGaleKite(scene: Phaser.Scene, spawn: EnemySpawn, options: PlaceholderEnemyOptions = {}) {
+  return createPlaceholderEnemy(
+    scene,
+    spawn,
+    {
+      enemyType: 'gale-kite',
+      defaultAbility: 'wind',
+      textureKey: 'gale-kite',
+      displayName: 'Gale Kite',
+      ignoreGravity: true,
+      scale: 0.85,
+    },
+    options,
+  );
+}
+
+export function createNimbusKnight(scene: Phaser.Scene, spawn: EnemySpawn, options: PlaceholderEnemyOptions = {}) {
+  return createPlaceholderEnemy(
+    scene,
+    spawn,
+    {
+      enemyType: 'nimbus-knight',
+      defaultAbility: 'thunder',
+      textureKey: 'nimbus-knight',
+      displayName: 'Nimbus Knight',
+      ignoreGravity: true,
+      scale: 1,
+      body: { width: 42, height: 46 },
+      defaultHP: 2,
+    },
+    options,
+  );
+}
+
+export function createPrismWraith(scene: Phaser.Scene, spawn: EnemySpawn, options: PlaceholderEnemyOptions = {}) {
+  return createPlaceholderEnemy(
+    scene,
+    spawn,
+    {
+      enemyType: 'prism-wraith',
+      defaultAbility: 'prism',
+      textureKey: 'prism-wraith',
+      displayName: 'Prism Wraith',
+      ignoreGravity: true,
+      scale: 0.9,
+    },
+    options,
+  );
 }

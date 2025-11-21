@@ -1,6 +1,6 @@
 import type { AreaDefinition } from '../AreaManager';
 import { buildStageDefinition } from './stage-utils';
-import { FIRE_RELIQUARY_ID, getFireExpanseExitId } from './procedural';
+import { FIRE_RELIQUARY_ID, getFireBossId } from './procedural';
 
 const tileSize = 32;
 
@@ -23,7 +23,7 @@ export const fireReliquary: AreaDefinition = buildStageDefinition({
   tileSize,
   layout,
   neighbors: {
-    west: getFireExpanseExitId(),
+    west: getFireBossId(),
   },
   entryPoints: {
     default: { position: { x: width - tileSize * 4, y: height / 2 } },
