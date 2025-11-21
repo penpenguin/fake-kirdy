@@ -1460,19 +1460,11 @@ export class GameScene extends Phaser.Scene {
     this.enemySpawnPlan = this.buildEnemySpawnPlan(areaState?.definition?.enemySpawns);
     this.nextEnemyTypeIndex = 0;
 
-    // 中央ハブやゴールサンクタムなど、敵スポーン設定がない/無効なエリアでは自動スポーンを止める
+    // 中央ハブやゴールサンクタムなど、敵スポーン設定がない/無効なエリアでは自動スポーンを止めるが、
+    // 手動スポーン用に EnemyManager 自体は維持する。
     const shouldAutoSpawn =
       !!this.enemySpawnPlan && this.enemySpawnPlan.baseline > 0 && this.enemySpawnPlan.entries.length > 0;
     this.enemyAutoSpawnEnabled = shouldAutoSpawn;
-
-    if (!shouldAutoSpawn) {
-      this.enemyBaselinePopulation = 0;
-      this.enemySpawnPoints = [];
-      this.enemyManager?.destroy();
-      this.enemyManager = undefined;
-      return;
-    }
-
     this.enemyManagerConfig = this.createEnemyManagerConfig(this.enemySpawnPlan);
 
     this.enemyManager = new EnemyManager({
@@ -1487,11 +1479,11 @@ export class GameScene extends Phaser.Scene {
     this.enemyManager.resetSpawnCooldown();
     this.enemySpawnPoints = this.collectInitialEnemySpawns();
     const spawnCapacity = this.enemySpawnPoints.length;
-    const plannedBaseline = this.enemySpawnPlan?.baseline ?? this.enemyManagerConfig.maxActiveEnemies;
+    const plannedBaseline = shouldAutoSpawn ? this.enemySpawnPlan?.baseline ?? 0 : 0;
     this.enemyBaselinePopulation = Math.min(
       this.enemyManagerConfig.maxActiveEnemies,
       spawnCapacity,
-      plannedBaseline,
+      Math.max(0, plannedBaseline),
     );
     this.nextEnemySpawnIndex = 0;
     this.enemyAutoSpawnTimer = 0;

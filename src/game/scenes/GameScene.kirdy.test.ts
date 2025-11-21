@@ -1656,37 +1656,8 @@ describe('GameScene player integration', () => {
 
     scene.update(0, 16);
 
-    expect(createWabbleBeeMock).toHaveBeenCalledTimes(3);
-
-    const spawnArgs = createWabbleBeeMock.mock.calls as unknown as Array<[unknown, { x: number; y: number }]>;
-    const spawns = spawnArgs.map(([, spawn]) => spawn);
-
-    expect(spawns).toHaveLength(3);
-
-    const tileMap = defaultAreaState.tileMap;
-    const tileSize = tileMap.tileSize;
-    const neighborOffsets = [
-      { dx: 0, dy: 0 },
-      { dx: 1, dy: 0 },
-      { dx: -1, dy: 0 },
-      { dx: 0, dy: 1 },
-      { dx: 0, dy: -1 },
-    ];
-
-    spawns.forEach((spawn) => {
-      const tile = tileMap.getTileAtWorldPosition(spawn);
-      expect(tile).toBe('floor');
-
-      const column = Math.floor(spawn.x / tileSize);
-      const row = Math.floor(spawn.y / tileSize);
-
-      neighborOffsets.forEach(({ dx, dy }) => {
-        const neighborTile = tileMap.getTileAt(column + dx, row + dy);
-        expect(neighborTile).not.toBeUndefined();
-        expect(neighborTile).not.toBe('wall');
-        expect(neighborTile).not.toBe('void');
-      });
-    });
+    // 中央ハブは敵スポーン無効のため初期配置なし
+    expect(createWabbleBeeMock).toHaveBeenCalledTimes(0);
   });
 
   it('画面外の敵を一時的に非アクティブ化し、戻った際に復帰させる', () => {
