@@ -51,17 +51,17 @@
 - いずれも `sprite.data` に `enemyType` と `abilityType` を保持し、撃破時に `enemy-defeated` を発火。吸い込み後の能力変換や HUD 更新フローで利用可能。
 - AI 実装時は `createPlaceholderEnemy` の `body`・`ignoreGravity`・`defaultHP` をそのまま活用し、`PassiveEnemy.updateAI` を差し替えるだけでよい。
 
-## 4. ボス（リリクアリ防衛用の大型敵）※実装方針
+## 4. ボス（リリクアリ防衛用の大型敵）
 リリクアリ部屋で Keystone を守る常設ボス。各バイオーム終端に 1 体ずつ配置し、撃破後に遺物を解放する。
 
 ### 4.1 配置と共通仕様
 - 配置場所: `forest-reliquary`, `ice-reliquary`, `fire-reliquary`, `ruins-reliquary` の各部屋中央。
 - エンカウント条件: 部屋に入った時点でドアロック、ボス HP が 0 になるとロック解除し Keystone をドロップ。
-- HP/ダメージ: 通常敵より高 HP（最低 8）と高火力（Kirdy 基本HPの 2 倍を 3 回で瀕死になる程度）を想定。
+- HP/ダメージ: HP は最低 8。攻撃は Kirdy 基本HPの 2 倍を 3 回受けると瀕死になる火力帯に調整。
 - 能力連携: 撃破時に `enemy-defeated` と合わせて `boss-defeated` を発火し、GameScene 側で遺物取得・ロック解除・HUD 更新をトリガーする。
 - 吸い込み耐性: `InhaleSystem.addInhalableTarget` には登録しない（吸い込み不可）。代わりにフェーズ移行ギミックを優先。
 
-### 4.2 ボス候補（例）
+### 4.2 バイオーム別ボス仕様
 | ボスID | バイオーム | コア行動 | 特徴・フェーズ | 既定アビリティ |
 | --- | --- | --- | --- | --- |
 | guardian-treant | Forest | 根の突き上げ + 稀に種子散弾 | HP50%で移動速度上昇、床トゲ設置 | leaf |
