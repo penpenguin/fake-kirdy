@@ -1,6 +1,33 @@
 import type Phaser from 'phaser';
-import { createDrontoDurt, createFrostWabble, createGlacioDurt, createWabbleBee } from './index';
-import type { DrontoDurtOptions, Enemy, EnemySpawn, EnemyType, WabbleBeeOptions } from './index';
+import {
+  createBlazeStrider,
+  createChillWisp,
+  createCurseBat,
+  createDrontoDurt,
+  createEmberImp,
+  createFrostArcher,
+  createFrostWabble,
+  createGaleKite,
+  createGlacierGolem,
+  createGlacioDurt,
+  createMagmaCrab,
+  createNimbusKnight,
+  createPrismWraith,
+  createRelicThief,
+  createSapSpitter,
+  createStoneSentinel,
+  createThornRoller,
+  createVineHopper,
+  createWabbleBee,
+} from './index';
+import type {
+  DrontoDurtOptions,
+  Enemy,
+  EnemyCommonOptions,
+  EnemySpawn,
+  EnemyType,
+  WabbleBeeOptions,
+} from './index';
 
 type Bounds = { left: number; right: number; top: number; bottom: number };
 
@@ -74,40 +101,93 @@ export class EnemyManager {
     this.enemyDisperseCooldownMs = Math.max(0, config.enemyDisperseCooldownMs);
   }
 
-  spawnWabbleBee(spawn: EnemySpawn, options: WabbleBeeOptions = {}) {
+  private spawnWithFactory<T extends Enemy, O extends EnemyCommonOptions = EnemyCommonOptions>(
+    factory: (scene: Phaser.Scene, spawn: EnemySpawn, options?: O) => T,
+    spawn: EnemySpawn,
+    options: O = {} as O,
+  ) {
     if (!this.canSpawnEnemy()) {
       return undefined;
     }
 
-    const enemy = createWabbleBee(this.scene, spawn, this.withPlayerPosition(options));
+    const enemy = factory(this.scene, spawn, this.withPlayerPosition(options));
     return this.registerEnemy(enemy);
+  }
+
+  spawnWabbleBee(spawn: EnemySpawn, options: WabbleBeeOptions = {}) {
+    return this.spawnWithFactory(createWabbleBee, spawn, options);
   }
 
   spawnFrostWabble(spawn: EnemySpawn, options: WabbleBeeOptions = {}) {
-    if (!this.canSpawnEnemy()) {
-      return undefined;
-    }
-
-    const enemy = createFrostWabble(this.scene, spawn, this.withPlayerPosition(options));
-    return this.registerEnemy(enemy);
+    return this.spawnWithFactory(createFrostWabble, spawn, options);
   }
 
   spawnDrontoDurt(spawn: EnemySpawn, options: DrontoDurtOptions = {}) {
-    if (!this.canSpawnEnemy()) {
-      return undefined;
-    }
-
-    const enemy = createDrontoDurt(this.scene, spawn, this.withPlayerPosition(options));
-    return this.registerEnemy(enemy);
+    return this.spawnWithFactory(createDrontoDurt, spawn, options);
   }
 
   spawnGlacioDurt(spawn: EnemySpawn, options: DrontoDurtOptions = {}) {
-    if (!this.canSpawnEnemy()) {
-      return undefined;
-    }
+    return this.spawnWithFactory(createGlacioDurt, spawn, options);
+  }
 
-    const enemy = createGlacioDurt(this.scene, spawn, this.withPlayerPosition(options));
-    return this.registerEnemy(enemy);
+  spawnVineHopper(spawn: EnemySpawn, options: EnemyCommonOptions = {}) {
+    return this.spawnWithFactory(createVineHopper, spawn, options);
+  }
+
+  spawnThornRoller(spawn: EnemySpawn, options: EnemyCommonOptions = {}) {
+    return this.spawnWithFactory(createThornRoller, spawn, options);
+  }
+
+  spawnSapSpitter(spawn: EnemySpawn, options: EnemyCommonOptions = {}) {
+    return this.spawnWithFactory(createSapSpitter, spawn, options);
+  }
+
+  spawnChillWisp(spawn: EnemySpawn, options: EnemyCommonOptions = {}) {
+    return this.spawnWithFactory(createChillWisp, spawn, options);
+  }
+
+  spawnGlacierGolem(spawn: EnemySpawn, options: EnemyCommonOptions = {}) {
+    return this.spawnWithFactory(createGlacierGolem, spawn, options);
+  }
+
+  spawnFrostArcher(spawn: EnemySpawn, options: EnemyCommonOptions = {}) {
+    return this.spawnWithFactory(createFrostArcher, spawn, options);
+  }
+
+  spawnEmberImp(spawn: EnemySpawn, options: EnemyCommonOptions = {}) {
+    return this.spawnWithFactory(createEmberImp, spawn, options);
+  }
+
+  spawnMagmaCrab(spawn: EnemySpawn, options: EnemyCommonOptions = {}) {
+    return this.spawnWithFactory(createMagmaCrab, spawn, options);
+  }
+
+  spawnBlazeStrider(spawn: EnemySpawn, options: EnemyCommonOptions = {}) {
+    return this.spawnWithFactory(createBlazeStrider, spawn, options);
+  }
+
+  spawnStoneSentinel(spawn: EnemySpawn, options: EnemyCommonOptions = {}) {
+    return this.spawnWithFactory(createStoneSentinel, spawn, options);
+  }
+
+  spawnCurseBat(spawn: EnemySpawn, options: EnemyCommonOptions = {}) {
+    return this.spawnWithFactory(createCurseBat, spawn, options);
+  }
+
+  spawnRelicThief(spawn: EnemySpawn, options: EnemyCommonOptions = {}) {
+    return this.spawnWithFactory(createRelicThief, spawn, options);
+  }
+
+  spawnGaleKite(spawn: EnemySpawn, options: EnemyCommonOptions = {}) {
+    return this.spawnWithFactory(createGaleKite, spawn, options);
+  }
+
+  spawnNimbusKnight(spawn: EnemySpawn, options: EnemyCommonOptions = {}) {
+    return this.spawnWithFactory(createNimbusKnight, spawn, options);
+  }
+
+  spawnPrismWraith(spawn: EnemySpawn, options: EnemyCommonOptions = {}) {
+    return this.spawnWithFactory(createPrismWraith, spawn, options);
   }
 
   update(delta: number) {
