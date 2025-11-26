@@ -44,14 +44,15 @@ describe('Stage enemy variety', () => {
     expect(entries).toContain('blaze-strider');
   });
 
-  it('assigns ruins-themed enemy types to the ruins reliquary', () => {
-    const ruins = STAGE_DEFINITIONS.find((definition) => definition.id === 'ruins-reliquary');
-    expect(ruins).toBeDefined();
-    const entries = ruins?.enemySpawns?.entries.map((entry) => entry.type) ?? [];
-
-    expect(entries).toContain('stone-sentinel');
-    expect(entries).toContain('curse-bat');
-    expect(entries).toContain('relic-thief');
+  it('disables enemy spawns in all reliquaries', () => {
+    const reliquaries = ['forest-reliquary', 'ice-reliquary', 'fire-reliquary', 'ruins-reliquary'];
+    reliquaries.forEach((id) => {
+      const reliquary = STAGE_DEFINITIONS.find((definition) => definition.id === id);
+      expect(reliquary).toBeDefined();
+      expect(reliquary?.enemySpawns?.baseline ?? 0).toBe(0);
+      expect(reliquary?.enemySpawns?.maxActive ?? 0).toBe(0);
+      expect(reliquary?.enemySpawns?.entries ?? []).toHaveLength(0);
+    });
   });
 
   it('assigns sky-themed enemy types to the sky sanctum', () => {

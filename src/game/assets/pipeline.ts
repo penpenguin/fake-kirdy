@@ -194,6 +194,11 @@ const IMAGE_ASSETS: ReadonlyArray<ImageAsset> = [
     fallbackUrl: 'images/ui/door-marker.webp',
   },
   {
+    key: 'return-gate',
+    url: 'images/ui/door-marker.webp',
+    fallbackUrl: 'images/ui/door-marker.webp',
+  },
+  {
     key: 'heal-orb',
     url: 'images/items/heal-orb.webp',
     fallbackUrl: 'images/ui/door-marker.webp',

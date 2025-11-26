@@ -80,6 +80,7 @@ const PIXEL_ART_TEXTURE_KEYS = [...WALL_TILE_TEXTURE_KEYS];
 const MENU_BLUR_FALLBACK_TEXTURE_KEY = '__menu-blur-fallback';
 const TERRAIN_VISUAL_DEPTH = -50;
 const DOOR_TEXTURE_KEY = 'door-marker';
+const RETURN_GATE_TEXTURE_KEY = 'return-gate';
 const GOAL_DOOR_TEXTURE_KEY = 'goal-door';
 const LOCKED_DOOR_TEXTURE_KEY = 'locked-door';
 const DOOR_MARKER_COLOR = 0xffdd66;
@@ -2159,6 +2160,7 @@ export class GameScene extends Phaser.Scene {
     const areaCluster = areaState?.definition?.metadata?.cluster;
     const resolvedWallTextureKey = selectWallTextureForArea(textureManager, areaCluster);
     const doorTextureAvailable = Boolean(textureManager?.exists?.(DOOR_TEXTURE_KEY));
+    const returnGateTextureAvailable = Boolean(textureManager?.exists?.(RETURN_GATE_TEXTURE_KEY));
     const goalDoorTextureAvailable = Boolean(textureManager?.exists?.(GOAL_DOOR_TEXTURE_KEY));
     const lockedDoorTextureAvailable = Boolean(textureManager?.exists?.(LOCKED_DOOR_TEXTURE_KEY));
     const currentAreaId = areaState?.definition?.id;
@@ -2212,16 +2214,25 @@ export class GameScene extends Phaser.Scene {
 
       const shouldUseLockedTexture = isLockedDoor;
       const shouldUseGoalTexture = !shouldUseLockedTexture && doorType === 'goal' && goalDoorTextureAvailable;
+      const shouldUseReturnTexture =
+        !shouldUseLockedTexture &&
+        !shouldUseGoalTexture &&
+        doorTargetId === AREA_IDS.CentralHub &&
+        returnGateTextureAvailable;
       const textureKey = shouldUseLockedTexture
         ? LOCKED_DOOR_TEXTURE_KEY
         : shouldUseGoalTexture
           ? GOAL_DOOR_TEXTURE_KEY
-          : DOOR_TEXTURE_KEY;
+          : shouldUseReturnTexture
+            ? RETURN_GATE_TEXTURE_KEY
+            : DOOR_TEXTURE_KEY;
       const textureAvailable = shouldUseLockedTexture
         ? lockedDoorTextureAvailable
         : shouldUseGoalTexture
           ? goalDoorTextureAvailable
-          : doorTextureAvailable;
+          : shouldUseReturnTexture
+            ? returnGateTextureAvailable
+            : doorTextureAvailable;
       if (textureAvailable) {
         try {
           marker = displayFactory.image?.(

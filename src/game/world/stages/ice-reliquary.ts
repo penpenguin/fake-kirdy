@@ -6,7 +6,7 @@ const tileSize = 32;
 
 const layout = [
   '####################',
-  'D....##......##....#',
+  'D....##......##....D',
   '#....##......##....#',
   '#..................#',
   '#..####......####..#',
@@ -24,18 +24,17 @@ export const iceReliquary: AreaDefinition = buildStageDefinition({
   layout,
   neighbors: {
     west: getIceBossId(),
+    east: 'central-hub',
   },
   entryPoints: {
     default: { position: { x: width - tileSize * 3, y: height / 2 } },
     west: { position: { x: tileSize * 2, y: height / 2 } },
+    east: { position: { x: width - tileSize * 5, y: height / 2 }, facing: 'west' },
   },
   enemySpawns: {
-    baseline: 2,
-    maxActive: 3,
-    entries: [
-      { type: 'frost-wabble', limit: 1 },
-      { type: 'glacio-durt', limit: 1 },
-    ],
+    baseline: 0,
+    maxActive: 0,
+    entries: [],
   },
   metadata: {
     cluster: 'ice',

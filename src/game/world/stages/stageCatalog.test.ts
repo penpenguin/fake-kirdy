@@ -19,7 +19,7 @@ const DIRECTIONS: AreaTransitionDirection[] = [
 
 describe('Stage catalog', () => {
 
-  it('keeps goal sanctum enclosed with mirror corridor access only', () => {
+  it('keeps goal sanctum enclosed with mirror corridor access and a central hub return gate', () => {
     const fireArea = findStage('fire-area');
     expect(fireArea).toBeDefined();
     expect(fireArea?.neighbors?.north).toBeUndefined();
@@ -28,14 +28,17 @@ describe('Stage catalog', () => {
     expect(goalSanctum).toBeDefined();
     expect(goalSanctum?.neighbors?.south).toBe('mirror-corridor');
     expect(goalSanctum?.neighbors?.north).toBe('sky-sanctum');
+    expect(goalSanctum?.neighbors?.west).toBe('central-hub');
     expect(goalSanctum?.entryPoints?.north).toBeDefined();
+    expect(goalSanctum?.entryPoints?.west).toBeDefined();
     expect(goalSanctum?.enemySpawns?.baseline ?? 0).toBeGreaterThanOrEqual(0);
 
     const hasExitDoor = goalSanctum?.layout.some((row) => row.includes('D')) ?? false;
     expect(hasExitDoor).toBe(true);
 
     const doorDirections = goalSanctum?.doors?.map((door) => door.direction) ?? [];
-    expect(doorDirections).toEqual(['north', 'south']);
+    expect(doorDirections).toEqual(expect.arrayContaining(['north', 'south', 'west']));
+    expect(doorDirections).toHaveLength(3);
     expect(goalSanctum?.goal?.doorId).toBe('south-0');
 
     const tileSize = goalSanctum?.tileSize ?? 0;
@@ -69,6 +72,26 @@ describe('Stage catalog', () => {
 
     const starlitKeep = findStage('starlit-keep');
     expect(starlitKeep?.neighbors?.east).toBe('sky-sanctum');
+  });
+
+  it('adds return gates from reliquaries and the goal sanctum back to the central hub', () => {
+    const reliquaryIds = ['forest-reliquary', 'ice-reliquary', 'fire-reliquary', 'ruins-reliquary'];
+
+    reliquaryIds.forEach((id) => {
+      const stage = findStage(id);
+      expect(stage).toBeDefined();
+      expect(stage?.neighbors?.east).toBe('central-hub');
+
+      const returnDoors = stage?.doors?.filter((door) => door.target === 'central-hub') ?? [];
+      expect(returnDoors).toHaveLength(1);
+      expect(returnDoors[0]?.direction).toBe('east');
+    });
+
+    const goalSanctum = findStage('goal-sanctum');
+    expect(goalSanctum?.neighbors?.west).toBe('central-hub');
+    const sanctumReturnDoors = goalSanctum?.doors?.filter((door) => door.target === 'central-hub') ?? [];
+    expect(sanctumReturnDoors).toHaveLength(1);
+    expect(sanctumReturnDoors[0]?.direction).toBe('west');
   });
 
   it('lays out aurora-spire as a vertical tower with safe west entry', () => {

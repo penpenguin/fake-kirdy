@@ -6,7 +6,7 @@ const tileSize = 32;
 
 const layout = [
   '########################',
-  'D......................#',
+  'D......................D',
   '#..####..######..####..#',
   '#......................#',
   '#..####..######..####..#',
@@ -24,19 +24,17 @@ export const fireReliquary: AreaDefinition = buildStageDefinition({
   layout,
   neighbors: {
     west: getFireBossId(),
+    east: 'central-hub',
   },
   entryPoints: {
     default: { position: { x: width - tileSize * 4, y: height / 2 } },
     west: { position: { x: tileSize * 2, y: height / 2 } },
+    east: { position: { x: width - tileSize * 4, y: height / 2 }, facing: 'west' },
   },
   enemySpawns: {
-    baseline: 3,
-    maxActive: 4,
-    entries: [
-      { type: 'wabble-bee', limit: 1 },
-      { type: 'dronto-durt', limit: 1 },
-      { type: 'glacio-durt', limit: 1 },
-    ],
+    baseline: 0,
+    maxActive: 0,
+    entries: [],
   },
   metadata: {
     cluster: 'fire',

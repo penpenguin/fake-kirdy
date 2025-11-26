@@ -129,6 +129,7 @@ const stubs = vi.hoisted(() => {
     'wall-texture',
     'goal-door',
     'locked-door',
+    'return-gate',
     'heal-orb',
     'brick-tile',
     'forest-tile',
@@ -1370,6 +1371,69 @@ describe('GameScene player integration', () => {
     scene.create();
 
     expect(createdImages.some((entry) => entry.textureKey === 'locked-door')).toBe(true);
+  });
+
+  it('Central Hub 行きの扉は return-gate テクスチャを使用する', () => {
+    const tileSize = defaultAreaState.tileMap.tileSize;
+    const doorColumn = defaultAreaState.tileMap.columns - 2;
+    const doorRow = Math.floor(defaultAreaState.tileMap.rows / 2);
+    const originalGetTileAt = defaultAreaState.tileMap.getTileAt;
+    const getTileAt = vi.fn((column: number, row: number) => {
+      if (column === doorColumn && row === doorRow) {
+        return 'door';
+      }
+
+      return originalGetTileAt(column, row);
+    });
+
+    const areaStateWithReturnDoor = {
+      ...defaultAreaState,
+      definition: {
+        ...defaultAreaState.definition,
+        id: 'forest-reliquary',
+        name: 'Forest Reliquary',
+        doors: [
+          {
+            id: 'east-0',
+            direction: 'east' as const,
+            tile: { column: doorColumn, row: doorRow },
+            position: {
+              x: doorColumn * tileSize + tileSize / 2,
+              y: doorRow * tileSize + tileSize / 2,
+            },
+            type: 'standard' as const,
+            target: 'central-hub',
+            safeRadius: 1,
+          },
+        ],
+      },
+      tileMap: {
+        ...defaultAreaState.tileMap,
+        getTileAt,
+      },
+    };
+
+    areaManagerGetStateMock.mockReturnValue(areaStateWithReturnDoor as any);
+
+    const createdImages: Array<{ textureKey: string }> = [];
+    stubs.addImageMock.mockImplementation((x: number, y: number, textureKey: string, frame?: string) => {
+      const image = {
+        setOrigin: vi.fn().mockReturnThis(),
+        setDepth: vi.fn().mockReturnThis(),
+        setDisplaySize: vi.fn().mockReturnThis(),
+        setVisible: vi.fn().mockReturnThis(),
+        setActive: vi.fn().mockReturnThis(),
+        setFrame: vi.fn().mockReturnThis(),
+        destroy: vi.fn(),
+      };
+      createdImages.push({ textureKey });
+      return image;
+    });
+
+    const scene = new GameScene();
+    scene.create();
+
+    expect(createdImages.some((entry) => entry.textureKey === 'return-gate')).toBe(true);
   });
 
   it('Goal Sanctum 北扉が未解放のとき locked-door テクスチャを使用する', () => {
