@@ -40,12 +40,9 @@ export const centralHub: AreaDefinition = buildStageDefinition({
     southwest: { position: { x: tileSize * 2, y: height - tileSize * 2 } },
   },
   enemySpawns: {
-    baseline: 3,
-    maxActive: 3,
-    entries: [
-      { type: 'wabble-bee', limit: 2 },
-      { type: 'dronto-durt', limit: 1 },
-    ],
+    baseline: 0,
+    maxActive: 0,
+    entries: [],
   },
   metadata: {
     cluster: 'hub',

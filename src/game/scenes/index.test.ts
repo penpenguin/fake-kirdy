@@ -16,6 +16,26 @@ vi.mock('phaser', () => {
     isPaused: vi.fn(() => false),
   });
 
+  describe('enemy spawn routing', () => {
+    it('routes placeholder enemy types to their spawn helpers', async () => {
+      const { GameScene } = await import('./index');
+      const scene: any = new GameScene();
+      const spawn = { x: 10, y: 20 };
+      const enemyInstance = { id: 'vine' };
+
+      const enemyManager = {
+        spawnVineHopper: vi.fn().mockReturnValue(enemyInstance),
+      };
+
+      scene.enemyManager = enemyManager;
+
+      const result = (scene as any).spawnEnemyByType('vine-hopper', spawn);
+
+      expect(enemyManager.spawnVineHopper).toHaveBeenCalledWith(spawn);
+      expect(result).toBe(enemyInstance);
+    });
+  });
+
   const createEventEmitterMock = () => ({
     emit: vi.fn(),
     on: vi.fn(),

@@ -269,4 +269,33 @@ describe('enemy system', () => {
     const [[chargeVelocity]] = sprite.setVelocityX.mock.calls.slice(-1);
     expect(Math.abs(chargeVelocity)).toBe(expectedSpeed);
   });
+
+  it.each([
+    { factory: 'createVineHopper', enemyType: 'vine-hopper', ability: 'leaf' },
+    { factory: 'createThornRoller', enemyType: 'thorn-roller', ability: 'spike' },
+    { factory: 'createSapSpitter', enemyType: 'sap-spitter', ability: 'sticky' },
+    { factory: 'createChillWisp', enemyType: 'chill-wisp', ability: 'ice' },
+    { factory: 'createGlacierGolem', enemyType: 'glacier-golem', ability: 'guard' },
+    { factory: 'createFrostArcher', enemyType: 'frost-archer', ability: 'ice-arrow' },
+    { factory: 'createEmberImp', enemyType: 'ember-imp', ability: 'fire' },
+    { factory: 'createMagmaCrab', enemyType: 'magma-crab', ability: 'magma-shield' },
+    { factory: 'createBlazeStrider', enemyType: 'blaze-strider', ability: 'dash-fire' },
+    { factory: 'createStoneSentinel', enemyType: 'stone-sentinel', ability: 'beam' },
+    { factory: 'createCurseBat', enemyType: 'curse-bat', ability: 'curse' },
+    { factory: 'createRelicThief', enemyType: 'relic-thief', ability: 'warp' },
+    { factory: 'createGaleKite', enemyType: 'gale-kite', ability: 'wind' },
+    { factory: 'createNimbusKnight', enemyType: 'nimbus-knight', ability: 'thunder' },
+    { factory: 'createPrismWraith', enemyType: 'prism-wraith', ability: 'prism' },
+  ])('creates $enemyType with placeholder ability', async ({ factory, enemyType, ability }) => {
+    const enemiesModule: Record<string, any> = await import('./index');
+    const createFn = enemiesModule[factory];
+    expect(typeof createFn).toBe('function');
+
+    const enemy = createFn(scene, { x: 50, y: 75 });
+
+    expect(addSpriteMock).toHaveBeenCalledWith(50, 75, enemyType);
+    expect(sprite.setData).toHaveBeenCalledWith('enemyType', enemyType);
+    expect(sprite.setData).toHaveBeenCalledWith('abilityType', ability);
+    expect(enemy.getAbilityType()).toBe(ability);
+  });
 });
