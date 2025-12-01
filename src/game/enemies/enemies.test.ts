@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const spriteFactory = vi.hoisted(() => () => ({
   x: 0,
   y: 0,
+  body: { position: { x: 0, y: 0 } },
   setIgnoreGravity: vi.fn().mockReturnThis(),
   setFixedRotation: vi.fn().mockReturnThis(),
   setFrictionAir: vi.fn().mockReturnThis(),
@@ -11,6 +12,7 @@ const spriteFactory = vi.hoisted(() => () => ({
   setData: vi.fn().mockReturnThis(),
   setVelocityX: vi.fn().mockReturnThis(),
   setVelocityY: vi.fn().mockReturnThis(),
+  setVelocity: vi.fn().mockReturnThis(),
   setFlipX: vi.fn().mockReturnThis(),
   setActive: vi.fn().mockReturnThis(),
   setVisible: vi.fn().mockReturnThis(),
@@ -20,6 +22,7 @@ const spriteFactory = vi.hoisted(() => () => ({
   setRectangle: vi.fn().mockReturnThis(),
   setTint: vi.fn().mockReturnThis(),
   clearTint: vi.fn().mockReturnThis(),
+  setSensor: vi.fn().mockReturnThis(),
   destroy: vi.fn(),
 }));
 
@@ -41,12 +44,37 @@ describe('enemy system', () => {
   let sprite: ReturnType<typeof spriteFactory>;
   let scene: any;
 
+  const behaviorCases = [
+    { factory: 'createVineHopper', enemyType: 'vine-hopper', ability: 'leaf', mobile: true },
+    { factory: 'createThornRoller', enemyType: 'thorn-roller', ability: 'spike', mobile: true },
+    { factory: 'createSapSpitter', enemyType: 'sap-spitter', ability: 'sticky', mobile: false },
+    { factory: 'createChillWisp', enemyType: 'chill-wisp', ability: 'ice', mobile: true },
+    { factory: 'createGlacierGolem', enemyType: 'glacier-golem', ability: 'guard', mobile: true },
+    { factory: 'createFrostArcher', enemyType: 'frost-archer', ability: 'ice-arrow', mobile: true },
+    { factory: 'createEmberImp', enemyType: 'ember-imp', ability: 'fire', mobile: true },
+    { factory: 'createMagmaCrab', enemyType: 'magma-crab', ability: 'magma-shield', mobile: false },
+    { factory: 'createBlazeStrider', enemyType: 'blaze-strider', ability: 'dash-fire', mobile: true },
+    { factory: 'createStoneSentinel', enemyType: 'stone-sentinel', ability: 'beam', mobile: false },
+    { factory: 'createCurseBat', enemyType: 'curse-bat', ability: 'curse', mobile: true },
+    { factory: 'createRelicThief', enemyType: 'relic-thief', ability: 'warp', mobile: true },
+    { factory: 'createGaleKite', enemyType: 'gale-kite', ability: 'wind', mobile: true },
+    { factory: 'createNimbusKnight', enemyType: 'nimbus-knight', ability: 'thunder', mobile: true },
+    { factory: 'createPrismWraith', enemyType: 'prism-wraith', ability: 'prism', mobile: true },
+  ];
+
+  const attackCases = behaviorCases.map((entry) => ({
+    ...entry,
+    // every new AI-capable enemy should be able to emit at least one attack event
+    expectsAttack: true,
+  }));
+
   beforeEach(() => {
     sprite = spriteFactory();
     addSpriteMock.mockReturnValue(sprite);
     eventsEmitMock.mockReset();
     sprite.setData.mockReset();
     sprite.setVelocityX.mockReset();
+    sprite.setVelocityY.mockReset();
     sprite.setFlipX.mockReset();
     sprite.destroy.mockReset();
     sprite.setBody.mockReset();
@@ -268,5 +296,78 @@ describe('enemy system', () => {
 
     const [[chargeVelocity]] = sprite.setVelocityX.mock.calls.slice(-1);
     expect(Math.abs(chargeVelocity)).toBe(expectedSpeed);
+  });
+
+  it.each([
+    { factory: 'createVineHopper', enemyType: 'vine-hopper', ability: 'leaf' },
+    { factory: 'createThornRoller', enemyType: 'thorn-roller', ability: 'spike' },
+    { factory: 'createSapSpitter', enemyType: 'sap-spitter', ability: 'sticky' },
+    { factory: 'createChillWisp', enemyType: 'chill-wisp', ability: 'ice' },
+    { factory: 'createGlacierGolem', enemyType: 'glacier-golem', ability: 'guard' },
+    { factory: 'createFrostArcher', enemyType: 'frost-archer', ability: 'ice-arrow' },
+    { factory: 'createEmberImp', enemyType: 'ember-imp', ability: 'fire' },
+    { factory: 'createMagmaCrab', enemyType: 'magma-crab', ability: 'magma-shield' },
+    { factory: 'createBlazeStrider', enemyType: 'blaze-strider', ability: 'dash-fire' },
+    { factory: 'createStoneSentinel', enemyType: 'stone-sentinel', ability: 'beam' },
+    { factory: 'createCurseBat', enemyType: 'curse-bat', ability: 'curse' },
+    { factory: 'createRelicThief', enemyType: 'relic-thief', ability: 'warp' },
+    { factory: 'createGaleKite', enemyType: 'gale-kite', ability: 'wind' },
+    { factory: 'createNimbusKnight', enemyType: 'nimbus-knight', ability: 'thunder' },
+    { factory: 'createPrismWraith', enemyType: 'prism-wraith', ability: 'prism' },
+  ])('creates $enemyType with placeholder ability', async ({ factory, enemyType, ability }) => {
+    const enemiesModule: Record<string, any> = await import('./index');
+    const createFn = enemiesModule[factory];
+    expect(typeof createFn).toBe('function');
+
+    const enemy = createFn(scene, { x: 50, y: 75 });
+
+    expect(addSpriteMock).toHaveBeenCalledWith(50, 75, enemyType);
+    expect(sprite.setData).toHaveBeenCalledWith('enemyType', enemyType);
+    expect(sprite.setData).toHaveBeenCalledWith('abilityType', ability);
+    expect(enemy.getAbilityType()).toBe(ability);
+  });
+
+  it.each(behaviorCases)('moves or stays idle according to mobility for %s', async ({ factory, mobile }) => {
+    const enemiesModule: Record<string, any> = await import('./index');
+    const createFn = enemiesModule[factory];
+
+    const enemy = createFn(scene, { x: 0, y: 0 }, {
+      getPlayerPosition: () => ({ x: 120, y: 0 }),
+    });
+
+    sprite.x = 0;
+    enemy.update(16);
+
+    if (mobile) {
+      expect(sprite.setVelocityX).toHaveBeenCalledWith(expect.any(Number));
+    } else {
+      expect(sprite.setVelocityX).not.toHaveBeenCalled();
+    }
+  });
+
+  it.each(attackCases)('emits an enemy-attack event when target is in range for %s', async ({ factory, enemyType, ability }) => {
+    const enemiesModule: Record<string, any> = await import('./index');
+    const createFn = enemiesModule[factory];
+
+    const enemy = createFn(scene, { x: 0, y: 0 }, {
+      getPlayerPosition: () => ({ x: 10, y: 0 }),
+    });
+
+    // allow any internal cooldown to expire
+    enemy.update(1000);
+
+    expect(eventsEmitMock).toHaveBeenCalledWith(
+      'enemy-attack',
+      expect.objectContaining({
+        enemyType,
+        abilityType: ability,
+        sprite,
+      }),
+    );
+
+    eventsEmitMock.mockClear();
+    // immediate second update should be gated by cooldown
+    enemy.update(100);
+    expect(eventsEmitMock).not.toHaveBeenCalled();
   });
 });

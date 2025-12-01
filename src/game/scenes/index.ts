@@ -80,6 +80,7 @@ const PIXEL_ART_TEXTURE_KEYS = [...WALL_TILE_TEXTURE_KEYS];
 const MENU_BLUR_FALLBACK_TEXTURE_KEY = '__menu-blur-fallback';
 const TERRAIN_VISUAL_DEPTH = -50;
 const DOOR_TEXTURE_KEY = 'door-marker';
+const RETURN_GATE_TEXTURE_KEY = 'return-gate';
 const GOAL_DOOR_TEXTURE_KEY = 'goal-door';
 const LOCKED_DOOR_TEXTURE_KEY = 'locked-door';
 const DOOR_MARKER_COLOR = 0xffdd66;
@@ -712,6 +713,11 @@ export class GameScene extends Phaser.Scene {
     this.requestSave();
   };
 
+  private readonly handleEnemyAttack = (event?: { damage?: number }) => {
+    const damage = Number.isFinite(event?.damage) ? Math.max(1, Math.floor(event?.damage ?? 0)) : 1;
+    this.damagePlayer(damage);
+  };
+
   private readonly handleEnemyCaptured = (event: { sprite?: Phaser.Physics.Matter.Sprite }) => {
     const sprite = event?.sprite;
     if (!sprite) {
@@ -982,6 +988,7 @@ export class GameScene extends Phaser.Scene {
       this.events?.off?.('ability-acquired', this.handleAbilityAcquired, this);
       this.events?.off?.('ability-cleared', this.handleAbilityCleared, this);
       this.events?.off?.('enemy-defeated', this.handleEnemyDefeated, this);
+      this.events?.off?.('enemy-attack', this.handleEnemyAttack, this);
       this.events?.off?.('enemy-captured', this.handleEnemyCaptured, this);
       this.events?.off?.('enemy-capture-released', this.handleEnemyCaptureReleased, this);
       this.events?.off?.('enemy-swallowed', this.handleEnemySwallowed, this);
@@ -1061,6 +1068,7 @@ export class GameScene extends Phaser.Scene {
     this.events?.on?.('ability-acquired', this.handleAbilityAcquired, this);
     this.events?.on?.('ability-cleared', this.handleAbilityCleared, this);
     this.events?.on?.('enemy-defeated', this.handleEnemyDefeated, this);
+    this.events?.on?.('enemy-attack', this.handleEnemyAttack, this);
     this.events?.on?.('enemy-captured', this.handleEnemyCaptured, this);
     this.events?.on?.('enemy-capture-released', this.handleEnemyCaptureReleased, this);
     this.events?.on?.('enemy-swallowed', this.handleEnemySwallowed, this);
@@ -1391,6 +1399,66 @@ export class GameScene extends Phaser.Scene {
     return this.enemyManager?.spawnGlacioDurt(spawn, options);
   }
 
+  spawnVineHopper(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnVineHopper(spawn);
+  }
+
+  spawnThornRoller(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnThornRoller(spawn);
+  }
+
+  spawnSapSpitter(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnSapSpitter(spawn);
+  }
+
+  spawnChillWisp(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnChillWisp(spawn);
+  }
+
+  spawnGlacierGolem(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnGlacierGolem(spawn);
+  }
+
+  spawnFrostArcher(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnFrostArcher(spawn);
+  }
+
+  spawnEmberImp(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnEmberImp(spawn);
+  }
+
+  spawnMagmaCrab(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnMagmaCrab(spawn);
+  }
+
+  spawnBlazeStrider(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnBlazeStrider(spawn);
+  }
+
+  spawnStoneSentinel(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnStoneSentinel(spawn);
+  }
+
+  spawnCurseBat(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnCurseBat(spawn);
+  }
+
+  spawnRelicThief(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnRelicThief(spawn);
+  }
+
+  spawnGaleKite(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnGaleKite(spawn);
+  }
+
+  spawnNimbusKnight(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnNimbusKnight(spawn);
+  }
+
+  spawnPrismWraith(spawn: EnemySpawn) {
+    return this.enemyManager?.spawnPrismWraith(spawn);
+  }
+
   private initializeEnemyManager() {
     if (!this.inhaleSystem || !this.physicsSystem) {
       return;
@@ -1399,6 +1467,12 @@ export class GameScene extends Phaser.Scene {
     const areaState = this.areaManager?.getCurrentAreaState();
     this.enemySpawnPlan = this.buildEnemySpawnPlan(areaState?.definition?.enemySpawns);
     this.nextEnemyTypeIndex = 0;
+
+    // 中央ハブやゴールサンクタムなど、敵スポーン設定がない/無効なエリアでは自動スポーンを止めるが、
+    // 手動スポーン用に EnemyManager 自体は維持する。
+    const shouldAutoSpawn =
+      !!this.enemySpawnPlan && this.enemySpawnPlan.baseline > 0 && this.enemySpawnPlan.entries.length > 0;
+    this.enemyAutoSpawnEnabled = shouldAutoSpawn;
     this.enemyManagerConfig = this.createEnemyManagerConfig(this.enemySpawnPlan);
 
     if (this.enemyManager) {
@@ -1418,11 +1492,11 @@ export class GameScene extends Phaser.Scene {
     this.enemyManager.resetSpawnCooldown();
     this.enemySpawnPoints = this.collectInitialEnemySpawns();
     const spawnCapacity = this.enemySpawnPoints.length;
-    const plannedBaseline = this.enemySpawnPlan?.baseline ?? this.enemyManagerConfig.maxActiveEnemies;
+    const plannedBaseline = shouldAutoSpawn ? this.enemySpawnPlan?.baseline ?? 0 : 0;
     this.enemyBaselinePopulation = Math.min(
       this.enemyManagerConfig.maxActiveEnemies,
       spawnCapacity,
-      plannedBaseline,
+      Math.max(0, plannedBaseline),
     );
     this.nextEnemySpawnIndex = 0;
     this.enemyAutoSpawnTimer = 0;
@@ -1816,6 +1890,36 @@ export class GameScene extends Phaser.Scene {
         return this.spawnGlacioDurt(spawn);
       case 'dronto-durt':
         return this.spawnDrontoDurt(spawn);
+      case 'vine-hopper':
+        return this.spawnVineHopper(spawn);
+      case 'thorn-roller':
+        return this.spawnThornRoller(spawn);
+      case 'sap-spitter':
+        return this.spawnSapSpitter(spawn);
+      case 'chill-wisp':
+        return this.spawnChillWisp(spawn);
+      case 'glacier-golem':
+        return this.spawnGlacierGolem(spawn);
+      case 'frost-archer':
+        return this.spawnFrostArcher(spawn);
+      case 'ember-imp':
+        return this.spawnEmberImp(spawn);
+      case 'magma-crab':
+        return this.spawnMagmaCrab(spawn);
+      case 'blaze-strider':
+        return this.spawnBlazeStrider(spawn);
+      case 'stone-sentinel':
+        return this.spawnStoneSentinel(spawn);
+      case 'curse-bat':
+        return this.spawnCurseBat(spawn);
+      case 'relic-thief':
+        return this.spawnRelicThief(spawn);
+      case 'gale-kite':
+        return this.spawnGaleKite(spawn);
+      case 'nimbus-knight':
+        return this.spawnNimbusKnight(spawn);
+      case 'prism-wraith':
+        return this.spawnPrismWraith(spawn);
       case 'wabble-bee':
       default:
         return this.spawnWabbleBee(spawn);
@@ -2063,6 +2167,7 @@ export class GameScene extends Phaser.Scene {
     const areaCluster = areaState?.definition?.metadata?.cluster;
     const resolvedWallTextureKey = selectWallTextureForArea(textureManager, areaCluster);
     const doorTextureAvailable = Boolean(textureManager?.exists?.(DOOR_TEXTURE_KEY));
+    const returnGateTextureAvailable = Boolean(textureManager?.exists?.(RETURN_GATE_TEXTURE_KEY));
     const goalDoorTextureAvailable = Boolean(textureManager?.exists?.(GOAL_DOOR_TEXTURE_KEY));
     const lockedDoorTextureAvailable = Boolean(textureManager?.exists?.(LOCKED_DOOR_TEXTURE_KEY));
     const currentAreaId = areaState?.definition?.id;
@@ -2116,16 +2221,25 @@ export class GameScene extends Phaser.Scene {
 
       const shouldUseLockedTexture = isLockedDoor;
       const shouldUseGoalTexture = !shouldUseLockedTexture && doorType === 'goal' && goalDoorTextureAvailable;
+      const shouldUseReturnTexture =
+        !shouldUseLockedTexture &&
+        !shouldUseGoalTexture &&
+        doorTargetId === AREA_IDS.CentralHub &&
+        returnGateTextureAvailable;
       const textureKey = shouldUseLockedTexture
         ? LOCKED_DOOR_TEXTURE_KEY
         : shouldUseGoalTexture
           ? GOAL_DOOR_TEXTURE_KEY
-          : DOOR_TEXTURE_KEY;
+          : shouldUseReturnTexture
+            ? RETURN_GATE_TEXTURE_KEY
+            : DOOR_TEXTURE_KEY;
       const textureAvailable = shouldUseLockedTexture
         ? lockedDoorTextureAvailable
         : shouldUseGoalTexture
           ? goalDoorTextureAvailable
-          : doorTextureAvailable;
+          : shouldUseReturnTexture
+            ? returnGateTextureAvailable
+            : doorTextureAvailable;
       if (textureAvailable) {
         try {
           marker = displayFactory.image?.(

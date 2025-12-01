@@ -129,6 +129,7 @@ const stubs = vi.hoisted(() => {
     'wall-texture',
     'goal-door',
     'locked-door',
+    'return-gate',
     'heal-orb',
     'brick-tile',
     'forest-tile',
@@ -1372,6 +1373,69 @@ describe('GameScene player integration', () => {
     expect(createdImages.some((entry) => entry.textureKey === 'locked-door')).toBe(true);
   });
 
+  it('Central Hub 行きの扉は return-gate テクスチャを使用する', () => {
+    const tileSize = defaultAreaState.tileMap.tileSize;
+    const doorColumn = defaultAreaState.tileMap.columns - 2;
+    const doorRow = Math.floor(defaultAreaState.tileMap.rows / 2);
+    const originalGetTileAt = defaultAreaState.tileMap.getTileAt;
+    const getTileAt = vi.fn((column: number, row: number) => {
+      if (column === doorColumn && row === doorRow) {
+        return 'door';
+      }
+
+      return originalGetTileAt(column, row);
+    });
+
+    const areaStateWithReturnDoor = {
+      ...defaultAreaState,
+      definition: {
+        ...defaultAreaState.definition,
+        id: 'forest-reliquary',
+        name: 'Forest Reliquary',
+        doors: [
+          {
+            id: 'east-0',
+            direction: 'east' as const,
+            tile: { column: doorColumn, row: doorRow },
+            position: {
+              x: doorColumn * tileSize + tileSize / 2,
+              y: doorRow * tileSize + tileSize / 2,
+            },
+            type: 'standard' as const,
+            target: 'central-hub',
+            safeRadius: 1,
+          },
+        ],
+      },
+      tileMap: {
+        ...defaultAreaState.tileMap,
+        getTileAt,
+      },
+    };
+
+    areaManagerGetStateMock.mockReturnValue(areaStateWithReturnDoor as any);
+
+    const createdImages: Array<{ textureKey: string }> = [];
+    stubs.addImageMock.mockImplementation((x: number, y: number, textureKey: string, frame?: string) => {
+      const image = {
+        setOrigin: vi.fn().mockReturnThis(),
+        setDepth: vi.fn().mockReturnThis(),
+        setDisplaySize: vi.fn().mockReturnThis(),
+        setVisible: vi.fn().mockReturnThis(),
+        setActive: vi.fn().mockReturnThis(),
+        setFrame: vi.fn().mockReturnThis(),
+        destroy: vi.fn(),
+      };
+      createdImages.push({ textureKey });
+      return image;
+    });
+
+    const scene = new GameScene();
+    scene.create();
+
+    expect(createdImages.some((entry) => entry.textureKey === 'return-gate')).toBe(true);
+  });
+
   it('Goal Sanctum 北扉が未解放のとき locked-door テクスチャを使用する', () => {
     const tileSize = defaultAreaState.tileMap.tileSize;
     const doorColumn = Math.floor(defaultAreaState.tileMap.columns / 2);
@@ -1656,37 +1720,8 @@ describe('GameScene player integration', () => {
 
     scene.update(0, 16);
 
-    expect(createWabbleBeeMock).toHaveBeenCalledTimes(3);
-
-    const spawnArgs = createWabbleBeeMock.mock.calls as unknown as Array<[unknown, { x: number; y: number }]>;
-    const spawns = spawnArgs.map(([, spawn]) => spawn);
-
-    expect(spawns).toHaveLength(3);
-
-    const tileMap = defaultAreaState.tileMap;
-    const tileSize = tileMap.tileSize;
-    const neighborOffsets = [
-      { dx: 0, dy: 0 },
-      { dx: 1, dy: 0 },
-      { dx: -1, dy: 0 },
-      { dx: 0, dy: 1 },
-      { dx: 0, dy: -1 },
-    ];
-
-    spawns.forEach((spawn) => {
-      const tile = tileMap.getTileAtWorldPosition(spawn);
-      expect(tile).toBe('floor');
-
-      const column = Math.floor(spawn.x / tileSize);
-      const row = Math.floor(spawn.y / tileSize);
-
-      neighborOffsets.forEach(({ dx, dy }) => {
-        const neighborTile = tileMap.getTileAt(column + dx, row + dy);
-        expect(neighborTile).not.toBeUndefined();
-        expect(neighborTile).not.toBe('wall');
-        expect(neighborTile).not.toBe('void');
-      });
-    });
+    // 中央ハブは敵スポーン無効のため初期配置なし
+    expect(createWabbleBeeMock).toHaveBeenCalledTimes(0);
   });
 
   it('画面外の敵を一時的に非アクティブ化し、戻った際に復帰させる', () => {
@@ -2301,6 +2336,24 @@ describe('GameScene player integration', () => {
     enemyDefeatedHandler?.({ enemyType: 'dronto-durt' });
     expect(hudUpdateScoreMock).toHaveBeenLastCalledWith(200);
     expect(kirdyInstance.addScore).toHaveBeenLastCalledWith(100);
+  });
+
+  it('敵攻撃イベントでプレイヤーにダメージを適用する', () => {
+    const scene = new GameScene();
+    createKirdyMock.mockReturnValue(makeKirdyStub());
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const attackHandler = stubs.events.on.mock.calls.find(([event]) => event === 'enemy-attack')?.[1];
+    expect(attackHandler).toBeInstanceOf(Function);
+
+    const damageSpy = vi.spyOn(scene, 'damagePlayer');
+
+    attackHandler?.({ damage: 2 });
+    expect(damageSpy).toHaveBeenCalledWith(2);
+
+    damageSpy.mockRestore();
   });
 
   it('ダメージを受けるとHPを減算しゲームオーバー閾値までHUDを更新する', () => {

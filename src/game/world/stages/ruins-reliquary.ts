@@ -1,12 +1,12 @@
 import type { AreaDefinition } from '../AreaManager';
 import { buildStageDefinition } from './stage-utils';
-import { RUINS_RELIQUARY_ID, getRuinsExpanseExitId } from './procedural';
+import { RUINS_RELIQUARY_ID, getRuinsBossId } from './procedural';
 
 const tileSize = 32;
 
 const layout = [
   '####################',
-  'D....##......##....#',
+  'D....##......##....D',
   '#..####......####..#',
   '#..................#',
   '#..######..######..#',
@@ -23,19 +23,18 @@ export const ruinsReliquary: AreaDefinition = buildStageDefinition({
   tileSize,
   layout,
   neighbors: {
-    west: getRuinsExpanseExitId(),
+    west: getRuinsBossId(),
+    east: 'central-hub',
   },
   entryPoints: {
     default: { position: { x: width - tileSize * 4, y: height / 2 } },
     west: { position: { x: tileSize * 2, y: height / 2 } },
+    east: { position: { x: width - tileSize * 4, y: height / 2 }, facing: 'west' },
   },
   enemySpawns: {
-    baseline: 3,
-    maxActive: 4,
-    entries: [
-      { type: 'wabble-bee', limit: 1 },
-      { type: 'dronto-durt', limit: 1 },
-    ],
+    baseline: 0,
+    maxActive: 0,
+    entries: [],
   },
   metadata: {
     cluster: 'ruins',
