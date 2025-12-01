@@ -713,6 +713,11 @@ export class GameScene extends Phaser.Scene {
     this.requestSave();
   };
 
+  private readonly handleEnemyAttack = (event?: { damage?: number }) => {
+    const damage = Number.isFinite(event?.damage) ? Math.max(1, Math.floor(event?.damage ?? 0)) : 1;
+    this.damagePlayer(damage);
+  };
+
   private readonly handleEnemyCaptured = (event: { sprite?: Phaser.Physics.Matter.Sprite }) => {
     const sprite = event?.sprite;
     if (!sprite) {
@@ -983,6 +988,7 @@ export class GameScene extends Phaser.Scene {
       this.events?.off?.('ability-acquired', this.handleAbilityAcquired, this);
       this.events?.off?.('ability-cleared', this.handleAbilityCleared, this);
       this.events?.off?.('enemy-defeated', this.handleEnemyDefeated, this);
+      this.events?.off?.('enemy-attack', this.handleEnemyAttack, this);
       this.events?.off?.('enemy-captured', this.handleEnemyCaptured, this);
       this.events?.off?.('enemy-capture-released', this.handleEnemyCaptureReleased, this);
       this.events?.off?.('enemy-swallowed', this.handleEnemySwallowed, this);
@@ -1062,6 +1068,7 @@ export class GameScene extends Phaser.Scene {
     this.events?.on?.('ability-acquired', this.handleAbilityAcquired, this);
     this.events?.on?.('ability-cleared', this.handleAbilityCleared, this);
     this.events?.on?.('enemy-defeated', this.handleEnemyDefeated, this);
+    this.events?.on?.('enemy-attack', this.handleEnemyAttack, this);
     this.events?.on?.('enemy-captured', this.handleEnemyCaptured, this);
     this.events?.on?.('enemy-capture-released', this.handleEnemyCaptureReleased, this);
     this.events?.on?.('enemy-swallowed', this.handleEnemySwallowed, this);

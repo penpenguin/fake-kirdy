@@ -2338,6 +2338,24 @@ describe('GameScene player integration', () => {
     expect(kirdyInstance.addScore).toHaveBeenLastCalledWith(100);
   });
 
+  it('敵攻撃イベントでプレイヤーにダメージを適用する', () => {
+    const scene = new GameScene();
+    createKirdyMock.mockReturnValue(makeKirdyStub());
+    playerInputUpdateMock.mockReturnValue(createSnapshot());
+
+    scene.create();
+
+    const attackHandler = stubs.events.on.mock.calls.find(([event]) => event === 'enemy-attack')?.[1];
+    expect(attackHandler).toBeInstanceOf(Function);
+
+    const damageSpy = vi.spyOn(scene, 'damagePlayer');
+
+    attackHandler?.({ damage: 2 });
+    expect(damageSpy).toHaveBeenCalledWith(2);
+
+    damageSpy.mockRestore();
+  });
+
   it('ダメージを受けるとHPを減算しゲームオーバー閾値までHUDを更新する', () => {
     const scene = new GameScene();
     createKirdyMock.mockReturnValue(makeKirdyStub());
