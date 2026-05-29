@@ -13,6 +13,16 @@ signal trace_event(event_type: String, payload: Dictionary)
 @export var swallow_action: StringName = &"swallow"
 @export var use_ability_action: StringName = &"use_ability"
 @export var level_id: String = "controller_lab"
+@export var kirdy_idle_texture: Texture2D
+@export var kirdy_run_texture: Texture2D
+@export var kirdy_jump_texture: Texture2D
+@export var kirdy_hover_texture: Texture2D
+@export var kirdy_inhale_texture: Texture2D
+@export var kirdy_swallow_texture: Texture2D
+@export var kirdy_spit_texture: Texture2D
+@export var kirdy_fire_texture: Texture2D
+@export var kirdy_ice_texture: Texture2D
+@export var kirdy_sword_texture: Texture2D
 
 var ability_type: String = ""
 var coyote_time: float = 0.0
@@ -21,9 +31,13 @@ var was_on_floor: bool = false
 var is_hovering: bool = false
 var has_jump_cut: bool = false
 var input_source: Node = null
+var last_facing: float = 1.0
+
+@onready var body_sprite: Sprite2D = $Body
 
 
 func _ready() -> void:
+    update_visual_state(0.0, false)
     emit_trace("player.spawned")
 
 
@@ -43,6 +57,7 @@ func _physics_process(delta: float) -> void:
 
     move_and_slide()
     update_landing_trace()
+    update_visual_state(input_x, jump_held)
 
 
 func apply_horizontal_movement(input_x: float, delta: float) -> void:
@@ -99,10 +114,63 @@ func is_use_ability_pressed() -> bool:
 
 func set_ability_type(next_ability_type: String) -> void:
     ability_type = next_ability_type
+    update_visual_state(0.0, false)
 
 
 func clear_ability_type() -> void:
     ability_type = ""
+    update_visual_state(0.0, false)
+
+
+func update_visual_state(input_x: float, jump_held: bool) -> void:
+    if body_sprite == null:
+        return
+
+    if input_x != 0.0:
+        last_facing = sign(input_x)
+        body_sprite.flip_h = last_facing < 0.0
+
+    var next_texture := kirdy_idle_texture
+
+    if is_input_action_pressed(inhale_action) and kirdy_inhale_texture != null:
+        next_texture = kirdy_inhale_texture
+    elif is_input_action_pressed(swallow_action) and kirdy_swallow_texture != null:
+        next_texture = kirdy_swallow_texture
+    elif not is_on_floor() and should_hover(jump_held) and kirdy_hover_texture != null:
+        next_texture = kirdy_hover_texture
+    elif not is_on_floor() and kirdy_jump_texture != null:
+        next_texture = kirdy_jump_texture
+    elif input_x != 0.0 and kirdy_run_texture != null:
+        next_texture = kirdy_run_texture
+    elif ability_type == "fire" and kirdy_fire_texture != null:
+        next_texture = kirdy_fire_texture
+    elif ability_type == "ice" or ability_type == "frost":
+        if kirdy_ice_texture != null:
+            next_texture = kirdy_ice_texture
+    elif ability_type == "sword" and kirdy_sword_texture != null:
+        next_texture = kirdy_sword_texture
+    elif ability_type != "" and kirdy_fire_texture != null:
+        next_texture = kirdy_fire_texture
+
+    if next_texture == null:
+        return
+
+    if body_sprite.texture != next_texture:
+        body_sprite.texture = next_texture
+        fit_body_sprite()
+
+
+func fit_body_sprite() -> void:
+    if body_sprite == null or body_sprite.texture == null:
+        return
+
+    var texture_size := body_sprite.texture.get_size()
+    if texture_size.x <= 0.0 or texture_size.y <= 0.0:
+        return
+
+    var target_size := Vector2(32.0, 36.0)
+    var scale_factor: float = minf(target_size.x / texture_size.x, target_size.y / texture_size.y)
+    body_sprite.scale = Vector2(scale_factor, scale_factor)
 
 
 func update_coyote_time(on_floor_before_move: bool, delta: float) -> void:

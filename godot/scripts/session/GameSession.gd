@@ -5,6 +5,7 @@ const PlayerScene = preload("res://scenes/player/Player.tscn")
 const SimpleEnemyScene = preload("res://scenes/enemies/SimpleEnemy.tscn")
 const FlyingEnemyScene = preload("res://scenes/enemies/FlyingEnemy.tscn")
 const LevelLoaderScript = preload("res://scripts/level/LevelLoader.gd")
+const LevelVisualAssetsScript = preload("res://scripts/level/LevelVisualAssets.gd")
 const TraceRecorderScript = preload("res://scripts/sim/TraceRecorder.gd")
 const SaveStoreScript = preload("res://scripts/save/SaveStore.gd")
 const MapOverlayScene = preload("res://scenes/ui/MapOverlay.tscn")
@@ -12,6 +13,13 @@ const HudOverlayScene = preload("res://scenes/ui/HudOverlay.tscn")
 const ResultOverlayScene = preload("res://scenes/ui/ResultOverlay.tscn")
 const SettingsOverlayScene = preload("res://scenes/ui/SettingsOverlay.tscn")
 const InventoryOverlayScene = preload("res://scenes/ui/InventoryOverlay.tscn")
+const BgmMain = preload("res://resources/assets/audio/bgm-main.wav")
+const SfxKirdyInhale = preload("res://resources/assets/audio/sfx/kirdy-inhale.wav")
+const SfxKirdySwallow = preload("res://resources/assets/audio/sfx/kirdy-swallow.wav")
+const SfxKirdySpit = preload("res://resources/assets/audio/sfx/kirdy-spit.wav")
+const SfxAbilityFireAttack = preload("res://resources/assets/audio/sfx/ability-fire-attack.wav")
+const SfxAbilityIceAttack = preload("res://resources/assets/audio/sfx/ability-ice-attack.wav")
+const SfxAbilitySwordAttack = preload("res://resources/assets/audio/sfx/ability-sword-attack.wav")
 
 var current_level_id: String = ""
 var current_level = null
@@ -46,8 +54,11 @@ var hud_overlay: Control = null
 var result_overlay: Control = null
 var settings_overlay: Control = null
 var inventory_overlay: Control = null
+var bgm_player: AudioStreamPlayer = null
+var sfx_player: AudioStreamPlayer = null
 
 var level_loader = null
+var level_visual_assets = LevelVisualAssetsScript.new()
 var requested_spawn_id: String = "default"
 
 @export var auto_start: bool = true
@@ -73,6 +84,7 @@ var requested_spawn_id: String = "default"
 @export var result_overlay_enabled: bool = true
 @export var settings_overlay_enabled: bool = true
 @export var inventory_overlay_enabled: bool = true
+@export var audio_enabled: bool = true
 
 
 func _ready() -> void:
@@ -127,6 +139,7 @@ func start_session(start_level_id: String, start_spawn_id: String = "default", f
     setup_result_overlay()
     setup_settings_overlay()
     setup_inventory_overlay()
+    setup_audio_players()
     trace_recorder.call("configure", start_level_id, replay_fps)
     load_persistent_state()
     sync_map_overlay("save.loaded")
@@ -194,6 +207,7 @@ func load_level(level_id: String, spawn_id: String = "default") -> bool:
     current_level_id = level_id
     requested_spawn_id = spawn_id
     add_child(current_level)
+    level_visual_assets.call("apply_to_level", current_level, current_level_id)
     current_definition = level_loader.call("build_level_definition", current_level, level_id)
     spawn_player(spawn_id)
     spawn_enemies()
@@ -297,6 +311,7 @@ func capture_nearest_enemy() -> void:
 
     captured_enemy = nearest_enemy
     captured_enemy.call("capture", player)
+    play_sfx(SfxKirdyInhale)
     trace_recorder.call("record_player_event", "enemy.captured", {
         "level_id": current_level_id,
         "player": get_player_trace(),
@@ -311,6 +326,7 @@ func release_captured_enemy() -> void:
     var released_enemy = captured_enemy
     captured_enemy = null
     released_enemy.call("release")
+    play_sfx(SfxKirdySpit)
     trace_recorder.call("record_player_event", "enemy.released", {
         "level_id": current_level_id,
         "player": get_player_trace(),
@@ -326,6 +342,7 @@ func swallow_captured_enemy() -> void:
     captured_enemy = null
     swallowed_enemy.call("swallow")
     player.call("set_ability_type", swallowed_enemy.ability_type)
+    play_sfx(SfxKirdySwallow)
     trace_recorder.call("record_player_event", "enemy.swallowed", {
         "level_id": current_level_id,
         "player": get_player_trace(),
@@ -348,6 +365,7 @@ func use_ability() -> void:
     if String(player.ability_type) == "":
         return
 
+    play_sfx(get_ability_sfx(String(player.ability_type)))
     trace_recorder.call("record_player_event", "ability.used", {
         "level_id": current_level_id,
         "player": get_player_trace(),
@@ -722,6 +740,42 @@ func setup_inventory_overlay() -> void:
 
     inventory_overlay = InventoryOverlayScene.instantiate()
     add_child(inventory_overlay)
+
+
+func setup_audio_players() -> void:
+    if not audio_enabled:
+        return
+
+    bgm_player = AudioStreamPlayer.new()
+    bgm_player.name = "BgmPlayer"
+    bgm_player.stream = BgmMain
+    bgm_player.volume_db = linear_to_db(clampf(setting_volume, 0.0, 1.0))
+    add_child(bgm_player)
+    bgm_player.play()
+
+    sfx_player = AudioStreamPlayer.new()
+    sfx_player.name = "SfxPlayer"
+    sfx_player.volume_db = linear_to_db(clampf(setting_volume, 0.0, 1.0))
+    add_child(sfx_player)
+
+
+func play_sfx(stream: AudioStream) -> void:
+    if not audio_enabled or sfx_player == null or stream == null:
+        return
+
+    sfx_player.stream = stream
+    sfx_player.volume_db = linear_to_db(clampf(setting_volume, 0.0, 1.0))
+    sfx_player.play()
+
+
+func get_ability_sfx(current_ability_type: String) -> AudioStream:
+    match current_ability_type:
+        "ice", "frost":
+            return SfxAbilityIceAttack
+        "sword":
+            return SfxAbilitySwordAttack
+        _:
+            return SfxAbilityFireAttack
 
 
 func sync_map_overlay(reason: String = "", emit_trace: bool = false) -> void:

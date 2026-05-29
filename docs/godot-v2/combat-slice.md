@@ -2,7 +2,7 @@
 
 The Combat Slice adds the smallest Kirdy-like loop: inhale an enemy, optionally release it, swallow it, acquire its ability type, use that ability once, and finish the room.
 
-This is not a full enemy port. It has `SimpleEnemy` and a small `FlyingEnemy` variant selected by `EnemySpawnMarker.enemy_type`. There is no polished animation, no audio, no broad enemy roster, and only the minimal mainline HUD described in `hud-overlay.md`.
+This is not a full enemy port. It has `SimpleEnemy` and a small `FlyingEnemy` variant selected by `EnemySpawnMarker.enemy_type`. The Godot mainline now uses the retained Phaser reference sprites and basic combat audio cues, but polished animation, a broad enemy roster, and final presentation remain outside this slice.
 
 ## Controls
 

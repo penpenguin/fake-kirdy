@@ -46,6 +46,8 @@ if (version.error) {
   process.exit(1);
 }
 
+ensureGodotImport();
+
 const outDir = resolve(repoRoot, options.outDir ?? join(tmpdir(), `fake-kirdy-godot-replay-suite-${process.pid}`));
 mkdirSync(outDir, { recursive: true });
 
@@ -153,6 +155,28 @@ function readSuite(path) {
     version: parsed.version,
     replays,
   };
+}
+
+function ensureGodotImport() {
+  const importResult = spawnSync('godot', ['--headless', '--path', godotRoot, '--import'], {
+    encoding: 'utf8',
+  });
+
+  if (importResult.error) {
+    console.error(`[godot:replay-suite] ${importResult.error.message}`);
+    process.exit(1);
+  }
+
+  if ((importResult.status ?? 0) !== 0) {
+    if (importResult.stdout) {
+      console.error(importResult.stdout);
+    }
+    if (importResult.stderr) {
+      console.error(importResult.stderr);
+    }
+    console.error('[godot:replay-suite] Godot asset import failed.');
+    process.exit(importResult.status ?? 1);
+  }
 }
 
 function runReplay(replay, outDir) {

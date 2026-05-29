@@ -2,83 +2,103 @@
   "version": 1,
   "canonical_runtime": "godot",
   "legacy_reference": "phaser-matter",
-  "updated_on": "2026-05-28",
+  "updated_on": "2026-05-29",
   "entries": [
     {
       "id": "player-controller",
       "status": "ported",
       "summary": "Phaser Kirdy movement constants and direct Matter velocity writes are replaced by a Godot CharacterBody2D controller with tuning resource, acceleration/deceleration, jump buffer, coyote time, jump cut, gravity split, hover, and trace events.",
-      "legacy_reference_files": ["legacy/phaser-reference/src/game/characters/Kirdy.ts"],
       "godot_evidence": [
         "godot/scripts/player/PlayerController.gd",
         "godot/scripts/player/PlayerTuning.gd",
         "godot/levels/controller_lab.tscn",
         "godot/tests/replays/controller_lab_jump.json"
       ],
-      "docs_evidence": ["docs/godot-v2/controller-lab.md"],
-      "validation": ["npm run godot:replay-suite", "npm test"],
+      "docs_evidence": [
+        "docs/godot-v2/controller-lab.md"
+      ],
+      "validation": [
+        "npm run godot:replay-suite",
+        "npm test"
+      ],
       "retirement_blocker": false
     },
     {
       "id": "level-markers-and-loader",
       "status": "ported",
       "summary": "Gameplay placement is represented with Godot marker nodes and LevelLoader/LevelDefinition scanning instead of hard-coded player controller placement.",
-      "legacy_reference_files": ["legacy/phaser-reference/src/game/world/AreaManager.ts", "legacy/phaser-reference/src/game/world/stages/index.ts"],
       "godot_evidence": [
         "godot/scripts/level/LevelDefinition.gd",
         "godot/scripts/level/LevelLoader.gd",
         "godot/levels/level_catalog.source.json"
       ],
-      "docs_evidence": ["docs/godot-v2/level-lab.md", "docs/godot-v2/content-migration.md"],
-      "validation": ["npm run godot:content-check", "npm test"],
+      "docs_evidence": [
+        "docs/godot-v2/level-lab.md",
+        "docs/godot-v2/content-migration.md"
+      ],
+      "validation": [
+        "npm run godot:content-check",
+        "npm test"
+      ],
       "retirement_blocker": false
     },
     {
       "id": "representative-stage-topology",
       "status": "ported",
-      "summary": "Central hub, branch rooms, goal path, static reliquaries, and the full Phaser procedural topology are represented by Godot scenes or generated schema. Content validation now covers all 146 Phaser stage ids and all generated neighbor edges, while final room art/layout polish remains separate from topology parity.",
-      "legacy_reference_files": ["legacy/phaser-reference/src/game/world/stages/"],
+      "summary": "Central hub, branch rooms, goal path, static reliquaries, and the full canonical procedural topology are represented by Godot scenes or generated schema. Content validation now covers all 146 canonical stage ids and all generated neighbor edges, while final room art/layout polish remains separate from topology parity.",
       "godot_evidence": [
         "godot/levels/central_hub.tscn",
         "godot/levels/goal_sanctum.tscn",
         "godot/levels/generated/procedural_levels.json",
-        "godot/levels/phaser_stage_manifest.json"
+        "godot/levels/stage_manifest.json"
       ],
-      "docs_evidence": ["docs/godot-v2/content-migration.md", "docs/godot-v2/procedural-level-generation.md"],
-      "validation": ["npm run godot:stage-manifest -- --check", "npm run godot:procedural-levels -- --check", "npm run godot:content-check"],
+      "docs_evidence": [
+        "docs/godot-v2/content-migration.md",
+        "docs/godot-v2/procedural-level-generation.md"
+      ],
+      "validation": [
+        "npm run godot:stage-manifest -- --check",
+        "npm run godot:procedural-levels -- --check",
+        "npm run godot:content-check"
+      ],
       "retirement_blocker": false
     },
     {
       "id": "session-transitions-outcomes",
       "status": "ported",
       "summary": "Door transitions, level loading, goal completion, death, game-over, run timer, and run.finished trace are owned by GameSession.",
-      "legacy_reference_files": ["legacy/phaser-reference/src/game/scenes/index.ts"],
       "godot_evidence": [
         "godot/scripts/session/GameSession.gd",
         "godot/tests/replays/central_hub_to_heal_goal.json",
         "godot/tests/replays/danger_room_game_over.json"
       ],
-      "docs_evidence": ["docs/godot-v2/session-outcomes.md", "docs/godot-v2/door-transition-flow.md"],
-      "validation": ["npm run godot:replay-suite", "npm test"],
+      "docs_evidence": [
+        "docs/godot-v2/session-outcomes.md",
+        "docs/godot-v2/door-transition-flow.md"
+      ],
+      "validation": [
+        "npm run godot:replay-suite",
+        "npm test"
+      ],
       "retirement_blocker": false
     },
     {
       "id": "combat-core",
       "status": "ported",
       "summary": "Godot has the smallest mainline combat loop: capture, release, swallow, ability acquire, ability use, ground enemy, flying enemy, and trace hooks.",
-      "legacy_reference_files": [
-        "legacy/phaser-reference/src/game/mechanics/InhaleSystem.ts",
-        "legacy/phaser-reference/src/game/mechanics/SwallowSystem.ts",
-        "legacy/phaser-reference/src/game/mechanics/AbilitySystem.ts"
-      ],
       "godot_evidence": [
         "godot/scripts/enemies/SimpleEnemy.gd",
         "godot/scripts/enemies/FlyingEnemy.gd",
         "godot/tests/replays/combat_capture_swallow_goal.json",
         "godot/tests/replays/flying_enemy_release_swallow_goal.json"
       ],
-      "docs_evidence": ["docs/godot-v2/combat-slice.md"],
-      "validation": ["npm run godot:replay-suite", "npm test"],
+      "docs_evidence": [
+        "docs/godot-v2/combat-slice.md"
+      ],
+      "validation": [
+        "npm run godot:replay-suite",
+        "npm test"
+      ],
       "retirement_blocker": false
     },
     {
@@ -93,15 +113,19 @@
         "scripts/run-godot-replay-suite.mjs",
         "scripts/trace-summary.mjs"
       ],
-      "docs_evidence": ["docs/godot-v2/replay-and-trace.md"],
-      "validation": ["npm run godot:replay-suite", "npm run trace:summary -- <trace>"],
+      "docs_evidence": [
+        "docs/godot-v2/replay-and-trace.md"
+      ],
+      "validation": [
+        "npm run godot:replay-suite",
+        "npm run trace:summary -- <trace>"
+      ],
       "retirement_blocker": false
     },
     {
       "id": "save-progress-settings",
       "status": "ported",
       "summary": "Godot persists item ids, HP, max HP, revive count, current level, completed/visited/unlocked ids, explored tiles, player position, ability, and settings, with minimal settings UI and settings trace coverage.",
-      "legacy_reference_files": ["legacy/phaser-reference/src/game/save/SaveManager.ts"],
       "godot_evidence": [
         "godot/scripts/save/SaveState.gd",
         "godot/scripts/save/SaveStore.gd",
@@ -109,29 +133,38 @@
         "godot/tests/replays/use_saved_ability.json",
         "godot/tests/replays/settings_adjustment.json"
       ],
-      "docs_evidence": ["docs/godot-v2/save-persistence.md"],
-      "validation": ["npm test", "npm run godot:replay-suite"],
+      "docs_evidence": [
+        "docs/godot-v2/save-persistence.md"
+      ],
+      "validation": [
+        "npm test",
+        "npm run godot:replay-suite"
+      ],
       "retirement_blocker": false
     },
     {
       "id": "collectibles-heals-rewards",
       "status": "ported",
       "summary": "Godot marker/session flow handles collectible pickup, item acquisition, health, max-health, and revive reward semantics with trace evidence.",
-      "legacy_reference_files": ["legacy/phaser-reference/src/game/world/stages/"],
       "godot_evidence": [
         "godot/tests/replays/forest_reliquary_collectible.json",
         "godot/tests/replays/central_hub_dead_end_max_health.json",
         "godot/tests/replays/revive_room_revive_then_game_over.json"
       ],
-      "docs_evidence": ["docs/godot-v2/session-outcomes.md", "docs/godot-v2/content-migration.md"],
-      "validation": ["npm run godot:replay-suite", "npm test"],
+      "docs_evidence": [
+        "docs/godot-v2/session-outcomes.md",
+        "docs/godot-v2/content-migration.md"
+      ],
+      "validation": [
+        "npm run godot:replay-suite",
+        "npm test"
+      ],
       "retirement_blocker": false
     },
     {
       "id": "ui-map-hud-results",
       "status": "ported",
       "summary": "Godot has minimal visible map, HUD, inventory/progress, settings, and result overlays with trace metrics. Full presentation polish, animation, audio, and menu styling are deferred outside the runtime-retirement blocker.",
-      "legacy_reference_files": ["legacy/phaser-reference/src/game/ui/"],
       "godot_evidence": [
         "godot/scripts/ui/MapOverlay.gd",
         "godot/scripts/ui/HudOverlay.gd",
@@ -144,37 +177,61 @@
         "docs/godot-v2/result-overlay.md",
         "docs/godot-v2/session-outcomes.md"
       ],
-      "validation": ["npm test", "npm run godot:replay-suite"],
+      "validation": [
+        "npm test",
+        "npm run godot:replay-suite"
+      ],
       "retirement_blocker": false
     },
     {
       "id": "audio-and-polish",
       "status": "deferred",
-      "summary": "Audio, polished animation, detailed effects, and final presentation are intentionally deferred from runtime migration. The Godot mainline has traceable functional UI/gameplay parity; presentation work remains backlog rather than a blocker for retiring the Phaser runtime.",
-      "legacy_reference_files": ["legacy/phaser-reference/src/game/audio/AudioManager.ts"],
-      "docs_evidence": ["docs/godot-v2/combat-slice.md", "docs/godot-v2/result-overlay.md"],
-      "validation": ["docs/godot-v2/full-migration-execplan.md decision log"],
+      "summary": "Retained Phaser reference assets are copied into Godot resources and connected to the player, enemies, doors, goals, pickups, terrain visuals, BGM, and core combat cues. Polished animation, detailed effects, full audio mixing, and final presentation remain backlog rather than a blocker for retiring the Phaser runtime.",
+      "godot_evidence": [
+        "godot/resources/assets/asset_manifest.json",
+        "godot/resources/assets",
+        "godot/scenes/player/Player.tscn",
+        "godot/scripts/session/GameSession.gd"
+      ],
+      "docs_evidence": [
+        "docs/godot-v2/combat-slice.md",
+        "docs/godot-v2/result-overlay.md"
+      ],
+      "validation": [
+        "npm run check:test"
+      ],
       "retirement_blocker": false
     },
     {
       "id": "export-packaging",
       "status": "ported",
       "summary": "The canonical build command now uses the Godot export wrapper, validates the export preset, and skips gracefully when local export templates are unavailable. Installing matching templates is an environment setup step, not a Phaser runtime retirement blocker.",
-      "godot_evidence": ["godot/export_presets.cfg", "scripts/export-godot.mjs"],
-      "docs_evidence": ["docs/godot-v2/full-migration-execplan.md"],
-      "validation": ["npm run godot:export -- --check", "npm run build -- --check"],
+      "godot_evidence": [
+        "godot/export_presets.cfg",
+        "scripts/export-godot.mjs"
+      ],
+      "docs_evidence": [
+        "docs/godot-v2/full-migration-execplan.md"
+      ],
+      "validation": [
+        "npm run godot:export -- --check",
+        "npm run build -- --check"
+      ],
       "retirement_blocker": false
     },
     {
       "id": "phaser-vite-runtime-retirement",
       "status": "ported",
-      "summary": "The root package has retired Phaser/Vite runtime commands and dependencies. Phaser source remains only as legacy/reference material for audits while canonical run, build, replay, trace, metrics, and tests use Godot paths.",
-      "legacy_reference_files": ["legacy/phaser-reference/src", "legacy/phaser-reference/public", "legacy/phaser-reference/index.html", "legacy/phaser-reference/vite.config.ts"],
+      "summary": "The root package has retired Phaser/Vite runtime commands and dependencies. Optional Phaser reference copies are audit material only; canonical run, build, replay, trace, metrics, and tests use Godot paths.",
       "docs_evidence": [
         "docs/godot-v2/legacy-reference-boundary.md",
         "docs/godot-v2/full-migration-execplan.md"
       ],
-      "validation": ["npm run legacy:inventory", "npm run test:canonical", "npm run godot:parity-ledger -- --fail-on-blockers"],
+      "validation": [
+        "npm run legacy:inventory",
+        "npm run test:canonical",
+        "npm run godot:parity-ledger -- --fail-on-blockers"
+      ],
       "retirement_blocker": false
     }
   ]

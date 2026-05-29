@@ -14,7 +14,7 @@
     "test": "npm run check:typecheck && npm run check:test && npm run check:godot",
     "test:canonical": "npm test && npm run godot:replay-suite --",
     "legacy:inventory": "node scripts/legacy-inventory.mjs",
-    "godot:stage-manifest": "node scripts/generate-phaser-stage-manifest.mjs",
+    "godot:stage-manifest": "node scripts/check-godot-stage-manifest.mjs",
     "godot:procedural-levels": "node scripts/generate-godot-procedural-levels.mjs",
     "godot:catalog": "node scripts/generate-godot-level-catalog.mjs",
     "godot:content-check": "node scripts/check-godot-content-migration.mjs",

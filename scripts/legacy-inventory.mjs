@@ -22,7 +22,8 @@ const inventory = {
   canonical_runtime: 'godot',
   canonical_project_dir: 'godot',
   legacy_runtime: {
-    status: 'reference source retained outside root runtime',
+    status: 'optional reference copy outside canonical runtime',
+    required_by_canonical_runtime: false,
     source_dirs: legacySourceDirs,
     config_files: legacyConfigFiles,
     commands: legacyCommands,

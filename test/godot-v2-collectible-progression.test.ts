@@ -66,7 +66,7 @@ describe('Godot v2 collectible progression slice', () => {
     const sourceCatalog = JSON.parse(readGodotFile('levels/level_catalog.source.json')) as {
       levels?: Array<{
         id?: string;
-        phaser_stage_id?: string;
+        stage_id?: string;
         expected_collectibles?: string[];
         expected_metadata?: Record<string, string | number | boolean>;
       }>;
@@ -78,7 +78,7 @@ describe('Godot v2 collectible progression slice', () => {
       const replayPath = join(godotRoot, 'tests', 'replays', `${levelId}_collectible.json`);
       const mappedLevel = sourceCatalog.levels?.find((entry) => entry.id === levelId);
 
-      expect(mappedLevel?.phaser_stage_id).toBe(phaserStageId);
+      expect(mappedLevel?.stage_id).toBe(phaserStageId);
       expect(mappedLevel?.expected_collectibles).toEqual([itemId]);
       expect(mappedLevel?.expected_metadata).toEqual({
         cluster,
@@ -106,7 +106,7 @@ describe('Godot v2 collectible progression slice', () => {
       encoding: 'utf8',
     });
 
-    expect(output).toContain('validated 15 Phaser stage mappings');
+    expect(output).toContain('validated 15 canonical stage mappings');
     expect(output).toContain('validated expected_collectibles for 4 level mappings');
   });
 });

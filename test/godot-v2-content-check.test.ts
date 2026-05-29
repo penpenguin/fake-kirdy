@@ -8,7 +8,7 @@ const currentDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(currentDir, '..');
 
 describe('Godot v2 content migration checker', () => {
-  it('validates mapped Phaser neighbor edges against Godot DoorMarker targets', () => {
+  it('validates mapped canonical neighbor edges against Godot DoorMarker targets', () => {
     const output = execFileSync('node', ['scripts/check-godot-content-migration.mjs'], {
       cwd: repoRoot,
       encoding: 'utf8',
@@ -26,13 +26,13 @@ describe('Godot v2 content migration checker', () => {
     expect(output).toContain('labyrinth-001 -> forest-area maps to labyrinth_001 -> forest_area');
   });
 
-  it('validates the full Phaser stage topology against Godot scenes or generated schema', () => {
+  it('validates the full canonical stage topology against Godot scenes or generated schema', () => {
     const output = execFileSync('node', ['scripts/check-godot-content-migration.mjs'], {
       cwd: repoRoot,
       encoding: 'utf8',
     });
 
-    expect(output).toContain('validated 146 Phaser stage topology mapping(s)');
+    expect(output).toContain('validated 146 canonical stage topology mapping(s)');
     expect(output).toContain('validated 132 generated schema level(s)');
     expect(output).toContain('validated 263 generated neighbor edge(s)');
   });

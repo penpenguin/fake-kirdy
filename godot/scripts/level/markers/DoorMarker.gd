@@ -1,6 +1,8 @@
 extends Node2D
 class_name DoorMarker
 
+const DoorTexture = preload("res://resources/assets/images/ui/door-marker.webp")
+
 @export var door_id: String = "door"
 @export var target_level_id: String = ""
 @export var target_spawn_id: String = "default"
@@ -10,6 +12,19 @@ class_name DoorMarker
 func _ready() -> void:
     add_to_group("level_marker")
     add_to_group("door_marker")
+    ensure_visual()
+
+
+func ensure_visual() -> void:
+    if has_node("Visual"):
+        return
+
+    var visual := Sprite2D.new()
+    visual.name = "Visual"
+    visual.texture = DoorTexture
+    visual.scale = Vector2(0.18, 0.18)
+    visual.z_index = 2
+    add_child(visual)
 
 
 func to_level_marker() -> Dictionary:

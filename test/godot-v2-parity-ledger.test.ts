@@ -21,14 +21,15 @@ describe('Godot v2 Phaser parity ledger', () => {
         status?: string;
         retirement_blocker?: boolean;
         godot_evidence?: string[];
-        validation?: string[];
-      }>;
-    };
+      validation?: string[];
+    }>;
+  };
 
     expect(ledger.version).toBe(1);
     expect(ledger.canonical_runtime).toBe('godot');
     expect(ledger.legacy_reference).toBe('phaser-matter');
     expect(ledger.entries?.length).toBeGreaterThanOrEqual(10);
+    expect(JSON.stringify(ledger)).not.toContain('legacy/phaser-reference');
 
     const byId = new Map(ledger.entries?.map((entry) => [entry.id, entry]));
     expect(byId.get('player-controller')?.status).toBe('ported');

@@ -19,8 +19,8 @@ describe('Godot v2 catalog generation pipeline', () => {
       levels?: Array<{
         id?: string;
         scene_path?: string;
-        phaser_source?: string;
-        phaser_stage_id?: string;
+        source_ref?: string;
+        stage_id?: string;
         expected_neighbors?: string[];
         expected_collectibles?: string[];
         expected_dead_end_rewards?: string[];
@@ -30,11 +30,12 @@ describe('Godot v2 catalog generation pipeline', () => {
     };
 
     expect(source.version).toBe(1);
-    expect(source.levels?.some((level) => level.id === 'central_hub' && level.phaser_source === 'legacy/phaser-reference/src/game/world/stages/central-hub.ts')).toBe(true);
+    expect(source.levels?.some((level) => level.id === 'central_hub' && level.source_ref === 'stage_manifest:central-hub')).toBe(true);
+    expect(JSON.stringify(source)).not.toContain('legacy/phaser-reference');
     expect(source.levels?.every((level) => typeof level.migration_status === 'string')).toBe(true);
 
     const centralHub = source.levels?.find((level) => level.id === 'central_hub');
-    expect(centralHub?.phaser_stage_id).toBe('central-hub');
+    expect(centralHub?.stage_id).toBe('central-hub');
     expect(centralHub?.expected_neighbors).toEqual([
       'ice-area',
       'mirror-corridor',
@@ -45,7 +46,7 @@ describe('Godot v2 catalog generation pipeline', () => {
     expect(centralHub?.expected_dead_end_rewards).toEqual(['health', 'max-health']);
 
     const phaserStageIds = source.levels
-      ?.map((level) => level.phaser_stage_id)
+      ?.map((level) => level.stage_id)
       .filter((stageId): stageId is string => typeof stageId === 'string');
 
     expect(phaserStageIds).toEqual(expect.arrayContaining([
@@ -66,43 +67,43 @@ describe('Godot v2 catalog generation pipeline', () => {
       'ruins-reliquary',
     ]));
 
-    expect(source.levels?.find((level) => level.phaser_stage_id === 'ice-area')?.expected_metadata).toEqual({
+    expect(source.levels?.find((level) => level.stage_id === 'ice-area')?.expected_metadata).toEqual({
       cluster: 'ice',
       difficulty: 2,
     });
-    expect(source.levels?.find((level) => level.phaser_stage_id === 'fire-area')?.expected_metadata).toEqual({
+    expect(source.levels?.find((level) => level.stage_id === 'fire-area')?.expected_metadata).toEqual({
       cluster: 'fire',
       difficulty: 3,
     });
-    expect(source.levels?.find((level) => level.phaser_stage_id === 'goal-sanctum')?.expected_metadata).toEqual({
+    expect(source.levels?.find((level) => level.stage_id === 'goal-sanctum')?.expected_metadata).toEqual({
       cluster: 'ruins',
       difficulty: 4,
     });
-    expect(source.levels?.find((level) => level.phaser_stage_id === 'sky-sanctum')?.expected_metadata).toEqual({
+    expect(source.levels?.find((level) => level.stage_id === 'sky-sanctum')?.expected_metadata).toEqual({
       cluster: 'sky',
       difficulty: 4,
     });
-    expect(source.levels?.find((level) => level.phaser_stage_id === 'labyrinth-001')?.expected_metadata).toEqual({
+    expect(source.levels?.find((level) => level.stage_id === 'labyrinth-001')?.expected_metadata).toEqual({
       cluster: 'forest',
       difficulty: 2,
     });
-    expect(source.levels?.find((level) => level.phaser_stage_id === 'labyrinth-001')?.expected_dead_end_rewards).toEqual([
+    expect(source.levels?.find((level) => level.stage_id === 'labyrinth-001')?.expected_dead_end_rewards).toEqual([
       'health',
     ]);
-    expect(source.levels?.find((level) => level.phaser_stage_id === 'forest-reliquary')?.expected_metadata).toEqual({
+    expect(source.levels?.find((level) => level.stage_id === 'forest-reliquary')?.expected_metadata).toEqual({
       cluster: 'forest',
       difficulty: 3,
     });
-    expect(source.levels?.find((level) => level.phaser_stage_id === 'forest-reliquary')?.expected_collectibles).toEqual([
+    expect(source.levels?.find((level) => level.stage_id === 'forest-reliquary')?.expected_collectibles).toEqual([
       'forest-keystone',
     ]);
-    expect(source.levels?.find((level) => level.phaser_stage_id === 'ice-reliquary')?.expected_collectibles).toEqual([
+    expect(source.levels?.find((level) => level.stage_id === 'ice-reliquary')?.expected_collectibles).toEqual([
       'ice-keystone',
     ]);
-    expect(source.levels?.find((level) => level.phaser_stage_id === 'fire-reliquary')?.expected_collectibles).toEqual([
+    expect(source.levels?.find((level) => level.stage_id === 'fire-reliquary')?.expected_collectibles).toEqual([
       'fire-keystone',
     ]);
-    expect(source.levels?.find((level) => level.phaser_stage_id === 'ruins-reliquary')?.expected_collectibles).toEqual([
+    expect(source.levels?.find((level) => level.stage_id === 'ruins-reliquary')?.expected_collectibles).toEqual([
       'cave-keystone',
     ]);
   });
@@ -114,10 +115,10 @@ describe('Godot v2 catalog generation pipeline', () => {
     });
 
     expect(output).toContain('level_catalog.json is up to date');
-    expect(output).toContain('validated 15 Phaser stage mappings');
+    expect(output).toContain('validated 15 canonical stage mappings');
     expect(output).toContain('validated expected_collectibles for 4 level mappings');
     expect(output).toContain('validated expected_dead_end_rewards for 2 level mappings');
-    expect(output).toContain('against phaser_stage_manifest.json');
+    expect(output).toContain('against stage_manifest.json');
   });
 
   it('wires catalog generation into package validation scripts', () => {

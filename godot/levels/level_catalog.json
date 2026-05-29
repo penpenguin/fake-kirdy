@@ -9,7 +9,7 @@
         "representative",
         "door_graph"
       ],
-      "phaser_source": "legacy/phaser-reference/src/game/world/stages/central-hub.ts"
+      "source_ref": "stage_manifest:central-hub"
     },
     {
       "id": "ice_area",
@@ -19,7 +19,7 @@
         "representative",
         "phaser_branch"
       ],
-      "phaser_source": "legacy/phaser-reference/src/game/world/stages/ice-area.ts"
+      "source_ref": "stage_manifest:ice-area"
     },
     {
       "id": "mirror_corridor",
@@ -29,7 +29,7 @@
         "representative",
         "phaser_branch"
       ],
-      "phaser_source": "legacy/phaser-reference/src/game/world/stages/mirror-corridor.ts"
+      "source_ref": "stage_manifest:mirror-corridor"
     },
     {
       "id": "fire_area",
@@ -39,7 +39,7 @@
         "representative",
         "phaser_branch"
       ],
-      "phaser_source": "legacy/phaser-reference/src/game/world/stages/fire-area.ts"
+      "source_ref": "stage_manifest:fire-area"
     },
     {
       "id": "forest_area",
@@ -49,7 +49,7 @@
         "representative",
         "phaser_branch"
       ],
-      "phaser_source": "legacy/phaser-reference/src/game/world/stages/forest-area.ts"
+      "source_ref": "stage_manifest:forest-area"
     },
     {
       "id": "cave_area",
@@ -59,7 +59,7 @@
         "representative",
         "phaser_branch"
       ],
-      "phaser_source": "legacy/phaser-reference/src/game/world/stages/cave-area.ts"
+      "source_ref": "stage_manifest:cave-area"
     },
     {
       "id": "goal_sanctum",
@@ -70,7 +70,7 @@
         "representative",
         "phaser_branch"
       ],
-      "phaser_source": "legacy/phaser-reference/src/game/world/stages/goal-sanctum.ts"
+      "source_ref": "stage_manifest:goal-sanctum"
     },
     {
       "id": "sky_sanctum",
@@ -80,7 +80,7 @@
         "representative",
         "phaser_branch"
       ],
-      "phaser_source": "legacy/phaser-reference/src/game/world/stages/sky-sanctum.ts"
+      "source_ref": "stage_manifest:sky-sanctum"
     },
     {
       "id": "starlit_keep",
@@ -90,7 +90,7 @@
         "representative",
         "phaser_branch"
       ],
-      "phaser_source": "legacy/phaser-reference/src/game/world/stages/starlit-keep.ts"
+      "source_ref": "stage_manifest:starlit-keep"
     },
     {
       "id": "aurora_spire",
@@ -100,7 +100,7 @@
         "representative",
         "phaser_branch"
       ],
-      "phaser_source": "legacy/phaser-reference/src/game/world/stages/aurora-spire.ts"
+      "source_ref": "stage_manifest:aurora-spire"
     },
     {
       "id": "labyrinth_001",
@@ -111,7 +111,7 @@
         "representative",
         "phaser_branch"
       ],
-      "phaser_source": "legacy/phaser-reference/src/game/world/stages/procedural.ts"
+      "source_ref": "stage_manifest:labyrinth-001"
     },
     {
       "id": "forest_reliquary",
@@ -123,7 +123,7 @@
         "representative",
         "phaser_branch"
       ],
-      "phaser_source": "legacy/phaser-reference/src/game/world/stages/forest-reliquary.ts"
+      "source_ref": "stage_manifest:forest-reliquary"
     },
     {
       "id": "ice_reliquary",
@@ -135,7 +135,7 @@
         "representative",
         "phaser_branch"
       ],
-      "phaser_source": "legacy/phaser-reference/src/game/world/stages/ice-reliquary.ts"
+      "source_ref": "stage_manifest:ice-reliquary"
     },
     {
       "id": "fire_reliquary",
@@ -147,7 +147,7 @@
         "representative",
         "phaser_branch"
       ],
-      "phaser_source": "legacy/phaser-reference/src/game/world/stages/fire-reliquary.ts"
+      "source_ref": "stage_manifest:fire-reliquary"
     },
     {
       "id": "ruins_reliquary",
@@ -159,7 +159,7 @@
         "representative",
         "phaser_branch"
       ],
-      "phaser_source": "legacy/phaser-reference/src/game/world/stages/ruins-reliquary.ts"
+      "source_ref": "stage_manifest:ruins-reliquary"
     },
     {
       "id": "controller_lab",
@@ -168,7 +168,7 @@
         "controller_lab",
         "prototype"
       ],
-      "phaser_source": ""
+      "source_ref": ""
     },
     {
       "id": "flat_room",
@@ -177,7 +177,7 @@
         "goal",
         "test_room"
       ],
-      "phaser_source": ""
+      "source_ref": ""
     },
     {
       "id": "jump_room",
@@ -187,7 +187,7 @@
         "heal",
         "test_room"
       ],
-      "phaser_source": ""
+      "source_ref": ""
     },
     {
       "id": "door_room",
@@ -196,7 +196,7 @@
         "door_transition",
         "test_room"
       ],
-      "phaser_source": ""
+      "source_ref": ""
     },
     {
       "id": "combat_room",
@@ -206,7 +206,7 @@
         "ability",
         "representative"
       ],
-      "phaser_source": "docs/design.md"
+      "source_ref": "docs/design.md"
     },
     {
       "id": "flying_combat_room",
@@ -217,7 +217,7 @@
         "flying_enemy",
         "representative"
       ],
-      "phaser_source": "docs/design.md"
+      "source_ref": "docs/design.md"
     },
     {
       "id": "danger_room",
@@ -227,7 +227,7 @@
         "game_over",
         "test_room"
       ],
-      "phaser_source": "legacy/phaser-reference/src/game/scenes/index.ts"
+      "source_ref": "docs/design.md"
     },
     {
       "id": "revive_room",
@@ -237,7 +237,7 @@
         "revive",
         "test_room"
       ],
-      "phaser_source": "docs/design.md"
+      "source_ref": "docs/design.md"
     },
     {
       "id": "heal_room",
@@ -247,7 +247,7 @@
         "representative",
         "goal"
       ],
-      "phaser_source": "docs/design.md"
+      "source_ref": "docs/design.md"
     }
   ]
 }

@@ -1,15 +1,12 @@
 # Godot v2 Legacy Reference Boundary
 
-Godot is the canonical runtime. The Phaser + Matter.js implementation remains in the repository only as legacy/reference source for gameplay intent, content audits, and historical regression context.
+Godot is the canonical runtime. Any Phaser + Matter.js copy that remains in the repository is an optional reference copy for gameplay intent, content audits, and historical regression context. It is not required by the canonical runtime or canonical import data.
 
 ## Current Legacy Surface
 
 Runtime source and web assets:
 
-- `legacy/phaser-reference/src/`
-- `legacy/phaser-reference/public/`
-- `legacy/phaser-reference/index.html`
-- `legacy/phaser-reference/vite.config.ts`
+Optional reference copy only. Its concrete files are reported by `npm run legacy:inventory` when present.
 
 Legacy commands:
 
@@ -19,15 +16,15 @@ Legacy runtime dependencies:
 
 None. Root Phaser/Vite dependencies have been removed.
 
-Use `npm run legacy:inventory` for the current machine-readable inventory.
+Use `npm run legacy:inventory` for the current machine-readable inventory. The inventory marks this surface as `required_by_canonical_runtime: false`.
 
 Use `docs/godot-v2/phaser-parity-ledger.json` and `npm run godot:parity-ledger -- --check` to see which Phaser reference systems are ported, partial, deferred, deprecated, or still blocking retirement.
 
 ## Allowed Uses
 
-Use the legacy/reference source to confirm gameplay intent, map topology, input semantics, save fields, enemy behavior, collectibles, and results flow while auditing Godot parity.
+Use optional legacy/reference material to confirm gameplay intent, map topology, input semantics, save fields, enemy behavior, collectibles, and results flow while auditing Godot parity.
 
-Do not add new mainline gameplay to `legacy/phaser-reference/src/`. New canonical runtime work belongs under `godot/`, with supporting validation or import tooling under `scripts/` and tests under `test/`.
+Do not add new mainline gameplay to optional legacy/reference copies. New canonical runtime work belongs under `godot/`, with supporting validation or import tooling under `scripts/` and tests under `test/`.
 
 ## Retirement Gates
 

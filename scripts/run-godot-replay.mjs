@@ -25,6 +25,8 @@ if (version.error?.code === 'ENOENT') {
   process.exit(0);
 }
 
+ensureGodotImport();
+
 const result = spawnSync(
   'godot',
   ['--path', godotRoot, '--headless', '--script', 'tests/run_replay.gd', '--', ...replayArgs],
@@ -40,3 +42,25 @@ if (result.error) {
 }
 
 process.exit(result.status ?? 0);
+
+function ensureGodotImport() {
+  const importResult = spawnSync('godot', ['--headless', '--path', godotRoot, '--import'], {
+    encoding: 'utf8',
+  });
+
+  if (importResult.error) {
+    console.error(`[godot:replay] ${importResult.error.message}`);
+    process.exit(1);
+  }
+
+  if ((importResult.status ?? 0) !== 0) {
+    if (importResult.stdout) {
+      console.error(importResult.stdout);
+    }
+    if (importResult.stderr) {
+      console.error(importResult.stderr);
+    }
+    console.error('[godot:replay] Godot asset import failed.');
+    process.exit(importResult.status ?? 1);
+  }
+}

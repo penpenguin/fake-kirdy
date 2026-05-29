@@ -33,25 +33,25 @@ describe('Godot v2 representative content migration', () => {
     expect(catalog).toContain('"central_hub"');
   });
 
-  it('adds representative Godot rooms for the Phaser central hub branch stages', () => {
+  it('adds representative Godot rooms for the canonical central hub branch stages', () => {
     const expectedBranches = [
-      ['ice_area', 'legacy/phaser-reference/src/game/world/stages/ice-area.ts'],
-      ['mirror_corridor', 'legacy/phaser-reference/src/game/world/stages/mirror-corridor.ts'],
-      ['fire_area', 'legacy/phaser-reference/src/game/world/stages/fire-area.ts'],
-      ['forest_area', 'legacy/phaser-reference/src/game/world/stages/forest-area.ts'],
-      ['cave_area', 'legacy/phaser-reference/src/game/world/stages/cave-area.ts'],
-      ['goal_sanctum', 'legacy/phaser-reference/src/game/world/stages/goal-sanctum.ts'],
-      ['sky_sanctum', 'legacy/phaser-reference/src/game/world/stages/sky-sanctum.ts'],
-      ['starlit_keep', 'legacy/phaser-reference/src/game/world/stages/starlit-keep.ts'],
-      ['aurora_spire', 'legacy/phaser-reference/src/game/world/stages/aurora-spire.ts'],
-      ['labyrinth_001', 'legacy/phaser-reference/src/game/world/stages/procedural.ts'],
+      ['ice_area', 'stage_manifest:ice-area'],
+      ['mirror_corridor', 'stage_manifest:mirror-corridor'],
+      ['fire_area', 'stage_manifest:fire-area'],
+      ['forest_area', 'stage_manifest:forest-area'],
+      ['cave_area', 'stage_manifest:cave-area'],
+      ['goal_sanctum', 'stage_manifest:goal-sanctum'],
+      ['sky_sanctum', 'stage_manifest:sky-sanctum'],
+      ['starlit_keep', 'stage_manifest:starlit-keep'],
+      ['aurora_spire', 'stage_manifest:aurora-spire'],
+      ['labyrinth_001', 'stage_manifest:labyrinth-001'],
     ] as const;
 
     const catalog = JSON.parse(readGodotFile('levels/level_catalog.json')) as {
-      levels?: Array<{ id?: string; phaser_source?: string; tags?: string[] }>;
+      levels?: Array<{ id?: string; source_ref?: string; tags?: string[] }>;
     };
 
-    for (const [levelId, phaserSource] of expectedBranches) {
+    for (const [levelId, sourceRef] of expectedBranches) {
       const scene = readGodotFile(`levels/${levelId}.tscn`);
       const catalogEntry = catalog.levels?.find((level) => level.id === levelId);
 
@@ -72,7 +72,7 @@ describe('Godot v2 representative content migration', () => {
       } else {
         expect(scene).toContain('target_level_id = "central_hub"');
       }
-      expect(catalogEntry?.phaser_source).toBe(phaserSource);
+      expect(catalogEntry?.source_ref).toBe(sourceRef);
       expect(catalogEntry?.tags).toContain('representative');
       expect(catalogEntry?.tags).toContain('phaser_branch');
     }

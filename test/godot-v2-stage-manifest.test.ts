@@ -6,15 +6,15 @@ import { describe, expect, it } from 'vitest';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(currentDir, '..');
-const manifestPath = join(repoRoot, 'godot', 'levels', 'phaser_stage_manifest.json');
+const manifestPath = join(repoRoot, 'godot', 'levels', 'stage_manifest.json');
 
 type StageManifest = {
   version?: number;
-  generated_from?: string;
+  canonical_source?: string;
   stages?: Array<{
     id?: string;
     name?: string;
-    source_path?: string;
+    origin?: string;
     layout?: {
       rows?: number;
       columns?: number;
@@ -35,19 +35,18 @@ type StageManifest = {
       column?: number;
       row?: number;
     }>;
-    procedural_generated?: boolean;
   }>;
 };
 
-describe('Godot v2 Phaser stage manifest', () => {
-  it('generates a checked-in manifest from Phaser stage definitions', () => {
-    const output = execFileSync('node', ['scripts/generate-phaser-stage-manifest.mjs', '--check'], {
+describe('Godot v2 canonical stage manifest', () => {
+  it('validates the checked-in canonical stage manifest without legacy source', () => {
+    const output = execFileSync('node', ['scripts/check-godot-stage-manifest.mjs', '--check'], {
       cwd: repoRoot,
       encoding: 'utf8',
     });
 
-    expect(output).toContain('phaser_stage_manifest.json is up to date');
-    expect(output).toContain('exported');
+    expect(output).toContain('stage_manifest.json is up to date');
+    expect(output).toContain('validated 146 stages');
     expect(existsSync(manifestPath)).toBe(true);
   });
 
@@ -56,7 +55,9 @@ describe('Godot v2 Phaser stage manifest', () => {
     const stages = new Map(manifest.stages?.map((stage) => [stage.id, stage]));
 
     expect(manifest.version).toBe(1);
-    expect(manifest.generated_from).toBe('legacy/phaser-reference/src/game/world/stages');
+    expect(manifest.canonical_source).toBe('godot/levels/stage_manifest.json');
+    expect(JSON.stringify(manifest)).not.toContain('legacy/phaser-reference');
+    expect(JSON.stringify(manifest)).not.toContain('source_path');
     expect(stages.get('central-hub')?.neighbors).toMatchObject({
       northwest: 'ice-area',
       north: 'mirror-corridor',
@@ -76,8 +77,8 @@ describe('Godot v2 Phaser stage manifest', () => {
     expect(stages.get('ice-area')?.neighbors?.southeast).toBe('central-hub');
     expect(stages.get('ice-area')?.dynamic_neighbors?.east).toBe('getIceExpanseEntryId()');
     expect(stages.get('forest-area')?.neighbors?.east).toBe('labyrinth-001');
-    expect(stages.get('labyrinth-001')?.source_path).toBe('legacy/phaser-reference/src/game/world/stages/procedural.ts');
-    expect(stages.get('labyrinth-001')?.procedural_generated).toBe(true);
+    expect(stages.get('central-hub')?.origin).toBe('authored');
+    expect(stages.get('labyrinth-001')?.origin).toBe('generated_schema');
     expect(stages.get('labyrinth-001')?.neighbors).toMatchObject({
       west: 'forest-area',
       east: 'labyrinth-002',
@@ -124,7 +125,7 @@ describe('Godot v2 Phaser stage manifest', () => {
   it('exports the generated procedural area chain instead of only a single representative node', () => {
     const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as StageManifest;
     const stages = new Map(manifest.stages?.map((stage) => [stage.id, stage]));
-    const proceduralStages = manifest.stages?.filter((stage) => stage.procedural_generated) ?? [];
+    const proceduralStages = manifest.stages?.filter((stage) => stage.origin === 'generated_schema') ?? [];
 
     expect(proceduralStages).toHaveLength(132);
     expect(stages.get('labyrinth-005')?.neighbors).toMatchObject({
@@ -168,8 +169,8 @@ describe('Godot v2 Phaser stage manifest', () => {
     };
     const catalogGenerator = readFileSync(join(repoRoot, 'scripts', 'generate-godot-level-catalog.mjs'), 'utf8');
 
-    expect(packageJson.scripts?.['godot:stage-manifest']).toContain('scripts/generate-phaser-stage-manifest.mjs');
+    expect(packageJson.scripts?.['godot:stage-manifest']).toContain('scripts/check-godot-stage-manifest.mjs');
     expect(packageJson.scripts?.['check:godot']).toContain('godot:stage-manifest');
-    expect(catalogGenerator).toContain('phaser_stage_manifest.json');
+    expect(catalogGenerator).toContain('stage_manifest.json');
   });
 });

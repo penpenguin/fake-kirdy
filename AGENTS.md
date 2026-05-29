@@ -17,9 +17,9 @@ When writing complex features or significant refactors, use an ExecPlan (as desc
 
 ## Project Structure & Module Organization
 - `godot/` contains the canonical Godot 4 project.
-- `legacy/phaser-reference/src/` contains retained Phaser legacy/reference TypeScript source for audits only; it is not part of the root runtime or canonical test gate.
+- Optional legacy/reference copies may exist for audits only; they are not part of the root runtime, canonical import data, or canonical test gate.
 - Canonical repository tests live under `test/godot*.test.ts` plus `test/trace-summary.test.ts`.
-- Static web assets in `legacy/phaser-reference/public/` are retained as legacy/reference material only.
+- Static web assets from the former runtime are optional reference material only; canonical assets live under `godot/resources/`.
 - Scope, rules, and open tasks are tracked in `docs/`; revise those specs before adjusting gameplay.
 - Godot migration documentation belongs in `docs/godot-v2/`; historical prototype files may remain under `prototypes/godot-v2/`, but new mainline Godot work belongs under `godot/`.
 
@@ -42,7 +42,7 @@ When writing complex features or significant refactors, use an ExecPlan (as desc
 ## Coding Style & Naming Conventions
 - Use TypeScript with ES modules, 2-space indentation, and `const` defaults; supply explicit return types for exported APIs.
 - Favor `camelCase` for values, `PascalCase` for types and classes, and kebab-case filenames (`create-game-scene.ts`) unless mirroring third-party names.
-- Keep retained Phaser reference factories side-effect free if auditing them; legacy direct DOM access lives under `legacy/phaser-reference/src/main.ts`.
+- Keep retained Phaser reference factories side-effect free if auditing them; do not add new DOM/runtime behavior outside the Godot mainline.
 - No repo formatter is enforced, so follow surrounding style and keep imports ordered logically.
 
 ## Testing Guidelines
@@ -51,7 +51,7 @@ When writing complex features or significant refactors, use an ExecPlan (as desc
 - Name files `<subject>.test.ts` near the code or place infra checks under `test/`.
 - Apply Takuto Wada's TDD cycle: write the smallest failing spec, make it pass, then refactor safely.
 - Extend `vitest.setup.ts` for shared matchers instead of repeating hooks.
-- Guard critical Godot gameplay with replay or trace tests before fixing bugs; retained Phaser source under `legacy/phaser-reference/src/game/**` is audit material, not mainline runtime.
+- Guard critical Godot gameplay with replay or trace tests before fixing bugs; retained Phaser source, when present, is audit material, not mainline runtime.
 - Run `npm run test` after changes that affect existing TypeScript code, repo configuration, or shared documentation that changes development rules.
 
 ## Godot Canonical Migration Rules

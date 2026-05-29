@@ -1,12 +1,11 @@
 {
   "version": 1,
-  "generated_from": "godot/levels/phaser_stage_manifest.json",
+  "generated_from": "godot/levels/stage_manifest.json",
   "levels": [
     {
       "id": "labyrinth_001",
-      "phaser_stage_id": "labyrinth-001",
+      "stage_id": "labyrinth-001",
       "name": "Forest Expanse 1",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -169,7 +168,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-002",
         "west": "forest-area"
       },
@@ -181,9 +180,8 @@
     },
     {
       "id": "labyrinth_002",
-      "phaser_stage_id": "labyrinth-002",
+      "stage_id": "labyrinth-002",
       "name": "Forest Expanse 2",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -346,7 +344,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-003",
         "west": "labyrinth-001"
       },
@@ -358,9 +356,8 @@
     },
     {
       "id": "labyrinth_003",
-      "phaser_stage_id": "labyrinth-003",
+      "stage_id": "labyrinth-003",
       "name": "Forest Expanse 3",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -523,7 +520,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-004",
         "west": "labyrinth-002"
       },
@@ -535,9 +532,8 @@
     },
     {
       "id": "labyrinth_004",
-      "phaser_stage_id": "labyrinth-004",
+      "stage_id": "labyrinth-004",
       "name": "Forest Expanse 4",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -700,7 +696,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-005",
         "west": "labyrinth-003"
       },
@@ -712,9 +708,8 @@
     },
     {
       "id": "labyrinth_005",
-      "phaser_stage_id": "labyrinth-005",
+      "stage_id": "labyrinth-005",
       "name": "Forest Expanse 5",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -888,7 +883,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "forest-reliquary",
         "west": "labyrinth-004"
       },
@@ -900,9 +895,8 @@
     },
     {
       "id": "labyrinth_006",
-      "phaser_stage_id": "labyrinth-006",
+      "stage_id": "labyrinth-006",
       "name": "Ice Expanse 6",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -1076,7 +1070,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-007",
         "west": "ice-area"
       },
@@ -1088,9 +1082,8 @@
     },
     {
       "id": "labyrinth_007",
-      "phaser_stage_id": "labyrinth-007",
+      "stage_id": "labyrinth-007",
       "name": "Ice Expanse 7",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -1264,7 +1257,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-008",
         "west": "labyrinth-006"
       },
@@ -1276,9 +1269,8 @@
     },
     {
       "id": "labyrinth_008",
-      "phaser_stage_id": "labyrinth-008",
+      "stage_id": "labyrinth-008",
       "name": "Ice Expanse 8",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -1452,7 +1444,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-009",
         "west": "labyrinth-007"
       },
@@ -1464,9 +1456,8 @@
     },
     {
       "id": "labyrinth_009",
-      "phaser_stage_id": "labyrinth-009",
+      "stage_id": "labyrinth-009",
       "name": "Ice Expanse 9",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -1640,7 +1631,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-010",
         "west": "labyrinth-008"
       },
@@ -1652,9 +1643,8 @@
     },
     {
       "id": "labyrinth_010",
-      "phaser_stage_id": "labyrinth-010",
+      "stage_id": "labyrinth-010",
       "name": "Ice Expanse 10",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -1839,7 +1829,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "ice-reliquary",
         "west": "labyrinth-009"
       },
@@ -1851,9 +1841,8 @@
     },
     {
       "id": "labyrinth_011",
-      "phaser_stage_id": "labyrinth-011",
+      "stage_id": "labyrinth-011",
       "name": "Fire Expanse 11",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -2038,7 +2027,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-012",
         "south": "fire-area"
       },
@@ -2050,9 +2039,8 @@
     },
     {
       "id": "labyrinth_012",
-      "phaser_stage_id": "labyrinth-012",
+      "stage_id": "labyrinth-012",
       "name": "Fire Expanse 12",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -2226,7 +2214,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-013",
         "west": "labyrinth-011"
       },
@@ -2238,9 +2226,8 @@
     },
     {
       "id": "labyrinth_013",
-      "phaser_stage_id": "labyrinth-013",
+      "stage_id": "labyrinth-013",
       "name": "Fire Expanse 13",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -2414,7 +2401,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-014",
         "west": "labyrinth-012"
       },
@@ -2426,9 +2413,8 @@
     },
     {
       "id": "labyrinth_014",
-      "phaser_stage_id": "labyrinth-014",
+      "stage_id": "labyrinth-014",
       "name": "Fire Expanse 14",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -2602,7 +2588,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-015",
         "west": "labyrinth-013"
       },
@@ -2614,9 +2600,8 @@
     },
     {
       "id": "labyrinth_015",
-      "phaser_stage_id": "labyrinth-015",
+      "stage_id": "labyrinth-015",
       "name": "Fire Expanse 15",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -2790,7 +2775,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-016",
         "west": "labyrinth-014"
       },
@@ -2802,9 +2787,8 @@
     },
     {
       "id": "labyrinth_016",
-      "phaser_stage_id": "labyrinth-016",
+      "stage_id": "labyrinth-016",
       "name": "Fire Expanse 16",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -2978,7 +2962,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-017",
         "west": "labyrinth-015"
       },
@@ -2990,9 +2974,8 @@
     },
     {
       "id": "labyrinth_017",
-      "phaser_stage_id": "labyrinth-017",
+      "stage_id": "labyrinth-017",
       "name": "Fire Expanse 17",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -3166,7 +3149,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-018",
         "west": "labyrinth-016"
       },
@@ -3178,9 +3161,8 @@
     },
     {
       "id": "labyrinth_018",
-      "phaser_stage_id": "labyrinth-018",
+      "stage_id": "labyrinth-018",
       "name": "Fire Expanse 18",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -3354,7 +3336,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-019",
         "west": "labyrinth-017"
       },
@@ -3366,9 +3348,8 @@
     },
     {
       "id": "labyrinth_019",
-      "phaser_stage_id": "labyrinth-019",
+      "stage_id": "labyrinth-019",
       "name": "Fire Expanse 19",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -3542,7 +3523,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-020",
         "west": "labyrinth-018"
       },
@@ -3554,9 +3535,8 @@
     },
     {
       "id": "labyrinth_020",
-      "phaser_stage_id": "labyrinth-020",
+      "stage_id": "labyrinth-020",
       "name": "Fire Expanse 20",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -3730,7 +3710,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-021",
         "west": "labyrinth-019"
       },
@@ -3742,9 +3722,8 @@
     },
     {
       "id": "labyrinth_021",
-      "phaser_stage_id": "labyrinth-021",
+      "stage_id": "labyrinth-021",
       "name": "Fire Expanse 21",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -3918,7 +3897,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-022",
         "west": "labyrinth-020"
       },
@@ -3930,9 +3909,8 @@
     },
     {
       "id": "labyrinth_022",
-      "phaser_stage_id": "labyrinth-022",
+      "stage_id": "labyrinth-022",
       "name": "Fire Expanse 22",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -4106,7 +4084,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-023",
         "west": "labyrinth-021"
       },
@@ -4118,9 +4096,8 @@
     },
     {
       "id": "labyrinth_023",
-      "phaser_stage_id": "labyrinth-023",
+      "stage_id": "labyrinth-023",
       "name": "Fire Expanse 23",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -4294,7 +4271,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-024",
         "west": "labyrinth-022"
       },
@@ -4306,9 +4283,8 @@
     },
     {
       "id": "labyrinth_024",
-      "phaser_stage_id": "labyrinth-024",
+      "stage_id": "labyrinth-024",
       "name": "Fire Expanse 24",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -4482,7 +4458,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-025",
         "west": "labyrinth-023"
       },
@@ -4494,9 +4470,8 @@
     },
     {
       "id": "labyrinth_025",
-      "phaser_stage_id": "labyrinth-025",
+      "stage_id": "labyrinth-025",
       "name": "Fire Expanse 25",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -4670,7 +4645,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-026",
         "west": "labyrinth-024"
       },
@@ -4682,9 +4657,8 @@
     },
     {
       "id": "labyrinth_026",
-      "phaser_stage_id": "labyrinth-026",
+      "stage_id": "labyrinth-026",
       "name": "Fire Expanse 26",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -4858,7 +4832,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-027",
         "west": "labyrinth-025"
       },
@@ -4870,9 +4844,8 @@
     },
     {
       "id": "labyrinth_027",
-      "phaser_stage_id": "labyrinth-027",
+      "stage_id": "labyrinth-027",
       "name": "Fire Expanse 27",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -5046,7 +5019,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-028",
         "west": "labyrinth-026"
       },
@@ -5058,9 +5031,8 @@
     },
     {
       "id": "labyrinth_028",
-      "phaser_stage_id": "labyrinth-028",
+      "stage_id": "labyrinth-028",
       "name": "Fire Expanse 28",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -5234,7 +5206,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-029",
         "west": "labyrinth-027"
       },
@@ -5246,9 +5218,8 @@
     },
     {
       "id": "labyrinth_029",
-      "phaser_stage_id": "labyrinth-029",
+      "stage_id": "labyrinth-029",
       "name": "Fire Expanse 29",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -5422,7 +5393,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-030",
         "west": "labyrinth-028"
       },
@@ -5434,9 +5405,8 @@
     },
     {
       "id": "labyrinth_030",
-      "phaser_stage_id": "labyrinth-030",
+      "stage_id": "labyrinth-030",
       "name": "Fire Expanse 30",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -5610,7 +5580,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-031",
         "west": "labyrinth-029"
       },
@@ -5622,9 +5592,8 @@
     },
     {
       "id": "labyrinth_031",
-      "phaser_stage_id": "labyrinth-031",
+      "stage_id": "labyrinth-031",
       "name": "Fire Expanse 31",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -5798,7 +5767,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-032",
         "west": "labyrinth-030"
       },
@@ -5810,9 +5779,8 @@
     },
     {
       "id": "labyrinth_032",
-      "phaser_stage_id": "labyrinth-032",
+      "stage_id": "labyrinth-032",
       "name": "Fire Expanse 32",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -5997,7 +5965,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "fire-reliquary",
         "west": "labyrinth-031"
       },
@@ -6009,9 +5977,8 @@
     },
     {
       "id": "labyrinth_033",
-      "phaser_stage_id": "labyrinth-033",
+      "stage_id": "labyrinth-033",
       "name": "Ruins Expanse 33",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -6185,7 +6152,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-034",
         "south": "cave-area"
       },
@@ -6197,9 +6164,8 @@
     },
     {
       "id": "labyrinth_034",
-      "phaser_stage_id": "labyrinth-034",
+      "stage_id": "labyrinth-034",
       "name": "Ruins Expanse 34",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -6362,7 +6328,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-035",
         "west": "labyrinth-033"
       },
@@ -6374,9 +6340,8 @@
     },
     {
       "id": "labyrinth_035",
-      "phaser_stage_id": "labyrinth-035",
+      "stage_id": "labyrinth-035",
       "name": "Ruins Expanse 35",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -6539,7 +6504,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-036",
         "west": "labyrinth-034"
       },
@@ -6551,9 +6516,8 @@
     },
     {
       "id": "labyrinth_036",
-      "phaser_stage_id": "labyrinth-036",
+      "stage_id": "labyrinth-036",
       "name": "Ruins Expanse 36",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -6716,7 +6680,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-037",
         "west": "labyrinth-035"
       },
@@ -6728,9 +6692,8 @@
     },
     {
       "id": "labyrinth_037",
-      "phaser_stage_id": "labyrinth-037",
+      "stage_id": "labyrinth-037",
       "name": "Ruins Expanse 37",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -6893,7 +6856,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-038",
         "west": "labyrinth-036"
       },
@@ -6905,9 +6868,8 @@
     },
     {
       "id": "labyrinth_038",
-      "phaser_stage_id": "labyrinth-038",
+      "stage_id": "labyrinth-038",
       "name": "Ruins Expanse 38",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -7070,7 +7032,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-039",
         "west": "labyrinth-037"
       },
@@ -7082,9 +7044,8 @@
     },
     {
       "id": "labyrinth_039",
-      "phaser_stage_id": "labyrinth-039",
+      "stage_id": "labyrinth-039",
       "name": "Ruins Expanse 39",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -7247,7 +7208,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-040",
         "west": "labyrinth-038"
       },
@@ -7259,9 +7220,8 @@
     },
     {
       "id": "labyrinth_040",
-      "phaser_stage_id": "labyrinth-040",
+      "stage_id": "labyrinth-040",
       "name": "Ruins Expanse 40",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -7424,7 +7384,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-041",
         "west": "labyrinth-039"
       },
@@ -7436,9 +7396,8 @@
     },
     {
       "id": "labyrinth_041",
-      "phaser_stage_id": "labyrinth-041",
+      "stage_id": "labyrinth-041",
       "name": "Ruins Expanse 41",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -7601,7 +7560,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-042",
         "west": "labyrinth-040"
       },
@@ -7613,9 +7572,8 @@
     },
     {
       "id": "labyrinth_042",
-      "phaser_stage_id": "labyrinth-042",
+      "stage_id": "labyrinth-042",
       "name": "Ruins Expanse 42",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -7778,7 +7736,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-043",
         "west": "labyrinth-041"
       },
@@ -7790,9 +7748,8 @@
     },
     {
       "id": "labyrinth_043",
-      "phaser_stage_id": "labyrinth-043",
+      "stage_id": "labyrinth-043",
       "name": "Ruins Expanse 43",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -7955,7 +7912,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-044",
         "west": "labyrinth-042"
       },
@@ -7967,9 +7924,8 @@
     },
     {
       "id": "labyrinth_044",
-      "phaser_stage_id": "labyrinth-044",
+      "stage_id": "labyrinth-044",
       "name": "Ruins Expanse 44",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -8132,7 +8088,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-045",
         "west": "labyrinth-043"
       },
@@ -8144,9 +8100,8 @@
     },
     {
       "id": "labyrinth_045",
-      "phaser_stage_id": "labyrinth-045",
+      "stage_id": "labyrinth-045",
       "name": "Ruins Expanse 45",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -8309,7 +8264,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-046",
         "west": "labyrinth-044"
       },
@@ -8321,9 +8276,8 @@
     },
     {
       "id": "labyrinth_046",
-      "phaser_stage_id": "labyrinth-046",
+      "stage_id": "labyrinth-046",
       "name": "Ruins Expanse 46",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -8486,7 +8440,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-047",
         "west": "labyrinth-045"
       },
@@ -8498,9 +8452,8 @@
     },
     {
       "id": "labyrinth_047",
-      "phaser_stage_id": "labyrinth-047",
+      "stage_id": "labyrinth-047",
       "name": "Ruins Expanse 47",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -8663,7 +8616,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-048",
         "west": "labyrinth-046"
       },
@@ -8675,9 +8628,8 @@
     },
     {
       "id": "labyrinth_048",
-      "phaser_stage_id": "labyrinth-048",
+      "stage_id": "labyrinth-048",
       "name": "Ruins Expanse 48",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -8840,7 +8792,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-049",
         "west": "labyrinth-047"
       },
@@ -8852,9 +8804,8 @@
     },
     {
       "id": "labyrinth_049",
-      "phaser_stage_id": "labyrinth-049",
+      "stage_id": "labyrinth-049",
       "name": "Ruins Expanse 49",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -9017,7 +8968,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-050",
         "west": "labyrinth-048"
       },
@@ -9029,9 +8980,8 @@
     },
     {
       "id": "labyrinth_050",
-      "phaser_stage_id": "labyrinth-050",
+      "stage_id": "labyrinth-050",
       "name": "Ruins Expanse 50",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -9205,7 +9155,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "ruins-reliquary",
         "west": "labyrinth-049"
       },
@@ -9217,9 +9167,8 @@
     },
     {
       "id": "labyrinth_051",
-      "phaser_stage_id": "labyrinth-051",
+      "stage_id": "labyrinth-051",
       "name": "Sky Expanse 51",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -9404,7 +9353,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-052",
         "south": "sky-sanctum"
       },
@@ -9416,9 +9365,8 @@
     },
     {
       "id": "labyrinth_052",
-      "phaser_stage_id": "labyrinth-052",
+      "stage_id": "labyrinth-052",
       "name": "Sky Expanse 52",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -9592,7 +9540,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-053",
         "west": "labyrinth-051"
       },
@@ -9604,9 +9552,8 @@
     },
     {
       "id": "labyrinth_053",
-      "phaser_stage_id": "labyrinth-053",
+      "stage_id": "labyrinth-053",
       "name": "Sky Expanse 53",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -9780,7 +9727,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-054",
         "west": "labyrinth-052"
       },
@@ -9792,9 +9739,8 @@
     },
     {
       "id": "labyrinth_054",
-      "phaser_stage_id": "labyrinth-054",
+      "stage_id": "labyrinth-054",
       "name": "Sky Expanse 54",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -9968,7 +9914,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-055",
         "west": "labyrinth-053"
       },
@@ -9980,9 +9926,8 @@
     },
     {
       "id": "labyrinth_055",
-      "phaser_stage_id": "labyrinth-055",
+      "stage_id": "labyrinth-055",
       "name": "Sky Expanse 55",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -10156,7 +10101,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-056",
         "west": "labyrinth-054"
       },
@@ -10168,9 +10113,8 @@
     },
     {
       "id": "labyrinth_056",
-      "phaser_stage_id": "labyrinth-056",
+      "stage_id": "labyrinth-056",
       "name": "Sky Expanse 56",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -10344,7 +10288,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-057",
         "west": "labyrinth-055"
       },
@@ -10356,9 +10300,8 @@
     },
     {
       "id": "labyrinth_057",
-      "phaser_stage_id": "labyrinth-057",
+      "stage_id": "labyrinth-057",
       "name": "Sky Expanse 57",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -10532,7 +10475,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-058",
         "west": "labyrinth-056"
       },
@@ -10544,9 +10487,8 @@
     },
     {
       "id": "labyrinth_058",
-      "phaser_stage_id": "labyrinth-058",
+      "stage_id": "labyrinth-058",
       "name": "Sky Expanse 58",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -10720,7 +10662,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-059",
         "west": "labyrinth-057"
       },
@@ -10732,9 +10674,8 @@
     },
     {
       "id": "labyrinth_059",
-      "phaser_stage_id": "labyrinth-059",
+      "stage_id": "labyrinth-059",
       "name": "Sky Expanse 59",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -10908,7 +10849,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-060",
         "west": "labyrinth-058"
       },
@@ -10920,9 +10861,8 @@
     },
     {
       "id": "labyrinth_060",
-      "phaser_stage_id": "labyrinth-060",
+      "stage_id": "labyrinth-060",
       "name": "Sky Expanse 60",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -11096,7 +11036,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-061",
         "west": "labyrinth-059"
       },
@@ -11108,9 +11048,8 @@
     },
     {
       "id": "labyrinth_061",
-      "phaser_stage_id": "labyrinth-061",
+      "stage_id": "labyrinth-061",
       "name": "Sky Expanse 61",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -11284,7 +11223,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-062",
         "west": "labyrinth-060"
       },
@@ -11296,9 +11235,8 @@
     },
     {
       "id": "labyrinth_062",
-      "phaser_stage_id": "labyrinth-062",
+      "stage_id": "labyrinth-062",
       "name": "Sky Expanse 62",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -11472,7 +11410,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-063",
         "west": "labyrinth-061"
       },
@@ -11484,9 +11422,8 @@
     },
     {
       "id": "labyrinth_063",
-      "phaser_stage_id": "labyrinth-063",
+      "stage_id": "labyrinth-063",
       "name": "Sky Expanse 63",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -11660,7 +11597,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-064",
         "west": "labyrinth-062"
       },
@@ -11672,9 +11609,8 @@
     },
     {
       "id": "labyrinth_064",
-      "phaser_stage_id": "labyrinth-064",
+      "stage_id": "labyrinth-064",
       "name": "Sky Expanse 64",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -11848,7 +11784,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-065",
         "west": "labyrinth-063"
       },
@@ -11860,9 +11796,8 @@
     },
     {
       "id": "labyrinth_065",
-      "phaser_stage_id": "labyrinth-065",
+      "stage_id": "labyrinth-065",
       "name": "Sky Expanse 65",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -12036,7 +11971,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-066",
         "west": "labyrinth-064"
       },
@@ -12048,9 +11983,8 @@
     },
     {
       "id": "labyrinth_066",
-      "phaser_stage_id": "labyrinth-066",
+      "stage_id": "labyrinth-066",
       "name": "Sky Expanse 66",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -12224,7 +12158,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-067",
         "west": "labyrinth-065"
       },
@@ -12236,9 +12170,8 @@
     },
     {
       "id": "labyrinth_067",
-      "phaser_stage_id": "labyrinth-067",
+      "stage_id": "labyrinth-067",
       "name": "Sky Expanse 67",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -12412,7 +12345,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-068",
         "west": "labyrinth-066"
       },
@@ -12424,9 +12357,8 @@
     },
     {
       "id": "labyrinth_068",
-      "phaser_stage_id": "labyrinth-068",
+      "stage_id": "labyrinth-068",
       "name": "Sky Expanse 68",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -12611,7 +12543,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "south": "labyrinth-069",
         "west": "labyrinth-067"
       },
@@ -12623,9 +12555,8 @@
     },
     {
       "id": "labyrinth_069",
-      "phaser_stage_id": "labyrinth-069",
+      "stage_id": "labyrinth-069",
       "name": "Void Expanse 69",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -12735,7 +12666,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-070",
         "north": "labyrinth-068"
       },
@@ -12747,9 +12678,8 @@
     },
     {
       "id": "labyrinth_070",
-      "phaser_stage_id": "labyrinth-070",
+      "stage_id": "labyrinth-070",
       "name": "Void Expanse 70",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -12847,7 +12777,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-071",
         "west": "labyrinth-069"
       },
@@ -12859,9 +12789,8 @@
     },
     {
       "id": "labyrinth_071",
-      "phaser_stage_id": "labyrinth-071",
+      "stage_id": "labyrinth-071",
       "name": "Void Expanse 71",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -12959,7 +12888,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-072",
         "west": "labyrinth-070"
       },
@@ -12971,9 +12900,8 @@
     },
     {
       "id": "labyrinth_072",
-      "phaser_stage_id": "labyrinth-072",
+      "stage_id": "labyrinth-072",
       "name": "Void Expanse 72",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -13071,7 +12999,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-073",
         "west": "labyrinth-071"
       },
@@ -13083,9 +13011,8 @@
     },
     {
       "id": "labyrinth_073",
-      "phaser_stage_id": "labyrinth-073",
+      "stage_id": "labyrinth-073",
       "name": "Void Expanse 73",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -13183,7 +13110,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-074",
         "west": "labyrinth-072"
       },
@@ -13195,9 +13122,8 @@
     },
     {
       "id": "labyrinth_074",
-      "phaser_stage_id": "labyrinth-074",
+      "stage_id": "labyrinth-074",
       "name": "Void Expanse 74",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -13295,7 +13221,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-075",
         "west": "labyrinth-073"
       },
@@ -13307,9 +13233,8 @@
     },
     {
       "id": "labyrinth_075",
-      "phaser_stage_id": "labyrinth-075",
+      "stage_id": "labyrinth-075",
       "name": "Void Expanse 75",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -13407,7 +13332,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-076",
         "west": "labyrinth-074"
       },
@@ -13419,9 +13344,8 @@
     },
     {
       "id": "labyrinth_076",
-      "phaser_stage_id": "labyrinth-076",
+      "stage_id": "labyrinth-076",
       "name": "Void Expanse 76",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -13519,7 +13443,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-077",
         "west": "labyrinth-075"
       },
@@ -13531,9 +13455,8 @@
     },
     {
       "id": "labyrinth_077",
-      "phaser_stage_id": "labyrinth-077",
+      "stage_id": "labyrinth-077",
       "name": "Void Expanse 77",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -13631,7 +13554,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-078",
         "west": "labyrinth-076"
       },
@@ -13643,9 +13566,8 @@
     },
     {
       "id": "labyrinth_078",
-      "phaser_stage_id": "labyrinth-078",
+      "stage_id": "labyrinth-078",
       "name": "Void Expanse 78",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -13743,7 +13665,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-079",
         "west": "labyrinth-077"
       },
@@ -13755,9 +13677,8 @@
     },
     {
       "id": "labyrinth_079",
-      "phaser_stage_id": "labyrinth-079",
+      "stage_id": "labyrinth-079",
       "name": "Void Expanse 79",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -13855,7 +13776,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-080",
         "west": "labyrinth-078"
       },
@@ -13867,9 +13788,8 @@
     },
     {
       "id": "labyrinth_080",
-      "phaser_stage_id": "labyrinth-080",
+      "stage_id": "labyrinth-080",
       "name": "Void Expanse 80",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -13967,7 +13887,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-081",
         "west": "labyrinth-079"
       },
@@ -13979,9 +13899,8 @@
     },
     {
       "id": "labyrinth_081",
-      "phaser_stage_id": "labyrinth-081",
+      "stage_id": "labyrinth-081",
       "name": "Void Expanse 81",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -14079,7 +13998,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-082",
         "west": "labyrinth-080"
       },
@@ -14091,9 +14010,8 @@
     },
     {
       "id": "labyrinth_082",
-      "phaser_stage_id": "labyrinth-082",
+      "stage_id": "labyrinth-082",
       "name": "Void Expanse 82",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -14191,7 +14109,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-083",
         "west": "labyrinth-081"
       },
@@ -14203,9 +14121,8 @@
     },
     {
       "id": "labyrinth_083",
-      "phaser_stage_id": "labyrinth-083",
+      "stage_id": "labyrinth-083",
       "name": "Void Expanse 83",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -14303,7 +14220,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-084",
         "west": "labyrinth-082"
       },
@@ -14315,9 +14232,8 @@
     },
     {
       "id": "labyrinth_084",
-      "phaser_stage_id": "labyrinth-084",
+      "stage_id": "labyrinth-084",
       "name": "Void Expanse 84",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -14415,7 +14331,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-085",
         "west": "labyrinth-083"
       },
@@ -14427,9 +14343,8 @@
     },
     {
       "id": "labyrinth_085",
-      "phaser_stage_id": "labyrinth-085",
+      "stage_id": "labyrinth-085",
       "name": "Void Expanse 85",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -14527,7 +14442,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-086",
         "west": "labyrinth-084"
       },
@@ -14539,9 +14454,8 @@
     },
     {
       "id": "labyrinth_086",
-      "phaser_stage_id": "labyrinth-086",
+      "stage_id": "labyrinth-086",
       "name": "Void Expanse 86",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -14639,7 +14553,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-087",
         "west": "labyrinth-085"
       },
@@ -14651,9 +14565,8 @@
     },
     {
       "id": "labyrinth_087",
-      "phaser_stage_id": "labyrinth-087",
+      "stage_id": "labyrinth-087",
       "name": "Void Expanse 87",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -14751,7 +14664,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-088",
         "west": "labyrinth-086"
       },
@@ -14763,9 +14676,8 @@
     },
     {
       "id": "labyrinth_088",
-      "phaser_stage_id": "labyrinth-088",
+      "stage_id": "labyrinth-088",
       "name": "Void Expanse 88",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -14863,7 +14775,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-089",
         "west": "labyrinth-087"
       },
@@ -14875,9 +14787,8 @@
     },
     {
       "id": "labyrinth_089",
-      "phaser_stage_id": "labyrinth-089",
+      "stage_id": "labyrinth-089",
       "name": "Void Expanse 89",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -14975,7 +14886,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-090",
         "west": "labyrinth-088"
       },
@@ -14987,9 +14898,8 @@
     },
     {
       "id": "labyrinth_090",
-      "phaser_stage_id": "labyrinth-090",
+      "stage_id": "labyrinth-090",
       "name": "Void Expanse 90",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -15087,7 +14997,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-091",
         "west": "labyrinth-089"
       },
@@ -15099,9 +15009,8 @@
     },
     {
       "id": "labyrinth_091",
-      "phaser_stage_id": "labyrinth-091",
+      "stage_id": "labyrinth-091",
       "name": "Void Expanse 91",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -15199,7 +15108,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-092",
         "west": "labyrinth-090"
       },
@@ -15211,9 +15120,8 @@
     },
     {
       "id": "labyrinth_092",
-      "phaser_stage_id": "labyrinth-092",
+      "stage_id": "labyrinth-092",
       "name": "Void Expanse 92",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -15311,7 +15219,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-093",
         "west": "labyrinth-091"
       },
@@ -15323,9 +15231,8 @@
     },
     {
       "id": "labyrinth_093",
-      "phaser_stage_id": "labyrinth-093",
+      "stage_id": "labyrinth-093",
       "name": "Void Expanse 93",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -15423,7 +15330,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-094",
         "west": "labyrinth-092"
       },
@@ -15435,9 +15342,8 @@
     },
     {
       "id": "labyrinth_094",
-      "phaser_stage_id": "labyrinth-094",
+      "stage_id": "labyrinth-094",
       "name": "Void Expanse 94",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -15535,7 +15441,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-095",
         "west": "labyrinth-093"
       },
@@ -15547,9 +15453,8 @@
     },
     {
       "id": "labyrinth_095",
-      "phaser_stage_id": "labyrinth-095",
+      "stage_id": "labyrinth-095",
       "name": "Void Expanse 95",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -15647,7 +15552,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-096",
         "west": "labyrinth-094"
       },
@@ -15659,9 +15564,8 @@
     },
     {
       "id": "labyrinth_096",
-      "phaser_stage_id": "labyrinth-096",
+      "stage_id": "labyrinth-096",
       "name": "Void Expanse 96",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -15759,7 +15663,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-097",
         "west": "labyrinth-095"
       },
@@ -15771,9 +15675,8 @@
     },
     {
       "id": "labyrinth_097",
-      "phaser_stage_id": "labyrinth-097",
+      "stage_id": "labyrinth-097",
       "name": "Void Expanse 97",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -15871,7 +15774,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-098",
         "west": "labyrinth-096"
       },
@@ -15883,9 +15786,8 @@
     },
     {
       "id": "labyrinth_098",
-      "phaser_stage_id": "labyrinth-098",
+      "stage_id": "labyrinth-098",
       "name": "Void Expanse 98",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -15983,7 +15885,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-099",
         "west": "labyrinth-097"
       },
@@ -15995,9 +15897,8 @@
     },
     {
       "id": "labyrinth_099",
-      "phaser_stage_id": "labyrinth-099",
+      "stage_id": "labyrinth-099",
       "name": "Void Expanse 99",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -16095,7 +15996,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-100",
         "west": "labyrinth-098"
       },
@@ -16107,9 +16008,8 @@
     },
     {
       "id": "labyrinth_100",
-      "phaser_stage_id": "labyrinth-100",
+      "stage_id": "labyrinth-100",
       "name": "Void Expanse 100",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -16207,7 +16107,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-101",
         "west": "labyrinth-099"
       },
@@ -16219,9 +16119,8 @@
     },
     {
       "id": "labyrinth_101",
-      "phaser_stage_id": "labyrinth-101",
+      "stage_id": "labyrinth-101",
       "name": "Void Expanse 101",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -16319,7 +16218,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-102",
         "west": "labyrinth-100"
       },
@@ -16331,9 +16230,8 @@
     },
     {
       "id": "labyrinth_102",
-      "phaser_stage_id": "labyrinth-102",
+      "stage_id": "labyrinth-102",
       "name": "Void Expanse 102",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -16431,7 +16329,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-103",
         "west": "labyrinth-101"
       },
@@ -16443,9 +16341,8 @@
     },
     {
       "id": "labyrinth_103",
-      "phaser_stage_id": "labyrinth-103",
+      "stage_id": "labyrinth-103",
       "name": "Void Expanse 103",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -16543,7 +16440,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-104",
         "west": "labyrinth-102"
       },
@@ -16555,9 +16452,8 @@
     },
     {
       "id": "labyrinth_104",
-      "phaser_stage_id": "labyrinth-104",
+      "stage_id": "labyrinth-104",
       "name": "Void Expanse 104",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -16655,7 +16551,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-105",
         "west": "labyrinth-103"
       },
@@ -16667,9 +16563,8 @@
     },
     {
       "id": "labyrinth_105",
-      "phaser_stage_id": "labyrinth-105",
+      "stage_id": "labyrinth-105",
       "name": "Void Expanse 105",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -16767,7 +16662,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-106",
         "west": "labyrinth-104"
       },
@@ -16779,9 +16674,8 @@
     },
     {
       "id": "labyrinth_106",
-      "phaser_stage_id": "labyrinth-106",
+      "stage_id": "labyrinth-106",
       "name": "Void Expanse 106",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -16879,7 +16773,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-107",
         "west": "labyrinth-105"
       },
@@ -16891,9 +16785,8 @@
     },
     {
       "id": "labyrinth_107",
-      "phaser_stage_id": "labyrinth-107",
+      "stage_id": "labyrinth-107",
       "name": "Void Expanse 107",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -16991,7 +16884,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-108",
         "west": "labyrinth-106"
       },
@@ -17003,9 +16896,8 @@
     },
     {
       "id": "labyrinth_108",
-      "phaser_stage_id": "labyrinth-108",
+      "stage_id": "labyrinth-108",
       "name": "Void Expanse 108",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -17103,7 +16995,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-109",
         "west": "labyrinth-107"
       },
@@ -17115,9 +17007,8 @@
     },
     {
       "id": "labyrinth_109",
-      "phaser_stage_id": "labyrinth-109",
+      "stage_id": "labyrinth-109",
       "name": "Void Expanse 109",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -17215,7 +17106,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-110",
         "west": "labyrinth-108"
       },
@@ -17227,9 +17118,8 @@
     },
     {
       "id": "labyrinth_110",
-      "phaser_stage_id": "labyrinth-110",
+      "stage_id": "labyrinth-110",
       "name": "Void Expanse 110",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -17327,7 +17217,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-111",
         "west": "labyrinth-109"
       },
@@ -17339,9 +17229,8 @@
     },
     {
       "id": "labyrinth_111",
-      "phaser_stage_id": "labyrinth-111",
+      "stage_id": "labyrinth-111",
       "name": "Void Expanse 111",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -17439,7 +17328,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-112",
         "west": "labyrinth-110"
       },
@@ -17451,9 +17340,8 @@
     },
     {
       "id": "labyrinth_112",
-      "phaser_stage_id": "labyrinth-112",
+      "stage_id": "labyrinth-112",
       "name": "Void Expanse 112",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -17551,7 +17439,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-113",
         "west": "labyrinth-111"
       },
@@ -17563,9 +17451,8 @@
     },
     {
       "id": "labyrinth_113",
-      "phaser_stage_id": "labyrinth-113",
+      "stage_id": "labyrinth-113",
       "name": "Void Expanse 113",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -17663,7 +17550,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-114",
         "west": "labyrinth-112"
       },
@@ -17675,9 +17562,8 @@
     },
     {
       "id": "labyrinth_114",
-      "phaser_stage_id": "labyrinth-114",
+      "stage_id": "labyrinth-114",
       "name": "Void Expanse 114",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -17775,7 +17661,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-115",
         "west": "labyrinth-113"
       },
@@ -17787,9 +17673,8 @@
     },
     {
       "id": "labyrinth_115",
-      "phaser_stage_id": "labyrinth-115",
+      "stage_id": "labyrinth-115",
       "name": "Void Expanse 115",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -17887,7 +17772,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-116",
         "west": "labyrinth-114"
       },
@@ -17899,9 +17784,8 @@
     },
     {
       "id": "labyrinth_116",
-      "phaser_stage_id": "labyrinth-116",
+      "stage_id": "labyrinth-116",
       "name": "Void Expanse 116",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -17999,7 +17883,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-117",
         "west": "labyrinth-115"
       },
@@ -18011,9 +17895,8 @@
     },
     {
       "id": "labyrinth_117",
-      "phaser_stage_id": "labyrinth-117",
+      "stage_id": "labyrinth-117",
       "name": "Void Expanse 117",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -18111,7 +17994,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-118",
         "west": "labyrinth-116"
       },
@@ -18123,9 +18006,8 @@
     },
     {
       "id": "labyrinth_118",
-      "phaser_stage_id": "labyrinth-118",
+      "stage_id": "labyrinth-118",
       "name": "Void Expanse 118",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -18223,7 +18105,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-119",
         "west": "labyrinth-117"
       },
@@ -18235,9 +18117,8 @@
     },
     {
       "id": "labyrinth_119",
-      "phaser_stage_id": "labyrinth-119",
+      "stage_id": "labyrinth-119",
       "name": "Void Expanse 119",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -18335,7 +18216,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-120",
         "west": "labyrinth-118"
       },
@@ -18347,9 +18228,8 @@
     },
     {
       "id": "labyrinth_120",
-      "phaser_stage_id": "labyrinth-120",
+      "stage_id": "labyrinth-120",
       "name": "Void Expanse 120",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -18447,7 +18327,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-121",
         "west": "labyrinth-119"
       },
@@ -18459,9 +18339,8 @@
     },
     {
       "id": "labyrinth_121",
-      "phaser_stage_id": "labyrinth-121",
+      "stage_id": "labyrinth-121",
       "name": "Void Expanse 121",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -18559,7 +18438,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-122",
         "west": "labyrinth-120"
       },
@@ -18571,9 +18450,8 @@
     },
     {
       "id": "labyrinth_122",
-      "phaser_stage_id": "labyrinth-122",
+      "stage_id": "labyrinth-122",
       "name": "Void Expanse 122",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -18671,7 +18549,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-123",
         "west": "labyrinth-121"
       },
@@ -18683,9 +18561,8 @@
     },
     {
       "id": "labyrinth_123",
-      "phaser_stage_id": "labyrinth-123",
+      "stage_id": "labyrinth-123",
       "name": "Void Expanse 123",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -18783,7 +18660,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-124",
         "west": "labyrinth-122"
       },
@@ -18795,9 +18672,8 @@
     },
     {
       "id": "labyrinth_124",
-      "phaser_stage_id": "labyrinth-124",
+      "stage_id": "labyrinth-124",
       "name": "Void Expanse 124",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -18895,7 +18771,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-125",
         "west": "labyrinth-123"
       },
@@ -18907,9 +18783,8 @@
     },
     {
       "id": "labyrinth_125",
-      "phaser_stage_id": "labyrinth-125",
+      "stage_id": "labyrinth-125",
       "name": "Void Expanse 125",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -19007,7 +18882,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-126",
         "west": "labyrinth-124"
       },
@@ -19019,9 +18894,8 @@
     },
     {
       "id": "labyrinth_126",
-      "phaser_stage_id": "labyrinth-126",
+      "stage_id": "labyrinth-126",
       "name": "Void Expanse 126",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -19119,7 +18993,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-127",
         "west": "labyrinth-125"
       },
@@ -19131,9 +19005,8 @@
     },
     {
       "id": "labyrinth_127",
-      "phaser_stage_id": "labyrinth-127",
+      "stage_id": "labyrinth-127",
       "name": "Void Expanse 127",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -19231,7 +19104,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-128",
         "west": "labyrinth-126"
       },
@@ -19243,9 +19116,8 @@
     },
     {
       "id": "labyrinth_128",
-      "phaser_stage_id": "labyrinth-128",
+      "stage_id": "labyrinth-128",
       "name": "Void Expanse 128",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -19343,7 +19215,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-129",
         "west": "labyrinth-127"
       },
@@ -19355,9 +19227,8 @@
     },
     {
       "id": "labyrinth_129",
-      "phaser_stage_id": "labyrinth-129",
+      "stage_id": "labyrinth-129",
       "name": "Void Expanse 129",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -19455,7 +19326,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-130",
         "west": "labyrinth-128"
       },
@@ -19467,9 +19338,8 @@
     },
     {
       "id": "labyrinth_130",
-      "phaser_stage_id": "labyrinth-130",
+      "stage_id": "labyrinth-130",
       "name": "Void Expanse 130",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -19567,7 +19437,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-131",
         "west": "labyrinth-129"
       },
@@ -19579,9 +19449,8 @@
     },
     {
       "id": "labyrinth_131",
-      "phaser_stage_id": "labyrinth-131",
+      "stage_id": "labyrinth-131",
       "name": "Void Expanse 131",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -19679,7 +19548,7 @@
           "goals": []
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "east": "labyrinth-132",
         "west": "labyrinth-130"
       },
@@ -19691,9 +19560,8 @@
     },
     {
       "id": "labyrinth_132",
-      "phaser_stage_id": "labyrinth-132",
+      "stage_id": "labyrinth-132",
       "name": "Void Expanse 132",
-      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
       "layout": {
         "rows": 12,
         "columns": 18,
@@ -19802,7 +19670,7 @@
           ]
         }
       },
-      "phaser_neighbors": {
+      "stage_neighbors": {
         "west": "labyrinth-131"
       },
       "neighbors": {

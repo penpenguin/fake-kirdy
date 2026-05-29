@@ -2,17 +2,17 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
 const repoRoot = process.cwd();
-const manifestPath = join(repoRoot, 'godot', 'levels', 'phaser_stage_manifest.json');
+const manifestPath = join(repoRoot, 'godot', 'levels', 'stage_manifest.json');
 const catalogSourcePath = join(repoRoot, 'godot', 'levels', 'level_catalog.source.json');
 const outputPath = join(repoRoot, 'godot', 'levels', 'generated', 'procedural_levels.json');
 const checkOnly = process.argv.includes('--check');
 const doorTriggerRadius = 48;
 const minSpawnDoorDistance = 64;
 
-const manifest = loadJson(manifestPath, 'Phaser stage manifest');
+const manifest = loadJson(manifestPath, 'stage manifest');
 const catalogSource = loadJson(catalogSourcePath, 'Godot level catalog source');
-const phaserIdToGodotId = buildPhaserIdMap(catalogSource);
-const exportData = buildProceduralLevelExport(manifest, phaserIdToGodotId);
+const stageIdToGodotId = buildStageIdMap(catalogSource);
+const exportData = buildProceduralLevelExport(manifest, stageIdToGodotId);
 const nextOutputText = `${JSON.stringify(exportData, null, 2)}\n`;
 
 if (checkOnly) {
@@ -38,15 +38,15 @@ function loadJson(filePath, label) {
   return JSON.parse(readFileSync(filePath, 'utf8'));
 }
 
-function buildPhaserIdMap(source) {
+function buildStageIdMap(source) {
   if (source?.version !== 1 || !Array.isArray(source.levels)) {
     throw new Error('Godot level catalog source must have version 1 and a levels array');
   }
 
   const idMap = new Map();
   for (const level of source.levels) {
-    if (typeof level.phaser_stage_id === 'string' && level.phaser_stage_id.length > 0) {
-      idMap.set(level.phaser_stage_id, requireString(level.id, `${level.phaser_stage_id}.id`));
+    if (typeof level.stage_id === 'string' && level.stage_id.length > 0) {
+      idMap.set(level.stage_id, requireString(level.id, `${level.stage_id}.id`));
     }
   }
   return idMap;
@@ -54,39 +54,38 @@ function buildPhaserIdMap(source) {
 
 function buildProceduralLevelExport(stageManifest, idMap) {
   if (stageManifest?.version !== 1 || !Array.isArray(stageManifest.stages)) {
-    throw new Error('Phaser stage manifest must have version 1 and a stages array');
+    throw new Error('Stage manifest must have version 1 and a stages array');
   }
 
   const proceduralStages = stageManifest.stages
-    .filter((stage) => stage.procedural_generated === true)
+    .filter((stage) => stage.origin === 'generated_schema')
     .sort((left, right) => requireString(left.id, 'stage.id').localeCompare(requireString(right.id, 'stage.id')));
 
   return {
     version: 1,
-    generated_from: 'godot/levels/phaser_stage_manifest.json',
+    generated_from: 'godot/levels/stage_manifest.json',
     levels: proceduralStages.map((stage) => buildProceduralLevel(stage, idMap)),
   };
 }
 
 function buildProceduralLevel(stage, idMap) {
-  const phaserStageId = requireString(stage.id, 'stage.id');
-  const phaserNeighbors = normalizeNeighbors(stage.neighbors ?? {});
+  const stageId = requireString(stage.id, 'stage.id');
+  const stageNeighbors = normalizeNeighbors(stage.neighbors ?? {});
   const godotNeighbors = Object.fromEntries(
-    Object.entries(phaserNeighbors).map(([direction, targetStageId]) => [
+    Object.entries(stageNeighbors).map(([direction, targetStageId]) => [
       direction,
-      mapPhaserIdToGodotId(targetStageId, idMap),
+      mapStageIdToGodotId(targetStageId, idMap),
     ]),
   );
 
   return {
-    id: mapPhaserIdToGodotId(phaserStageId, idMap),
-    phaser_stage_id: phaserStageId,
-    name: requireString(stage.name, `${phaserStageId}.name`),
-    source_path: requireString(stage.source_path, `${phaserStageId}.source_path`),
-    layout: normalizeLayout(stage.layout, phaserStageId),
-    metadata: normalizeMetadata(stage.metadata ?? {}, phaserStageId),
-    runtime_layout: buildRuntimeLayout(stage.layout, stage.metadata ?? {}, phaserStageId, godotNeighbors, stage.dead_ends ?? []),
-    phaser_neighbors: phaserNeighbors,
+    id: mapStageIdToGodotId(stageId, idMap),
+    stage_id: stageId,
+    name: requireString(stage.name, `${stageId}.name`),
+    layout: normalizeLayout(stage.layout, stageId),
+    metadata: normalizeMetadata(stage.metadata ?? {}, stageId),
+    runtime_layout: buildRuntimeLayout(stage.layout, stage.metadata ?? {}, stageId, godotNeighbors, stage.dead_ends ?? []),
+    stage_neighbors: stageNeighbors,
     neighbors: godotNeighbors,
     scene_strategy: 'generated_schema',
   };
@@ -96,7 +95,7 @@ function buildRuntimeLayout(layout, metadata, stageId, neighbors, deadEnds) {
   const normalizedLayout = normalizeLayout(layout, stageId);
   const normalizedMetadata = normalizeMetadata(metadata, stageId);
   const difficulty = Number(normalizedMetadata.difficulty ?? 1);
-  const levelId = mapPhaserIdToGodotId(stageId, new Map());
+  const levelId = mapStageIdToGodotId(stageId, new Map());
   const cluster = String(normalizedMetadata.cluster ?? 'void');
   const roomVariant = hasVerticalRoute(neighbors) ? 'vertical_route' : 'horizontal_route';
 
@@ -320,16 +319,16 @@ function normalizeMetadata(metadata, stageId) {
   );
 }
 
-function mapPhaserIdToGodotId(phaserId, idMap) {
-  if (idMap.has(phaserId)) {
-    return idMap.get(phaserId);
+function mapStageIdToGodotId(stageId, idMap) {
+  if (idMap.has(stageId)) {
+    return idMap.get(stageId);
   }
 
-  if (/^labyrinth-\d{3}$/.test(phaserId)) {
-    return phaserId.replaceAll('-', '_');
+  if (/^labyrinth-\d{3}$/.test(stageId)) {
+    return stageId.replaceAll('-', '_');
   }
 
-  return phaserId.replaceAll('-', '_');
+  return stageId.replaceAll('-', '_');
 }
 
 function requireString(value, fieldName) {

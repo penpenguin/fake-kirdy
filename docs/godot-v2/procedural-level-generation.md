@@ -1,8 +1,8 @@
 # Procedural Level Generation
 
-Godot is now the canonical runtime, but the old Phaser stage graph is still useful as migration input. The procedural expanse chain is handled in two layers:
+Godot is now the canonical runtime. The procedural expanse chain is handled in two layers:
 
-- `godot/levels/phaser_stage_manifest.json` records Phaser/reference stage ids and topology, including `labyrinth-001` through `labyrinth-132`.
+- `godot/levels/stage_manifest.json` records canonical stage ids and topology, including `labyrinth-001` through `labyrinth-132`.
 - `godot/levels/generated/procedural_levels.json` converts those procedural stage ids into Godot-friendly ids and durable schema data.
 
 Generate or verify the schema with:
@@ -19,12 +19,12 @@ npm run godot:procedural-levels -- --check
 Each generated level entry contains:
 
 - `id`: Godot level id, such as `labyrinth_001`.
-- `phaser_stage_id`: legacy/reference id, such as `labyrinth-001`.
-- `source_path`: the Phaser source that generated the stage metadata.
+- `stage_id`: canonical stage id, such as `labyrinth-001`.
+- `origin`: manifest origin, currently `generated_schema` for generated procedural levels.
 - `layout`: rows, columns, and tile size from the manifest.
 - `runtime_layout`: canonical Godot placement data for generated rooms, including tile size, grid dimensions, room size and route variant, camera bounds, spawn points, door points, spawn/door safety values, floor geometry, generated platform geometry, and generated gameplay marker placement.
 - `metadata`: durable cluster, difficulty, and index fields.
-- `phaser_neighbors`: original Phaser neighbor ids.
+- `stage_neighbors`: canonical neighbor stage ids.
 - `neighbors`: Godot id equivalents for the same topology.
 - `scene_strategy`: currently `generated_schema`, meaning the level exists as canonical data but is not necessarily hand-authored as a `.tscn` scene.
 
@@ -46,7 +46,7 @@ Only `labyrinth_001` is currently scene-authored in Godot. The remaining generat
 
 `godot/tests/replays/labyrinth_010_generated_content.json` exercises generated content in an ice procedural room. It produces trace coverage for enemy contact damage, heal collection, player healing, generated shard collection, item acquisition, and the generated door into `ice_reliquary`.
 
-`godot/tests/replays/labyrinth_002_to_forest_reliquary_generated_chain.json` follows the generated forest chain from `labyrinth_002` through `labyrinth_005` into the hand-authored `forest_reliquary`. This validates directional generated spawns, repeated generated room transitions, generated damage/heal events, generated shard acquisition, and the Phaser-derived reliquary exit.
+`godot/tests/replays/labyrinth_002_to_forest_reliquary_generated_chain.json` follows the generated forest chain from `labyrinth_002` through `labyrinth_005` into the hand-authored `forest_reliquary`. This validates directional generated spawns, repeated generated room transitions, generated damage/heal events, generated shard acquisition, and the manifest-derived reliquary exit.
 
 `godot/tests/replays/labyrinth_006_to_ice_reliquary_generated_chain.json` applies the same chain coverage to the ice cluster, ending in `ice_reliquary` with generated shard and `ice-keystone` acquisition.
 

@@ -22,7 +22,7 @@ describe('Godot canonical validation and legacy boundary', () => {
     expect(packageJson.devDependencies?.vite).toBeUndefined();
   });
 
-  it('reports the remaining Phaser/Vite legacy reference inventory', () => {
+  it('reports the optional legacy reference inventory outside the canonical runtime', () => {
     const packageJson = JSON.parse(readFileSync(join(repoRoot, 'package.json'), 'utf8')) as {
       scripts?: Record<string, string>;
     };
@@ -36,6 +36,7 @@ describe('Godot canonical validation and legacy boundary', () => {
       canonical_runtime?: string;
       legacy_runtime?: {
         status?: string;
+        required_by_canonical_runtime?: boolean;
         source_dirs?: string[];
         commands?: string[];
         dependencies?: string[];
@@ -44,8 +45,8 @@ describe('Godot canonical validation and legacy boundary', () => {
     };
 
     expect(inventory.canonical_runtime).toBe('godot');
-    expect(inventory.legacy_runtime?.source_dirs).toContain('legacy/phaser-reference/src');
-    expect(inventory.legacy_runtime?.status).toBe('reference source retained outside root runtime');
+    expect(inventory.legacy_runtime?.required_by_canonical_runtime).toBe(false);
+    expect(inventory.legacy_runtime?.status).toBe('optional reference copy outside canonical runtime');
     expect(inventory.legacy_runtime?.commands).toEqual([]);
     expect(inventory.legacy_runtime?.dependencies).toEqual([]);
     expect(inventory.retirement_gates).toEqual(
@@ -53,7 +54,7 @@ describe('Godot canonical validation and legacy boundary', () => {
     );
   });
 
-  it('documents how legacy reference code is constrained until retirement', () => {
+  it('documents how optional legacy reference material is constrained until retirement', () => {
     const docsPath = join(repoRoot, 'docs', 'godot-v2', 'legacy-reference-boundary.md');
     expect(existsSync(docsPath)).toBe(true);
 
@@ -61,8 +62,8 @@ describe('Godot canonical validation and legacy boundary', () => {
     const readme = readFileSync(join(repoRoot, 'README.md'), 'utf8');
     const agents = readFileSync(join(repoRoot, 'AGENTS.md'), 'utf8');
 
-    expect(docs).toContain('legacy/phaser-reference/src/');
-    expect(docs).toContain('legacy/reference source');
+    expect(docs).toContain('optional reference copy');
+    expect(docs).toContain('not required by the canonical runtime');
     expect(docs).toContain('Root runtime dependencies removed');
     expect(docs).toContain('retirement gates');
     expect(readme).toContain('npm run test:canonical');

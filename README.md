@@ -26,6 +26,6 @@ The canonical Godot project lives in `godot/`. The export wrapper skips graceful
 
 The deployed Phaser build is still useful as a gameplay reference during migration: [Fake Kirdy on GitHub Pages](https://penpenguin.github.io/fake-kirdy/).
 
-The root package no longer exposes Phaser/Vite runtime commands or dependencies. Legacy/reference source remains under `legacy/phaser-reference/` for audit only; use Godot commands for run/build/test.
+The root package no longer exposes Phaser/Vite runtime commands or dependencies. Optional legacy/reference copies may remain for audits only; use Godot commands for run/build/test.
 
 Run `npm run legacy:inventory` to see the remaining legacy/reference source surface. Run `npm run godot:parity-ledger -- --fail-on-blockers` before changing that boundary.

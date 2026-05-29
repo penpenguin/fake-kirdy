@@ -4,20 +4,20 @@ import { join } from 'node:path';
 const repoRoot = process.cwd();
 const sourcePath = join(repoRoot, 'godot', 'levels', 'level_catalog.source.json');
 const outputPath = join(repoRoot, 'godot', 'levels', 'level_catalog.json');
-const phaserStageManifestPath = join(repoRoot, 'godot', 'levels', 'phaser_stage_manifest.json');
+const stageManifestPath = join(repoRoot, 'godot', 'levels', 'stage_manifest.json');
 const checkOnly = process.argv.includes('--check');
 
 const source = JSON.parse(readFileSync(sourcePath, 'utf8'));
-const phaserStageManifest = loadPhaserStageManifest();
-const validation = validateSource(source, phaserStageManifest);
+const stageManifest = loadStageManifest();
+const validation = validateSource(source, stageManifest);
 
 const catalog = {
   version: source.version,
-  levels: source.levels.map(({ id, scene_path, tags, phaser_source }) => ({
+  levels: source.levels.map(({ id, scene_path, tags, source_ref }) => ({
     id,
     scene_path,
     tags,
-    phaser_source,
+    source_ref,
   })),
 };
 const nextCatalogText = `${JSON.stringify(catalog, null, 2)}\n`;
@@ -30,19 +30,19 @@ if (checkOnly) {
   }
 
   console.log('[godot:catalog] level_catalog.json is up to date.');
-  console.log(`[godot:catalog] validated ${validation.phaserStageMappings} Phaser stage ${pluralizeMapping(validation.phaserStageMappings)}.`);
+  console.log(`[godot:catalog] validated ${validation.stageMappings} canonical stage ${pluralizeMapping(validation.stageMappings)}.`);
   console.log(`[godot:catalog] validated expected_collectibles for ${validation.collectibleMappings} level ${validation.collectibleMappings === 1 ? 'mapping' : 'mappings'}.`);
   console.log(`[godot:catalog] validated expected_dead_end_rewards for ${validation.deadEndRewardMappings} level ${validation.deadEndRewardMappings === 1 ? 'mapping' : 'mappings'}.`);
-  console.log('[godot:catalog] validated catalog mappings against phaser_stage_manifest.json.');
+  console.log('[godot:catalog] validated catalog mappings against stage_manifest.json.');
   process.exit(0);
 }
 
 writeFileSync(outputPath, nextCatalogText);
 console.log('[godot:catalog] wrote godot/levels/level_catalog.json');
-console.log(`[godot:catalog] validated ${validation.phaserStageMappings} Phaser stage ${pluralizeMapping(validation.phaserStageMappings)}.`);
+console.log(`[godot:catalog] validated ${validation.stageMappings} canonical stage ${pluralizeMapping(validation.stageMappings)}.`);
 console.log(`[godot:catalog] validated expected_collectibles for ${validation.collectibleMappings} level ${validation.collectibleMappings === 1 ? 'mapping' : 'mappings'}.`);
 console.log(`[godot:catalog] validated expected_dead_end_rewards for ${validation.deadEndRewardMappings} level ${validation.deadEndRewardMappings === 1 ? 'mapping' : 'mappings'}.`);
-console.log('[godot:catalog] validated catalog mappings against phaser_stage_manifest.json.');
+console.log('[godot:catalog] validated catalog mappings against stage_manifest.json.');
 
 function validateSource(data, stageManifest) {
   if (data?.version !== 1 || !Array.isArray(data.levels)) {
@@ -51,7 +51,7 @@ function validateSource(data, stageManifest) {
 
   const stagesById = new Map(stageManifest.stages.map((stage) => [stage.id, stage]));
   const seenIds = new Set();
-  let phaserStageMappings = 0;
+  let stageMappings = 0;
   let collectibleMappings = 0;
   let deadEndRewardMappings = 0;
   for (const level of data.levels) {
@@ -78,14 +78,14 @@ function validateSource(data, stageManifest) {
       throw new Error(`Level ${id} scene does not exist: ${scenePath}`);
     }
 
-    const phaserSource = String(level.phaser_source ?? '');
-    if (phaserSource !== '' && !existsSync(join(repoRoot, phaserSource))) {
-      throw new Error(`Level ${id} phaser_source does not exist: ${phaserSource}`);
+    const sourceRef = String(level.source_ref ?? '');
+    if (sourceRef !== '' && !sourceRef.startsWith('stage_manifest:') && !existsSync(join(repoRoot, sourceRef))) {
+      throw new Error(`Level ${id} source_ref does not exist: ${sourceRef}`);
     }
 
-    if (typeof level.phaser_stage_id === 'string' && level.phaser_stage_id !== '') {
-      const levelValidation = validatePhaserStageMapping(level, phaserSource, stagesById);
-      phaserStageMappings += 1;
+    if (typeof level.stage_id === 'string' && level.stage_id !== '') {
+      const levelValidation = validateStageMapping(level, sourceRef, stagesById);
+      stageMappings += 1;
       if (levelValidation.hasCollectibleExpectations) {
         collectibleMappings += 1;
       }
@@ -95,41 +95,41 @@ function validateSource(data, stageManifest) {
     }
   }
 
-  return { phaserStageMappings, collectibleMappings, deadEndRewardMappings };
+  return { stageMappings, collectibleMappings, deadEndRewardMappings };
 }
 
 
-function loadPhaserStageManifest() {
-  if (!existsSync(phaserStageManifestPath)) {
-    throw new Error('Missing godot/levels/phaser_stage_manifest.json; run npm run godot:stage-manifest.');
+function loadStageManifest() {
+  if (!existsSync(stageManifestPath)) {
+    throw new Error('Missing godot/levels/stage_manifest.json; run npm run godot:stage-manifest.');
   }
 
-  const manifest = JSON.parse(readFileSync(phaserStageManifestPath, 'utf8'));
+  const manifest = JSON.parse(readFileSync(stageManifestPath, 'utf8'));
   if (manifest?.version !== 1 || !Array.isArray(manifest.stages)) {
-    throw new Error('Phaser stage manifest must have version 1 and a stages array');
+    throw new Error('Stage manifest must have version 1 and a stages array');
   }
 
   return manifest;
 }
 
 
-function validatePhaserStageMapping(level, phaserSource, stagesById) {
-  if (phaserSource === '') {
-    throw new Error(`Level ${level.id} defines phaser_stage_id without phaser_source`);
+function validateStageMapping(level, sourceRef, stagesById) {
+  if (sourceRef === '') {
+    throw new Error(`Level ${level.id} defines stage_id without source_ref`);
   }
 
-  const stageId = String(level.phaser_stage_id);
+  const stageId = String(level.stage_id);
   const stage = stagesById.get(stageId);
   if (stage === undefined) {
-    throw new Error(`Level ${level.id} phaser_stage_id is missing from phaser_stage_manifest.json: ${stageId}`);
+    throw new Error(`Level ${level.id} stage_id is missing from stage_manifest.json: ${stageId}`);
   }
 
-  if (stage.source_path !== phaserSource) {
-    throw new Error(`Level ${level.id} phaser_source does not match manifest for ${stageId}: ${phaserSource}`);
+  if (sourceRef !== `stage_manifest:${stageId}`) {
+    throw new Error(`Level ${level.id} source_ref must be stage_manifest:${stageId}`);
   }
 
   if (!Array.isArray(level.expected_neighbors)) {
-    throw new Error(`Level ${level.id} with phaser_stage_id must define expected_neighbors`);
+    throw new Error(`Level ${level.id} with stage_id must define expected_neighbors`);
   }
 
   for (const neighborId of level.expected_neighbors) {
@@ -138,7 +138,7 @@ function validatePhaserStageMapping(level, phaserSource, stagesById) {
     }
 
     if (!Object.values(stage.neighbors ?? {}).includes(neighborId)) {
-      throw new Error(`Level ${level.id} expected neighbor missing from phaser_stage_manifest.json: ${neighborId}`);
+      throw new Error(`Level ${level.id} expected neighbor missing from stage_manifest.json: ${neighborId}`);
     }
   }
 
@@ -174,7 +174,7 @@ function validateExpectedMetadata(level, stage) {
     }
 
     if (stage.metadata?.[field] !== expectedValue) {
-      throw new Error(`Level ${level.id} expected metadata missing from phaser_stage_manifest.json: ${field}=${expectedValue}`);
+      throw new Error(`Level ${level.id} expected metadata missing from stage_manifest.json: ${field}=${expectedValue}`);
     }
   }
 }
@@ -193,7 +193,7 @@ function validateExpectedCollectibles(level, stage) {
 
   for (const expectedCollectibleId of level.expected_collectibles) {
     if (!stageCollectibleIds.has(expectedCollectibleId)) {
-      throw new Error(`Level ${level.id} expected collectible missing from phaser_stage_manifest.json: ${expectedCollectibleId}`);
+      throw new Error(`Level ${level.id} expected collectible missing from stage_manifest.json: ${expectedCollectibleId}`);
     }
   }
 }
@@ -212,7 +212,7 @@ function validateExpectedDeadEndRewards(level, stage) {
 
   for (const expectedReward of level.expected_dead_end_rewards) {
     if (!stageRewards.has(expectedReward)) {
-      throw new Error(`Level ${level.id} expected dead-end reward missing from phaser_stage_manifest.json: ${expectedReward}`);
+      throw new Error(`Level ${level.id} expected dead-end reward missing from stage_manifest.json: ${expectedReward}`);
     }
   }
 }

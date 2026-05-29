@@ -11,7 +11,7 @@ const readGodotFile = (relativePath: string): string =>
   readFileSync(join(godotRoot, relativePath), 'utf8');
 
 describe('Godot v2 canonical level catalog', () => {
-  it('defines level ids, scene paths, tags, and Phaser source references in JSON', () => {
+  it('defines level ids, scene paths, tags, and canonical source references in JSON', () => {
     const catalogPath = join(godotRoot, 'levels', 'level_catalog.json');
 
     expect(existsSync(catalogPath)).toBe(true);
@@ -22,7 +22,7 @@ describe('Godot v2 canonical level catalog', () => {
         id?: string;
         scene_path?: string;
         tags?: string[];
-        phaser_source?: string;
+        source_ref?: string;
       }>;
     };
 
@@ -32,7 +32,7 @@ describe('Godot v2 canonical level catalog', () => {
     const byId = new Map(catalog.levels?.map((level) => [level.id, level]));
     expect(byId.get('central_hub')?.scene_path).toBe('res://levels/central_hub.tscn');
     expect(byId.get('central_hub')?.tags).toContain('hub');
-    expect(byId.get('central_hub')?.phaser_source).toBe('legacy/phaser-reference/src/game/world/stages/central-hub.ts');
+    expect(byId.get('central_hub')?.source_ref).toBe('stage_manifest:central-hub');
     expect(byId.get('heal_room')?.tags).toContain('heal');
     expect(byId.get('combat_room')?.tags).toContain('combat');
   });
@@ -51,7 +51,7 @@ describe('Godot v2 canonical level catalog', () => {
     const docs = readFileSync(join(repoRoot, 'docs', 'godot-v2', 'content-migration.md'), 'utf8');
 
     expect(docs).toContain('level_catalog.json');
-    expect(docs).toContain('phaser_source');
+    expect(docs).toContain('source_ref');
     expect(docs).toContain('schema/importer');
   });
 });

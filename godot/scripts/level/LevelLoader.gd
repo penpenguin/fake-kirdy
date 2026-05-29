@@ -133,7 +133,7 @@ func create_generated_procedural_level(level_id: String) -> Node2D:
     var root := Node2D.new()
     root.name = level_id.to_pascal_case()
     root.set_meta("generated_schema", true)
-    root.set_meta("phaser_stage_id", String(entry.get("phaser_stage_id", "")))
+    root.set_meta("stage_id", String(entry.get("stage_id", "")))
     root.set_meta("scene_strategy", String(entry.get("scene_strategy", "generated_schema")))
 
     var runtime_layout := get_runtime_layout(entry)

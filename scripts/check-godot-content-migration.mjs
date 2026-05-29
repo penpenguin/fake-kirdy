@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 const repoRoot = process.cwd();
 const catalogSourcePath = join(repoRoot, 'godot', 'levels', 'level_catalog.source.json');
-const stageManifestPath = join(repoRoot, 'godot', 'levels', 'phaser_stage_manifest.json');
+const stageManifestPath = join(repoRoot, 'godot', 'levels', 'stage_manifest.json');
 const proceduralLevelsPath = join(repoRoot, 'godot', 'levels', 'generated', 'procedural_levels.json');
 
 const catalogSource = readJson(catalogSourcePath);
@@ -17,7 +17,7 @@ function validateContentMigration(catalog, manifest, procedural) {
     throw new Error('Level catalog source must have version 1 and a levels array');
   }
   if (manifest?.version !== 1 || !Array.isArray(manifest.stages)) {
-    throw new Error('Phaser stage manifest must have version 1 and a stages array');
+    throw new Error('Stage manifest must have version 1 and a stages array');
   }
   if (procedural?.version !== 1 || !Array.isArray(procedural.levels)) {
     throw new Error('Procedural levels must have version 1 and a levels array');
@@ -26,8 +26,8 @@ function validateContentMigration(catalog, manifest, procedural) {
   const stagesById = new Map(manifest.stages.map((stage) => [stage.id, stage]));
   const levelsByStageId = new Map(
     catalog.levels
-      .filter((level) => typeof level.phaser_stage_id === 'string' && level.phaser_stage_id !== '')
-      .map((level) => [level.phaser_stage_id, level]),
+      .filter((level) => typeof level.stage_id === 'string' && level.stage_id !== '')
+      .map((level) => [level.stage_id, level]),
   );
   const levelIds = new Set(catalog.levels.map((level) => level.id).filter((id) => typeof id === 'string' && id !== ''));
   const generatedLevelIds = new Set();
@@ -40,23 +40,23 @@ function validateContentMigration(catalog, manifest, procedural) {
 
   for (const level of procedural.levels) {
     const levelId = requireString(level.id, 'procedural level id');
-    const phaserStageId = requireString(level.phaser_stage_id, `${levelId}.phaser_stage_id`);
+    const stageId = requireString(level.stage_id, `${levelId}.stage_id`);
 
     if (level.scene_strategy !== 'generated_schema') {
       throw new Error(`${levelId} must use generated_schema scene_strategy`);
     }
-    if (!stagesById.has(phaserStageId)) {
-      throw new Error(`${levelId} references missing Phaser stage ${phaserStageId}`);
+    if (!stagesById.has(stageId)) {
+      throw new Error(`${levelId} references missing stage ${stageId}`);
     }
     if (generatedLevelIds.has(levelId)) {
       throw new Error(`Duplicate generated level id: ${levelId}`);
     }
-    if (generatedStageIds.has(phaserStageId)) {
-      throw new Error(`Duplicate generated Phaser stage id: ${phaserStageId}`);
+    if (generatedStageIds.has(stageId)) {
+      throw new Error(`Duplicate generated stage id: ${stageId}`);
     }
 
     generatedLevelIds.add(levelId);
-    generatedStageIds.add(phaserStageId);
+    generatedStageIds.add(stageId);
   }
 
   for (const level of procedural.levels) {
@@ -74,13 +74,13 @@ function validateContentMigration(catalog, manifest, procedural) {
   }
 
   for (const level of catalog.levels) {
-    if (typeof level.phaser_stage_id !== 'string' || level.phaser_stage_id === '') {
+    if (typeof level.stage_id !== 'string' || level.stage_id === '') {
       continue;
     }
 
-    const stage = stagesById.get(level.phaser_stage_id);
+    const stage = stagesById.get(level.stage_id);
     if (stage === undefined) {
-      throw new Error(`Missing Phaser stage manifest entry for ${level.phaser_stage_id}`);
+      throw new Error(`Missing stage manifest entry for ${level.stage_id}`);
     }
 
     const expectedNeighbors = Array.isArray(level.expected_neighbors) ? level.expected_neighbors : [];
@@ -88,7 +88,7 @@ function validateContentMigration(catalog, manifest, procedural) {
 
     for (const neighborStageId of expectedNeighbors) {
       if (!Object.values(stage.neighbors ?? {}).includes(neighborStageId)) {
-        throw new Error(`${level.phaser_stage_id} does not declare expected neighbor ${neighborStageId} in phaser_stage_manifest.json`);
+        throw new Error(`${level.stage_id} does not declare expected neighbor ${neighborStageId} in stage_manifest.json`);
       }
 
       const targetLevel = levelsByStageId.get(neighborStageId);
@@ -98,11 +98,11 @@ function validateContentMigration(catalog, manifest, procedural) {
       }
 
       if (!sceneTargets.has(targetLevel.id)) {
-        throw new Error(`${level.id} scene is missing DoorMarker target_level_id "${targetLevel.id}" for Phaser edge ${level.phaser_stage_id} -> ${neighborStageId}`);
+        throw new Error(`${level.id} scene is missing DoorMarker target_level_id "${targetLevel.id}" for stage edge ${level.stage_id} -> ${neighborStageId}`);
       }
 
       validatedDoors += 1;
-      validatedLines.push(`${level.phaser_stage_id} -> ${neighborStageId} maps to ${level.id} -> ${targetLevel.id}`);
+      validatedLines.push(`${level.stage_id} -> ${neighborStageId} maps to ${level.id} -> ${targetLevel.id}`);
     }
   }
 
@@ -111,12 +111,12 @@ function validateContentMigration(catalog, manifest, procedural) {
     .map((stage) => stage.id)
     .filter((stageId) => !coveredStageIds.has(stageId));
   if (missingStageIds.length > 0) {
-    throw new Error(`Missing Godot topology mapping for Phaser stage(s): ${missingStageIds.join(', ')}`);
+    throw new Error(`Missing Godot topology mapping for stage(s): ${missingStageIds.join(', ')}`);
   }
 
   console.log(`[godot:content-check] validated ${validatedDoors} mapped neighbor door(s).`);
   console.log(`[godot:content-check] deferred ${deferredNeighbors} unmapped neighbor(s).`);
-  console.log(`[godot:content-check] validated ${coveredStageIds.size} Phaser stage topology mapping(s).`);
+  console.log(`[godot:content-check] validated ${coveredStageIds.size} canonical stage topology mapping(s).`);
   console.log(`[godot:content-check] validated ${generatedLevelIds.size} generated schema level(s).`);
   console.log(`[godot:content-check] validated ${generatedNeighborEdges} generated neighbor edge(s).`);
   for (const line of validatedLines) {

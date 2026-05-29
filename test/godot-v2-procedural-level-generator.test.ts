@@ -13,9 +13,8 @@ type ProceduralLevelExport = {
   generated_from?: string;
   levels?: Array<{
     id?: string;
-    phaser_stage_id?: string;
+    stage_id?: string;
     scene_strategy?: string;
-    source_path?: string;
     layout?: {
       rows?: number;
       columns?: number;
@@ -66,7 +65,7 @@ type ProceduralLevelExport = {
       };
     };
     metadata?: Record<string, string | number | boolean>;
-    phaser_neighbors?: Record<string, string>;
+    stage_neighbors?: Record<string, string>;
     neighbors?: Record<string, string>;
   }>;
 };
@@ -88,12 +87,11 @@ describe('Godot v2 procedural level schema generation', () => {
     const levels = new Map(generated.levels?.map((level) => [level.id, level]));
 
     expect(generated.version).toBe(1);
-    expect(generated.generated_from).toBe('godot/levels/phaser_stage_manifest.json');
+    expect(generated.generated_from).toBe('godot/levels/stage_manifest.json');
     expect(generated.levels).toHaveLength(132);
 
     expect(levels.get('labyrinth_001')).toMatchObject({
-      phaser_stage_id: 'labyrinth-001',
-      source_path: 'legacy/phaser-reference/src/game/world/stages/procedural.ts',
+      stage_id: 'labyrinth-001',
       scene_strategy: 'generated_schema',
       layout: {
         rows: 12,
@@ -104,7 +102,7 @@ describe('Godot v2 procedural level schema generation', () => {
         cluster: 'forest',
         difficulty: 2,
       },
-      phaser_neighbors: {
+      stage_neighbors: {
         west: 'forest-area',
         east: 'labyrinth-002',
       },
