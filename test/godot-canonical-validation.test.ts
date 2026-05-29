@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -69,5 +69,15 @@ describe('Godot canonical validation and legacy boundary', () => {
     expect(readme).toContain('npm run legacy:inventory');
     expect(agents).toContain('npm run test:canonical');
     expect(agents).toContain('legacy:inventory');
+  });
+
+  it('keeps root tests limited to Godot canonical validation', () => {
+    const rootTestFiles = readdirSync(join(repoRoot, 'test'))
+      .filter((fileName) => fileName.endsWith('.test.ts'))
+      .sort();
+
+    expect(
+      rootTestFiles.every((fileName) => fileName.startsWith('godot') || fileName === 'trace-summary.test.ts'),
+    ).toBe(true);
   });
 });
