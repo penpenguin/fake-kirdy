@@ -22,6 +22,8 @@ describe('Godot v2 export workflow', () => {
     expect(preset).toContain('platform="Web"');
     expect(preset).toContain('export_path="../dist/index.html"');
     expect(preset).toContain('variant/thread_support=false');
+    expect(preset).toContain('vram_texture_compression/for_mobile=false');
+    expect(preset).not.toContain('vram_texture_compression/for_mobile=true');
     expect(preset).toContain('html/canvas_resize_policy=2');
   });
 
