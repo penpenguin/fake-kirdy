@@ -1,0 +1,122 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { describe, expect, it } from 'vitest';
+
+const currentDir = dirname(fileURLToPath(import.meta.url));
+const repoRoot = join(currentDir, '..');
+const godotRoot = join(repoRoot, 'godot');
+
+const readGodotFile = (relativePath: string): string =>
+  readFileSync(join(godotRoot, relativePath), 'utf8');
+
+describe('Godot v2 minimal combat slice', () => {
+  it('defines one simple enemy with ability metadata and capture states', () => {
+    const script = readGodotFile('scripts/enemies/SimpleEnemy.gd');
+    const scene = readGodotFile('scenes/enemies/SimpleEnemy.tscn');
+
+    expect(script).toContain('class_name SimpleEnemy');
+    expect(script).toContain('@export var ability_type');
+    expect(script).toContain('enemy.idle');
+    expect(script).toContain('enemy.captured');
+    expect(script).toContain('enemy.swallowed');
+    expect(scene).toContain('SimpleEnemy.gd');
+    expect(scene).not.toContain('RigidBody2D');
+  });
+
+  it('defines a second flying enemy type selected by enemy marker metadata', () => {
+    const scriptPath = join(godotRoot, 'scripts', 'enemies', 'FlyingEnemy.gd');
+    const scenePath = join(godotRoot, 'scenes', 'enemies', 'FlyingEnemy.tscn');
+    expect(existsSync(scriptPath)).toBe(true);
+    expect(existsSync(scenePath)).toBe(true);
+
+    const script = readFileSync(scriptPath, 'utf8');
+    const scene = readFileSync(scenePath, 'utf8');
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const level = readGodotFile('levels/flying_combat_room.tscn');
+
+    expect(script).toContain('class_name FlyingEnemy');
+    expect(script).toContain('extends "res://scripts/enemies/SimpleEnemy.gd"');
+    expect(script).toContain('@export var hover_amplitude');
+    expect(script).toContain('enemy.idle');
+    expect(scene).toContain('FlyingEnemy.gd');
+    expect(scene).not.toContain('RigidBody2D');
+    expect(session).toContain('FlyingEnemyScene');
+    expect(session).toContain('enemy_type');
+    expect(level).toContain('enemy_type = "flying"');
+    expect(level).toContain('ability_type = "frost"');
+  });
+
+  it('adds player inhale, swallow, and ability actions', () => {
+    const project = readGodotFile('project.godot');
+    const controller = readGodotFile('scripts/player/PlayerController.gd');
+    const playerScene = readGodotFile('scenes/player/Player.tscn');
+
+    expect(project).toContain('inhale');
+    expect(project).toContain('swallow');
+    expect(project).toContain('use_ability');
+    expect(controller).toContain('inhale_action');
+    expect(controller).toContain('swallow_action');
+    expect(controller).toContain('use_ability_action');
+    expect(controller).toContain('ability_type');
+    expect(controller).toContain('is_inhale_pressed');
+    expect(controller).toContain('is_swallow_pressed');
+    expect(controller).toContain('is_use_ability_pressed');
+    expect(playerScene).toContain('InhaleArea');
+    expect(playerScene).toContain('Area2D');
+  });
+
+  it('carries enemy ability metadata through level markers and the combat room', () => {
+    const marker = readGodotFile('scripts/level/markers/EnemySpawnMarker.gd');
+    const level = readGodotFile('levels/combat_room.tscn');
+    const catalog = readGodotFile('levels/level_catalog.json');
+
+    expect(marker).toContain('@export var ability_type');
+    expect(marker).toContain('"ability_type"');
+    expect(level).toContain('EnemySpawnMarker.gd');
+    expect(level).toContain('DoorMarker.gd');
+    expect(level).toContain('GoalMarker.gd');
+    expect(level).toContain('ability_type');
+    expect(catalog).toContain('"combat_room"');
+  });
+
+  it('extends GameSession with capture, swallow, ability, and combat traces', () => {
+    const source = readGodotFile('scripts/session/GameSession.gd');
+
+    expect(source).toContain('SimpleEnemy');
+    expect(source).toContain('spawn_enemies');
+    expect(source).toContain('check_combat_actions');
+    expect(source).toContain('captured_enemy');
+    expect(source).toContain('enemy.captured');
+    expect(source).toContain('enemy.released');
+    expect(source).toContain('enemy.swallowed');
+    expect(source).toContain('ability.acquired');
+    expect(source).toContain('ability.used');
+  });
+
+  it('adds combat replays and docs', () => {
+    const replayPath = join(godotRoot, 'tests', 'replays', 'combat_capture_swallow_goal.json');
+    const flyingReplayPath = join(godotRoot, 'tests', 'replays', 'flying_enemy_release_swallow_goal.json');
+    const docsPath = join(repoRoot, 'docs', 'godot-v2', 'combat-slice.md');
+    const replay = JSON.parse(readFileSync(replayPath, 'utf8'));
+    const flyingReplay = JSON.parse(readFileSync(flyingReplayPath, 'utf8'));
+
+    expect(replay.start_level_id).toBe('combat_room');
+    expect(replay.frames.some((frame: { actions?: Record<string, boolean> }) => frame.actions?.inhale)).toBe(true);
+    expect(replay.frames.some((frame: { actions?: Record<string, boolean> }) => frame.actions?.swallow)).toBe(true);
+    expect(replay.frames.some((frame: { actions?: Record<string, boolean> }) => frame.actions?.use_ability)).toBe(true);
+    expect(flyingReplay.start_level_id).toBe('flying_combat_room');
+    expect(flyingReplay.frames.some((frame: { actions?: Record<string, boolean> }) => frame.actions?.inhale === false)).toBe(true);
+    expect(flyingReplay.frames.some((frame: { actions?: Record<string, boolean> }) => frame.actions?.swallow)).toBe(true);
+    expect(existsSync(docsPath)).toBe(true);
+
+    const docs = readFileSync(docsPath, 'utf8');
+    expect(docs).toContain('Combat Slice');
+    expect(docs).toContain('enemy.captured');
+    expect(docs).toContain('enemy.released');
+    expect(docs).toContain('enemy.swallowed');
+    expect(docs).toContain('ability.acquired');
+    expect(docs).toContain('combat_capture_swallow_goal.json');
+    expect(docs).toContain('flying_enemy_release_swallow_goal.json');
+  });
+});

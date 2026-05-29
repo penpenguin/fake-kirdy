@@ -1,0 +1,46 @@
+[gd_scene load_steps=2 format=3 uid="uid://hudoverlay01"]
+
+[ext_resource type="Script" path="res://scripts/ui/HudOverlay.gd" id="1_hud"]
+
+[node name="HudOverlay" type="Control"]
+offset_left = 640.0
+offset_top = 16.0
+offset_right = 944.0
+offset_bottom = 136.0
+mouse_filter = 2
+script = ExtResource("1_hud")
+
+[node name="LevelLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 288.0
+offset_bottom = 20.0
+text = "Level"
+
+[node name="HpLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 22.0
+offset_right = 288.0
+offset_bottom = 42.0
+text = "HP"
+
+[node name="AbilityLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 44.0
+offset_right = 288.0
+offset_bottom = 64.0
+text = "Ability"
+
+[node name="ItemsLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 66.0
+offset_right = 288.0
+offset_bottom = 86.0
+text = "Items"
+
+[node name="OutcomeLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 88.0
+offset_right = 288.0
+offset_bottom = 108.0
+text = "Run"

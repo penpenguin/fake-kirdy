@@ -1,0 +1,55 @@
+[gd_scene load_steps=8 format=3 uid="uid://icereliquarylevel01"]
+
+[ext_resource type="Script" path="res://scripts/level/markers/PlayerSpawn.gd" id="1_spawn"]
+[ext_resource type="Script" path="res://scripts/level/markers/DoorMarker.gd" id="2_door"]
+[ext_resource type="Script" path="res://scripts/level/markers/EnemySpawnMarker.gd" id="3_enemy"]
+[ext_resource type="Script" path="res://scripts/level/markers/CollectibleMarker.gd" id="4_collectible"]
+[ext_resource type="Script" path="res://scripts/level/markers/CameraBoundsMarker.gd" id="5_camera_bounds"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
+size = Vector2(760, 32)
+
+[node name="IceReliquary" type="Node2D"]
+
+[node name="PlayerSpawn" type="Node2D" parent="."]
+position = Vector2(96, 368)
+script = ExtResource("1_spawn")
+spawn_id = "default"
+
+[node name="IceKeystone" type="Node2D" parent="."]
+position = Vector2(220, 368)
+script = ExtResource("4_collectible")
+collectible_id = "ice-keystone"
+item_id = "ice-keystone"
+trigger_radius = 48.0
+
+[node name="EnemySpawnMarker" type="Node2D" parent="."]
+position = Vector2(360, 400)
+script = ExtResource("3_enemy")
+spawn_id = "ice_reliquary_guard"
+enemy_type = "simple_ground"
+ability_type = "frost"
+contact_damage = 1
+
+[node name="DoorToIceArea" type="Node2D" parent="."]
+position = Vector2(620, 368)
+script = ExtResource("2_door")
+door_id = "ice_reliquary_to_ice_area"
+target_level_id = "ice_area"
+target_spawn_id = "default"
+trigger_radius = 48.0
+
+[node name="CameraBoundsMarker" type="Node2D" parent="."]
+position = Vector2(380, 270)
+script = ExtResource("5_camera_bounds")
+size = Vector2(840, 540)
+
+[node name="Floor" type="StaticBody2D" parent="."]
+position = Vector2(380, 432)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]
+shape = SubResource("RectangleShape2D_floor")
+
+[node name="FloorVisual" type="Polygon2D" parent="Floor"]
+color = Color(0.20, 0.38, 0.48, 1)
+polygon = PackedVector2Array(-380, -16, 380, -16, 380, 16, -380, 16)

@@ -1,0 +1,253 @@
+{
+  "version": 1,
+  "levels": [
+    {
+      "id": "central_hub",
+      "scene_path": "res://levels/central_hub.tscn",
+      "tags": [
+        "hub",
+        "representative",
+        "door_graph"
+      ],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/central-hub.ts"
+    },
+    {
+      "id": "ice_area",
+      "scene_path": "res://levels/ice_area.tscn",
+      "tags": [
+        "ice",
+        "representative",
+        "phaser_branch"
+      ],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/ice-area.ts"
+    },
+    {
+      "id": "mirror_corridor",
+      "scene_path": "res://levels/mirror_corridor.tscn",
+      "tags": [
+        "ruins",
+        "representative",
+        "phaser_branch"
+      ],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/mirror-corridor.ts"
+    },
+    {
+      "id": "fire_area",
+      "scene_path": "res://levels/fire_area.tscn",
+      "tags": [
+        "fire",
+        "representative",
+        "phaser_branch"
+      ],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/fire-area.ts"
+    },
+    {
+      "id": "forest_area",
+      "scene_path": "res://levels/forest_area.tscn",
+      "tags": [
+        "forest",
+        "representative",
+        "phaser_branch"
+      ],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/forest-area.ts"
+    },
+    {
+      "id": "cave_area",
+      "scene_path": "res://levels/cave_area.tscn",
+      "tags": [
+        "ruins",
+        "representative",
+        "phaser_branch"
+      ],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/cave-area.ts"
+    },
+    {
+      "id": "goal_sanctum",
+      "scene_path": "res://levels/goal_sanctum.tscn",
+      "tags": [
+        "goal",
+        "ruins",
+        "representative",
+        "phaser_branch"
+      ],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/goal-sanctum.ts"
+    },
+    {
+      "id": "sky_sanctum",
+      "scene_path": "res://levels/sky_sanctum.tscn",
+      "tags": [
+        "sky",
+        "representative",
+        "phaser_branch"
+      ],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/sky-sanctum.ts"
+    },
+    {
+      "id": "starlit_keep",
+      "scene_path": "res://levels/starlit_keep.tscn",
+      "tags": [
+        "sky",
+        "representative",
+        "phaser_branch"
+      ],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/starlit-keep.ts"
+    },
+    {
+      "id": "aurora_spire",
+      "scene_path": "res://levels/aurora_spire.tscn",
+      "tags": [
+        "sky",
+        "representative",
+        "phaser_branch"
+      ],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/aurora-spire.ts"
+    },
+    {
+      "id": "labyrinth_001",
+      "scene_path": "res://levels/labyrinth_001.tscn",
+      "tags": [
+        "forest",
+        "procedural",
+        "representative",
+        "phaser_branch"
+      ],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/procedural.ts"
+    },
+    {
+      "id": "forest_reliquary",
+      "scene_path": "res://levels/forest_reliquary.tscn",
+      "tags": [
+        "forest",
+        "reliquary",
+        "collectible",
+        "representative",
+        "phaser_branch"
+      ],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/forest-reliquary.ts"
+    },
+    {
+      "id": "ice_reliquary",
+      "scene_path": "res://levels/ice_reliquary.tscn",
+      "tags": [
+        "ice",
+        "reliquary",
+        "collectible",
+        "representative",
+        "phaser_branch"
+      ],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/ice-reliquary.ts"
+    },
+    {
+      "id": "fire_reliquary",
+      "scene_path": "res://levels/fire_reliquary.tscn",
+      "tags": [
+        "fire",
+        "reliquary",
+        "collectible",
+        "representative",
+        "phaser_branch"
+      ],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/fire-reliquary.ts"
+    },
+    {
+      "id": "ruins_reliquary",
+      "scene_path": "res://levels/ruins_reliquary.tscn",
+      "tags": [
+        "ruins",
+        "reliquary",
+        "collectible",
+        "representative",
+        "phaser_branch"
+      ],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/ruins-reliquary.ts"
+    },
+    {
+      "id": "controller_lab",
+      "scene_path": "res://levels/controller_lab.tscn",
+      "tags": [
+        "controller_lab",
+        "prototype"
+      ],
+      "phaser_source": ""
+    },
+    {
+      "id": "flat_room",
+      "scene_path": "res://levels/flat_room.tscn",
+      "tags": [
+        "goal",
+        "test_room"
+      ],
+      "phaser_source": ""
+    },
+    {
+      "id": "jump_room",
+      "scene_path": "res://levels/jump_room.tscn",
+      "tags": [
+        "platforming",
+        "heal",
+        "test_room"
+      ],
+      "phaser_source": ""
+    },
+    {
+      "id": "door_room",
+      "scene_path": "res://levels/door_room.tscn",
+      "tags": [
+        "door_transition",
+        "test_room"
+      ],
+      "phaser_source": ""
+    },
+    {
+      "id": "combat_room",
+      "scene_path": "res://levels/combat_room.tscn",
+      "tags": [
+        "combat",
+        "ability",
+        "representative"
+      ],
+      "phaser_source": "docs/design.md"
+    },
+    {
+      "id": "flying_combat_room",
+      "scene_path": "res://levels/flying_combat_room.tscn",
+      "tags": [
+        "combat",
+        "ability",
+        "flying_enemy",
+        "representative"
+      ],
+      "phaser_source": "docs/design.md"
+    },
+    {
+      "id": "danger_room",
+      "scene_path": "res://levels/danger_room.tscn",
+      "tags": [
+        "damage",
+        "game_over",
+        "test_room"
+      ],
+      "phaser_source": "legacy/phaser-reference/src/game/scenes/index.ts"
+    },
+    {
+      "id": "revive_room",
+      "scene_path": "res://levels/revive_room.tscn",
+      "tags": [
+        "damage",
+        "revive",
+        "test_room"
+      ],
+      "phaser_source": "docs/design.md"
+    },
+    {
+      "id": "heal_room",
+      "scene_path": "res://levels/heal_room.tscn",
+      "tags": [
+        "heal",
+        "representative",
+        "goal"
+      ],
+      "phaser_source": "docs/design.md"
+    }
+  ]
+}

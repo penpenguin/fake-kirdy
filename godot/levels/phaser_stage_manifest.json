@@ -1,0 +1,5608 @@
+{
+  "version": 1,
+  "generated_from": "legacy/phaser-reference/src/game/world/stages",
+  "stages": [
+    {
+      "id": "aurora-spire",
+      "name": "Aurora Spire",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/aurora-spire.ts",
+      "layout": {
+        "rows": 13,
+        "columns": 24,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "sky-sanctum"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 8,
+        "difficulty": 4
+      }
+    },
+    {
+      "id": "cave-area",
+      "name": "Cave Area",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/cave-area.ts",
+      "layout": {
+        "rows": 7,
+        "columns": 20,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "northeast": "central-hub"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 4,
+        "difficulty": 2
+      },
+      "dynamic_neighbors": {
+        "north": "getRuinsExpanseEntryId()"
+      }
+    },
+    {
+      "id": "central-hub",
+      "name": "Central Hub",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/central-hub.ts",
+      "layout": {
+        "rows": 10,
+        "columns": 20,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "northwest": "ice-area",
+        "north": "mirror-corridor",
+        "northeast": "fire-area",
+        "southeast": "forest-area",
+        "southwest": "cave-area"
+      },
+      "metadata": {
+        "cluster": "hub",
+        "index": 0,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 3,
+          "row": 2,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 7,
+          "reward": "max-health"
+        }
+      ]
+    },
+    {
+      "id": "fire-area",
+      "name": "Fire Area",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/fire-area.ts",
+      "layout": {
+        "rows": 7,
+        "columns": 24,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "southwest": "central-hub"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 5,
+        "difficulty": 3
+      },
+      "dynamic_neighbors": {
+        "south": "getFireExpanseEntryId()"
+      }
+    },
+    {
+      "id": "fire-reliquary",
+      "name": "Fire Reliquary",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/fire-reliquary.ts",
+      "layout": {
+        "rows": 7,
+        "columns": 24,
+        "tile_size": 32
+      },
+      "neighbors": {},
+      "metadata": {
+        "cluster": "fire",
+        "index": 240,
+        "difficulty": 4
+      },
+      "collectibles": [
+        {
+          "id": "fire-keystone",
+          "itemId": "fire-keystone",
+          "column": 16,
+          "row": 3
+        }
+      ],
+      "dynamic_neighbors": {
+        "west": "getFireExpanseExitId()"
+      }
+    },
+    {
+      "id": "forest-area",
+      "name": "Forest Area",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/forest-area.ts",
+      "layout": {
+        "rows": 7,
+        "columns": 24,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "northwest": "central-hub",
+        "east": "labyrinth-001"
+      },
+      "metadata": {
+        "cluster": "forest",
+        "index": 3,
+        "difficulty": 1
+      }
+    },
+    {
+      "id": "forest-reliquary",
+      "name": "Forest Reliquary",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/forest-reliquary.ts",
+      "layout": {
+        "rows": 7,
+        "columns": 24,
+        "tile_size": 32
+      },
+      "neighbors": {},
+      "metadata": {
+        "cluster": "forest",
+        "index": 205,
+        "difficulty": 3
+      },
+      "collectibles": [
+        {
+          "id": "forest-keystone",
+          "itemId": "forest-keystone",
+          "column": 18,
+          "row": 3
+        }
+      ],
+      "dynamic_neighbors": {
+        "west": "getForestExpanseExitId()"
+      }
+    },
+    {
+      "id": "goal-sanctum",
+      "name": "Goal Sanctum",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/goal-sanctum.ts",
+      "layout": {
+        "rows": 7,
+        "columns": 20,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "south": "mirror-corridor",
+        "north": "sky-sanctum"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 6,
+        "difficulty": 4
+      }
+    },
+    {
+      "id": "ice-area",
+      "name": "Ice Area",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/ice-area.ts",
+      "layout": {
+        "rows": 7,
+        "columns": 20,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "southeast": "central-hub"
+      },
+      "metadata": {
+        "cluster": "ice",
+        "index": 2,
+        "difficulty": 2
+      },
+      "dynamic_neighbors": {
+        "east": "getIceExpanseEntryId()"
+      }
+    },
+    {
+      "id": "ice-reliquary",
+      "name": "Ice Reliquary",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/ice-reliquary.ts",
+      "layout": {
+        "rows": 7,
+        "columns": 20,
+        "tile_size": 32
+      },
+      "neighbors": {},
+      "metadata": {
+        "cluster": "ice",
+        "index": 210,
+        "difficulty": 4
+      },
+      "collectibles": [
+        {
+          "id": "ice-keystone",
+          "itemId": "ice-keystone",
+          "column": 14,
+          "row": 3
+        }
+      ],
+      "dynamic_neighbors": {
+        "west": "getIceExpanseExitId()"
+      }
+    },
+    {
+      "id": "labyrinth-001",
+      "name": "Forest Expanse 1",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "east": "labyrinth-002",
+        "west": "forest-area"
+      },
+      "metadata": {
+        "cluster": "forest",
+        "index": 10,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-002",
+      "name": "Forest Expanse 2",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-001",
+        "east": "labyrinth-003"
+      },
+      "metadata": {
+        "cluster": "forest",
+        "index": 11,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-003",
+      "name": "Forest Expanse 3",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-002",
+        "east": "labyrinth-004"
+      },
+      "metadata": {
+        "cluster": "forest",
+        "index": 12,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-004",
+      "name": "Forest Expanse 4",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-003",
+        "east": "labyrinth-005"
+      },
+      "metadata": {
+        "cluster": "forest",
+        "index": 13,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-005",
+      "name": "Forest Expanse 5",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-004",
+        "east": "forest-reliquary"
+      },
+      "metadata": {
+        "cluster": "forest",
+        "index": 14,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-006",
+      "name": "Ice Expanse 6",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "east": "labyrinth-007",
+        "west": "ice-area"
+      },
+      "metadata": {
+        "cluster": "ice",
+        "index": 15,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-007",
+      "name": "Ice Expanse 7",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-006",
+        "east": "labyrinth-008"
+      },
+      "metadata": {
+        "cluster": "ice",
+        "index": 16,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-008",
+      "name": "Ice Expanse 8",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-007",
+        "east": "labyrinth-009"
+      },
+      "metadata": {
+        "cluster": "ice",
+        "index": 17,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-009",
+      "name": "Ice Expanse 9",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-008",
+        "east": "labyrinth-010"
+      },
+      "metadata": {
+        "cluster": "ice",
+        "index": 18,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-010",
+      "name": "Ice Expanse 10",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-009",
+        "east": "ice-reliquary"
+      },
+      "metadata": {
+        "cluster": "ice",
+        "index": 19,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-011",
+      "name": "Fire Expanse 11",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "east": "labyrinth-012",
+        "south": "fire-area"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 20,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-012",
+      "name": "Fire Expanse 12",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-011",
+        "east": "labyrinth-013"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 21,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-013",
+      "name": "Fire Expanse 13",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-012",
+        "east": "labyrinth-014"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 22,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-014",
+      "name": "Fire Expanse 14",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-013",
+        "east": "labyrinth-015"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 23,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-015",
+      "name": "Fire Expanse 15",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-014",
+        "east": "labyrinth-016"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 24,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-016",
+      "name": "Fire Expanse 16",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-015",
+        "east": "labyrinth-017"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 25,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-017",
+      "name": "Fire Expanse 17",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-016",
+        "east": "labyrinth-018"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 26,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-018",
+      "name": "Fire Expanse 18",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-017",
+        "east": "labyrinth-019"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 27,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-019",
+      "name": "Fire Expanse 19",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-018",
+        "east": "labyrinth-020"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 28,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-020",
+      "name": "Fire Expanse 20",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-019",
+        "east": "labyrinth-021"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 29,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-021",
+      "name": "Fire Expanse 21",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-020",
+        "east": "labyrinth-022"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 30,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-022",
+      "name": "Fire Expanse 22",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-021",
+        "east": "labyrinth-023"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 31,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-023",
+      "name": "Fire Expanse 23",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-022",
+        "east": "labyrinth-024"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 32,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-024",
+      "name": "Fire Expanse 24",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-023",
+        "east": "labyrinth-025"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 33,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-025",
+      "name": "Fire Expanse 25",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-024",
+        "east": "labyrinth-026"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 34,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-026",
+      "name": "Fire Expanse 26",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-025",
+        "east": "labyrinth-027"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 35,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-027",
+      "name": "Fire Expanse 27",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-026",
+        "east": "labyrinth-028"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 36,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-028",
+      "name": "Fire Expanse 28",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-027",
+        "east": "labyrinth-029"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 37,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-029",
+      "name": "Fire Expanse 29",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-028",
+        "east": "labyrinth-030"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 38,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-030",
+      "name": "Fire Expanse 30",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-029",
+        "east": "labyrinth-031"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 39,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-031",
+      "name": "Fire Expanse 31",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-030",
+        "east": "labyrinth-032"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 40,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-032",
+      "name": "Fire Expanse 32",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-031",
+        "east": "fire-reliquary"
+      },
+      "metadata": {
+        "cluster": "fire",
+        "index": 41,
+        "difficulty": 3
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-033",
+      "name": "Ruins Expanse 33",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "east": "labyrinth-034",
+        "south": "cave-area"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 42,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-034",
+      "name": "Ruins Expanse 34",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-033",
+        "east": "labyrinth-035"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 43,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-035",
+      "name": "Ruins Expanse 35",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-034",
+        "east": "labyrinth-036"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 44,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-036",
+      "name": "Ruins Expanse 36",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-035",
+        "east": "labyrinth-037"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 45,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-037",
+      "name": "Ruins Expanse 37",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-036",
+        "east": "labyrinth-038"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 46,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-038",
+      "name": "Ruins Expanse 38",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-037",
+        "east": "labyrinth-039"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 47,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-039",
+      "name": "Ruins Expanse 39",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-038",
+        "east": "labyrinth-040"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 48,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-040",
+      "name": "Ruins Expanse 40",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-039",
+        "east": "labyrinth-041"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 49,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-041",
+      "name": "Ruins Expanse 41",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-040",
+        "east": "labyrinth-042"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 50,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-042",
+      "name": "Ruins Expanse 42",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-041",
+        "east": "labyrinth-043"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 51,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-043",
+      "name": "Ruins Expanse 43",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-042",
+        "east": "labyrinth-044"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 52,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-044",
+      "name": "Ruins Expanse 44",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-043",
+        "east": "labyrinth-045"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 53,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-045",
+      "name": "Ruins Expanse 45",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-044",
+        "east": "labyrinth-046"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 54,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-046",
+      "name": "Ruins Expanse 46",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-045",
+        "east": "labyrinth-047"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 55,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-047",
+      "name": "Ruins Expanse 47",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-046",
+        "east": "labyrinth-048"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 56,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-048",
+      "name": "Ruins Expanse 48",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-047",
+        "east": "labyrinth-049"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 57,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-049",
+      "name": "Ruins Expanse 49",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-048",
+        "east": "labyrinth-050"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 58,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-050",
+      "name": "Ruins Expanse 50",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-049",
+        "east": "ruins-reliquary"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 59,
+        "difficulty": 2
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-051",
+      "name": "Sky Expanse 51",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "east": "labyrinth-052",
+        "south": "sky-sanctum"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 60,
+        "difficulty": 4
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-052",
+      "name": "Sky Expanse 52",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-051",
+        "east": "labyrinth-053"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 61,
+        "difficulty": 4
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-053",
+      "name": "Sky Expanse 53",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-052",
+        "east": "labyrinth-054"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 62,
+        "difficulty": 4
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-054",
+      "name": "Sky Expanse 54",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-053",
+        "east": "labyrinth-055"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 63,
+        "difficulty": 4
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-055",
+      "name": "Sky Expanse 55",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-054",
+        "east": "labyrinth-056"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 64,
+        "difficulty": 4
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-056",
+      "name": "Sky Expanse 56",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-055",
+        "east": "labyrinth-057"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 65,
+        "difficulty": 4
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-057",
+      "name": "Sky Expanse 57",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-056",
+        "east": "labyrinth-058"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 66,
+        "difficulty": 4
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-058",
+      "name": "Sky Expanse 58",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-057",
+        "east": "labyrinth-059"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 67,
+        "difficulty": 4
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-059",
+      "name": "Sky Expanse 59",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-058",
+        "east": "labyrinth-060"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 68,
+        "difficulty": 4
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-060",
+      "name": "Sky Expanse 60",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-059",
+        "east": "labyrinth-061"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 69,
+        "difficulty": 4
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-061",
+      "name": "Sky Expanse 61",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-060",
+        "east": "labyrinth-062"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 70,
+        "difficulty": 4
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-062",
+      "name": "Sky Expanse 62",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-061",
+        "east": "labyrinth-063"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 71,
+        "difficulty": 4
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-063",
+      "name": "Sky Expanse 63",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-062",
+        "east": "labyrinth-064"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 72,
+        "difficulty": 4
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-064",
+      "name": "Sky Expanse 64",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-063",
+        "east": "labyrinth-065"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 73,
+        "difficulty": 4
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-065",
+      "name": "Sky Expanse 65",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-064",
+        "east": "labyrinth-066"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 74,
+        "difficulty": 4
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-066",
+      "name": "Sky Expanse 66",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-065",
+        "east": "labyrinth-067"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 75,
+        "difficulty": 4
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-067",
+      "name": "Sky Expanse 67",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-066",
+        "east": "labyrinth-068"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 76,
+        "difficulty": 4
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-068",
+      "name": "Sky Expanse 68",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-067",
+        "south": "labyrinth-069"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 77,
+        "difficulty": 4
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-069",
+      "name": "Void Expanse 69",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "east": "labyrinth-070",
+        "north": "labyrinth-068"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 78,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-070",
+      "name": "Void Expanse 70",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-069",
+        "east": "labyrinth-071"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 79,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-071",
+      "name": "Void Expanse 71",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-070",
+        "east": "labyrinth-072"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 80,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-072",
+      "name": "Void Expanse 72",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-071",
+        "east": "labyrinth-073"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 81,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-073",
+      "name": "Void Expanse 73",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-072",
+        "east": "labyrinth-074"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 82,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-074",
+      "name": "Void Expanse 74",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-073",
+        "east": "labyrinth-075"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 83,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-075",
+      "name": "Void Expanse 75",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-074",
+        "east": "labyrinth-076"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 84,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-076",
+      "name": "Void Expanse 76",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-075",
+        "east": "labyrinth-077"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 85,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-077",
+      "name": "Void Expanse 77",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-076",
+        "east": "labyrinth-078"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 86,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-078",
+      "name": "Void Expanse 78",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-077",
+        "east": "labyrinth-079"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 87,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-079",
+      "name": "Void Expanse 79",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-078",
+        "east": "labyrinth-080"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 88,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-080",
+      "name": "Void Expanse 80",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-079",
+        "east": "labyrinth-081"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 89,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-081",
+      "name": "Void Expanse 81",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-080",
+        "east": "labyrinth-082"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 90,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-082",
+      "name": "Void Expanse 82",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-081",
+        "east": "labyrinth-083"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 91,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-083",
+      "name": "Void Expanse 83",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-082",
+        "east": "labyrinth-084"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 92,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-084",
+      "name": "Void Expanse 84",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-083",
+        "east": "labyrinth-085"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 93,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-085",
+      "name": "Void Expanse 85",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-084",
+        "east": "labyrinth-086"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 94,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-086",
+      "name": "Void Expanse 86",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-085",
+        "east": "labyrinth-087"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 95,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-087",
+      "name": "Void Expanse 87",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-086",
+        "east": "labyrinth-088"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 96,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-088",
+      "name": "Void Expanse 88",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-087",
+        "east": "labyrinth-089"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 97,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-089",
+      "name": "Void Expanse 89",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-088",
+        "east": "labyrinth-090"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 98,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-090",
+      "name": "Void Expanse 90",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-089",
+        "east": "labyrinth-091"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 99,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-091",
+      "name": "Void Expanse 91",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-090",
+        "east": "labyrinth-092"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 100,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-092",
+      "name": "Void Expanse 92",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-091",
+        "east": "labyrinth-093"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 101,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-093",
+      "name": "Void Expanse 93",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-092",
+        "east": "labyrinth-094"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 102,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-094",
+      "name": "Void Expanse 94",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-093",
+        "east": "labyrinth-095"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 103,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-095",
+      "name": "Void Expanse 95",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-094",
+        "east": "labyrinth-096"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 104,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-096",
+      "name": "Void Expanse 96",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-095",
+        "east": "labyrinth-097"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 105,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-097",
+      "name": "Void Expanse 97",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-096",
+        "east": "labyrinth-098"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 106,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-098",
+      "name": "Void Expanse 98",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-097",
+        "east": "labyrinth-099"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 107,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-099",
+      "name": "Void Expanse 99",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-098",
+        "east": "labyrinth-100"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 108,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-100",
+      "name": "Void Expanse 100",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-099",
+        "east": "labyrinth-101"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 109,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-101",
+      "name": "Void Expanse 101",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-100",
+        "east": "labyrinth-102"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 110,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-102",
+      "name": "Void Expanse 102",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-101",
+        "east": "labyrinth-103"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 111,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-103",
+      "name": "Void Expanse 103",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-102",
+        "east": "labyrinth-104"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 112,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-104",
+      "name": "Void Expanse 104",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-103",
+        "east": "labyrinth-105"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 113,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-105",
+      "name": "Void Expanse 105",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-104",
+        "east": "labyrinth-106"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 114,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-106",
+      "name": "Void Expanse 106",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-105",
+        "east": "labyrinth-107"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 115,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-107",
+      "name": "Void Expanse 107",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-106",
+        "east": "labyrinth-108"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 116,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-108",
+      "name": "Void Expanse 108",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-107",
+        "east": "labyrinth-109"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 117,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-109",
+      "name": "Void Expanse 109",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-108",
+        "east": "labyrinth-110"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 118,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-110",
+      "name": "Void Expanse 110",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-109",
+        "east": "labyrinth-111"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 119,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-111",
+      "name": "Void Expanse 111",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-110",
+        "east": "labyrinth-112"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 120,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-112",
+      "name": "Void Expanse 112",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-111",
+        "east": "labyrinth-113"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 121,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-113",
+      "name": "Void Expanse 113",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-112",
+        "east": "labyrinth-114"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 122,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-114",
+      "name": "Void Expanse 114",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-113",
+        "east": "labyrinth-115"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 123,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-115",
+      "name": "Void Expanse 115",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-114",
+        "east": "labyrinth-116"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 124,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-116",
+      "name": "Void Expanse 116",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-115",
+        "east": "labyrinth-117"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 125,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-117",
+      "name": "Void Expanse 117",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-116",
+        "east": "labyrinth-118"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 126,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-118",
+      "name": "Void Expanse 118",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-117",
+        "east": "labyrinth-119"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 127,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-119",
+      "name": "Void Expanse 119",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-118",
+        "east": "labyrinth-120"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 128,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-120",
+      "name": "Void Expanse 120",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-119",
+        "east": "labyrinth-121"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 129,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-121",
+      "name": "Void Expanse 121",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-120",
+        "east": "labyrinth-122"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 130,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-122",
+      "name": "Void Expanse 122",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-121",
+        "east": "labyrinth-123"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 131,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-123",
+      "name": "Void Expanse 123",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-122",
+        "east": "labyrinth-124"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 132,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-124",
+      "name": "Void Expanse 124",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-123",
+        "east": "labyrinth-125"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 133,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-125",
+      "name": "Void Expanse 125",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-124",
+        "east": "labyrinth-126"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 134,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-126",
+      "name": "Void Expanse 126",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-125",
+        "east": "labyrinth-127"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 135,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-127",
+      "name": "Void Expanse 127",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-126",
+        "east": "labyrinth-128"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 136,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-128",
+      "name": "Void Expanse 128",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-127",
+        "east": "labyrinth-129"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 137,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-129",
+      "name": "Void Expanse 129",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-128",
+        "east": "labyrinth-130"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 138,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-130",
+      "name": "Void Expanse 130",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-129",
+        "east": "labyrinth-131"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 139,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-131",
+      "name": "Void Expanse 131",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-130",
+        "east": "labyrinth-132"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 140,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "labyrinth-132",
+      "name": "Void Expanse 132",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "layout": {
+        "rows": 12,
+        "columns": 18,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "west": "labyrinth-131"
+      },
+      "metadata": {
+        "cluster": "void",
+        "index": 141,
+        "difficulty": 1
+      },
+      "dead_ends": [
+        {
+          "id": "dead-end-0",
+          "column": 2,
+          "row": 9,
+          "reward": "health"
+        },
+        {
+          "id": "dead-end-1",
+          "column": 15,
+          "row": 2,
+          "reward": "max-health"
+        },
+        {
+          "id": "dead-end-2",
+          "column": 9,
+          "row": 8,
+          "reward": "revive"
+        }
+      ],
+      "procedural_generated": true
+    },
+    {
+      "id": "mirror-corridor",
+      "name": "Mirror Corridor",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/mirror-corridor.ts",
+      "layout": {
+        "rows": 5,
+        "columns": 20,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "south": "central-hub",
+        "north": "goal-sanctum"
+      },
+      "metadata": {
+        "cluster": "ruins",
+        "index": 1,
+        "difficulty": 1
+      }
+    },
+    {
+      "id": "ruins-reliquary",
+      "name": "Ruins Reliquary",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/ruins-reliquary.ts",
+      "layout": {
+        "rows": 7,
+        "columns": 20,
+        "tile_size": 32
+      },
+      "neighbors": {},
+      "metadata": {
+        "cluster": "ruins",
+        "index": 260,
+        "difficulty": 3
+      },
+      "collectibles": [
+        {
+          "id": "cave-keystone",
+          "itemId": "cave-keystone",
+          "column": 10,
+          "row": 3
+        }
+      ],
+      "dynamic_neighbors": {
+        "west": "getRuinsExpanseExitId()"
+      }
+    },
+    {
+      "id": "sky-sanctum",
+      "name": "Sky Sanctum",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/sky-sanctum.ts",
+      "layout": {
+        "rows": 7,
+        "columns": 24,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "south": "goal-sanctum",
+        "east": "aurora-spire",
+        "west": "starlit-keep"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 7,
+        "difficulty": 4
+      },
+      "dynamic_neighbors": {
+        "north": "getSkyExpanseEntryId()"
+      }
+    },
+    {
+      "id": "starlit-keep",
+      "name": "Starlit Keep",
+      "source_path": "legacy/phaser-reference/src/game/world/stages/starlit-keep.ts",
+      "layout": {
+        "rows": 7,
+        "columns": 24,
+        "tile_size": 32
+      },
+      "neighbors": {
+        "east": "sky-sanctum"
+      },
+      "metadata": {
+        "cluster": "sky",
+        "index": 9,
+        "difficulty": 3
+      }
+    }
+  ]
+}

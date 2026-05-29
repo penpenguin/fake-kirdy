@@ -1,0 +1,43 @@
+[gd_scene load_steps=6 format=3 uid="uid://b0q6x3cvk4l1a"]
+
+[ext_resource type="Script" path="res://scripts/player/PlayerController.gd" id="1_controller"]
+[ext_resource type="Script" path="res://scripts/player/PlayerTuning.gd" id="2_tuning"]
+
+[sub_resource type="Resource" id="Resource_player_tuning"]
+script = ExtResource("2_tuning")
+max_speed = 220.0
+ground_accel = 1800.0
+ground_decel = 2400.0
+air_accel = 900.0
+air_decel = 700.0
+jump_velocity = 430.0
+gravity_up = 1250.0
+gravity_down = 1700.0
+jump_cut_multiplier = 0.45
+coyote_time_ms = 90.0
+jump_buffer_ms = 120.0
+hover_gravity_scale = 0.35
+hover_max_fall_speed = 90.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
+size = Vector2(24, 32)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_inhale"]
+radius = 96.0
+
+[node name="Player" type="CharacterBody2D"]
+script = ExtResource("1_controller")
+tuning = SubResource("Resource_player_tuning")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_player")
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.95, 0.35, 0.55, 1)
+polygon = PackedVector2Array(-12, -16, 12, -16, 12, 16, -12, 16)
+
+[node name="InhaleArea" type="Area2D" parent="."]
+position = Vector2(72, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InhaleArea"]
+shape = SubResource("CircleShape2D_inhale")

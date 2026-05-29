@@ -1,0 +1,148 @@
+[gd_scene load_steps=12 format=3 uid="uid://centralhublevel01"]
+
+[ext_resource type="Script" path="res://scripts/level/markers/PlayerSpawn.gd" id="1_spawn"]
+[ext_resource type="Script" path="res://scripts/level/markers/DoorMarker.gd" id="2_door"]
+[ext_resource type="Script" path="res://scripts/level/markers/CameraBoundsMarker.gd" id="3_camera_bounds"]
+[ext_resource type="Script" path="res://scripts/level/LevelTileMap.gd" id="4_tilemap"]
+[ext_resource type="Script" path="res://scripts/level/markers/HealMarker.gd" id="5_heal"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
+size = Vector2(840, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_left_platform"]
+size = Vector2(120, 24)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_right_platform"]
+size = Vector2(120, 24)
+
+[node name="CentralHub" type="Node2D"]
+
+[node name="TileMap" type="TileMap" parent="."]
+script = ExtResource("4_tilemap")
+metadata_tile_size = Vector2i(32, 32)
+columns = 29
+rows = 17
+collision_source = "static_body"
+
+[node name="PlayerSpawn" type="Node2D" parent="."]
+position = Vector2(96, 368)
+script = ExtResource("1_spawn")
+spawn_id = "default"
+
+[node name="PlayerSpawnDeadEndMaxHealth" type="Node2D" parent="."]
+position = Vector2(496, 240)
+script = ExtResource("1_spawn")
+spawn_id = "dead_end_max_health"
+
+[node name="DoorToHealRoom" type="Node2D" parent="."]
+position = Vector2(220, 368)
+script = ExtResource("2_door")
+door_id = "hub_to_heal_room"
+target_level_id = "heal_room"
+target_spawn_id = "default"
+trigger_radius = 48.0
+
+[node name="DoorToCombatRoom" type="Node2D" parent="."]
+position = Vector2(420, 368)
+script = ExtResource("2_door")
+door_id = "hub_to_combat_room"
+target_level_id = "combat_room"
+target_spawn_id = "default"
+trigger_radius = 48.0
+
+[node name="DoorToJumpRoom" type="Node2D" parent="."]
+position = Vector2(640, 368)
+script = ExtResource("2_door")
+door_id = "hub_to_jump_room"
+target_level_id = "jump_room"
+target_spawn_id = "default"
+trigger_radius = 48.0
+
+[node name="DoorToIceArea" type="Node2D" parent="."]
+position = Vector2(720, 300)
+script = ExtResource("2_door")
+door_id = "hub_to_ice_area"
+target_level_id = "ice_area"
+target_spawn_id = "default"
+trigger_radius = 40.0
+
+[node name="DoorToMirrorCorridor" type="Node2D" parent="."]
+position = Vector2(590, 300)
+script = ExtResource("2_door")
+door_id = "hub_to_mirror_corridor"
+target_level_id = "mirror_corridor"
+target_spawn_id = "default"
+trigger_radius = 40.0
+
+[node name="DoorToFireArea" type="Node2D" parent="."]
+position = Vector2(460, 330)
+script = ExtResource("2_door")
+door_id = "hub_to_fire_area"
+target_level_id = "fire_area"
+target_spawn_id = "default"
+trigger_radius = 40.0
+
+[node name="DoorToForestArea" type="Node2D" parent="."]
+position = Vector2(250, 330)
+script = ExtResource("2_door")
+door_id = "hub_to_forest_area"
+target_level_id = "forest_area"
+target_spawn_id = "default"
+trigger_radius = 40.0
+
+[node name="DoorToCaveArea" type="Node2D" parent="."]
+position = Vector2(660, 300)
+script = ExtResource("2_door")
+door_id = "hub_to_cave_area"
+target_level_id = "cave_area"
+target_spawn_id = "default"
+trigger_radius = 40.0
+
+[node name="CameraBoundsMarker" type="Node2D" parent="."]
+position = Vector2(420, 270)
+script = ExtResource("3_camera_bounds")
+size = Vector2(920, 540)
+
+[node name="DeadEndHealthMarker" type="Node2D" parent="."]
+position = Vector2(112, 80)
+script = ExtResource("5_heal")
+heal_id = "central_hub_dead_end_health"
+amount = 1
+reward_type = "health"
+
+[node name="DeadEndMaxHealthMarker" type="Node2D" parent="."]
+position = Vector2(496, 240)
+script = ExtResource("5_heal")
+heal_id = "central_hub_dead_end_max_health"
+amount = 1
+reward_type = "max-health"
+
+[node name="Floor" type="StaticBody2D" parent="."]
+position = Vector2(420, 432)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]
+shape = SubResource("RectangleShape2D_floor")
+
+[node name="FloorVisual" type="Polygon2D" parent="Floor"]
+color = Color(0.24, 0.27, 0.30, 1)
+polygon = PackedVector2Array(-420, -16, 420, -16, 420, 16, -420, 16)
+
+[node name="LeftPlatform" type="StaticBody2D" parent="."]
+position = Vector2(250, 330)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftPlatform"]
+shape = SubResource("RectangleShape2D_left_platform")
+
+[node name="PlatformVisual" type="Polygon2D" parent="LeftPlatform"]
+color = Color(0.30, 0.36, 0.42, 1)
+polygon = PackedVector2Array(-60, -12, 60, -12, 60, 12, -60, 12)
+
+[node name="RightPlatform" type="StaticBody2D" parent="."]
+position = Vector2(590, 300)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightPlatform"]
+shape = SubResource("RectangleShape2D_right_platform")
+
+[node name="PlatformVisual" type="Polygon2D" parent="RightPlatform"]
+color = Color(0.30, 0.36, 0.42, 1)
+polygon = PackedVector2Array(-60, -12, 60, -12, 60, 12, -60, 12)

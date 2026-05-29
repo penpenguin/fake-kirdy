@@ -1,0 +1,72 @@
+[gd_scene load_steps=9 format=3 uid="uid://jumproomlevel01"]
+
+[ext_resource type="Script" path="res://scripts/level/markers/PlayerSpawn.gd" id="1_spawn"]
+[ext_resource type="Script" path="res://scripts/level/markers/GoalMarker.gd" id="2_goal"]
+[ext_resource type="Script" path="res://scripts/level/markers/CameraBoundsMarker.gd" id="3_camera_bounds"]
+[ext_resource type="Script" path="res://scripts/level/markers/HealMarker.gd" id="4_heal"]
+[ext_resource type="Script" path="res://scripts/level/markers/EnemySpawnMarker.gd" id="5_enemy"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
+size = Vector2(760, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform"]
+size = Vector2(160, 24)
+
+[node name="JumpRoom" type="Node2D"]
+
+[node name="PlayerSpawn" type="Node2D" parent="."]
+position = Vector2(80, 368)
+script = ExtResource("1_spawn")
+spawn_id = "default"
+
+[node name="GoalMarker" type="Node2D" parent="."]
+position = Vector2(690, 248)
+script = ExtResource("2_goal")
+goal_id = "jump_goal"
+
+[node name="CameraBoundsMarker" type="Node2D" parent="."]
+position = Vector2(400, 270)
+script = ExtResource("3_camera_bounds")
+size = Vector2(860, 540)
+
+[node name="HealMarker" type="Node2D" parent="."]
+position = Vector2(430, 316)
+script = ExtResource("4_heal")
+heal_id = "jump_room_heal"
+amount = 1
+
+[node name="EnemySpawnMarker" type="Node2D" parent="."]
+position = Vector2(560, 400)
+script = ExtResource("5_enemy")
+spawn_id = "jump_room_dummy"
+enemy_type = "test_dummy"
+
+[node name="Floor" type="StaticBody2D" parent="."]
+position = Vector2(400, 432)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]
+shape = SubResource("RectangleShape2D_floor")
+
+[node name="FloorVisual" type="Polygon2D" parent="Floor"]
+color = Color(0.24, 0.27, 0.30, 1)
+polygon = PackedVector2Array(-380, -16, 380, -16, 380, 16, -380, 16)
+
+[node name="MidPlatform" type="StaticBody2D" parent="."]
+position = Vector2(360, 344)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="MidPlatform"]
+shape = SubResource("RectangleShape2D_platform")
+
+[node name="PlatformVisual" type="Polygon2D" parent="MidPlatform"]
+color = Color(0.30, 0.36, 0.42, 1)
+polygon = PackedVector2Array(-80, -12, 80, -12, 80, 12, -80, 12)
+
+[node name="HighPlatform" type="StaticBody2D" parent="."]
+position = Vector2(680, 280)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HighPlatform"]
+shape = SubResource("RectangleShape2D_platform")
+
+[node name="PlatformVisual" type="Polygon2D" parent="HighPlatform"]
+color = Color(0.34, 0.40, 0.46, 1)
+polygon = PackedVector2Array(-80, -12, 80, -12, 80, 12, -80, 12)

@@ -1,0 +1,32 @@
+[gd_scene load_steps=2 format=3 uid="uid://settingsoverlay01"]
+
+[ext_resource type="Script" path="res://scripts/ui/SettingsOverlay.gd" id="1_settings"]
+
+[node name="SettingsOverlay" type="Control"]
+offset_left = 16.0
+offset_top = 424.0
+offset_right = 320.0
+offset_bottom = 520.0
+mouse_filter = 2
+script = ExtResource("1_settings")
+
+[node name="VolumeLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 288.0
+offset_bottom = 20.0
+text = "Volume"
+
+[node name="ControlsLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 24.0
+offset_right = 288.0
+offset_bottom = 44.0
+text = "Controls"
+
+[node name="DifficultyLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 48.0
+offset_right = 288.0
+offset_bottom = 68.0
+text = "Difficulty"

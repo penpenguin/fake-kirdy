@@ -1,0 +1,271 @@
+{
+  "version": 1,
+  "levels": [
+    {
+      "id": "central_hub",
+      "scene_path": "res://levels/central_hub.tscn",
+      "tags": ["hub", "representative", "door_graph"],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/central-hub.ts",
+      "phaser_stage_id": "central-hub",
+      "expected_neighbors": [
+        "ice-area",
+        "mirror-corridor",
+        "fire-area",
+        "forest-area",
+        "cave-area"
+      ],
+      "expected_dead_end_rewards": ["health", "max-health"],
+      "migration_status": "representative"
+    },
+    {
+      "id": "ice_area",
+      "scene_path": "res://levels/ice_area.tscn",
+      "tags": ["ice", "representative", "phaser_branch"],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/ice-area.ts",
+      "phaser_stage_id": "ice-area",
+      "expected_neighbors": ["central-hub"],
+      "expected_metadata": {
+        "cluster": "ice",
+        "difficulty": 2
+      },
+      "migration_status": "representative"
+    },
+    {
+      "id": "mirror_corridor",
+      "scene_path": "res://levels/mirror_corridor.tscn",
+      "tags": ["ruins", "representative", "phaser_branch"],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/mirror-corridor.ts",
+      "phaser_stage_id": "mirror-corridor",
+      "expected_neighbors": ["central-hub", "goal-sanctum"],
+      "expected_metadata": {
+        "cluster": "ruins",
+        "difficulty": 1
+      },
+      "migration_status": "representative"
+    },
+    {
+      "id": "fire_area",
+      "scene_path": "res://levels/fire_area.tscn",
+      "tags": ["fire", "representative", "phaser_branch"],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/fire-area.ts",
+      "phaser_stage_id": "fire-area",
+      "expected_neighbors": ["central-hub"],
+      "expected_metadata": {
+        "cluster": "fire",
+        "difficulty": 3
+      },
+      "migration_status": "representative"
+    },
+    {
+      "id": "forest_area",
+      "scene_path": "res://levels/forest_area.tscn",
+      "tags": ["forest", "representative", "phaser_branch"],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/forest-area.ts",
+      "phaser_stage_id": "forest-area",
+      "expected_neighbors": ["central-hub", "labyrinth-001"],
+      "expected_metadata": {
+        "cluster": "forest",
+        "difficulty": 1
+      },
+      "migration_status": "representative"
+    },
+    {
+      "id": "cave_area",
+      "scene_path": "res://levels/cave_area.tscn",
+      "tags": ["ruins", "representative", "phaser_branch"],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/cave-area.ts",
+      "phaser_stage_id": "cave-area",
+      "expected_neighbors": ["central-hub"],
+      "expected_metadata": {
+        "cluster": "ruins",
+        "difficulty": 2
+      },
+      "migration_status": "representative"
+    },
+    {
+      "id": "goal_sanctum",
+      "scene_path": "res://levels/goal_sanctum.tscn",
+      "tags": ["goal", "ruins", "representative", "phaser_branch"],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/goal-sanctum.ts",
+      "phaser_stage_id": "goal-sanctum",
+      "expected_neighbors": ["mirror-corridor", "sky-sanctum"],
+      "expected_metadata": {
+        "cluster": "ruins",
+        "difficulty": 4
+      },
+      "migration_status": "representative"
+    },
+    {
+      "id": "sky_sanctum",
+      "scene_path": "res://levels/sky_sanctum.tscn",
+      "tags": ["sky", "representative", "phaser_branch"],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/sky-sanctum.ts",
+      "phaser_stage_id": "sky-sanctum",
+      "expected_neighbors": ["goal-sanctum", "aurora-spire", "starlit-keep"],
+      "expected_metadata": {
+        "cluster": "sky",
+        "difficulty": 4
+      },
+      "migration_status": "representative"
+    },
+    {
+      "id": "starlit_keep",
+      "scene_path": "res://levels/starlit_keep.tscn",
+      "tags": ["sky", "representative", "phaser_branch"],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/starlit-keep.ts",
+      "phaser_stage_id": "starlit-keep",
+      "expected_neighbors": ["sky-sanctum"],
+      "expected_metadata": {
+        "cluster": "sky",
+        "difficulty": 3
+      },
+      "migration_status": "representative"
+    },
+    {
+      "id": "aurora_spire",
+      "scene_path": "res://levels/aurora_spire.tscn",
+      "tags": ["sky", "representative", "phaser_branch"],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/aurora-spire.ts",
+      "phaser_stage_id": "aurora-spire",
+      "expected_neighbors": ["sky-sanctum"],
+      "expected_metadata": {
+        "cluster": "sky",
+        "difficulty": 4
+      },
+      "migration_status": "representative"
+    },
+    {
+      "id": "labyrinth_001",
+      "scene_path": "res://levels/labyrinth_001.tscn",
+      "tags": ["forest", "procedural", "representative", "phaser_branch"],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/procedural.ts",
+      "phaser_stage_id": "labyrinth-001",
+      "expected_neighbors": ["forest-area"],
+      "expected_metadata": {
+        "cluster": "forest",
+        "difficulty": 2
+      },
+      "expected_dead_end_rewards": ["health"],
+      "migration_status": "representative"
+    },
+    {
+      "id": "forest_reliquary",
+      "scene_path": "res://levels/forest_reliquary.tscn",
+      "tags": ["forest", "reliquary", "collectible", "representative", "phaser_branch"],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/forest-reliquary.ts",
+      "phaser_stage_id": "forest-reliquary",
+      "expected_neighbors": [],
+      "expected_collectibles": ["forest-keystone"],
+      "expected_metadata": {
+        "cluster": "forest",
+        "difficulty": 3
+      },
+      "migration_status": "representative"
+    },
+    {
+      "id": "ice_reliquary",
+      "scene_path": "res://levels/ice_reliquary.tscn",
+      "tags": ["ice", "reliquary", "collectible", "representative", "phaser_branch"],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/ice-reliquary.ts",
+      "phaser_stage_id": "ice-reliquary",
+      "expected_neighbors": [],
+      "expected_collectibles": ["ice-keystone"],
+      "expected_metadata": {
+        "cluster": "ice",
+        "difficulty": 4
+      },
+      "migration_status": "representative"
+    },
+    {
+      "id": "fire_reliquary",
+      "scene_path": "res://levels/fire_reliquary.tscn",
+      "tags": ["fire", "reliquary", "collectible", "representative", "phaser_branch"],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/fire-reliquary.ts",
+      "phaser_stage_id": "fire-reliquary",
+      "expected_neighbors": [],
+      "expected_collectibles": ["fire-keystone"],
+      "expected_metadata": {
+        "cluster": "fire",
+        "difficulty": 4
+      },
+      "migration_status": "representative"
+    },
+    {
+      "id": "ruins_reliquary",
+      "scene_path": "res://levels/ruins_reliquary.tscn",
+      "tags": ["ruins", "reliquary", "collectible", "representative", "phaser_branch"],
+      "phaser_source": "legacy/phaser-reference/src/game/world/stages/ruins-reliquary.ts",
+      "phaser_stage_id": "ruins-reliquary",
+      "expected_neighbors": [],
+      "expected_collectibles": ["cave-keystone"],
+      "expected_metadata": {
+        "cluster": "ruins",
+        "difficulty": 3
+      },
+      "migration_status": "representative"
+    },
+    {
+      "id": "controller_lab",
+      "scene_path": "res://levels/controller_lab.tscn",
+      "tags": ["controller_lab", "prototype"],
+      "phaser_source": "",
+      "migration_status": "prototype"
+    },
+    {
+      "id": "flat_room",
+      "scene_path": "res://levels/flat_room.tscn",
+      "tags": ["goal", "test_room"],
+      "phaser_source": "",
+      "migration_status": "test"
+    },
+    {
+      "id": "jump_room",
+      "scene_path": "res://levels/jump_room.tscn",
+      "tags": ["platforming", "heal", "test_room"],
+      "phaser_source": "",
+      "migration_status": "test"
+    },
+    {
+      "id": "door_room",
+      "scene_path": "res://levels/door_room.tscn",
+      "tags": ["door_transition", "test_room"],
+      "phaser_source": "",
+      "migration_status": "test"
+    },
+    {
+      "id": "combat_room",
+      "scene_path": "res://levels/combat_room.tscn",
+      "tags": ["combat", "ability", "representative"],
+      "phaser_source": "docs/design.md",
+      "migration_status": "representative"
+    },
+    {
+      "id": "flying_combat_room",
+      "scene_path": "res://levels/flying_combat_room.tscn",
+      "tags": ["combat", "ability", "flying_enemy", "representative"],
+      "phaser_source": "docs/design.md",
+      "migration_status": "representative"
+    },
+    {
+      "id": "danger_room",
+      "scene_path": "res://levels/danger_room.tscn",
+      "tags": ["damage", "game_over", "test_room"],
+      "phaser_source": "legacy/phaser-reference/src/game/scenes/index.ts",
+      "migration_status": "test"
+    },
+    {
+      "id": "revive_room",
+      "scene_path": "res://levels/revive_room.tscn",
+      "tags": ["damage", "revive", "test_room"],
+      "phaser_source": "docs/design.md",
+      "migration_status": "test"
+    },
+    {
+      "id": "heal_room",
+      "scene_path": "res://levels/heal_room.tscn",
+      "tags": ["heal", "representative", "goal"],
+      "phaser_source": "docs/design.md",
+      "migration_status": "representative"
+    }
+  ]
+}

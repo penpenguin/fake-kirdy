@@ -1,0 +1,24 @@
+{
+  "start_level_id": "labyrinth_132",
+  "start_spawn_id": "default",
+  "level_id": "labyrinth_132",
+  "fps": 60,
+  "max_frames": 180,
+  "frames": [
+    {
+      "frame": 0,
+      "actions": {
+        "move_right": true,
+        "inhale": false,
+        "swallow": false,
+        "use_ability": false
+      }
+    },
+    {
+      "frame": 120,
+      "actions": {
+        "move_right": false
+      }
+    }
+  ]
+}

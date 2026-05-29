@@ -1,0 +1,57 @@
+[gd_scene load_steps=8 format=3 uid="uid://flyingcombatroom01"]
+
+[ext_resource type="Script" path="res://scripts/level/markers/PlayerSpawn.gd" id="1_spawn"]
+[ext_resource type="Script" path="res://scripts/level/markers/EnemySpawnMarker.gd" id="2_enemy"]
+[ext_resource type="Script" path="res://scripts/level/markers/GoalMarker.gd" id="3_goal"]
+[ext_resource type="Script" path="res://scripts/level/markers/CameraBoundsMarker.gd" id="4_camera_bounds"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
+size = Vector2(820, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform"]
+size = Vector2(160, 24)
+
+[node name="FlyingCombatRoom" type="Node2D"]
+
+[node name="PlayerSpawn" type="Node2D" parent="."]
+position = Vector2(96, 368)
+script = ExtResource("1_spawn")
+spawn_id = "default"
+
+[node name="FlyingEnemySpawnMarker" type="Node2D" parent="."]
+position = Vector2(210, 336)
+script = ExtResource("2_enemy")
+spawn_id = "flying_dummy"
+enemy_type = "flying"
+ability_type = "frost"
+contact_damage = 0
+
+[node name="GoalMarker" type="Node2D" parent="."]
+position = Vector2(640, 368)
+script = ExtResource("3_goal")
+goal_id = "flying_combat_goal"
+
+[node name="CameraBoundsMarker" type="Node2D" parent="."]
+position = Vector2(410, 270)
+script = ExtResource("4_camera_bounds")
+size = Vector2(900, 540)
+
+[node name="Floor" type="StaticBody2D" parent="."]
+position = Vector2(410, 432)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]
+shape = SubResource("RectangleShape2D_floor")
+
+[node name="FloorVisual" type="Polygon2D" parent="Floor"]
+color = Color(0.22, 0.26, 0.31, 1)
+polygon = PackedVector2Array(-410, -16, 410, -16, 410, 16, -410, 16)
+
+[node name="MidPlatform" type="StaticBody2D" parent="."]
+position = Vector2(420, 336)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="MidPlatform"]
+shape = SubResource("RectangleShape2D_platform")
+
+[node name="PlatformVisual" type="Polygon2D" parent="MidPlatform"]
+color = Color(0.34, 0.42, 0.54, 1)
+polygon = PackedVector2Array(-80, -12, 80, -12, 80, 12, -80, 12)

@@ -4,23 +4,32 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "test": "npm run check:typecheck && npm run check:test",
-    "check:test": "vitest run",
-    "check:test:watch": "vitest --watch",
-    "check:typecheck": "tsc --noEmit"
+    "dev": "npm run godot:run --",
+    "godot:run": "godot --path godot",
+    "godot:replay": "node scripts/run-godot-replay.mjs",
+    "godot:replay-suite": "node scripts/run-godot-replay-suite.mjs",
+    "godot:export": "node scripts/export-godot.mjs",
+    "build:godot": "npm run godot:export --",
+    "build": "npm run build:godot --",
+    "test": "npm run check:typecheck && npm run check:test && npm run check:godot",
+    "test:canonical": "npm test && npm run godot:replay-suite --",
+    "legacy:inventory": "node scripts/legacy-inventory.mjs",
+    "godot:stage-manifest": "node scripts/generate-phaser-stage-manifest.mjs",
+    "godot:procedural-levels": "node scripts/generate-godot-procedural-levels.mjs",
+    "godot:catalog": "node scripts/generate-godot-level-catalog.mjs",
+    "godot:content-check": "node scripts/check-godot-content-migration.mjs",
+    "godot:parity-ledger": "node scripts/check-godot-parity-ledger.mjs",
+    "check:godot": "npm run godot:stage-manifest -- --check && npm run godot:procedural-levels -- --check && npm run godot:catalog -- --check && npm run godot:content-check && npm run godot:parity-ledger -- --check && npm run godot:export -- --check && node scripts/check-godot.mjs",
+    "check:test": "vitest run test/godot*.test.ts test/trace-summary.test.ts",
+    "check:test:watch": "vitest --watch test/godot*.test.ts test/trace-summary.test.ts",
+    "check:typecheck": "tsc --noEmit",
+    "trace:summary": "node scripts/trace-summary.mjs"
   },
-  "dependencies": {
-    "matter-js": "^0.19.0",
-    "phaser": "^3.80.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "^20.12.7",
     "jsdom": "^27.0.0",
     "typescript": "^5.4.5",
-    "vite": "^5.2.0",
     "vitest": "^1.6.0"
   }
 }

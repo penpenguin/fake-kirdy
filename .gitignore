@@ -140,3 +140,6 @@ vite.config.ts.timestamp-*
 
 # worktree
 .worktrees
+
+# Godot editor/import cache
+**/.godot/

@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://flyingenemy01"]
+
+[ext_resource type="Script" path="res://scripts/enemies/FlyingEnemy.gd" id="1_enemy"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_enemy"]
+radius = 14.0
+
+[node name="FlyingEnemy" type="CharacterBody2D"]
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("1_enemy")
+enemy_id = "flying_enemy"
+ability_type = "frost"
+hover_amplitude = 18.0
+hover_speed = 2.4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_enemy")
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.76, 0.84, 0.96, 1)
+polygon = PackedVector2Array(0, -15, 14, -5, 10, 12, -10, 12, -14, -5)
