@@ -57,7 +57,7 @@ The Godot v2 vertical slice is successful when it demonstrates:
    - Verify `npm test` still passes.
 
 2. **Godot project skeleton**
-   - Add `prototypes/godot-v2/project.godot` and minimal scenes/scripts/resources directories.
+   - Add the canonical `godot/project.godot` and minimal scenes/scripts/resources directories.
    - Add optional Godot validation scripts that skip cleanly when Godot is unavailable.
    - Avoid any dependency that makes the existing web build or tests depend on Godot.
 

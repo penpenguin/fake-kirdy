@@ -78,6 +78,17 @@ describe('Godot canonical validation and legacy boundary', () => {
     expect(agents).toContain('legacy reference copy has been removed');
   });
 
+  it('does not retain the promoted Godot prototype tree', () => {
+    const readme = readFileSync(join(repoRoot, 'README.md'), 'utf8');
+    const agents = readFileSync(join(repoRoot, 'AGENTS.md'), 'utf8');
+    const plan = readFileSync(join(repoRoot, 'docs', 'godot-v2', 'full-migration-execplan.md'), 'utf8');
+
+    expect(existsSync(join(repoRoot, 'prototypes'))).toBe(false);
+    expect(readme).toContain('promoted Godot prototype tree has been removed');
+    expect(agents).toContain('promoted Godot prototype tree has been removed');
+    expect(plan).toContain('promoted Godot prototype tree has been removed');
+  });
+
   it('keeps root tests limited to Godot canonical validation', () => {
     const rootTestFiles = readdirSync(join(repoRoot, 'test'))
       .filter((fileName) => fileName.endsWith('.test.ts'))

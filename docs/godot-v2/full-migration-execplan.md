@@ -14,13 +14,14 @@ The repository currently has a Phaser + Matter game under `legacy/phaser-referen
 
 The Phaser `Kirdy` movement model uses Matter velocity operations such as direct horizontal velocity assignment and a jump velocity constant. Godot must replace this with `CharacterBody2D` and tuning-driven acceleration, deceleration, gravity, jump buffering, coyote time, variable jump height, hover, and replay-compatible input.
 
-The existing Godot prototype under `prototypes/godot-v2/` already contains a thin controller, marker-based levels, replay input, trace recorder, session transitions, and a one-enemy combat slice. This plan promotes that prototype into a repo-level `godot/` mainline while leaving the prototype and Phaser code in place during migration.
+The former Godot prototype has been promoted into the repo-level `godot/` mainline and no longer exists as a separate `prototypes/` tree. The canonical project now owns the controller, marker-based levels, replay input, trace recorder, session transitions, combat slice, and migrated content.
 
 ## Progress
 
 - [x] 2026-05-28: Read `AGENTS.md`, `.agent/PLANS.md`, `package.json`, `docs/design.md`, `legacy/phaser-reference/src/game/characters/Kirdy.ts`, `legacy/phaser-reference/src/game/scenes/index.ts`, `legacy/phaser-reference/src/game/world/AreaManager.ts`, `legacy/phaser-reference/src/game/world/stages/`, and the existing `prototypes/godot-v2/` tree.
 - [x] 2026-05-28: Added a Vitest contract for the Godot mainline migration so the repo records the expected ExecPlan, canonical `godot/` location, package scripts, README guidance, and AGENTS guidance.
 - [x] 2026-05-28: Promoted the existing Godot prototype into `godot/` without deleting `prototypes/godot-v2/`.
+- [x] 2026-05-29: The promoted Godot prototype tree has been removed; `godot/` is the only retained Godot project tree.
 - [x] 2026-05-28: Added graceful Godot script wrappers and `trace:summary` plumbing to `package.json`.
 - [x] 2026-05-28: Ran `npm test`; TypeScript, Vitest, and `check:godot` passed with Godot `4.6.3.stable.official.7d41c59c4`.
 - [x] 2026-05-28: Ran canonical Godot headless replay for `combat_capture_swallow_goal.json`; trace emitted capture, swallow, ability acquire/use, and `run.finished`.
@@ -313,6 +314,7 @@ The existing Godot prototype under `prototypes/godot-v2/` already contains a thi
 
 - 2026-05-28: Use `godot/` as the canonical project directory. `game/` was avoided because the repository already has `legacy/phaser-reference/src/game/`, and `godot/` makes editor, runner, and CI commands unambiguous.
 - 2026-05-28: Keep `prototypes/godot-v2/` during the initial promotion. It is a useful comparison point and avoids destructive deletion before Godot mainline validation.
+- 2026-05-29: Remove the promoted Godot prototype tree after canonical replay, content, export, and test coverage moved to `godot/`. Future changes should update the canonical project directly.
 - 2026-05-28: Keep Phaser runtime dependencies until Milestone 9. The Phaser implementation remains a legacy/reference source until Godot playable, replay, trace, metrics, and representative content are working.
 - 2026-05-28: Keep `npm test` meaningful during migration by running TypeScript/Vitest plus a graceful Godot executable check. Godot-specific headless replay remains separately runnable through `npm run godot:replay`.
 - 2026-05-28: Implement trace metrics as a Node script first. This keeps metrics testable in Vitest and allows useful validation even when Godot is absent.

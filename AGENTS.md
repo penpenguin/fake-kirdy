@@ -21,7 +21,7 @@ When writing complex features or significant refactors, use an ExecPlan (as desc
 - Canonical repository tests live under `test/godot*.test.ts` plus `test/trace-summary.test.ts`.
 - Static web assets from the former runtime are optional reference material only; canonical assets live under `godot/resources/`.
 - Scope, rules, and open tasks are tracked in `docs/`; revise those specs before adjusting gameplay.
-- Godot migration documentation belongs in `docs/godot-v2/`; historical prototype files may remain under `prototypes/godot-v2/`, but new mainline Godot work belongs under `godot/`.
+- Godot migration documentation belongs in `docs/godot-v2/`; the promoted Godot prototype tree has been removed, and all mainline Godot work belongs under `godot/`.
 
 ## Build, Test, and Development Commands
 - `npm run dev` starts the canonical Godot project at `godot/`.
@@ -68,7 +68,6 @@ When writing complex features or significant refactors, use an ExecPlan (as desc
 - `godot/resources/`
 - `godot/levels/`
 - `godot/tests/`
-- `prototypes/godot-v2/` is historical reference only during migration.
 - `docs/godot-v2/`
 
 ### Player Controller Rules

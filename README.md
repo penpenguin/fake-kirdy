@@ -20,7 +20,7 @@ Fake Kirdy uses Godot 4 as the canonical runtime. The former Phaser + Matter.js 
 - Validate canonical Godot behavior, including the replay suite when available: `npm run test:canonical`
 - Check the Phaser-to-Godot parity ledger: `npm run godot:parity-ledger -- --check`
 
-The canonical Godot project lives in `godot/`. The export wrapper skips gracefully if Godot or export templates are unavailable. The older `prototypes/godot-v2/` tree is kept as historical reference during the migration.
+The canonical Godot project lives in `godot/`. The export wrapper skips gracefully if Godot or export templates are unavailable. The promoted Godot prototype tree has been removed; use `godot/` for all runtime, replay, export, and content work.
 
 ## Legacy Removal
 

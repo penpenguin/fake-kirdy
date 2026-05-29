@@ -23,12 +23,12 @@ When the player reaches a goal, the session sets the outcome to completed and em
 
 ## Replay
 
-The sample replay is `prototypes/godot-v2/tests/replays/door_to_goal.json`. It starts in `door_room`, holds right to enter the door, transitions to `flat_room`, and continues to the goal.
+The sample replay is `godot/tests/replays/door_to_goal.json`. It starts in `door_room`, holds right to enter the door, transitions to `flat_room`, and continues to the goal.
 
 Optional headless command:
 
 ```bash
-godot --headless --path prototypes/godot-v2 --script tests/run_replay.gd -- --replay res://tests/replays/door_to_goal.json --out /tmp/fake-kirdy-door_to_goal.ndjson
+godot --headless --path godot --script tests/run_replay.gd -- --replay res://tests/replays/door_to_goal.json --out /tmp/fake-kirdy-door_to_goal.ndjson
 ```
 
 Expected trace events include:
