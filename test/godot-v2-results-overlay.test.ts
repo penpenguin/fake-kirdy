@@ -34,6 +34,15 @@ describe('Godot v2 result overlay', () => {
     expect(scene).toContain('ItemsLabel');
   });
 
+  it('keeps the result overlay hidden until a finished result is provided', () => {
+    const script = readGodotFile('scripts/ui/ResultOverlay.gd');
+
+    expect(script).toContain('has_finished_result');
+    expect(script).toContain('visible = has_finished_result(result_state)');
+    expect(script).toContain('"completed", "complete", "game_over"');
+    expect(script).not.toContain('visible = true');
+  });
+
   it('shows result overlay from GameSession and exposes it to trace metrics', () => {
     const session = readGodotFile('scripts/session/GameSession.gd');
     const mainScene = readGodotFile('scenes/Main.tscn');

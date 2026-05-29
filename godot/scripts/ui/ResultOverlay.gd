@@ -12,13 +12,20 @@ var result_state: Dictionary = {}
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_IGNORE
     custom_minimum_size = Vector2(360.0, 180.0)
-    visible = false
-    set_result_state(result_state)
+    visible = has_finished_result(result_state)
+    refresh_labels()
 
 
 func set_result_state(next_state: Dictionary) -> void:
     result_state = normalize_result_state(next_state)
-    visible = true
+    visible = has_finished_result(result_state)
+    if not is_inside_tree():
+        return
+
+    refresh_labels()
+
+
+func refresh_labels() -> void:
     if not is_inside_tree():
         return
 
@@ -47,6 +54,10 @@ func normalize_result_state(source: Dictionary) -> Dictionary:
         "items_collected": normalize_items(source.get("items_collected", [])),
         "completed_level_ids": normalize_items(source.get("completed_level_ids", [])),
     }
+
+
+func has_finished_result(state: Dictionary) -> bool:
+    return ["completed", "complete", "game_over"].has(String(state.get("outcome", "")))
 
 
 func normalize_items(items) -> Array:
