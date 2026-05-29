@@ -36,6 +36,9 @@ describe('Godot v2 save persistence foundation', () => {
     expect(state).toContain('sanitize_settings');
     expect(state).toContain('var player_hp');
     expect(state).toContain('var player_max_hp');
+    expect(state).toContain('var consumed_heal_ids');
+    expect(state).toContain('"consumed_heal_ids": consumed_heal_ids');
+    expect(state).toContain('data.get("consumed_heal_ids", [])');
     expect(state).toContain('to_dictionary');
     expect(state).toContain('from_dictionary');
     expect(store).toContain('class_name SaveStore');
@@ -76,6 +79,8 @@ describe('Godot v2 save persistence foundation', () => {
     expect(session).toContain('@export var setting_controls');
     expect(session).toContain('@export var setting_difficulty');
     expect(session).toContain('player_hp');
+    expect(session).toContain('for heal_id in state.consumed_heal_ids');
+    expect(session).toContain('"consumed_heal_ids": get_consumed_heal_ids()');
     expect(session).toContain('build_save_payload');
   });
 

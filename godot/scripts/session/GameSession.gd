@@ -638,6 +638,12 @@ func get_acquired_item_ids() -> Array:
     return item_ids
 
 
+func get_consumed_heal_ids() -> Array:
+    var heal_ids := consumed_heal_ids.keys()
+    heal_ids.sort()
+    return heal_ids
+
+
 func get_completed_level_ids() -> Array:
     var level_ids := completed_level_ids.keys()
     level_ids.sort()
@@ -875,6 +881,8 @@ func load_persistent_state() -> void:
     saved_ability_type = String(state.ability_type)
     for item_id in state.acquired_item_ids:
         acquired_item_ids[String(item_id)] = true
+    for heal_id in state.consumed_heal_ids:
+        consumed_heal_ids[String(heal_id)] = true
     for level_id in state.completed_level_ids:
         completed_level_ids[String(level_id)] = true
     for level_id in state.visited_level_ids:
@@ -901,6 +909,7 @@ func load_persistent_state() -> void:
     trace_recorder.call("record_event", "save.loaded", {
         "save_path": save_path,
         "items_collected": get_acquired_item_ids(),
+        "consumed_heal_ids": get_consumed_heal_ids(),
         "completed_level_ids": get_completed_level_ids(),
         "visited_level_ids": get_visited_level_ids(),
         "unlocked_door_ids": get_unlocked_door_ids(),
@@ -930,6 +939,7 @@ func write_persistent_state() -> void:
         trace_recorder.call("record_event", "save.written", {
             "save_path": save_path,
             "items_collected": get_acquired_item_ids(),
+            "consumed_heal_ids": get_consumed_heal_ids(),
             "completed_level_ids": get_completed_level_ids(),
             "visited_level_ids": get_visited_level_ids(),
             "unlocked_door_ids": get_unlocked_door_ids(),
@@ -954,6 +964,7 @@ func write_persistent_state() -> void:
 func build_save_payload() -> Dictionary:
     return {
         "acquired_item_ids": get_acquired_item_ids(),
+        "consumed_heal_ids": get_consumed_heal_ids(),
         "completed_level_ids": get_completed_level_ids(),
         "visited_level_ids": get_visited_level_ids(),
         "unlocked_door_ids": get_unlocked_door_ids(),

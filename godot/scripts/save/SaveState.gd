@@ -11,6 +11,7 @@ var explored_tiles: Dictionary = {}
 var current_level_id: String = ""
 var player_position: Dictionary = {}
 var ability_type: String = ""
+var consumed_heal_ids: Array[String] = []
 var settings: Dictionary = {
     "volume": 0.4,
     "controls": "keyboard",
@@ -32,6 +33,7 @@ func to_dictionary() -> Dictionary:
         "current_level_id": current_level_id,
         "player_position": player_position,
         "ability_type": ability_type,
+        "consumed_heal_ids": consumed_heal_ids,
         "settings": settings,
         "player_hp": player_hp,
         "player_max_hp": player_max_hp,
@@ -54,6 +56,13 @@ static func from_dictionary(data: Dictionary):
     state.player_hp = int(data.get("player_hp", 0))
     state.player_max_hp = int(data.get("player_max_hp", 0))
     state.player_revive_count = max(int(data.get("player_revive_count", 0)), 0)
+
+    var raw_consumed_heals: Array = data.get("consumed_heal_ids", [])
+    for heal_id in raw_consumed_heals:
+        var consumed_heal_id := String(heal_id)
+        if consumed_heal_id == "" or state.consumed_heal_ids.has(consumed_heal_id):
+            continue
+        state.consumed_heal_ids.append(consumed_heal_id)
 
     var raw_items: Array = data.get("acquired_item_ids", [])
     for item in raw_items:
@@ -85,6 +94,7 @@ static func from_dictionary(data: Dictionary):
 
     state.acquired_item_ids.sort()
     state.completed_level_ids.sort()
+    state.consumed_heal_ids.sort()
     state.visited_level_ids.sort()
     state.unlocked_door_ids.sort()
     return state
