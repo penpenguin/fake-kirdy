@@ -122,13 +122,21 @@ func clear_ability_type() -> void:
     update_visual_state(0.0, false)
 
 
+func set_facing(direction: float) -> void:
+    if direction == 0.0:
+        return
+
+    last_facing = -1.0 if direction < 0.0 else 1.0
+    if body_sprite != null:
+        body_sprite.flip_h = last_facing < 0.0
+
+
 func update_visual_state(input_x: float, jump_held: bool) -> void:
     if body_sprite == null:
         return
 
     if input_x != 0.0:
-        last_facing = sign(input_x)
-        body_sprite.flip_h = last_facing < 0.0
+        set_facing(input_x)
 
     var next_texture := kirdy_idle_texture
 

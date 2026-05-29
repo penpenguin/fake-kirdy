@@ -62,6 +62,7 @@ describe('Godot v2 minimal combat slice', () => {
     expect(controller).toContain('is_inhale_pressed');
     expect(controller).toContain('is_swallow_pressed');
     expect(controller).toContain('is_use_ability_pressed');
+    expect(controller).toContain('set_facing');
     expect(playerScene).toContain('InhaleArea');
     expect(playerScene).toContain('Area2D');
   });
@@ -92,6 +93,15 @@ describe('Godot v2 minimal combat slice', () => {
     expect(source).toContain('enemy.swallowed');
     expect(source).toContain('ability.acquired');
     expect(source).toContain('ability.used');
+  });
+
+  it('uses player facing when choosing inhale capture targets', () => {
+    const source = readGodotFile('scripts/session/GameSession.gd');
+
+    expect(source).toContain('get_player_facing_direction');
+    expect(source).toContain('delta_x * facing < -16.0');
+    expect(source).toContain('player.call("set_facing"');
+    expect(source).not.toContain('if delta_x < -16.0');
   });
 
   it('adds combat replays and docs', () => {

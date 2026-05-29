@@ -239,6 +239,16 @@ func spawn_player(spawn_id: String = "default") -> void:
     if player.get_parent() == null:
         add_child(player)
 
+    apply_spawn_facing(spawn_marker)
+
+
+func apply_spawn_facing(spawn_marker: Dictionary) -> void:
+    if player == null or spawn_marker.is_empty():
+        return
+
+    var payload: Dictionary = spawn_marker.get("payload", {})
+    player.call("set_facing", float(payload.get("facing", 1.0)))
+
 
 func spawn_enemies() -> void:
     for enemy in enemies:
@@ -290,6 +300,7 @@ func capture_nearest_enemy() -> void:
 
     var nearest_enemy = null
     var nearest_distance := capture_radius
+    var facing := get_player_facing_direction()
 
     for enemy in enemies:
         if not is_instance_valid(enemy) or enemy.state != "enemy.idle":
@@ -300,7 +311,7 @@ func capture_nearest_enemy() -> void:
             continue
 
         var delta_x: float = enemy.global_position.x - player.global_position.x
-        if delta_x < -16.0:
+        if delta_x * facing < -16.0:
             continue
 
         nearest_enemy = enemy
@@ -317,6 +328,17 @@ func capture_nearest_enemy() -> void:
         "player": get_player_trace(),
         "payload": get_enemy_payload(captured_enemy),
     })
+
+
+func get_player_facing_direction() -> float:
+    if player == null:
+        return 1.0
+
+    var facing := float(player.get("last_facing"))
+    if facing == 0.0:
+        return 1.0
+
+    return -1.0 if facing < 0.0 else 1.0
 
 
 func release_captured_enemy() -> void:
