@@ -10,6 +10,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  GODOT_VERSION: 4.6.3
+  GODOT_STATUS: stable
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -38,8 +42,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Godot export tooling
+        run: |
+          set -euxo pipefail
+          mkdir -p /tmp/godot "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.${GODOT_STATUS}"
+          curl -L -o /tmp/godot/godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64.zip"
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "/tmp/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64"
+          sudo ln -sf "/tmp/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64" /usr/local/bin/godot
+          curl -L -o /tmp/godot/export_templates.tpz "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_export_templates.tpz"
+          unzip -q /tmp/godot/export_templates.tpz -d /tmp/godot/export_templates
+          cp -R /tmp/godot/export_templates/templates/. "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.${GODOT_STATUS}/"
+
       - name: Build project
-        run: npm run build
+        run: npm run build:public
 
       - name: Run unit tests
         run: npm run test
@@ -72,8 +88,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Godot export tooling
+        run: |
+          set -euxo pipefail
+          mkdir -p /tmp/godot "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.${GODOT_STATUS}"
+          curl -L -o /tmp/godot/godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64.zip"
+          unzip -q /tmp/godot/godot.zip -d /tmp/godot
+          chmod +x "/tmp/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64"
+          sudo ln -sf "/tmp/godot/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64" /usr/local/bin/godot
+          curl -L -o /tmp/godot/export_templates.tpz "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/Godot_v${GODOT_VERSION}-${GODOT_STATUS}_export_templates.tpz"
+          unzip -q /tmp/godot/export_templates.tpz -d /tmp/godot/export_templates
+          cp -R /tmp/godot/export_templates/templates/. "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.${GODOT_STATUS}/"
+
       - name: Build project
-        run: npm run build
+        run: npm run build:public
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

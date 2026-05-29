@@ -205,17 +205,19 @@
     {
       "id": "export-packaging",
       "status": "ported",
-      "summary": "The canonical build command now uses the Godot export wrapper, validates the export preset, and skips gracefully when local export templates are unavailable. Installing matching templates is an environment setup step, not a Phaser runtime retirement blocker.",
+      "summary": "The canonical build command now uses the Godot Web export wrapper, validates the Web export preset, and writes public deployment output to dist/index.html. Local builds skip gracefully when export templates are unavailable, while CI uses build:public so GitHub Pages never falls back to Phaser/Vite output.",
       "godot_evidence": [
         "godot/export_presets.cfg",
-        "scripts/export-godot.mjs"
+        "scripts/export-godot.mjs",
+        ".github/workflows/test.yml"
       ],
       "docs_evidence": [
         "docs/godot-v2/full-migration-execplan.md"
       ],
       "validation": [
         "npm run godot:export -- --check",
-        "npm run build -- --check"
+        "npm run build -- --check",
+        "npm run build:public"
       ],
       "retirement_blocker": false
     },

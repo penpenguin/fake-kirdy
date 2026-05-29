@@ -50,6 +50,8 @@ describe('Godot mainline migration contract', () => {
     expect(manifest.scripts?.['godot:replay']).toContain('scripts/run-godot-replay.mjs');
     expect(manifest.scripts?.['dev:legacy:web']).toBeUndefined();
     expect(manifest.scripts?.['preview:legacy:web']).toBeUndefined();
+    expect(manifest.scripts?.['check:test:watch']).toBeUndefined();
+    expect(manifest.scripts?.['test:watch']).toBeUndefined();
     expect(manifest.scripts?.['trace:summary']).toContain('scripts/trace-summary.mjs');
     expect(manifest.scripts?.test).toContain('check:godot');
   });

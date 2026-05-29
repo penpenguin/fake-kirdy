@@ -1,16 +1,18 @@
-import { existsSync, mkdirSync, readFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
+import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const repoRoot = process.cwd();
 const godotRoot = join(repoRoot, 'godot');
 const projectPath = join(godotRoot, 'project.godot');
 const presetPath = join(godotRoot, 'export_presets.cfg');
-const defaultPreset = 'Linux Headless';
-const defaultOutPath = join(repoRoot, 'dist-godot', 'fake-kirdy.x86_64');
+const defaultPreset = 'Web';
+const defaultOutPath = join(repoRoot, 'dist', 'index.html');
 
 const args = process.argv.slice(2);
 const checkOnly = args.includes('--check');
+const cleanOutput = args.includes('--clean');
+const requireExport = args.includes('--require-export');
 const preset = readOption('--preset') ?? defaultPreset;
 const outPath = resolve(readOption('--out') ?? defaultOutPath);
 
@@ -44,8 +46,16 @@ if (checkOnly) {
 
 const version = readGodotVersion();
 if (version === null) {
+  if (requireExport) {
+    console.error('[godot:export] Godot is not installed; cannot create required export.');
+    process.exit(1);
+  }
   console.log('[godot:export] Godot is not installed; skipped export.');
   process.exit(0);
+}
+
+if (cleanOutput) {
+  cleanOutputDirectory(outPath);
 }
 
 mkdirSync(dirname(outPath), { recursive: true });
@@ -71,6 +81,13 @@ if (result.status === 0) {
 }
 
 if (isMissingExportTemplate(output)) {
+  if (requireExport) {
+    console.error('[godot:export] Godot export templates are not installed; required export failed.');
+    if (output.length > 0) {
+      console.error(output);
+    }
+    process.exit(result.status ?? 1);
+  }
   console.log('[godot:export] Godot export templates are not installed; skipped export.');
   if (output.length > 0) {
     console.log(output);
@@ -113,4 +130,20 @@ function readGodotVersion() {
 
 function isMissingExportTemplate(output) {
   return /export templates?|template.*not.*installed|No export template|Could not find.*template/i.test(output);
+}
+
+function cleanOutputDirectory(path) {
+  const outputDir = dirname(path);
+  const repoRelativeDir = relative(repoRoot, outputDir);
+  if (
+    outputDir === repoRoot ||
+    repoRelativeDir === '' ||
+    repoRelativeDir.startsWith('..') ||
+    isAbsolute(repoRelativeDir)
+  ) {
+    console.error(`[godot:export] Refusing to clean unsafe output directory: ${outputDir}`);
+    process.exit(1);
+  }
+
+  rmSync(outputDir, { recursive: true, force: true });
 }
