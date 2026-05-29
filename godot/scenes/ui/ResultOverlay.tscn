@@ -1,0 +1,40 @@
+[gd_scene load_steps=2 format=3 uid="uid://resultoverlay01"]
+
+[ext_resource type="Script" path="res://scripts/ui/ResultOverlay.gd" id="1_result"]
+
+[node name="ResultOverlay" type="Control"]
+visible = false
+offset_left = 300.0
+offset_top = 160.0
+offset_right = 660.0
+offset_bottom = 340.0
+mouse_filter = 2
+script = ExtResource("1_result")
+
+[node name="TitleLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 360.0
+offset_bottom = 28.0
+text = "Run Complete"
+
+[node name="OutcomeLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 36.0
+offset_right = 360.0
+offset_bottom = 60.0
+text = "Outcome"
+
+[node name="TimeLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 68.0
+offset_right = 360.0
+offset_bottom = 92.0
+text = "Time"
+
+[node name="ItemsLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 100.0
+offset_right = 360.0
+offset_bottom = 124.0
+text = "Items"

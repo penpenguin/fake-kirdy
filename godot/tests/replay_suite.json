@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "replays": [
+    {
+      "id": "controller_lab_jump",
+      "replay_path": "res://tests/replays/controller_lab_jump.json",
+      "expected_outcome": "finished",
+      "tags": ["controller", "movement", "jump", "hover", "metrics"]
+    },
+    {
+      "id": "combat_capture_swallow_goal",
+      "replay_path": "res://tests/replays/combat_capture_swallow_goal.json",
+      "expected_outcome": "complete",
+      "tags": ["combat", "ability", "goal"]
+    },
+    {
+      "id": "flying_enemy_release_swallow_goal",
+      "replay_path": "res://tests/replays/flying_enemy_release_swallow_goal.json",
+      "expected_outcome": "complete",
+      "tags": ["combat", "flying_enemy", "release", "ability", "goal"]
+    },
+    {
+      "id": "central_hub_to_heal_goal",
+      "replay_path": "res://tests/replays/central_hub_to_heal_goal.json",
+      "expected_outcome": "complete",
+      "tags": ["hub", "heal", "goal"]
+    },
+    {
+      "id": "central_hub_dead_end_max_health",
+      "replay_path": "res://tests/replays/central_hub_dead_end_max_health.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "tags": ["hub", "heal", "max-health", "dead-end"]
+    },
+    {
+      "id": "settings_adjustment",
+      "replay_path": "res://tests/replays/settings_adjustment.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "tags": ["settings", "save", "ui", "trace"]
+    },
+    {
+      "id": "revive_room_revive_then_game_over",
+      "replay_path": "res://tests/replays/revive_room_revive_then_game_over.json",
+      "expected_outcome": "game_over",
+      "tags": ["damage", "revive", "game_over"]
+    },
+    {
+      "id": "forest_generated_reliquary_chain",
+      "replay_path": "res://tests/replays/labyrinth_002_to_forest_reliquary_generated_chain.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "tags": ["procedural", "forest", "reliquary", "collectible"]
+    },
+    {
+      "id": "ice_generated_reliquary_chain",
+      "replay_path": "res://tests/replays/labyrinth_006_to_ice_reliquary_generated_chain.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "tags": ["procedural", "ice", "reliquary", "collectible"]
+    },
+    {
+      "id": "fire_generated_reliquary_chain",
+      "replay_path": "res://tests/replays/labyrinth_029_to_fire_reliquary_generated_chain.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "tags": ["procedural", "fire", "reliquary", "collectible"]
+    },
+    {
+      "id": "ruins_generated_reliquary_chain",
+      "replay_path": "res://tests/replays/labyrinth_047_to_ruins_reliquary_generated_chain.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "tags": ["procedural", "ruins", "reliquary", "collectible"]
+    },
+    {
+      "id": "sky_generated_goal_path",
+      "replay_path": "res://tests/replays/labyrinth_051_to_sky_sanctum_generated_exit.json",
+      "expected_outcome": "complete",
+      "tags": ["procedural", "sky", "door-chain", "goal"]
+    },
+    {
+      "id": "terminal_generated_goal",
+      "replay_path": "res://tests/replays/labyrinth_132_generated_goal.json",
+      "expected_outcome": "complete",
+      "tags": ["procedural", "terminal", "goal"]
+    },
+    {
+      "id": "danger_room_game_over",
+      "replay_path": "res://tests/replays/danger_room_game_over.json",
+      "expected_outcome": "game_over",
+      "tags": ["failure", "damage", "game-over"]
+    }
+  ]
+}

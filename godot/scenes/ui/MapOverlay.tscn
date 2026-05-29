@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://mapoverlay01"]
+
+[ext_resource type="Script" path="res://scripts/ui/MapOverlay.gd" id="1_overlay"]
+
+[node name="MapOverlay" type="Control"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 176.0
+offset_bottom = 112.0
+mouse_filter = 2
+script = ExtResource("1_overlay")

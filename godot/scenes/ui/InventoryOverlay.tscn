@@ -1,0 +1,32 @@
+[gd_scene load_steps=2 format=3 uid="uid://inventoryoverlay01"]
+
+[ext_resource type="Script" path="res://scripts/ui/InventoryOverlay.gd" id="1_inventory"]
+
+[node name="InventoryOverlay" type="Control"]
+offset_left = 640.0
+offset_top = 146.0
+offset_right = 960.0
+offset_bottom = 236.0
+mouse_filter = 2
+script = ExtResource("1_inventory")
+
+[node name="ItemsLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 304.0
+offset_bottom = 20.0
+text = "Items"
+
+[node name="AbilityLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 24.0
+offset_right = 304.0
+offset_bottom = 44.0
+text = "Ability"
+
+[node name="ProgressLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 48.0
+offset_right = 304.0
+offset_bottom = 68.0
+text = "Progress"

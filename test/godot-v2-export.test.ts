@@ -1,0 +1,131 @@
+import { execFileSync } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { describe, expect, it } from 'vitest';
+
+const repoRoot = process.cwd();
+
+const readText = (relativePath: string): string =>
+  readFileSync(join(repoRoot, relativePath), 'utf8');
+
+describe('Godot v2 export workflow', () => {
+  it('defines canonical Godot export presets for headless and public web builds', () => {
+    const presetPath = join(repoRoot, 'godot', 'export_presets.cfg');
+
+    expect(existsSync(presetPath)).toBe(true);
+
+    const preset = readFileSync(presetPath, 'utf8');
+    expect(preset).toContain('name="Linux Headless"');
+    expect(preset).toContain('platform="Linux/X11"');
+    expect(preset).toContain('export_path="../dist-godot/fake-kirdy.x86_64"');
+    expect(preset).toContain('name="Web"');
+    expect(preset).toContain('platform="Web"');
+    expect(preset).toContain('export_path="../dist/index.html"');
+    expect(preset).toContain('variant/thread_support=false');
+    expect(preset).toContain('vram_texture_compression/for_mobile=false');
+    expect(preset).not.toContain('vram_texture_compression/for_mobile=true');
+    expect(preset).toContain('html/canvas_resize_policy=2');
+  });
+
+  it('adds a graceful Godot export wrapper and package scripts', () => {
+    const packageJson = JSON.parse(readText('package.json')) as {
+      scripts?: Record<string, string>;
+    };
+    const script = readText('scripts/export-godot.mjs');
+
+    expect(packageJson.scripts?.['godot:export']).toContain('scripts/export-godot.mjs');
+    expect(packageJson.scripts?.['godot:export:web']).toContain('--preset=Web --out=dist/index.html');
+    expect(packageJson.scripts?.['build:godot']).toBe('npm run godot:export:web --');
+    expect(packageJson.scripts?.['build:public']).toBe('npm run godot:export:web -- --clean --require-export');
+    expect(packageJson.scripts?.['build:legacy:web']).toBeUndefined();
+    expect(packageJson.scripts?.build).toBe('npm run build:godot --');
+    expect(packageJson.scripts?.['check:godot']).toContain('npm run godot:export -- --check');
+    expect(script).toContain('export_presets.cfg');
+    expect(script).toContain("const defaultPreset = 'Web'");
+    expect(script).toContain("join(repoRoot, 'dist', 'index.html')");
+    expect(script).toContain('--require-export');
+    expect(script).toContain('--clean');
+    expect(script).toContain('Godot is not installed; skipped export');
+    expect(script).toContain('export templates are not installed; skipped export');
+  });
+
+  it('can validate the export configuration without requiring export templates', () => {
+    const output = execFileSync('node', ['scripts/export-godot.mjs', '--check'], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+    });
+
+    expect(output).toContain('[godot:export]');
+    expect(output).toContain('export preset available: Web');
+  });
+
+  it('forwards build:godot arguments to the export wrapper', () => {
+    const output = execFileSync('npm', ['run', 'build:godot', '--', '--check'], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+    });
+
+    expect(output).toContain('export preset available: Web');
+  });
+
+  it('forwards default build arguments to the Godot export wrapper', () => {
+    const output = execFileSync('npm', ['run', 'build', '--', '--check'], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+    });
+
+    expect(output).toContain('export preset available: Web');
+  });
+
+  it('keeps the Linux export preset available through explicit arguments', () => {
+    const output = execFileSync('npm', [
+      'run',
+      'godot:export',
+      '--',
+      '--check',
+      '--preset=Linux Headless',
+    ], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+    });
+
+    expect(output).toContain('export preset available: Linux Headless');
+  });
+
+  it('configures GitHub Pages deployment to publish the Godot Web export', () => {
+    const workflow = readText('.github/workflows/test.yml');
+
+    expect(workflow).toContain('GODOT_VERSION: 4.6.3');
+    expect(workflow).toContain('GODOT_STATUS: stable');
+    expect(workflow).toContain('Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64.zip');
+    expect(workflow).toContain('Godot_v${GODOT_VERSION}-${GODOT_STATUS}_export_templates.tpz');
+    expect(workflow).toContain('npm run build:public');
+    expect(workflow).toContain('path: dist');
+    expect(workflow).not.toContain('build:legacy:web');
+  });
+
+  it('documents the default Godot Web build command and removes Phaser deployment guidance', () => {
+    const readme = readText('README.md');
+    const agents = readText('AGENTS.md');
+    const plan = readText('docs/godot-v2/full-migration-execplan.md');
+
+    expect(readme).toContain('npm run godot:export');
+    expect(readme).toContain('npm run build:public');
+    expect(readme).toContain('Godot Web');
+    expect(readme).toContain('legacy reference copy has been removed');
+    expect(readme).toContain('npm run build');
+    expect(readme).not.toContain('deployed Phaser build');
+    expect(agents).toContain('npm run godot:export');
+    expect(agents).toContain('npm run build:public');
+    expect(agents).toContain('npm run build');
+    expect(plan).toContain('Godot Web export');
+    expect(plan).toContain('default `build` command');
+  });
+
+  it('uses the web-compatible Godot renderer for browser exports', () => {
+    const project = readText('godot/project.godot');
+
+    expect(project).toContain('[rendering]');
+    expect(project).toContain('renderer/rendering_method.web="gl_compatibility"');
+  });
+});

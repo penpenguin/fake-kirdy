@@ -1,0 +1,413 @@
+{
+  "version": 1,
+  "levels": [
+    {
+      "id": "central_hub",
+      "scene_path": "res://levels/central_hub.tscn",
+      "tags": [
+        "hub",
+        "representative",
+        "door_graph"
+      ],
+      "expected_neighbors": [
+        "ice-area",
+        "mirror-corridor",
+        "fire-area",
+        "forest-area",
+        "cave-area"
+      ],
+      "expected_dead_end_rewards": [
+        "health",
+        "max-health"
+      ],
+      "migration_status": "representative",
+      "stage_id": "central-hub",
+      "source_ref": "stage_manifest:central-hub"
+    },
+    {
+      "id": "ice_area",
+      "scene_path": "res://levels/ice_area.tscn",
+      "tags": [
+        "ice",
+        "representative",
+        "phaser_branch"
+      ],
+      "expected_neighbors": [
+        "central-hub"
+      ],
+      "expected_metadata": {
+        "cluster": "ice",
+        "difficulty": 2
+      },
+      "migration_status": "representative",
+      "stage_id": "ice-area",
+      "source_ref": "stage_manifest:ice-area"
+    },
+    {
+      "id": "mirror_corridor",
+      "scene_path": "res://levels/mirror_corridor.tscn",
+      "tags": [
+        "ruins",
+        "representative",
+        "phaser_branch"
+      ],
+      "expected_neighbors": [
+        "central-hub",
+        "goal-sanctum"
+      ],
+      "expected_metadata": {
+        "cluster": "ruins",
+        "difficulty": 1
+      },
+      "migration_status": "representative",
+      "stage_id": "mirror-corridor",
+      "source_ref": "stage_manifest:mirror-corridor"
+    },
+    {
+      "id": "fire_area",
+      "scene_path": "res://levels/fire_area.tscn",
+      "tags": [
+        "fire",
+        "representative",
+        "phaser_branch"
+      ],
+      "expected_neighbors": [
+        "central-hub"
+      ],
+      "expected_metadata": {
+        "cluster": "fire",
+        "difficulty": 3
+      },
+      "migration_status": "representative",
+      "stage_id": "fire-area",
+      "source_ref": "stage_manifest:fire-area"
+    },
+    {
+      "id": "forest_area",
+      "scene_path": "res://levels/forest_area.tscn",
+      "tags": [
+        "forest",
+        "representative",
+        "phaser_branch"
+      ],
+      "expected_neighbors": [
+        "central-hub",
+        "labyrinth-001"
+      ],
+      "expected_metadata": {
+        "cluster": "forest",
+        "difficulty": 1
+      },
+      "migration_status": "representative",
+      "stage_id": "forest-area",
+      "source_ref": "stage_manifest:forest-area"
+    },
+    {
+      "id": "cave_area",
+      "scene_path": "res://levels/cave_area.tscn",
+      "tags": [
+        "ruins",
+        "representative",
+        "phaser_branch"
+      ],
+      "expected_neighbors": [
+        "central-hub"
+      ],
+      "expected_metadata": {
+        "cluster": "ruins",
+        "difficulty": 2
+      },
+      "migration_status": "representative",
+      "stage_id": "cave-area",
+      "source_ref": "stage_manifest:cave-area"
+    },
+    {
+      "id": "goal_sanctum",
+      "scene_path": "res://levels/goal_sanctum.tscn",
+      "tags": [
+        "goal",
+        "ruins",
+        "representative",
+        "phaser_branch"
+      ],
+      "expected_neighbors": [
+        "mirror-corridor",
+        "sky-sanctum"
+      ],
+      "expected_metadata": {
+        "cluster": "ruins",
+        "difficulty": 4
+      },
+      "migration_status": "representative",
+      "stage_id": "goal-sanctum",
+      "source_ref": "stage_manifest:goal-sanctum"
+    },
+    {
+      "id": "sky_sanctum",
+      "scene_path": "res://levels/sky_sanctum.tscn",
+      "tags": [
+        "sky",
+        "representative",
+        "phaser_branch"
+      ],
+      "expected_neighbors": [
+        "goal-sanctum",
+        "aurora-spire",
+        "starlit-keep"
+      ],
+      "expected_metadata": {
+        "cluster": "sky",
+        "difficulty": 4
+      },
+      "migration_status": "representative",
+      "stage_id": "sky-sanctum",
+      "source_ref": "stage_manifest:sky-sanctum"
+    },
+    {
+      "id": "starlit_keep",
+      "scene_path": "res://levels/starlit_keep.tscn",
+      "tags": [
+        "sky",
+        "representative",
+        "phaser_branch"
+      ],
+      "expected_neighbors": [
+        "sky-sanctum"
+      ],
+      "expected_metadata": {
+        "cluster": "sky",
+        "difficulty": 3
+      },
+      "migration_status": "representative",
+      "stage_id": "starlit-keep",
+      "source_ref": "stage_manifest:starlit-keep"
+    },
+    {
+      "id": "aurora_spire",
+      "scene_path": "res://levels/aurora_spire.tscn",
+      "tags": [
+        "sky",
+        "representative",
+        "phaser_branch"
+      ],
+      "expected_neighbors": [
+        "sky-sanctum"
+      ],
+      "expected_metadata": {
+        "cluster": "sky",
+        "difficulty": 4
+      },
+      "migration_status": "representative",
+      "stage_id": "aurora-spire",
+      "source_ref": "stage_manifest:aurora-spire"
+    },
+    {
+      "id": "labyrinth_001",
+      "scene_path": "res://levels/labyrinth_001.tscn",
+      "tags": [
+        "forest",
+        "procedural",
+        "representative",
+        "phaser_branch"
+      ],
+      "expected_neighbors": [
+        "forest-area"
+      ],
+      "expected_metadata": {
+        "cluster": "forest",
+        "difficulty": 2
+      },
+      "expected_dead_end_rewards": [
+        "health"
+      ],
+      "migration_status": "representative",
+      "stage_id": "labyrinth-001",
+      "source_ref": "stage_manifest:labyrinth-001"
+    },
+    {
+      "id": "forest_reliquary",
+      "scene_path": "res://levels/forest_reliquary.tscn",
+      "tags": [
+        "forest",
+        "reliquary",
+        "collectible",
+        "representative",
+        "phaser_branch"
+      ],
+      "expected_neighbors": [],
+      "expected_collectibles": [
+        "forest-keystone"
+      ],
+      "expected_metadata": {
+        "cluster": "forest",
+        "difficulty": 3
+      },
+      "migration_status": "representative",
+      "stage_id": "forest-reliquary",
+      "source_ref": "stage_manifest:forest-reliquary"
+    },
+    {
+      "id": "ice_reliquary",
+      "scene_path": "res://levels/ice_reliquary.tscn",
+      "tags": [
+        "ice",
+        "reliquary",
+        "collectible",
+        "representative",
+        "phaser_branch"
+      ],
+      "expected_neighbors": [],
+      "expected_collectibles": [
+        "ice-keystone"
+      ],
+      "expected_metadata": {
+        "cluster": "ice",
+        "difficulty": 4
+      },
+      "migration_status": "representative",
+      "stage_id": "ice-reliquary",
+      "source_ref": "stage_manifest:ice-reliquary"
+    },
+    {
+      "id": "fire_reliquary",
+      "scene_path": "res://levels/fire_reliquary.tscn",
+      "tags": [
+        "fire",
+        "reliquary",
+        "collectible",
+        "representative",
+        "phaser_branch"
+      ],
+      "expected_neighbors": [],
+      "expected_collectibles": [
+        "fire-keystone"
+      ],
+      "expected_metadata": {
+        "cluster": "fire",
+        "difficulty": 4
+      },
+      "migration_status": "representative",
+      "stage_id": "fire-reliquary",
+      "source_ref": "stage_manifest:fire-reliquary"
+    },
+    {
+      "id": "ruins_reliquary",
+      "scene_path": "res://levels/ruins_reliquary.tscn",
+      "tags": [
+        "ruins",
+        "reliquary",
+        "collectible",
+        "representative",
+        "phaser_branch"
+      ],
+      "expected_neighbors": [],
+      "expected_collectibles": [
+        "cave-keystone"
+      ],
+      "expected_metadata": {
+        "cluster": "ruins",
+        "difficulty": 3
+      },
+      "migration_status": "representative",
+      "stage_id": "ruins-reliquary",
+      "source_ref": "stage_manifest:ruins-reliquary"
+    },
+    {
+      "id": "controller_lab",
+      "scene_path": "res://levels/controller_lab.tscn",
+      "tags": [
+        "controller_lab",
+        "prototype"
+      ],
+      "migration_status": "prototype",
+      "source_ref": ""
+    },
+    {
+      "id": "flat_room",
+      "scene_path": "res://levels/flat_room.tscn",
+      "tags": [
+        "goal",
+        "test_room"
+      ],
+      "migration_status": "test",
+      "source_ref": ""
+    },
+    {
+      "id": "jump_room",
+      "scene_path": "res://levels/jump_room.tscn",
+      "tags": [
+        "platforming",
+        "heal",
+        "test_room"
+      ],
+      "migration_status": "test",
+      "source_ref": ""
+    },
+    {
+      "id": "door_room",
+      "scene_path": "res://levels/door_room.tscn",
+      "tags": [
+        "door_transition",
+        "test_room"
+      ],
+      "migration_status": "test",
+      "source_ref": ""
+    },
+    {
+      "id": "combat_room",
+      "scene_path": "res://levels/combat_room.tscn",
+      "tags": [
+        "combat",
+        "ability",
+        "representative"
+      ],
+      "migration_status": "representative",
+      "source_ref": "docs/design.md"
+    },
+    {
+      "id": "flying_combat_room",
+      "scene_path": "res://levels/flying_combat_room.tscn",
+      "tags": [
+        "combat",
+        "ability",
+        "flying_enemy",
+        "representative"
+      ],
+      "migration_status": "representative",
+      "source_ref": "docs/design.md"
+    },
+    {
+      "id": "danger_room",
+      "scene_path": "res://levels/danger_room.tscn",
+      "tags": [
+        "damage",
+        "game_over",
+        "test_room"
+      ],
+      "migration_status": "test",
+      "source_ref": "docs/design.md"
+    },
+    {
+      "id": "revive_room",
+      "scene_path": "res://levels/revive_room.tscn",
+      "tags": [
+        "damage",
+        "revive",
+        "test_room"
+      ],
+      "migration_status": "test",
+      "source_ref": "docs/design.md"
+    },
+    {
+      "id": "heal_room",
+      "scene_path": "res://levels/heal_room.tscn",
+      "tags": [
+        "heal",
+        "representative",
+        "goal"
+      ],
+      "migration_status": "representative",
+      "source_ref": "docs/design.md"
+    }
+  ]
+}
