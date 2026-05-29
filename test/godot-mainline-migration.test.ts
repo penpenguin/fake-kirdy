@@ -21,7 +21,7 @@ describe('Godot mainline migration contract', () => {
       'Decision Log',
       'Outcomes & Retrospective',
       'Godot canonical',
-      'legacy/reference',
+      'legacy reference copy has been removed',
       'Milestone 10',
     ].forEach((requiredText) => {
       expect(plan).toContain(requiredText);
@@ -58,10 +58,10 @@ describe('Godot mainline migration contract', () => {
     const readme = readText('README.md');
 
     expect(agents).toContain('Godot canonical');
-    expect(agents).toContain('Phaser legacy/reference');
+    expect(agents).toContain('legacy reference copy has been removed');
     expect(readme).toContain('Godot');
     expect(readme).toContain('npm run dev');
-    expect(readme).toContain('legacy/reference source');
+    expect(readme).toContain('legacy reference copy has been removed');
     expect(readme).toContain('godot:run');
     expect(readme).toContain('trace:summary');
   });

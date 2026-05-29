@@ -8,7 +8,7 @@
 
 ![Kirdy key visual](docs/key_visual.gif)
 
-Fake Kirdy uses Godot 4 as the canonical runtime. The former Phaser + Matter.js implementation remains only as legacy/reference source for gameplay intent and migration audits.
+Fake Kirdy uses Godot 4 as the canonical runtime. The former Phaser + Matter.js reference copy has been removed from the repository after its gameplay intent, topology, and asset evidence were migrated into Godot-owned data.
 
 ## Godot Mainline
 
@@ -22,10 +22,10 @@ Fake Kirdy uses Godot 4 as the canonical runtime. The former Phaser + Matter.js 
 
 The canonical Godot project lives in `godot/`. The export wrapper skips gracefully if Godot or export templates are unavailable. The older `prototypes/godot-v2/` tree is kept as historical reference during the migration.
 
-## Legacy Reference
+## Legacy Removal
 
 The deployed Phaser build is still useful as a gameplay reference during migration: [Fake Kirdy on GitHub Pages](https://penpenguin.github.io/fake-kirdy/).
 
-The root package no longer exposes Phaser/Vite runtime commands or dependencies. Optional legacy/reference copies may remain for audits only; use Godot commands for run/build/test.
+The root package no longer exposes Phaser/Vite runtime commands or dependencies, and the legacy reference copy has been removed. Use Godot commands for run/build/test.
 
-Run `npm run legacy:inventory` to see the remaining legacy/reference source surface. Run `npm run godot:parity-ledger -- --fail-on-blockers` before changing that boundary.
+Run `npm run legacy:inventory` to confirm the removed legacy surface remains empty. Run `npm run godot:parity-ledger -- --fail-on-blockers` before changing that boundary again.

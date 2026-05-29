@@ -70,7 +70,7 @@ describe('Godot v2 export workflow', () => {
     const plan = readText('docs/godot-v2/full-migration-execplan.md');
 
     expect(readme).toContain('npm run godot:export');
-    expect(readme).toContain('legacy/reference source');
+    expect(readme).toContain('legacy reference copy has been removed');
     expect(readme).toContain('npm run build');
     expect(agents).toContain('npm run godot:export');
     expect(agents).toContain('npm run build');

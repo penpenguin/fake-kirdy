@@ -1,12 +1,12 @@
 # Godot v2 Legacy Reference Boundary
 
-Godot is the canonical runtime. Any Phaser + Matter.js copy that remains in the repository is an optional reference copy for gameplay intent, content audits, and historical regression context. It is not required by the canonical runtime or canonical import data.
+Godot is the canonical runtime. The Phaser + Matter.js legacy reference copy has been removed from the repository after its gameplay intent, content topology, migrated assets, and regression evidence were captured in Godot-owned docs, data, tests, and resources. It is not required by the canonical runtime or canonical import data.
 
 ## Current Legacy Surface
 
 Runtime source and web assets:
 
-Optional reference copy only. Its concrete files are reported by `npm run legacy:inventory` when present.
+Removed from the repository. `npm run legacy:inventory` should report empty `source_dirs` and `config_files`.
 
 Legacy commands:
 
@@ -16,15 +16,15 @@ Legacy runtime dependencies:
 
 None. Root Phaser/Vite dependencies have been removed.
 
-Use `npm run legacy:inventory` for the current machine-readable inventory. The inventory marks this surface as `required_by_canonical_runtime: false`.
+Use `npm run legacy:inventory` for the current machine-readable inventory. The inventory marks this surface as `removed from canonical repository` and `required_by_canonical_runtime: false`.
 
 Use `docs/godot-v2/phaser-parity-ledger.json` and `npm run godot:parity-ledger -- --check` to see which Phaser reference systems are ported, partial, deferred, deprecated, or still blocking retirement.
 
 ## Allowed Uses
 
-Use optional legacy/reference material to confirm gameplay intent, map topology, input semantics, save fields, enemy behavior, collectibles, and results flow while auditing Godot parity.
+Use Godot-owned docs, stage manifests, generated schema, replay fixtures, trace summaries, tests, and resources to confirm gameplay intent, map topology, input semantics, save fields, enemy behavior, collectibles, and results flow while auditing Godot parity.
 
-Do not add new mainline gameplay to optional legacy/reference copies. New canonical runtime work belongs under `godot/`, with supporting validation or import tooling under `scripts/` and tests under `test/`.
+Do not reintroduce optional legacy/reference copies or add new Phaser runtime behavior. New canonical runtime work belongs under `godot/`, with supporting validation or import tooling under `scripts/` and tests under `test/`.
 
 ## Retirement Gates
 

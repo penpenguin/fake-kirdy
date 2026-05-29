@@ -375,6 +375,7 @@ The existing Godot prototype under `prototypes/godot-v2/` already contains a thi
 - 2026-05-28: Count minimal map, HUD, inventory/progress, settings, and result overlays as the runtime-retirement UI baseline. Polished menus, animation, audio cues, and final visual treatment remain tracked by deferred `audio-and-polish` backlog rather than blocking Phaser runtime retirement.
 - 2026-05-28: Treat retained `legacy/phaser-reference/src/`, `legacy/phaser-reference/public/`, `legacy/phaser-reference/index.html`, and `legacy/phaser-reference/vite.config.ts` as legacy/reference source only. Root runtime commands, package dependencies, typecheck, and Vitest validation are now Godot canonical; Phaser/Vite can be audited from source but not run from the root package.
 - 2026-05-29: Keep optional legacy/reference copies discoverable through `legacy:inventory`, but do not make current generators, docs, tests, or parity evidence depend on their paths. The canonical source of migrated stage topology is now `godot/levels/stage_manifest.json`.
+- 2026-05-29: The legacy reference copy has been removed from the repository after Godot-owned stage manifests, generated schema, migrated assets, replay fixtures, and docs became the canonical audit evidence.
 
 ## Plan Of Work
 

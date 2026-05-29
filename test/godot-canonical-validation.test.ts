@@ -22,7 +22,7 @@ describe('Godot canonical validation and legacy boundary', () => {
     expect(packageJson.devDependencies?.vite).toBeUndefined();
   });
 
-  it('reports the optional legacy reference inventory outside the canonical runtime', () => {
+  it('reports that the legacy reference copy has been removed from the canonical repository', () => {
     const packageJson = JSON.parse(readFileSync(join(repoRoot, 'package.json'), 'utf8')) as {
       scripts?: Record<string, string>;
     };
@@ -38,6 +38,7 @@ describe('Godot canonical validation and legacy boundary', () => {
         status?: string;
         required_by_canonical_runtime?: boolean;
         source_dirs?: string[];
+        config_files?: string[];
         commands?: string[];
         dependencies?: string[];
       };
@@ -46,15 +47,18 @@ describe('Godot canonical validation and legacy boundary', () => {
 
     expect(inventory.canonical_runtime).toBe('godot');
     expect(inventory.legacy_runtime?.required_by_canonical_runtime).toBe(false);
-    expect(inventory.legacy_runtime?.status).toBe('optional reference copy outside canonical runtime');
+    expect(inventory.legacy_runtime?.status).toBe('removed from canonical repository');
+    expect(inventory.legacy_runtime?.source_dirs).toEqual([]);
+    expect(inventory.legacy_runtime?.config_files).toEqual([]);
     expect(inventory.legacy_runtime?.commands).toEqual([]);
     expect(inventory.legacy_runtime?.dependencies).toEqual([]);
+    expect(existsSync(join(repoRoot, 'legacy'))).toBe(false);
     expect(inventory.retirement_gates).toEqual(
       expect.arrayContaining(['canonical replay suite passes', 'root Phaser/Vite dependencies removed']),
     );
   });
 
-  it('documents how optional legacy reference material is constrained until retirement', () => {
+  it('documents that the legacy reference copy has been removed', () => {
     const docsPath = join(repoRoot, 'docs', 'godot-v2', 'legacy-reference-boundary.md');
     expect(existsSync(docsPath)).toBe(true);
 
@@ -62,14 +66,16 @@ describe('Godot canonical validation and legacy boundary', () => {
     const readme = readFileSync(join(repoRoot, 'README.md'), 'utf8');
     const agents = readFileSync(join(repoRoot, 'AGENTS.md'), 'utf8');
 
-    expect(docs).toContain('optional reference copy');
+    expect(docs).toContain('removed from the repository');
     expect(docs).toContain('not required by the canonical runtime');
     expect(docs).toContain('Root runtime dependencies removed');
     expect(docs).toContain('retirement gates');
     expect(readme).toContain('npm run test:canonical');
     expect(readme).toContain('npm run legacy:inventory');
+    expect(readme).toContain('legacy reference copy has been removed');
     expect(agents).toContain('npm run test:canonical');
     expect(agents).toContain('legacy:inventory');
+    expect(agents).toContain('legacy reference copy has been removed');
   });
 
   it('keeps root tests limited to Godot canonical validation', () => {

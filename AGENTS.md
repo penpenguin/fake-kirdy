@@ -1,10 +1,10 @@
 # Repository Guidelines
 
 ## Project Intent
-- Godot canonical is now the mainline direction for Fake Kirdy. The repository is migrating from the current Phaser + Matter.js game to a Godot 4 project.
-- Phaser legacy/reference source remains useful for gameplay behavior, map topology, controls, tests, and regression checks, but root runtime commands and dependencies are now Godot canonical.
+- Godot canonical is now the mainline direction for Fake Kirdy. The repository has migrated from the former Phaser + Matter.js game to a Godot 4 project.
+- The legacy reference copy has been removed from the repository; gameplay behavior, map topology, controls, regression checks, and migrated assets now live in Godot-owned docs, data, tests, and resources.
 - The Godot mainline validates a `CharacterBody2D` platformer controller, editor-driven level design, headless replay/trace output, and trace-derived metrics.
-- Do not add new Phaser runtime behavior. Use the retained legacy/reference source only for audits and migration context.
+- Do not add new Phaser runtime behavior or reintroduce Phaser runtime dependencies.
 
 ## Serena Tooling Expectations
 - Default to Serena's MCP integrations whenever you need context; it centralizes specs, saved memories, and helper scripts so agents stay in sync.
@@ -17,7 +17,7 @@ When writing complex features or significant refactors, use an ExecPlan (as desc
 
 ## Project Structure & Module Organization
 - `godot/` contains the canonical Godot 4 project.
-- Optional legacy/reference copies may exist for audits only; they are not part of the root runtime, canonical import data, or canonical test gate.
+- The legacy reference copy has been removed; it is not part of the root runtime, canonical import data, or canonical test gate.
 - Canonical repository tests live under `test/godot*.test.ts` plus `test/trace-summary.test.ts`.
 - Static web assets from the former runtime are optional reference material only; canonical assets live under `godot/resources/`.
 - Scope, rules, and open tasks are tracked in `docs/`; revise those specs before adjusting gameplay.
@@ -34,15 +34,15 @@ When writing complex features or significant refactors, use an ExecPlan (as desc
 - `npm run build` runs the canonical Godot export wrapper and skips gracefully when Godot or export templates are unavailable.
 - `npm run test` executes the canonical Godot migration Vitest suite in jsdom and then `check:godot`; `npm run test:watch` keeps the red-green loop tight.
 - `npm run test:canonical` runs `npm test` plus the canonical Godot replay suite; use it before claiming Godot gameplay parity.
-- `npm run legacy:inventory` prints the retained legacy/reference source surface and retirement gates as JSON.
-- `npm run godot:parity-ledger -- --fail-on-blockers` must pass before changing the retained legacy/reference boundary.
+- `npm run legacy:inventory` confirms the removed legacy source/config surface remains empty and prints retirement gates as JSON.
+- `npm run godot:parity-ledger -- --fail-on-blockers` must pass before changing the legacy boundary again.
 - `npm run typecheck` runs `tsc --noEmit` to catch signature drift early.
 - For Godot files, keep optional scripts graceful when `godot` is not installed. `npm test` may include non-destructive Godot checks only if they skip gracefully without Godot.
 
 ## Coding Style & Naming Conventions
 - Use TypeScript with ES modules, 2-space indentation, and `const` defaults; supply explicit return types for exported APIs.
 - Favor `camelCase` for values, `PascalCase` for types and classes, and kebab-case filenames (`create-game-scene.ts`) unless mirroring third-party names.
-- Keep retained Phaser reference factories side-effect free if auditing them; do not add new DOM/runtime behavior outside the Godot mainline.
+- Do not add new DOM/runtime behavior outside the Godot mainline.
 - No repo formatter is enforced, so follow surrounding style and keep imports ordered logically.
 
 ## Testing Guidelines
@@ -51,12 +51,12 @@ When writing complex features or significant refactors, use an ExecPlan (as desc
 - Name files `<subject>.test.ts` near the code or place infra checks under `test/`.
 - Apply Takuto Wada's TDD cycle: write the smallest failing spec, make it pass, then refactor safely.
 - Extend `vitest.setup.ts` for shared matchers instead of repeating hooks.
-- Guard critical Godot gameplay with replay or trace tests before fixing bugs; retained Phaser source, when present, is audit material, not mainline runtime.
+- Guard critical Godot gameplay with replay or trace tests before fixing bugs.
 - Run `npm run test` after changes that affect existing TypeScript code, repo configuration, or shared documentation that changes development rules.
 
 ## Godot Canonical Migration Rules
 - Treat Godot as the canonical runtime, but migrate through thin playable milestones instead of a destructive rewrite.
-- Phaser legacy/reference source remains available for audits, but Godot build / run / replay / trace / metrics and representative gameplay content are canonical.
+- Phaser legacy/reference source is no longer retained in the repository; Godot build / run / replay / trace / metrics and representative gameplay content are canonical.
 - Do not reintroduce Phaser runtime dependencies or commands into the root package.
 - Do not port every enemy, map, save flow, menu, audio path, or UI surface in one step. Port the smallest mainline-equivalent behavior first.
 - Do not introduce large binary assets without a clear review note.
