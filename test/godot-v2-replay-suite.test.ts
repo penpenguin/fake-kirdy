@@ -7,6 +7,16 @@ import { describe, expect, it } from 'vitest';
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(currentDir, '..');
 const suitePath = join(repoRoot, 'godot', 'tests', 'replay_suite.json');
+const replayRoot = join(repoRoot, 'godot', 'tests', 'replays');
+
+const readReplay = (filename: string): {
+  start_level_id?: string;
+  start_spawn_id?: string;
+  initial_ability_type?: string;
+  setting_difficulty?: string;
+  max_frames?: number;
+  frames?: Array<{ frame?: number; actions?: Record<string, boolean> }>;
+} => JSON.parse(readFileSync(join(replayRoot, filename), 'utf8'));
 
 describe('Godot v2 replay suite workflow', () => {
   it('defines a canonical representative replay suite', () => {
@@ -18,6 +28,8 @@ describe('Godot v2 replay suite workflow', () => {
         id?: string;
         replay_path?: string;
         expected_outcome?: string;
+        expected_events?: string[];
+        expected_last_hud?: Record<string, string | number | boolean>;
         tags?: string[];
       }>;
     };
@@ -41,6 +53,76 @@ describe('Godot v2 replay suite workflow', () => {
     expect(byId.get('terminal_generated_goal')?.expected_outcome).toBe('complete');
   });
 
+  it('adds focused replay fixtures for the new gameplay completion contracts', () => {
+    const suite = JSON.parse(readFileSync(suitePath, 'utf8')) as {
+      replays?: Array<{
+        id?: string;
+        replay_path?: string;
+        expected_outcome?: string;
+        expected_events?: string[];
+        expected_last_hud?: Record<string, string | number | boolean>;
+        tags?: string[];
+      }>;
+    };
+    const byId = new Map(suite.replays?.map((replay) => [replay.id, replay]));
+
+    expect(byId.get('combat_ability_damage_enemy')?.expected_events).toEqual(expect.arrayContaining([
+      'ability.used',
+      'enemy.damaged',
+      'enemy.defeated',
+    ]));
+    expect(readReplay('combat_ability_damage_enemy.json').frames?.some((frame) => frame.actions?.use_ability)).toBe(true);
+
+    expect(byId.get('combat_locked_door_without_ability')?.expected_events).toContain('door.locked');
+    expect(readReplay('combat_locked_door_without_ability.json').start_level_id).toBe('combat_room');
+
+    expect(byId.get('combat_ability_unlocks_door')?.expected_events).toEqual(expect.arrayContaining([
+      'door.entered',
+      'level.loaded',
+    ]));
+    expect(readReplay('combat_ability_unlocks_door.json').initial_ability_type).toBe('spark');
+
+    expect(byId.get('danger_hazard_trace')?.expected_events).toEqual(expect.arrayContaining([
+      'hazard.entered',
+      'player.damaged',
+    ]));
+    expect(readReplay('danger_hazard_trace.json').start_level_id).toBe('danger_room');
+
+    expect(byId.get('fire_area_ability_gate_trace')?.expected_events).toEqual(expect.arrayContaining([
+      'ability.used',
+      'ability_gate.opened',
+    ]));
+    expect(readReplay('fire_area_ability_gate_trace.json').initial_ability_type).toBe('fire');
+
+    expect(byId.get('hard_enemy_attack_trace')?.expected_events).toEqual(expect.arrayContaining([
+      'enemy.attack.started',
+      'player.damaged',
+    ]));
+    expect(byId.get('hard_enemy_attack_trace')?.expected_last_hud).toMatchObject({
+      difficulty: 'hard',
+      target_enemy_hp: 3,
+    });
+    expect(readReplay('hard_enemy_attack_trace.json').setting_difficulty).toBe('hard');
+
+    expect(byId.get('flying_spit_projectile_hit')?.expected_events).toEqual(expect.arrayContaining([
+      'enemy.released',
+      'spit.projectile.fired',
+      'spit.projectile.hit',
+      'enemy.damaged',
+    ]));
+    expect(readReplay('flying_spit_projectile_hit.json').frames?.some((frame) => frame.actions?.inhale === false)).toBe(true);
+
+    expect(byId.get('forest_reliquary_locked_without_key')?.expected_events).toContain('door.locked');
+    expect(readReplay('forest_reliquary_locked_without_key.json').start_spawn_id).toBe('door_check');
+
+    expect(byId.get('forest_reliquary_key_unlocks_door')?.expected_events).toEqual(expect.arrayContaining([
+      'collectible.collected',
+      'item.acquired',
+      'door.entered',
+    ]));
+    expect(readReplay('forest_reliquary_key_unlocks_door.json').start_level_id).toBe('forest_reliquary');
+  });
+
   it('provides a replay suite runner that can list the configured suite without Godot', () => {
     const output = execFileSync('node', ['scripts/run-godot-replay-suite.mjs', '--list'], {
       cwd: repoRoot,
@@ -56,6 +138,10 @@ describe('Godot v2 replay suite workflow', () => {
     expect(listed.replays?.map((replay) => replay.id)).toContain('settings_adjustment');
     expect(listed.replays?.map((replay) => replay.id)).toContain('controller_lab_jump');
     expect(listed.replays?.map((replay) => replay.id)).toContain('revive_room_revive_then_game_over');
+    expect(listed.replays?.map((replay) => replay.id)).toContain('combat_ability_damage_enemy');
+    expect(listed.replays?.map((replay) => replay.id)).toContain('fire_area_ability_gate_trace');
+    expect(listed.replays?.map((replay) => replay.id)).toContain('flying_spit_projectile_hit');
+    expect(listed.replays?.map((replay) => replay.id)).toContain('forest_reliquary_key_unlocks_door');
   });
 
   it('wires the suite into package scripts and documentation', () => {
@@ -66,6 +152,8 @@ describe('Godot v2 replay suite workflow', () => {
     const runner = readFileSync(join(repoRoot, 'scripts', 'run-godot-replay-suite.mjs'), 'utf8');
 
     expect(packageJson.scripts?.['godot:replay-suite']).toContain('scripts/run-godot-replay-suite.mjs');
+    expect(runner).toContain('expected_events');
+    expect(runner).toContain('expected_last_hud');
     expect(runner).toContain('last_hud: summary.last_hud');
     expect(runner).toContain('last_result_overlay: summary.last_result_overlay');
     expect(docs).toContain('godot:replay-suite');

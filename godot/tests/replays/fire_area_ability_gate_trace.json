@@ -1,0 +1,32 @@
+{
+  "start_level_id": "fire_area",
+  "start_spawn_id": "ability_gate",
+  "initial_ability_type": "fire",
+  "level_id": "fire_area",
+  "fps": 60,
+  "max_frames": 30,
+  "frames": [
+    {
+      "frame": 0,
+      "actions": {
+        "move_right": false,
+        "inhale": false,
+        "swallow": false,
+        "use_ability": false
+      }
+    },
+    {
+      "frame": 1,
+      "actions": {
+        "move_right": false,
+        "use_ability": true
+      }
+    },
+    {
+      "frame": 2,
+      "actions": {
+        "use_ability": false
+      }
+    }
+  ]
+}

@@ -28,6 +28,8 @@ describe('Godot v2 procedural runtime loading', () => {
     expect(source).toContain('EnemySpawnMarkerScript');
     expect(source).toContain('HealMarkerScript');
     expect(source).toContain('CollectibleMarkerScript');
+    expect(source).toContain('HazardMarkerScript');
+    expect(source).toContain('AbilityGateMarkerScript');
     expect(source).toContain('GoalMarkerScript');
   });
 
@@ -41,13 +43,19 @@ describe('Godot v2 procedural runtime loading', () => {
     expect(source).toContain('add_generated_content_markers');
     expect(source).toContain('runtime_layout.get("content"');
     expect(source).toContain('add_generated_enemy_marker');
+    expect(source).toContain('attack_damage');
+    expect(source).toContain('attack_cooldown_ms');
     expect(source).toContain('add_generated_heal_marker');
     expect(source).toContain('add_generated_collectible_marker');
+    expect(source).toContain('add_generated_hazard_marker');
+    expect(source).toContain('add_generated_ability_gate_marker');
     expect(source).toContain('add_generated_goal_marker');
     expect(source).toContain('generated_enemy');
     expect(source).toContain('generated_heal');
     expect(source).toContain('generated_shard');
     expect(source).toContain('generated_goal');
+    expect(source).toContain('generated_hazard');
+    expect(source).toContain('generated_ability_gate');
   });
 
   it('keeps generated procedural levels out of the scene-authored catalog until they are playable through the fallback', () => {

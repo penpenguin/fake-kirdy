@@ -8,6 +8,8 @@ var doors: Array[Dictionary] = []
 var enemy_spawns: Array[Dictionary] = []
 var heals: Array[Dictionary] = []
 var collectibles: Array[Dictionary] = []
+var hazards: Array[Dictionary] = []
+var ability_gates: Array[Dictionary] = []
 var goals: Array[Dictionary] = []
 var camera_bounds: Array[Dictionary] = []
 var tilemaps: Array[Dictionary] = []
@@ -30,6 +32,10 @@ func add_marker(marker: Dictionary) -> void:
             heals.append(marker)
         "collectible":
             collectibles.append(marker)
+        "hazard":
+            hazards.append(marker)
+        "ability_gate":
+            ability_gates.append(marker)
         "goal":
             goals.append(marker)
         "camera_bounds":
@@ -45,6 +51,8 @@ func marker_count() -> int:
         + enemy_spawns.size()
         + heals.size()
         + collectibles.size()
+        + hazards.size()
+        + ability_gates.size()
         + goals.size()
         + camera_bounds.size()
         + tilemaps.size()

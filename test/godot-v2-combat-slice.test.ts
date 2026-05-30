@@ -39,6 +39,7 @@ describe('Godot v2 minimal combat slice', () => {
     expect(script).toContain('extends "res://scripts/enemies/SimpleEnemy.gd"');
     expect(script).toContain('@export var hover_amplitude');
     expect(script).toContain('enemy.idle');
+    expect(script).toContain('tick_hurt_invulnerability(delta)');
     expect(scene).toContain('FlyingEnemy.gd');
     expect(scene).not.toContain('RigidBody2D');
     expect(session).toContain('FlyingEnemyScene');

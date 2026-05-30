@@ -88,6 +88,13 @@ describe('trace summary metrics', () => {
           payload: { collectible_id: 'forest-keystone', item_id: 'forest-keystone' },
         }),
         JSON.stringify({
+          frame: 13,
+          time_ms: 220,
+          event_type: 'door.locked',
+          level_id: 'forest_reliquary',
+          payload: { door_id: 'forest_exit', reason: 'missing_item:forest-keystone' },
+        }),
+        JSON.stringify({
           frame: 14,
           time_ms: 233,
           event_type: 'hud.updated',
@@ -124,6 +131,39 @@ describe('trace summary metrics', () => {
             completed_level_ids: ['flat_room'],
             visited_level_ids: ['combat_room', 'central_hub', 'forest_reliquary'],
             unlocked_door_ids: ['central_hub:door_to_heal_room', 'door_room:door_to_jump_room'],
+            defeated_enemy_group_ids: ['sky_guard'],
+            defeated_boss_ids: ['sky_guard_boss'],
+          },
+        }),
+        JSON.stringify({
+          frame: 18,
+          time_ms: 300,
+          event_type: 'enemy.defeated',
+          level_id: 'sky_sanctum',
+          payload: {
+            enemy_id: 'sky_sanctum_enemy',
+            enemy_group_id: 'sky_guard',
+            boss_id: 'sky_guard_boss',
+          },
+        }),
+        JSON.stringify({
+          frame: 20,
+          time_ms: 333,
+          event_type: 'hazard.entered',
+          level_id: 'danger_room',
+          payload: { hazard_id: 'danger_spikes', hazard_type: 'spike', damage: 3 },
+        }),
+        JSON.stringify({
+          frame: 22,
+          time_ms: 367,
+          event_type: 'ability_gate.opened',
+          level_id: 'fire_area',
+          payload: {
+            gate_id: 'fire_area_ice_block',
+            required_ability_type: 'fire',
+            ability_type: 'fire',
+            gate_effect: 'melt_ice',
+            opened_ability_gate_ids: ['fire_area_ice_block'],
           },
         }),
         JSON.stringify({
@@ -163,9 +203,15 @@ describe('trace summary metrics', () => {
       collectibles_collected: string[];
       items_collected: string[];
       abilities_acquired: string[];
+      enemies_defeated: string[];
       completed_levels: string[];
       visited_level_ids: string[];
       unlocked_door_ids: string[];
+      defeated_enemy_group_ids: string[];
+      defeated_boss_ids: string[];
+      door_lock_reasons: string[];
+      hazards_entered: string[];
+      ability_gates_opened: string[];
       explored_tiles_by_level: Record<string, string[]>;
       explored_tile_count: number;
       last_player_position?: { x: number; y: number };
@@ -210,14 +256,18 @@ describe('trace summary metrics', () => {
       };
     };
 
-    expect(summary.event_count).toBe(12);
-    expect(summary.levels).toEqual(['combat_room', 'flat_room', 'forest_reliquary', 'heal_room']);
+    expect(summary.event_count).toBe(16);
+    expect(summary.levels).toEqual(['combat_room', 'danger_room', 'fire_area', 'flat_room', 'forest_reliquary', 'heal_room', 'sky_sanctum']);
     expect(summary.duration_ms).toBe(700);
     expect(summary.outcome).toBe('complete');
     expect(summary.counts_by_type['ability.acquired']).toBe(1);
     expect(summary.counts_by_type['collectible.collected']).toBe(1);
     expect(summary.counts_by_type['item.acquired']).toBe(1);
     expect(summary.counts_by_type['hud.updated']).toBe(1);
+    expect(summary.counts_by_type['door.locked']).toBe(1);
+    expect(summary.counts_by_type['enemy.defeated']).toBe(1);
+    expect(summary.counts_by_type['hazard.entered']).toBe(1);
+    expect(summary.counts_by_type['ability_gate.opened']).toBe(1);
     expect(summary.counts_by_type['map.updated']).toBe(1);
     expect(summary.counts_by_type['result.overlay.shown']).toBe(1);
     expect(summary.counts_by_type['run.finished']).toBe(1);
@@ -226,9 +276,15 @@ describe('trace summary metrics', () => {
     expect(summary.collectibles_collected).toEqual(['forest-keystone']);
     expect(summary.items_collected).toEqual(['forest-keystone', 'ice-keystone']);
     expect(summary.abilities_acquired).toEqual(['spark']);
+    expect(summary.enemies_defeated).toEqual(['sky_sanctum_enemy']);
     expect(summary.completed_levels).toEqual(['flat_room', 'goal_sanctum']);
     expect(summary.visited_level_ids).toEqual(['central_hub', 'combat_room', 'forest_reliquary']);
     expect(summary.unlocked_door_ids).toEqual(['central_hub:door_to_heal_room', 'door_room:door_to_jump_room']);
+    expect(summary.defeated_enemy_group_ids).toEqual(['sky_guard']);
+    expect(summary.defeated_boss_ids).toEqual(['sky_guard_boss']);
+    expect(summary.door_lock_reasons).toEqual(['missing_item:forest-keystone']);
+    expect(summary.hazards_entered).toEqual(['danger_spikes']);
+    expect(summary.ability_gates_opened).toEqual(['fire_area_ice_block']);
     expect(summary.explored_tiles_by_level).toEqual({
       central_hub: ['3,11', '4,11'],
       combat_room: ['5,12'],

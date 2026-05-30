@@ -1,9 +1,10 @@
 {
-  "start_level_id": "labyrinth_029",
+  "start_level_id": "combat_room",
   "start_spawn_id": "default",
-  "level_id": "labyrinth_029",
+  "initial_ability_type": "spark",
+  "level_id": "combat_room",
   "fps": 60,
-  "max_frames": 670,
+  "max_frames": 520,
   "frames": [
     {
       "frame": 0,
@@ -15,7 +16,7 @@
       }
     },
     {
-      "frame": 650,
+      "frame": 500,
       "actions": {
         "move_right": false
       }

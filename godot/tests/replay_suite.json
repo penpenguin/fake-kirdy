@@ -14,10 +14,38 @@
       "tags": ["combat", "ability", "goal"]
     },
     {
+      "id": "combat_ability_damage_enemy",
+      "replay_path": "res://tests/replays/combat_ability_damage_enemy.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["ability.used", "enemy.damaged", "enemy.defeated"],
+      "tags": ["combat", "ability", "damage", "defeat", "trace"]
+    },
+    {
+      "id": "combat_locked_door_without_ability",
+      "replay_path": "res://tests/replays/combat_locked_door_without_ability.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["door.locked"],
+      "tags": ["combat", "door", "locked", "ability-gate", "trace"]
+    },
+    {
+      "id": "combat_ability_unlocks_door",
+      "replay_path": "res://tests/replays/combat_ability_unlocks_door.json",
+      "expected_outcome": "complete",
+      "expected_events": ["door.entered", "level.loaded"],
+      "tags": ["combat", "door", "ability-gate", "transition", "trace"]
+    },
+    {
       "id": "flying_enemy_release_swallow_goal",
       "replay_path": "res://tests/replays/flying_enemy_release_swallow_goal.json",
       "expected_outcome": "complete",
       "tags": ["combat", "flying_enemy", "release", "ability", "goal"]
+    },
+    {
+      "id": "flying_spit_projectile_hit",
+      "replay_path": "res://tests/replays/flying_spit_projectile_hit.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["enemy.released", "spit.projectile.fired", "spit.projectile.hit", "enemy.damaged"],
+      "tags": ["combat", "flying_enemy", "spit", "projectile", "trace"]
     },
     {
       "id": "central_hub_to_heal_goal",
@@ -42,6 +70,45 @@
       "replay_path": "res://tests/replays/revive_room_revive_then_game_over.json",
       "expected_outcome": "game_over",
       "tags": ["damage", "revive", "game_over"]
+    },
+    {
+      "id": "danger_hazard_trace",
+      "replay_path": "res://tests/replays/danger_hazard_trace.json",
+      "expected_outcome": "game_over",
+      "expected_events": ["hazard.entered", "player.damaged"],
+      "tags": ["damage", "hazard", "game_over", "trace"]
+    },
+    {
+      "id": "fire_area_ability_gate_trace",
+      "replay_path": "res://tests/replays/fire_area_ability_gate_trace.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["ability.used", "ability_gate.opened"],
+      "tags": ["ability", "ability-gate", "fire", "terrain", "trace"]
+    },
+    {
+      "id": "hard_enemy_attack_trace",
+      "replay_path": "res://tests/replays/hard_enemy_attack_trace.json",
+      "expected_outcome": "game_over",
+      "expected_events": ["enemy.attack.started", "player.damaged"],
+      "expected_last_hud": {
+        "difficulty": "hard",
+        "target_enemy_hp": 3
+      },
+      "tags": ["combat", "enemy-attack", "difficulty", "hard", "trace"]
+    },
+    {
+      "id": "forest_reliquary_locked_without_key",
+      "replay_path": "res://tests/replays/forest_reliquary_locked_without_key.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["door.locked"],
+      "tags": ["progression", "item", "door", "locked", "trace"]
+    },
+    {
+      "id": "forest_reliquary_key_unlocks_door",
+      "replay_path": "res://tests/replays/forest_reliquary_key_unlocks_door.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["collectible.collected", "item.acquired", "door.entered"],
+      "tags": ["progression", "item", "collectible", "door", "trace"]
     },
     {
       "id": "forest_generated_reliquary_chain",

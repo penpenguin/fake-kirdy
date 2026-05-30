@@ -27,6 +27,7 @@ describe('Godot v2 save persistence foundation', () => {
     expect(state).toContain('var completed_level_ids');
     expect(state).toContain('var visited_level_ids');
     expect(state).toContain('var unlocked_door_ids');
+    expect(state).toContain('var opened_ability_gate_ids');
     expect(state).toContain('var explored_tiles');
     expect(state).toContain('sanitize_explored_tiles');
     expect(state).toContain('var current_level_id');
@@ -63,6 +64,8 @@ describe('Godot v2 save persistence foundation', () => {
     expect(session).toContain('completed_level_ids');
     expect(session).toContain('visited_level_ids');
     expect(session).toContain('unlocked_door_ids');
+    expect(session).toContain('opened_ability_gate_ids');
+    expect(session).toContain('get_opened_ability_gate_ids');
     expect(session).toContain('explored_tiles');
     expect(session).toContain('mark_player_tile_explored');
     expect(session).toContain('get_explored_tiles_payload');

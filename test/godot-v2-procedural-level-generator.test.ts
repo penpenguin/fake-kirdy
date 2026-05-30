@@ -33,12 +33,21 @@ type ProceduralLevelExport = {
       };
       platforms?: Array<{ id?: string; position?: { x?: number; y?: number }; size?: { x?: number; y?: number } }>;
       content?: {
+        objective?: {
+          objective_type?: string;
+          objective_id?: string;
+          required_item_id?: string;
+          required_ability_type?: string;
+        };
         enemies?: Array<{
           id?: string;
           spawn_id?: string;
           enemy_type?: string;
           ability_type?: string;
           contact_damage?: number;
+          attack_damage?: number;
+          attack_radius?: number;
+          attack_cooldown_ms?: number;
           position?: { x?: number; y?: number };
         }>;
         heals?: Array<{
@@ -59,6 +68,22 @@ type ProceduralLevelExport = {
           id?: string;
           goal_id?: string;
           result_label?: string;
+          trigger_radius?: number;
+          position?: { x?: number; y?: number };
+        }>;
+        hazards?: Array<{
+          id?: string;
+          hazard_id?: string;
+          hazard_type?: string;
+          damage?: number;
+          trigger_radius?: number;
+          position?: { x?: number; y?: number };
+        }>;
+        ability_gates?: Array<{
+          id?: string;
+          gate_id?: string;
+          required_ability_type?: string;
+          gate_effect?: string;
           trigger_radius?: number;
           position?: { x?: number; y?: number };
         }>;
@@ -174,7 +199,21 @@ describe('Godot v2 procedural level schema generation', () => {
           enemy_type: 'generated_ground',
           ability_type: 'frost',
           contact_damage: 1,
+          attack_damage: 1,
+          attack_radius: 112,
+          attack_cooldown_ms: 4000,
           position: { x: 336, y: 400 },
+        },
+        {
+          id: 'GeneratedFlyingEnemySpawn',
+          spawn_id: 'labyrinth_010_generated_flying',
+          enemy_type: 'generated_flying',
+          ability_type: 'frost',
+          contact_damage: 1,
+          attack_damage: 1,
+          attack_radius: 148,
+          attack_cooldown_ms: 4000,
+          position: { x: 520, y: 320 },
         },
       ],
       collectibles: [
@@ -192,7 +231,7 @@ describe('Godot v2 procedural level schema generation', () => {
       {
         id: 'GeneratedHealMarkerRoute',
         heal_id: 'labyrinth_010_generated_heal',
-        amount: 1,
+        amount: 3,
         reward_type: 'health',
         position: { x: 456, y: 368 },
       },
@@ -227,6 +266,90 @@ describe('Godot v2 procedural level schema generation', () => {
         position: { x: 224, y: 368 },
       },
     ]);
+  });
+
+  it('varies generated room objectives and adds generated hazards and ability gates', () => {
+    const generated = JSON.parse(readFileSync(proceduralLevelsPath, 'utf8')) as ProceduralLevelExport;
+    const levels = new Map(generated.levels?.map((level) => [level.id, level]));
+    const forestRoute = levels.get('labyrinth_002');
+    const iceReliquaryRoute = levels.get('labyrinth_010');
+    const fireReliquaryRoute = levels.get('labyrinth_032');
+    const ruinsRoute = levels.get('labyrinth_047');
+    const terminalRoom = levels.get('labyrinth_132');
+
+    expect(forestRoute?.runtime_layout?.content?.objective).toMatchObject({
+      objective_type: 'defeat_enemies',
+      objective_id: 'labyrinth_002_defeat_enemies',
+    });
+    expect(forestRoute?.runtime_layout?.content?.hazards).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        hazard_id: 'labyrinth_002_spike_hazard',
+        hazard_type: 'spike',
+      }),
+    ]));
+
+    expect(iceReliquaryRoute?.runtime_layout?.content?.objective).toMatchObject({
+      objective_type: 'collect_key',
+      required_item_id: 'ice-generated-shard',
+    });
+    expect(iceReliquaryRoute?.runtime_layout?.content?.ability_gates).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        gate_id: 'labyrinth_010_ice_gate',
+        required_ability_type: 'ice',
+        gate_effect: 'freeze_water',
+      }),
+    ]));
+
+    expect(fireReliquaryRoute?.runtime_layout?.content?.ability_gates).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        required_ability_type: 'fire',
+        gate_effect: 'melt_ice',
+      }),
+    ]));
+    expect(ruinsRoute?.runtime_layout?.content?.ability_gates).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        required_ability_type: 'stone',
+        gate_effect: 'press_switch',
+      }),
+    ]));
+    expect(terminalRoom?.runtime_layout?.content?.objective).toMatchObject({
+      objective_type: 'goal',
+      objective_id: 'labyrinth_132_goal',
+    });
+  });
+
+  it('varies generated enemy encounters with multiple enemy roles and attack timing', () => {
+    const generated = JSON.parse(readFileSync(proceduralLevelsPath, 'utf8')) as ProceduralLevelExport;
+    const levels = new Map(generated.levels?.map((level) => [level.id, level]));
+    const iceReliquaryRoute = levels.get('labyrinth_010');
+    const skyRoute = levels.get('labyrinth_051');
+    const terminalRoom = levels.get('labyrinth_132');
+
+    expect(iceReliquaryRoute?.runtime_layout?.content?.enemies).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        spawn_id: 'labyrinth_010_generated_enemy',
+        enemy_type: 'generated_ground',
+        attack_damage: 1,
+        attack_radius: 112,
+        attack_cooldown_ms: 4000,
+      }),
+      expect.objectContaining({
+        spawn_id: 'labyrinth_010_generated_flying',
+        enemy_type: 'generated_flying',
+        attack_radius: 148,
+      }),
+    ]));
+
+    expect(skyRoute?.runtime_layout?.content?.enemies).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        spawn_id: 'labyrinth_051_generated_elite',
+        enemy_type: 'generated_flying',
+        contact_damage: 1,
+        attack_damage: 1,
+        attack_cooldown_ms: 4000,
+      }),
+    ]));
+    expect(terminalRoom?.runtime_layout?.content?.enemies).toEqual([]);
   });
 
   it('marks north/south procedural rooms with vertical-route layout metadata', () => {

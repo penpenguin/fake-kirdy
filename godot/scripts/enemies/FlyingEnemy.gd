@@ -18,6 +18,7 @@ func _physics_process(delta: float) -> void:
         super._physics_process(delta)
         return
 
+    tick_hurt_invulnerability(delta)
     hover_elapsed += delta
     global_position = hover_origin + Vector2(0.0, sin(hover_elapsed * hover_speed) * hover_amplitude)
 

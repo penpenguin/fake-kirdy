@@ -13,6 +13,7 @@ Fake Kirdy uses Godot 4 as the canonical runtime. The former Phaser + Matter.js 
 ## Godot Mainline
 
 - Run the canonical Godot project: `npm run dev` or `npm run godot:run`
+- If Godot is not available as `godot` or `godot4`, run with `GODOT_BIN=/path/to/godot npm run godot:run`
 - Run a headless replay when Godot is installed: `npm run godot:replay`
 - Export the canonical Godot Web build when export templates are installed: `npm run build` or `npm run godot:export`
 - Build the required public GitHub Pages artifact: `npm run build:public`

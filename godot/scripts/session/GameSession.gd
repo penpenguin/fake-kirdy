@@ -43,7 +43,12 @@ var acquired_item_ids: Dictionary = {}
 var completed_level_ids: Dictionary = {}
 var visited_level_ids: Dictionary = {}
 var unlocked_door_ids: Dictionary = {}
+var defeated_enemy_group_ids: Dictionary = {}
+var defeated_boss_ids: Dictionary = {}
+var opened_ability_gate_ids: Dictionary = {}
 var explored_tiles: Dictionary = {}
+var last_locked_door_reason: String = ""
+var ability_cooldown_remaining_ms: int = 0
 var saved_level_id: String = ""
 var saved_player_position: Vector2 = Vector2.ZERO
 var has_saved_player_position: bool = false
@@ -62,7 +67,7 @@ var level_visual_assets = LevelVisualAssetsScript.new()
 var requested_spawn_id: String = "default"
 
 @export var auto_start: bool = true
-@export var initial_level_id: String = "combat_room"
+@export var initial_level_id: String = "central_hub"
 @export var initial_spawn_id: String = "default"
 @export var save_enabled: bool = false
 @export var save_path: String = "user://fake_kirdy_save.json"
@@ -107,7 +112,12 @@ func start_session(start_level_id: String, start_spawn_id: String = "default", f
     completed_level_ids.clear()
     visited_level_ids.clear()
     unlocked_door_ids.clear()
+    defeated_enemy_group_ids.clear()
+    defeated_boss_ids.clear()
+    opened_ability_gate_ids.clear()
     explored_tiles.clear()
+    last_locked_door_reason = ""
+    ability_cooldown_remaining_ms = 0
     saved_level_id = ""
     saved_player_position = Vector2.ZERO
     has_saved_player_position = false
@@ -183,7 +193,13 @@ func _physics_process(delta: float) -> void:
         write_persistent_state()
     check_settings_actions()
     tick_player_invulnerability(delta)
+    tick_ability_cooldown(delta)
     check_combat_actions()
+    check_hazard_contacts()
+    if is_finished():
+        return
+
+    check_enemy_attacks(delta)
     check_enemy_contact_damage()
     if is_finished():
         return
@@ -265,7 +281,14 @@ func spawn_enemies() -> void:
         enemy.enemy_id = String(enemy_marker.get("id", "enemy"))
         enemy.ability_type = String(payload.get("ability_type", "spark"))
         enemy.contact_damage = int(payload.get("contact_damage", 1))
+        enemy.attack_damage = int(payload.get("attack_damage", enemy.contact_damage))
+        enemy.attack_radius = float(payload.get("attack_radius", 120.0))
+        enemy.attack_cooldown_ms = int(payload.get("attack_cooldown_ms", 1200))
+        enemy.enemy_group_id = String(payload.get("enemy_group_id", ""))
+        enemy.boss_id = String(payload.get("boss_id", ""))
         enemy.global_position = dictionary_to_vector2(enemy_marker.get("position", {}))
+        apply_difficulty_to_enemy(enemy)
+        enemy.call("configure_ai", player, float(payload.get("patrol_radius", 0.0)))
         add_child(enemy)
         enemies.append(enemy)
 
@@ -303,7 +326,7 @@ func capture_nearest_enemy() -> void:
     var facing := get_player_facing_direction()
 
     for enemy in enemies:
-        if not is_instance_valid(enemy) or enemy.state != "enemy.idle":
+        if not is_instance_valid(enemy) or not can_target_enemy(enemy):
             continue
 
         var distance: float = player.global_position.distance_to(enemy.global_position)
@@ -349,10 +372,38 @@ func release_captured_enemy() -> void:
     captured_enemy = null
     released_enemy.call("release")
     play_sfx(SfxKirdySpit)
+    var spit_profile := {
+        "damage": 2,
+        "range": 220.0,
+        "half_height": 48.0,
+        "knockback": 28.0,
+    }
     trace_recorder.call("record_player_event", "enemy.released", {
         "level_id": current_level_id,
         "player": get_player_trace(),
         "payload": get_enemy_payload(released_enemy),
+    })
+    trace_recorder.call("record_player_event", "spit.projectile.fired", {
+        "level_id": current_level_id,
+        "player": get_player_trace(),
+        "payload": {
+            "enemy": get_enemy_payload(released_enemy),
+            "profile": spit_profile,
+        },
+    })
+    var targets := find_enemy_targets(spit_profile, released_enemy)
+    if targets.is_empty():
+        return
+
+    var target = targets[0]
+    var result := apply_damage_to_enemy(target, int(spit_profile.get("damage", 2)), {
+        "source_type": "spit_projectile",
+        "projectile_enemy_id": released_enemy.enemy_id,
+    }, float(spit_profile.get("knockback", 0.0)))
+    trace_recorder.call("record_player_event", "spit.projectile.hit", {
+        "level_id": current_level_id,
+        "player": get_player_trace(),
+        "payload": result,
     })
 
 
@@ -364,6 +415,7 @@ func swallow_captured_enemy() -> void:
     captured_enemy = null
     swallowed_enemy.call("swallow")
     player.call("set_ability_type", swallowed_enemy.ability_type)
+    clear_resolved_locked_door_reason("missing_ability", String(swallowed_enemy.ability_type))
     play_sfx(SfxKirdySwallow)
     trace_recorder.call("record_player_event", "enemy.swallowed", {
         "level_id": current_level_id,
@@ -387,14 +439,273 @@ func use_ability() -> void:
     if String(player.ability_type) == "":
         return
 
+    if ability_cooldown_remaining_ms > 0:
+        return
+
+    var ability_type := String(player.ability_type)
+    var profile := get_ability_profile(ability_type)
+    ability_cooldown_remaining_ms = int(profile.get("cooldown_ms", 0))
     play_sfx(get_ability_sfx(String(player.ability_type)))
     trace_recorder.call("record_player_event", "ability.used", {
         "level_id": current_level_id,
         "player": get_player_trace(),
         "payload": {
-            "ability_type": player.ability_type,
+            "ability_type": ability_type,
+            "profile": profile,
         },
     })
+    check_ability_gate_interactions(ability_type, profile)
+    var targets := find_enemy_targets(profile)
+    for target in targets:
+        apply_damage_to_enemy(target, int(profile.get("damage", 1)), {
+            "source_type": "ability",
+            "ability_type": ability_type,
+        }, float(profile.get("knockback", 0.0)))
+
+
+func get_ability_profile(ability_type: String) -> Dictionary:
+    match ability_type:
+        "fire", "flame":
+            return {
+                "damage": 2,
+                "range": 240.0,
+                "half_height": 36.0,
+                "cooldown_ms": 260,
+                "knockback": 22.0,
+                "attack_type": "projectile",
+            }
+        "ice", "frost":
+            return {
+                "damage": 1,
+                "range": 180.0,
+                "half_height": 44.0,
+                "cooldown_ms": 220,
+                "knockback": 10.0,
+                "status": "frozen",
+                "attack_type": "beam",
+            }
+        "sword":
+            return {
+                "damage": 2,
+                "range": 92.0,
+                "half_height": 52.0,
+                "cooldown_ms": 180,
+                "knockback": 18.0,
+                "attack_type": "melee",
+            }
+        "spark":
+            return {
+                "damage": 2,
+                "range": 128.0,
+                "half_height": 84.0,
+                "cooldown_ms": 240,
+                "knockback": 12.0,
+                "attack_type": "burst",
+            }
+        "leaf":
+            return {
+                "damage": 1,
+                "range": 220.0,
+                "half_height": 32.0,
+                "cooldown_ms": 160,
+                "knockback": 16.0,
+                "attack_type": "cutter",
+            }
+        "stone":
+            return {
+                "damage": 3,
+                "range": 76.0,
+                "half_height": 58.0,
+                "cooldown_ms": 320,
+                "knockback": 30.0,
+                "attack_type": "heavy",
+            }
+        _:
+            return {
+                "damage": 1,
+                "range": 160.0,
+                "half_height": 40.0,
+                "cooldown_ms": 220,
+                "knockback": 12.0,
+                "attack_type": "generic",
+            }
+
+
+func find_enemy_targets(profile: Dictionary, ignored_enemy: Node = null) -> Array:
+    var targets := []
+    if player == null:
+        return targets
+
+    var facing := get_player_facing_direction()
+    var attack_range := float(profile.get("range", 120.0))
+    var half_height := float(profile.get("half_height", 48.0))
+    for enemy in enemies:
+        if enemy == ignored_enemy or not is_instance_valid(enemy) or not can_target_enemy(enemy):
+            continue
+
+        var offset: Vector2 = enemy.global_position - player.global_position
+        if offset.x * facing < -16.0:
+            continue
+        if abs(offset.x) > attack_range or abs(offset.y) > half_height:
+            continue
+
+        targets.append(enemy)
+
+    return targets
+
+
+func can_target_enemy(enemy: Node) -> bool:
+    if enemy == null or not is_instance_valid(enemy):
+        return false
+
+    return not ["enemy.captured", "enemy.swallowed", "enemy.defeated"].has(String(enemy.state))
+
+
+func apply_damage_to_enemy(enemy: Node, amount: int, source: Dictionary = {}, knockback: float = 0.0) -> Dictionary:
+    var result: Dictionary = enemy.call("take_damage", amount, source)
+    if knockback != 0.0:
+        enemy.call("apply_knockback", Vector2(get_player_facing_direction() * knockback, 0.0))
+
+    if int(result.get("damage", 0)) <= 0:
+        return result
+
+    trace_recorder.call("record_player_event", "enemy.damaged", {
+        "level_id": current_level_id,
+        "player": get_player_trace(),
+        "payload": result,
+    })
+
+    if bool(result.get("defeated", false)):
+        mark_enemy_defeated(result)
+        trace_recorder.call("record_player_event", "enemy.defeated", {
+            "level_id": current_level_id,
+            "player": get_player_trace(),
+            "payload": result,
+        })
+        sync_inventory_overlay("enemy.defeated", true)
+
+    sync_hud_overlay("enemy.damaged", true)
+    write_persistent_state()
+    return result
+
+
+func check_ability_gate_interactions(ability_type: String, profile: Dictionary) -> void:
+    if player == null or current_definition == null:
+        return
+
+    var gate_range := float(profile.get("range", 120.0))
+    for gate in current_definition.ability_gates:
+        var gate_id := String(gate.get("id", "ability_gate"))
+        if opened_ability_gate_ids.has(gate_id):
+            continue
+
+        var payload: Dictionary = gate.get("payload", {})
+        var required_ability_type := String(payload.get("required_ability_type", ""))
+        if not ability_matches_requirement(ability_type, required_ability_type):
+            continue
+
+        var radius := float(payload.get("trigger_radius", gate_range))
+        var gate_position := dictionary_to_vector2(gate.get("position", {}))
+        if player.global_position.distance_to(gate_position) > radius:
+            continue
+
+        opened_ability_gate_ids[gate_id] = true
+        var grants_item_id := String(payload.get("grants_item_id", ""))
+        trace_recorder.call("record_player_event", "ability_gate.opened", {
+            "level_id": current_level_id,
+            "player": get_player_trace(),
+            "payload": {
+                "gate_id": gate_id,
+                "required_ability_type": required_ability_type,
+                "ability_type": ability_type,
+                "gate_effect": String(payload.get("gate_effect", "open")),
+                "opened_ability_gate_ids": get_opened_ability_gate_ids(),
+                "grants_item_id": grants_item_id,
+            },
+        })
+        if grants_item_id != "":
+            acquire_item(grants_item_id, gate_id)
+        sync_hud_overlay("ability_gate.opened", true)
+        sync_inventory_overlay("ability_gate.opened", true)
+        write_persistent_state()
+        return
+
+
+func ability_matches_requirement(ability_type: String, required_ability_type: String) -> bool:
+    if required_ability_type == "":
+        return false
+
+    if ability_type == required_ability_type:
+        return true
+
+    if required_ability_type == "fire" and ability_type == "flame":
+        return true
+
+    if required_ability_type == "ice" and ability_type == "frost":
+        return true
+
+    return false
+
+
+func clear_resolved_locked_door_reason(requirement_prefix: String, requirement_value: String) -> void:
+    if last_locked_door_reason == "" or requirement_value == "":
+        return
+
+    var prefix := "%s:" % requirement_prefix
+    if not last_locked_door_reason.begins_with(prefix):
+        return
+
+    var required_value := last_locked_door_reason.substr(prefix.length())
+    if requirement_prefix == "missing_ability":
+        if ability_matches_requirement(requirement_value, required_value):
+            last_locked_door_reason = ""
+        return
+
+    if required_value == requirement_value:
+        last_locked_door_reason = ""
+
+
+func mark_enemy_defeated(result: Dictionary) -> void:
+    var enemy_group_id := String(result.get("enemy_group_id", ""))
+    if enemy_group_id != "":
+        defeated_enemy_group_ids[enemy_group_id] = true
+        clear_resolved_locked_door_reason("missing_defeated_enemy_group", enemy_group_id)
+
+    var boss_id := String(result.get("boss_id", ""))
+    if boss_id != "":
+        defeated_boss_ids[boss_id] = true
+        clear_resolved_locked_door_reason("missing_boss", boss_id)
+
+
+func check_enemy_attacks(delta: float) -> void:
+    if player == null or is_finished():
+        return
+
+    for enemy in enemies:
+        if not is_instance_valid(enemy) or not can_target_enemy(enemy):
+            continue
+
+        if enemy.has_method("tick_attack_cooldown"):
+            enemy.call("tick_attack_cooldown", delta)
+
+        if player_invulnerability_remaining_ms > 0:
+            continue
+
+        if not enemy.has_method("can_attack_player") or not bool(enemy.call("can_attack_player", player)):
+            continue
+
+        var attack_payload: Dictionary = enemy.call("mark_attack_started")
+        trace_recorder.call("record_player_event", "enemy.attack.started", {
+            "level_id": current_level_id,
+            "player": get_player_trace(),
+            "payload": attack_payload,
+        })
+        damage_player(int(attack_payload.get("attack_damage", enemy.contact_damage)), {
+            "source_type": "enemy_attack",
+            "enemy": get_enemy_payload(enemy),
+            "attack": attack_payload,
+        })
+        return
 
 
 func check_enemy_contact_damage() -> void:
@@ -402,7 +713,7 @@ func check_enemy_contact_damage() -> void:
         return
 
     for enemy in enemies:
-        if not is_instance_valid(enemy) or enemy.state != "enemy.idle":
+        if not is_instance_valid(enemy) or not can_target_enemy(enemy):
             continue
 
         if player.global_position.distance_to(enemy.global_position) > contact_damage_radius:
@@ -411,6 +722,38 @@ func check_enemy_contact_damage() -> void:
         damage_player(int(enemy.contact_damage), {
             "source_type": "enemy_contact",
             "enemy": get_enemy_payload(enemy),
+        })
+        return
+
+
+func check_hazard_contacts() -> void:
+    if player == null or is_finished() or player_invulnerability_remaining_ms > 0:
+        return
+
+    for hazard in current_definition.hazards:
+        var payload: Dictionary = hazard.get("payload", {})
+        var radius := float(payload.get("trigger_radius", 40.0))
+        var hazard_position := dictionary_to_vector2(hazard.get("position", {}))
+
+        if player.global_position.distance_to(hazard_position) > radius:
+            continue
+
+        var hazard_id := String(hazard.get("id", "hazard"))
+        var hazard_type := String(payload.get("hazard_type", "spike"))
+        var damage := int(payload.get("damage", 1))
+        trace_recorder.call("record_player_event", "hazard.entered", {
+            "level_id": current_level_id,
+            "player": get_player_trace(),
+            "payload": {
+                "hazard_id": hazard_id,
+                "hazard_type": hazard_type,
+                "damage": damage,
+            },
+        })
+        damage_player(damage, {
+            "source_type": "hazard",
+            "hazard_id": hazard_id,
+            "hazard_type": hazard_type,
         })
         return
 
@@ -435,7 +778,8 @@ func damage_player(amount: int, source: Dictionary = {}) -> void:
         },
     })
     sync_hud_overlay("player.damaged", true)
-    player_invulnerability_remaining_ms = max(player_invulnerability_ms, 0)
+    var difficulty_profile := get_difficulty_profile()
+    player_invulnerability_remaining_ms = max(int(difficulty_profile.get("player_invulnerability_ms", player_invulnerability_ms)), 0)
 
     if player_hp <= 0:
         if consume_player_revive(source):
@@ -490,6 +834,14 @@ func tick_player_invulnerability(delta: float) -> void:
 
     var elapsed_ms: int = int(round(max(delta, 0.0) * 1000.0))
     player_invulnerability_remaining_ms = max(player_invulnerability_remaining_ms - elapsed_ms, 0)
+
+
+func tick_ability_cooldown(delta: float) -> void:
+    if ability_cooldown_remaining_ms <= 0:
+        return
+
+    var elapsed_ms: int = int(round(max(delta, 0.0) * 1000.0))
+    ability_cooldown_remaining_ms = max(ability_cooldown_remaining_ms - elapsed_ms, 0)
 
 
 func check_heal_pickups() -> void:
@@ -600,7 +952,8 @@ func consume_player_revive(source: Dictionary = {}) -> bool:
 
 
 func heal_player(amount: int, heal_id: String = "") -> void:
-    var normalized_amount: int = max(amount, 0)
+    var difficulty_profile := get_difficulty_profile()
+    var normalized_amount: int = max(int(round(float(amount) * float(difficulty_profile.get("heal_multiplier", 1.0)))), 0)
     if normalized_amount <= 0:
         return
 
@@ -658,6 +1011,7 @@ func acquire_item(item_id: String, collectible_id: String = "") -> void:
         return
 
     acquired_item_ids[item_id] = true
+    clear_resolved_locked_door_reason("missing_item", item_id)
     trace_recorder.call("record_player_event", "item.acquired", {
         "level_id": current_level_id,
         "player": get_player_trace(),
@@ -700,6 +1054,24 @@ func get_unlocked_door_ids() -> Array:
     var door_ids := unlocked_door_ids.keys()
     door_ids.sort()
     return door_ids
+
+
+func get_defeated_enemy_group_ids() -> Array:
+    var group_ids := defeated_enemy_group_ids.keys()
+    group_ids.sort()
+    return group_ids
+
+
+func get_defeated_boss_ids() -> Array:
+    var boss_ids := defeated_boss_ids.keys()
+    boss_ids.sort()
+    return boss_ids
+
+
+func get_opened_ability_gate_ids() -> Array:
+    var gate_ids := opened_ability_gate_ids.keys()
+    gate_ids.sort()
+    return gate_ids
 
 
 func get_explored_tiles_payload() -> Dictionary:
@@ -800,6 +1172,50 @@ func get_ability_sfx(current_ability_type: String) -> AudioStream:
             return SfxAbilityFireAttack
 
 
+func get_difficulty_profile() -> Dictionary:
+    match sanitize_setting_difficulty(setting_difficulty):
+        "easy":
+            return {
+                "enemy_hp_multiplier": 0.75,
+                "contact_damage_multiplier": 0.5,
+                "enemy_attack_cooldown_multiplier": 1.25,
+                "player_invulnerability_ms": 1100,
+                "heal_multiplier": 1.5,
+            }
+        "hard":
+            return {
+                "enemy_hp_multiplier": 1.5,
+                "contact_damage_multiplier": 1.5,
+                "enemy_attack_cooldown_multiplier": 0.75,
+                "player_invulnerability_ms": 550,
+                "heal_multiplier": 0.75,
+            }
+        _:
+            return {
+                "enemy_hp_multiplier": 1.0,
+                "contact_damage_multiplier": 1.0,
+                "enemy_attack_cooldown_multiplier": 1.0,
+                "player_invulnerability_ms": player_invulnerability_ms,
+                "heal_multiplier": 1.0,
+            }
+
+
+func apply_difficulty_to_enemy(enemy: Node) -> void:
+    var profile := get_difficulty_profile()
+    enemy.max_hp = max(int(round(float(enemy.max_hp) * float(profile.get("enemy_hp_multiplier", 1.0)))), 1)
+    enemy.hp = enemy.max_hp
+    enemy.contact_damage = scale_enemy_damage_for_difficulty(int(enemy.contact_damage), profile)
+    enemy.attack_damage = scale_enemy_damage_for_difficulty(int(enemy.attack_damage), profile)
+    enemy.attack_cooldown_ms = max(int(round(float(enemy.attack_cooldown_ms) * float(profile.get("enemy_attack_cooldown_multiplier", 1.0)))), 120)
+
+
+func scale_enemy_damage_for_difficulty(amount: int, profile: Dictionary) -> int:
+    if amount <= 0:
+        return 0
+
+    return max(int(ceil(float(amount) * float(profile.get("contact_damage_multiplier", 1.0)))), 1)
+
+
 func sync_map_overlay(reason: String = "", emit_trace: bool = false) -> void:
     var explored_payload := get_explored_tiles_payload()
     if map_overlay != null and is_instance_valid(map_overlay):
@@ -837,8 +1253,48 @@ func build_hud_payload() -> Dictionary:
         "revive_count": player_revive_count,
         "ability_type": get_player_ability_type(),
         "items_collected": get_acquired_item_ids(),
+        "difficulty": sanitize_setting_difficulty(setting_difficulty),
+        "objective_text": get_current_objective_text(),
+        "ability_cooldown_ms": ability_cooldown_remaining_ms,
+        "locked_door_reason": last_locked_door_reason,
+        "target_enemy_hp": get_target_enemy_hp(),
         "outcome": outcome,
     }
+
+
+func get_current_objective_text() -> String:
+    if last_locked_door_reason != "":
+        return "Unlock door: %s" % last_locked_door_reason
+    if get_player_ability_type() == "" and captured_enemy == null and current_level_id == "combat_room":
+        return "Inhale an enemy and swallow it to gain an ability"
+    if get_target_enemy_hp() > 0:
+        return "Defeat nearby enemies"
+    if current_definition != null and current_definition.doors.size() > 0:
+        return "Find the next door"
+    return "Reach the goal"
+
+
+func get_target_enemy_hp() -> int:
+    if player == null:
+        return 0
+
+    var nearest_enemy = null
+    var nearest_distance := 999999.0
+    for enemy in enemies:
+        if not is_instance_valid(enemy) or not can_target_enemy(enemy):
+            continue
+
+        var distance: float = player.global_position.distance_to(enemy.global_position)
+        if distance >= nearest_distance:
+            continue
+
+        nearest_enemy = enemy
+        nearest_distance = distance
+
+    if nearest_enemy == null:
+        return 0
+
+    return int(nearest_enemy.hp)
 
 
 func sync_inventory_overlay(reason: String = "", emit_trace: bool = false) -> void:
@@ -860,6 +1316,9 @@ func build_inventory_payload() -> Dictionary:
         "completed_level_ids": get_completed_level_ids(),
         "visited_level_ids": get_visited_level_ids(),
         "unlocked_door_ids": get_unlocked_door_ids(),
+        "defeated_enemy_group_ids": get_defeated_enemy_group_ids(),
+        "defeated_boss_ids": get_defeated_boss_ids(),
+        "opened_ability_gate_ids": get_opened_ability_gate_ids(),
     }
 
 
@@ -965,6 +1424,12 @@ func load_persistent_state() -> void:
         visited_level_ids[String(level_id)] = true
     for door_id in state.unlocked_door_ids:
         unlocked_door_ids[String(door_id)] = true
+    for group_id in state.defeated_enemy_group_ids:
+        defeated_enemy_group_ids[String(group_id)] = true
+    for boss_id in state.defeated_boss_ids:
+        defeated_boss_ids[String(boss_id)] = true
+    for gate_id in state.opened_ability_gate_ids:
+        opened_ability_gate_ids[String(gate_id)] = true
     for level_id in state.explored_tiles.keys():
         var normalized_level_id := String(level_id)
         var level_tiles := {}
@@ -989,6 +1454,9 @@ func load_persistent_state() -> void:
         "completed_level_ids": get_completed_level_ids(),
         "visited_level_ids": get_visited_level_ids(),
         "unlocked_door_ids": get_unlocked_door_ids(),
+        "defeated_enemy_group_ids": get_defeated_enemy_group_ids(),
+        "defeated_boss_ids": get_defeated_boss_ids(),
+        "opened_ability_gate_ids": get_opened_ability_gate_ids(),
         "explored_tiles": get_explored_tiles_payload(),
         "current_level_id": String(state.current_level_id),
         "player_position": get_saved_player_position_payload(),
@@ -1019,6 +1487,9 @@ func write_persistent_state() -> void:
             "completed_level_ids": get_completed_level_ids(),
             "visited_level_ids": get_visited_level_ids(),
             "unlocked_door_ids": get_unlocked_door_ids(),
+            "defeated_enemy_group_ids": get_defeated_enemy_group_ids(),
+            "defeated_boss_ids": get_defeated_boss_ids(),
+            "opened_ability_gate_ids": get_opened_ability_gate_ids(),
             "explored_tiles": get_explored_tiles_payload(),
             "current_level_id": current_level_id,
             "player_position": get_player_position_payload(),
@@ -1044,6 +1515,9 @@ func build_save_payload() -> Dictionary:
         "completed_level_ids": get_completed_level_ids(),
         "visited_level_ids": get_visited_level_ids(),
         "unlocked_door_ids": get_unlocked_door_ids(),
+        "defeated_enemy_group_ids": get_defeated_enemy_group_ids(),
+        "defeated_boss_ids": get_defeated_boss_ids(),
+        "opened_ability_gate_ids": get_opened_ability_gate_ids(),
         "explored_tiles": get_explored_tiles_payload(),
         "current_level_id": current_level_id,
         "player_position": get_player_position_payload(),
@@ -1163,6 +1637,7 @@ func complete_level(level_id: String) -> void:
         return
 
     completed_level_ids[level_id] = true
+    clear_resolved_locked_door_reason("missing_completed_level", level_id)
     sync_inventory_overlay("level.completed", true)
     write_persistent_state()
 
@@ -1181,6 +1656,23 @@ func check_door_transitions() -> void:
         var target_level_id := String(payload.get("target_level_id", ""))
         var target_spawn_id := String(payload.get("target_spawn_id", "default"))
         var unlocked_door_id := "%s:%s" % [source_level_id, door_id]
+        var lock_reason := get_door_lock_reason(payload)
+        if lock_reason != "":
+            last_locked_door_reason = lock_reason
+            trace_recorder.call("record_player_event", "door.locked", {
+                "level_id": current_level_id,
+                "player": get_player_trace(),
+                "payload": {
+                    "door_id": door_id,
+                    "target_level_id": target_level_id,
+                    "target_spawn_id": target_spawn_id,
+                    "reason": lock_reason,
+                },
+            })
+            sync_hud_overlay("door.locked", true)
+            return
+
+        last_locked_door_reason = ""
         unlock_door(unlocked_door_id)
         trace_recorder.call("record_player_event", "door.entered", {
             "level_id": current_level_id,
@@ -1200,6 +1692,30 @@ func check_door_transitions() -> void:
             sync_inventory_overlay("door.transition", true)
             write_persistent_state()
         return
+
+
+func get_door_lock_reason(payload: Dictionary) -> String:
+    var required_item_id := String(payload.get("required_item_id", ""))
+    if required_item_id != "" and not acquired_item_ids.has(required_item_id):
+        return "missing_item:" + required_item_id
+
+    var required_ability_type := String(payload.get("required_ability_type", ""))
+    if required_ability_type != "" and not ability_matches_requirement(get_player_ability_type(), required_ability_type):
+        return "missing_ability:" + required_ability_type
+
+    var required_completed_level_id := String(payload.get("required_completed_level_id", ""))
+    if required_completed_level_id != "" and not completed_level_ids.has(required_completed_level_id):
+        return "missing_completed_level:" + required_completed_level_id
+
+    var required_defeated_enemy_group_id := String(payload.get("required_defeated_enemy_group_id", ""))
+    if required_defeated_enemy_group_id != "" and not defeated_enemy_group_ids.has(required_defeated_enemy_group_id):
+        return "missing_defeated_enemy_group:" + required_defeated_enemy_group_id
+
+    var required_boss_id := String(payload.get("required_boss_id", ""))
+    if required_boss_id != "" and not defeated_boss_ids.has(required_boss_id):
+        return "missing_boss:" + required_boss_id
+
+    return ""
 
 
 func check_goal_reached() -> void:
@@ -1262,6 +1778,13 @@ func get_enemy_payload(enemy: Node) -> Dictionary:
         "enemy_id": enemy.enemy_id,
         "ability_type": enemy.ability_type,
         "state": enemy.state,
+        "hp": int(enemy.hp),
+        "max_hp": int(enemy.max_hp),
+        "attack_damage": int(enemy.attack_damage),
+        "attack_radius": float(enemy.attack_radius),
+        "attack_cooldown_ms": int(enemy.attack_cooldown_ms),
+        "enemy_group_id": String(enemy.enemy_group_id),
+        "boss_id": String(enemy.boss_id),
         "position": {
             "x": enemy.global_position.x,
             "y": enemy.global_position.y,

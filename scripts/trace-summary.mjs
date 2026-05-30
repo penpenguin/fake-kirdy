@@ -15,9 +15,15 @@ const collectiblesCollected = new Set();
 const itemsCollected = new Set();
 const abilitiesAcquired = new Set();
 const abilitiesUsed = new Set();
+const enemiesDefeated = new Set();
 const completedLevels = new Set();
 const visitedLevelIds = new Set();
 const unlockedDoorIds = new Set();
+const defeatedEnemyGroupIds = new Set();
+const defeatedBossIds = new Set();
+const doorLockReasons = new Set();
+const hazardsEntered = new Set();
+const abilityGatesOpened = new Set();
 const exploredTilesByLevel = new Map();
 const playerMotion = createPlayerMotion();
 let firstFrame = null;
@@ -77,6 +83,9 @@ for (const event of events) {
     addPayloadStringArray(completedLevels, event, 'completed_level_ids');
     addPayloadStringArray(visitedLevelIds, event, 'visited_level_ids');
     addPayloadStringArray(unlockedDoorIds, event, 'unlocked_door_ids');
+    addPayloadStringArray(defeatedEnemyGroupIds, event, 'defeated_enemy_group_ids');
+    addPayloadStringArray(defeatedBossIds, event, 'defeated_boss_ids');
+    addPayloadStringArray(abilityGatesOpened, event, 'opened_ability_gate_ids');
     addExploredTiles(exploredTilesByLevel, event.payload?.explored_tiles);
     const position = parsePosition(event.payload?.player_position);
     if (position !== null) {
@@ -98,6 +107,19 @@ for (const event of events) {
 
   if (eventType === 'door.entered') {
     addPayloadString(unlockedDoorIds, event, 'unlocked_door_id');
+  }
+
+  if (eventType === 'door.locked') {
+    addPayloadString(doorLockReasons, event, 'reason');
+  }
+
+  if (eventType === 'hazard.entered') {
+    addPayloadString(hazardsEntered, event, 'hazard_id');
+  }
+
+  if (eventType === 'ability_gate.opened') {
+    addPayloadString(abilityGatesOpened, event, 'gate_id');
+    addPayloadStringArray(abilityGatesOpened, event, 'opened_ability_gate_ids');
   }
 
   if (eventType === 'hud.updated') {
@@ -136,6 +158,12 @@ for (const event of events) {
     addPayloadString(abilitiesUsed, event, 'ability_type');
   }
 
+  if (eventType === 'enemy.defeated') {
+    addPayloadString(enemiesDefeated, event, 'enemy_id');
+    addPayloadString(defeatedEnemyGroupIds, event, 'enemy_group_id');
+    addPayloadString(defeatedBossIds, event, 'boss_id');
+  }
+
   if (eventType === 'replay.error') {
     outcome = 'error';
   }
@@ -153,9 +181,15 @@ const summary = {
   items_collected: [...itemsCollected].sort(),
   abilities_acquired: [...abilitiesAcquired].sort(),
   abilities_used: [...abilitiesUsed].sort(),
+  enemies_defeated: [...enemiesDefeated].sort(),
   completed_levels: [...completedLevels].sort(),
   visited_level_ids: [...visitedLevelIds].sort(),
   unlocked_door_ids: [...unlockedDoorIds].sort(),
+  defeated_enemy_group_ids: [...defeatedEnemyGroupIds].sort(),
+  defeated_boss_ids: [...defeatedBossIds].sort(),
+  door_lock_reasons: [...doorLockReasons].sort(),
+  hazards_entered: [...hazardsEntered].sort(),
+  ability_gates_opened: [...abilityGatesOpened].sort(),
   explored_tiles_by_level: serializeExploredTiles(exploredTilesByLevel),
   explored_tile_count: countExploredTiles(exploredTilesByLevel),
   player_motion: serializePlayerMotion(playerMotion),
@@ -320,6 +354,10 @@ function parseHud(value) {
     revive_count: value.revive_count,
     ability_type: value.ability_type,
     items_collected: value.items_collected.filter((item) => typeof item === 'string').sort(),
+    difficulty: typeof value.difficulty === 'string' ? value.difficulty : undefined,
+    target_enemy_hp: Number.isInteger(value.target_enemy_hp) ? value.target_enemy_hp : undefined,
+    ability_cooldown_ms: Number.isInteger(value.ability_cooldown_ms) ? value.ability_cooldown_ms : undefined,
+    locked_door_reason: typeof value.locked_door_reason === 'string' ? value.locked_door_reason : undefined,
     outcome: value.outcome,
   };
 }
