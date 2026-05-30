@@ -108,6 +108,9 @@ describe('Godot v2 gameplay completion backlog', () => {
     expect(session).toContain('objective_text');
     expect(session).toContain('ability_cooldown_ms');
     expect(session).toContain('locked_door_reason');
+    expect(session).toContain('clear_resolved_locked_door_reason');
+    expect(session).toContain('"missing_item:"');
+    expect(session).toContain('"missing_ability:"');
     expect(session).toContain('target_enemy_hp');
     expect(traceSummary).toContain('enemies_defeated');
     expect(traceSummary).toContain('door_lock_reasons');
@@ -176,7 +179,7 @@ describe('Godot v2 gameplay completion backlog', () => {
     expect(iceArea).toContain('gate_effect = "freeze_water"');
     expect(iceArea).toContain('required_ability_type = "ice"');
     expect(forestArea).toContain('gate_effect = "cut_vines"');
-    expect(forestArea).toContain('required_ability_type = "sword"');
+    expect(forestArea).toContain('required_ability_type = "leaf"');
     expect(caveArea).toContain('gate_effect = "press_switch"');
     expect(caveArea).toContain('required_ability_type = "stone"');
     expect(skySanctum).toContain('gate_effect = "power_device"');

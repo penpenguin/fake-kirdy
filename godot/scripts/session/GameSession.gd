@@ -415,6 +415,7 @@ func swallow_captured_enemy() -> void:
     captured_enemy = null
     swallowed_enemy.call("swallow")
     player.call("set_ability_type", swallowed_enemy.ability_type)
+    clear_resolved_locked_door_reason("missing_ability", String(swallowed_enemy.ability_type))
     play_sfx(SfxKirdySwallow)
     trace_recorder.call("record_player_event", "enemy.swallowed", {
         "level_id": current_level_id,
@@ -646,14 +647,34 @@ func ability_matches_requirement(ability_type: String, required_ability_type: St
     return false
 
 
+func clear_resolved_locked_door_reason(requirement_prefix: String, requirement_value: String) -> void:
+    if last_locked_door_reason == "" or requirement_value == "":
+        return
+
+    var prefix := "%s:" % requirement_prefix
+    if not last_locked_door_reason.begins_with(prefix):
+        return
+
+    var required_value := last_locked_door_reason.substr(prefix.length())
+    if requirement_prefix == "missing_ability":
+        if ability_matches_requirement(requirement_value, required_value):
+            last_locked_door_reason = ""
+        return
+
+    if required_value == requirement_value:
+        last_locked_door_reason = ""
+
+
 func mark_enemy_defeated(result: Dictionary) -> void:
     var enemy_group_id := String(result.get("enemy_group_id", ""))
     if enemy_group_id != "":
         defeated_enemy_group_ids[enemy_group_id] = true
+        clear_resolved_locked_door_reason("missing_defeated_enemy_group", enemy_group_id)
 
     var boss_id := String(result.get("boss_id", ""))
     if boss_id != "":
         defeated_boss_ids[boss_id] = true
+        clear_resolved_locked_door_reason("missing_boss", boss_id)
 
 
 func check_enemy_attacks(delta: float) -> void:
@@ -990,6 +1011,7 @@ func acquire_item(item_id: String, collectible_id: String = "") -> void:
         return
 
     acquired_item_ids[item_id] = true
+    clear_resolved_locked_door_reason("missing_item", item_id)
     trace_recorder.call("record_player_event", "item.acquired", {
         "level_id": current_level_id,
         "player": get_player_trace(),
@@ -1615,6 +1637,7 @@ func complete_level(level_id: String) -> void:
         return
 
     completed_level_ids[level_id] = true
+    clear_resolved_locked_door_reason("missing_completed_level", level_id)
     sync_inventory_overlay("level.completed", true)
     write_persistent_state()
 
@@ -1674,23 +1697,23 @@ func check_door_transitions() -> void:
 func get_door_lock_reason(payload: Dictionary) -> String:
     var required_item_id := String(payload.get("required_item_id", ""))
     if required_item_id != "" and not acquired_item_ids.has(required_item_id):
-        return "missing_item:%s" % required_item_id
+        return "missing_item:" + required_item_id
 
     var required_ability_type := String(payload.get("required_ability_type", ""))
-    if required_ability_type != "" and get_player_ability_type() != required_ability_type:
-        return "missing_ability:%s" % required_ability_type
+    if required_ability_type != "" and not ability_matches_requirement(get_player_ability_type(), required_ability_type):
+        return "missing_ability:" + required_ability_type
 
     var required_completed_level_id := String(payload.get("required_completed_level_id", ""))
     if required_completed_level_id != "" and not completed_level_ids.has(required_completed_level_id):
-        return "missing_completed_level:%s" % required_completed_level_id
+        return "missing_completed_level:" + required_completed_level_id
 
     var required_defeated_enemy_group_id := String(payload.get("required_defeated_enemy_group_id", ""))
     if required_defeated_enemy_group_id != "" and not defeated_enemy_group_ids.has(required_defeated_enemy_group_id):
-        return "missing_defeated_enemy_group:%s" % required_defeated_enemy_group_id
+        return "missing_defeated_enemy_group:" + required_defeated_enemy_group_id
 
     var required_boss_id := String(payload.get("required_boss_id", ""))
     if required_boss_id != "" and not defeated_boss_ids.has(required_boss_id):
-        return "missing_boss:%s" % required_boss_id
+        return "missing_boss:" + required_boss_id
 
     return ""
 

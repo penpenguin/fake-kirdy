@@ -44,7 +44,7 @@ contact_damage = 1
 position = Vector2(430, 368)
 script = ExtResource("5_ability_gate")
 gate_id = "forest_area_vines"
-required_ability_type = "sword"
+required_ability_type = "leaf"
 gate_effect = "cut_vines"
 trigger_radius = 96.0
 
