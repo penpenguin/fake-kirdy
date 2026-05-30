@@ -103,6 +103,8 @@ describe('Godot v2 gameplay completion backlog', () => {
 
     expect(session).toContain('get_difficulty_profile');
     expect(session).toContain('apply_difficulty_to_enemy');
+    expect(session).toContain('scale_enemy_damage_for_difficulty');
+    expect(session).toContain('if amount <= 0:');
     expect(session).toContain('objective_text');
     expect(session).toContain('ability_cooldown_ms');
     expect(session).toContain('locked_door_reason');

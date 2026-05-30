@@ -1182,9 +1182,16 @@ func apply_difficulty_to_enemy(enemy: Node) -> void:
     var profile := get_difficulty_profile()
     enemy.max_hp = max(int(round(float(enemy.max_hp) * float(profile.get("enemy_hp_multiplier", 1.0)))), 1)
     enemy.hp = enemy.max_hp
-    enemy.contact_damage = max(int(ceil(float(enemy.contact_damage) * float(profile.get("contact_damage_multiplier", 1.0)))), 1)
-    enemy.attack_damage = max(int(ceil(float(enemy.attack_damage) * float(profile.get("contact_damage_multiplier", 1.0)))), 1)
+    enemy.contact_damage = scale_enemy_damage_for_difficulty(int(enemy.contact_damage), profile)
+    enemy.attack_damage = scale_enemy_damage_for_difficulty(int(enemy.attack_damage), profile)
     enemy.attack_cooldown_ms = max(int(round(float(enemy.attack_cooldown_ms) * float(profile.get("enemy_attack_cooldown_multiplier", 1.0)))), 120)
+
+
+func scale_enemy_damage_for_difficulty(amount: int, profile: Dictionary) -> int:
+    if amount <= 0:
+        return 0
+
+    return max(int(ceil(float(amount) * float(profile.get("contact_damage_multiplier", 1.0)))), 1)
 
 
 func sync_map_overlay(reason: String = "", emit_trace: bool = false) -> void:
