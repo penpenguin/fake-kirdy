@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "npm run godot:run --",
-    "godot:run": "godot --path godot",
+    "godot:run": "node scripts/run-godot.mjs",
     "godot:replay": "node scripts/run-godot-replay.mjs",
     "godot:replay-suite": "node scripts/run-godot-replay-suite.mjs",
     "godot:export": "node scripts/export-godot.mjs",
