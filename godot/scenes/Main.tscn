@@ -5,7 +5,7 @@
 [node name="GameSession" type="Node"]
 script = ExtResource("1_session")
 auto_start = true
-initial_level_id = "combat_room"
+initial_level_id = "central_hub"
 initial_spawn_id = "default"
 map_overlay_enabled = true
 hud_overlay_enabled = true

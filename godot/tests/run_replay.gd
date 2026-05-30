@@ -73,6 +73,8 @@ func run_session_replay(input_source: Node, output_path: String, args: Dictionar
     var session = GameSessionScript.new()
     session.auto_start = false
     session.input_source = input_source
+    if String(input_source.get("setting_difficulty")) != "":
+        session.setting_difficulty = String(input_source.get("setting_difficulty"))
     if args.has("save"):
         session.save_enabled = true
         session.save_path = String(args["save"])
@@ -87,6 +89,10 @@ func run_session_replay(input_source: Node, output_path: String, args: Dictionar
         session.trace_recorder.call("write_to_path", output_path)
         quit(1)
         return
+
+    if String(input_source.get("initial_ability_type")) != "" and session.player != null:
+        session.player.call("set_ability_type", String(input_source.get("initial_ability_type")))
+        session.call("sync_hud_overlay", "replay.initial_ability", true)
 
     await process_frame
 

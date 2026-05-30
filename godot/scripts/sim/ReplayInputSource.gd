@@ -6,6 +6,8 @@ const FrameInputScript = preload("res://scripts/sim/FrameInput.gd")
 var scene_path: String = ""
 var start_level_id: String = ""
 var start_spawn_id: String = "default"
+var initial_ability_type: String = ""
+var setting_difficulty: String = ""
 var level_id: String = "controller_lab"
 var fps: int = 60
 var max_frames: int = 0
@@ -31,6 +33,8 @@ func load_replay(path: String) -> bool:
     scene_path = String(parsed.get("scene_path", ""))
     start_level_id = String(parsed.get("start_level_id", ""))
     start_spawn_id = String(parsed.get("start_spawn_id", "default"))
+    initial_ability_type = String(parsed.get("initial_ability_type", ""))
+    setting_difficulty = String(parsed.get("setting_difficulty", ""))
     level_id = String(parsed.get("level_id", level_id))
     fps = int(parsed.get("fps", fps))
     max_frames = int(parsed.get("max_frames", 0))

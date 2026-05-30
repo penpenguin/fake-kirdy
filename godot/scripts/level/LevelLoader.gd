@@ -8,6 +8,8 @@ const CameraBoundsMarkerScript = preload("res://scripts/level/markers/CameraBoun
 const EnemySpawnMarkerScript = preload("res://scripts/level/markers/EnemySpawnMarker.gd")
 const HealMarkerScript = preload("res://scripts/level/markers/HealMarker.gd")
 const CollectibleMarkerScript = preload("res://scripts/level/markers/CollectibleMarker.gd")
+const HazardMarkerScript = preload("res://scripts/level/markers/HazardMarker.gd")
+const AbilityGateMarkerScript = preload("res://scripts/level/markers/AbilityGateMarker.gd")
 const GoalMarkerScript = preload("res://scripts/level/markers/GoalMarker.gd")
 const LevelTileMapScript = preload("res://scripts/level/LevelTileMap.gd")
 
@@ -277,6 +279,14 @@ func add_generated_content_markers(root: Node2D, runtime_layout: Dictionary) -> 
         if typeof(collectible_payload) == TYPE_DICTIONARY:
             add_generated_collectible_marker(root, collectible_payload)
 
+    for hazard_payload in content.get("hazards", []):
+        if typeof(hazard_payload) == TYPE_DICTIONARY:
+            add_generated_hazard_marker(root, hazard_payload)
+
+    for ability_gate_payload in content.get("ability_gates", []):
+        if typeof(ability_gate_payload) == TYPE_DICTIONARY:
+            add_generated_ability_gate_marker(root, ability_gate_payload)
+
     for goal_payload in content.get("goals", []):
         if typeof(goal_payload) == TYPE_DICTIONARY:
             add_generated_goal_marker(root, goal_payload)
@@ -291,6 +301,10 @@ func add_generated_enemy_marker(root: Node2D, payload: Dictionary) -> void:
     enemy.set("enemy_type", String(payload.get("enemy_type", "generated_ground")))
     enemy.set("ability_type", String(payload.get("ability_type", "spark")))
     enemy.set("contact_damage", int(payload.get("contact_damage", 1)))
+    enemy.set("attack_damage", int(payload.get("attack_damage", payload.get("contact_damage", 1))))
+    enemy.set("attack_radius", float(payload.get("attack_radius", 120.0)))
+    enemy.set("attack_cooldown_ms", int(payload.get("attack_cooldown_ms", 1200)))
+    enemy.set("patrol_radius", float(payload.get("patrol_radius", 0.0)))
     root.add_child(enemy)
 
 
@@ -314,6 +328,31 @@ func add_generated_collectible_marker(root: Node2D, payload: Dictionary) -> void
     collectible.set("item_id", String(payload.get("item_id", "generated-shard")))
     collectible.set("trigger_radius", float(payload.get("trigger_radius", 48.0)))
     root.add_child(collectible)
+
+
+func add_generated_hazard_marker(root: Node2D, payload: Dictionary) -> void:
+    var hazard := Node2D.new()
+    hazard.name = String(payload.get("id", "GeneratedHazardMarker"))
+    hazard.position = dictionary_to_vector2(payload.get("position", {}), Vector2(252.0, 400.0))
+    hazard.set_script(HazardMarkerScript)
+    hazard.set("hazard_id", String(payload.get("hazard_id", "generated_hazard")))
+    hazard.set("hazard_type", String(payload.get("hazard_type", "spike")))
+    hazard.set("damage", int(payload.get("damage", 1)))
+    hazard.set("trigger_radius", float(payload.get("trigger_radius", 40.0)))
+    root.add_child(hazard)
+
+
+func add_generated_ability_gate_marker(root: Node2D, payload: Dictionary) -> void:
+    var gate := Node2D.new()
+    gate.name = String(payload.get("id", "GeneratedAbilityGateMarker"))
+    gate.position = dictionary_to_vector2(payload.get("position", {}), Vector2(500.0, 368.0))
+    gate.set_script(AbilityGateMarkerScript)
+    gate.set("gate_id", String(payload.get("gate_id", "generated_ability_gate")))
+    gate.set("required_ability_type", String(payload.get("required_ability_type", "spark")))
+    gate.set("gate_effect", String(payload.get("gate_effect", "power_device")))
+    gate.set("trigger_radius", float(payload.get("trigger_radius", 96.0)))
+    gate.set("grants_item_id", String(payload.get("grants_item_id", "")))
+    root.add_child(gate)
 
 
 func add_generated_goal_marker(root: Node2D, payload: Dictionary) -> void:

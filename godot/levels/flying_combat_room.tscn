@@ -25,6 +25,16 @@ spawn_id = "flying_dummy"
 enemy_type = "flying"
 ability_type = "frost"
 contact_damage = 0
+attack_radius = 1.0
+
+[node name="SpitTargetEnemySpawnMarker" type="Node2D" parent="."]
+position = Vector2(300, 400)
+script = ExtResource("2_enemy")
+spawn_id = "spit_target"
+enemy_type = "simple_ground"
+ability_type = "spark"
+contact_damage = 0
+attack_radius = 1.0
 
 [node name="GoalMarker" type="Node2D" parent="."]
 position = Vector2(640, 368)

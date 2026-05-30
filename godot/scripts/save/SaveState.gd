@@ -7,6 +7,9 @@ var acquired_item_ids: Array[String] = []
 var completed_level_ids: Array[String] = []
 var visited_level_ids: Array[String] = []
 var unlocked_door_ids: Array[String] = []
+var defeated_enemy_group_ids: Array[String] = []
+var defeated_boss_ids: Array[String] = []
+var opened_ability_gate_ids: Array[String] = []
 var explored_tiles: Dictionary = {}
 var current_level_id: String = ""
 var player_position: Dictionary = {}
@@ -29,6 +32,9 @@ func to_dictionary() -> Dictionary:
         "completed_level_ids": completed_level_ids,
         "visited_level_ids": visited_level_ids,
         "unlocked_door_ids": unlocked_door_ids,
+        "defeated_enemy_group_ids": defeated_enemy_group_ids,
+        "defeated_boss_ids": defeated_boss_ids,
+        "opened_ability_gate_ids": opened_ability_gate_ids,
         "explored_tiles": explored_tiles,
         "current_level_id": current_level_id,
         "player_position": player_position,
@@ -92,9 +98,33 @@ static func from_dictionary(data: Dictionary):
             continue
         state.unlocked_door_ids.append(unlocked_door_id)
 
+    var raw_defeated_enemy_groups: Array = data.get("defeated_enemy_group_ids", [])
+    for group_id in raw_defeated_enemy_groups:
+        var defeated_enemy_group_id := String(group_id)
+        if defeated_enemy_group_id == "" or state.defeated_enemy_group_ids.has(defeated_enemy_group_id):
+            continue
+        state.defeated_enemy_group_ids.append(defeated_enemy_group_id)
+
+    var raw_defeated_bosses: Array = data.get("defeated_boss_ids", [])
+    for boss_id in raw_defeated_bosses:
+        var defeated_boss_id := String(boss_id)
+        if defeated_boss_id == "" or state.defeated_boss_ids.has(defeated_boss_id):
+            continue
+        state.defeated_boss_ids.append(defeated_boss_id)
+
+    var raw_opened_ability_gates: Array = data.get("opened_ability_gate_ids", [])
+    for gate_id in raw_opened_ability_gates:
+        var opened_ability_gate_id := String(gate_id)
+        if opened_ability_gate_id == "" or state.opened_ability_gate_ids.has(opened_ability_gate_id):
+            continue
+        state.opened_ability_gate_ids.append(opened_ability_gate_id)
+
     state.acquired_item_ids.sort()
     state.completed_level_ids.sort()
     state.consumed_heal_ids.sort()
+    state.defeated_enemy_group_ids.sort()
+    state.defeated_boss_ids.sort()
+    state.opened_ability_gate_ids.sort()
     state.visited_level_ids.sort()
     state.unlocked_door_ids.sort()
     return state

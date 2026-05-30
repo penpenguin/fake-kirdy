@@ -1,9 +1,9 @@
 {
-  "start_level_id": "labyrinth_029",
-  "start_spawn_id": "default",
-  "level_id": "labyrinth_029",
+  "start_level_id": "forest_reliquary",
+  "start_spawn_id": "door_check",
+  "level_id": "forest_reliquary",
   "fps": 60,
-  "max_frames": 670,
+  "max_frames": 50,
   "frames": [
     {
       "frame": 0,
@@ -15,7 +15,7 @@
       }
     },
     {
-      "frame": 650,
+      "frame": 30,
       "actions": {
         "move_right": false
       }

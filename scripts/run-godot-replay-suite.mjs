@@ -15,10 +15,12 @@ if (options.list) {
   writeJson({
     version: suite.version,
     replay_count: suite.replays.length,
-    replays: suite.replays.map(({ id, replay_path, expected_outcome, tags }) => ({
+    replays: suite.replays.map(({ id, replay_path, expected_outcome, expected_events, expected_last_hud, tags }) => ({
       id,
       replay_path,
       expected_outcome,
+      expected_events,
+      expected_last_hud,
       tags,
     })),
   });
@@ -143,10 +145,28 @@ function readSuite(path) {
       throw new Error(`Replay suite entry ${replay.id} has invalid tags`);
     }
 
+    if (replay.expected_events !== undefined && !Array.isArray(replay.expected_events)) {
+      throw new Error(`Replay suite entry ${replay.id} has invalid expected_events`);
+    }
+
+    if (
+      replay.expected_last_hud !== undefined &&
+      (typeof replay.expected_last_hud !== 'object' || replay.expected_last_hud === null || Array.isArray(replay.expected_last_hud))
+    ) {
+      throw new Error(`Replay suite entry ${replay.id} has invalid expected_last_hud`);
+    }
+
     return {
       id: replay.id,
       replay_path: replay.replay_path,
       expected_outcome: replay.expected_outcome ?? null,
+      expected_events: (replay.expected_events ?? []).map((eventType) => {
+        if (typeof eventType !== 'string' || eventType.length === 0) {
+          throw new Error(`Replay suite entry ${replay.id} has invalid expected_events item`);
+        }
+        return eventType;
+      }),
+      expected_last_hud: replay.expected_last_hud ?? {},
       tags: replay.tags ?? [],
     };
   });
@@ -215,15 +235,20 @@ function runReplay(replay, outDir) {
   const summary = JSON.parse(summaryResult.stdout);
   const outcomeMatches =
     replay.expected_outcome === null || summary.outcome === replay.expected_outcome;
+  const missingEvents = replay.expected_events.filter((eventType) => Number(summary.counts_by_type?.[eventType] ?? 0) <= 0);
+  const lastHudMismatches = getObjectSubsetMismatches(replay.expected_last_hud, summary.last_hud ?? {});
+  const passed = outcomeMatches && missingEvents.length === 0 && lastHudMismatches.length === 0;
 
   return {
     id: replay.id,
     replay_path: replay.replay_path,
     trace_path: tracePath,
     expected_outcome: replay.expected_outcome,
+    expected_events: replay.expected_events,
+    expected_last_hud: replay.expected_last_hud,
     outcome: summary.outcome,
-    status: outcomeMatches ? 'passed' : 'failed',
-    failure: outcomeMatches ? null : `expected outcome ${replay.expected_outcome}, got ${summary.outcome}`,
+    status: passed ? 'passed' : 'failed',
+    failure: passed ? null : buildReplayFailure(replay, summary, missingEvents, lastHudMismatches),
     event_count: summary.event_count,
     levels: summary.levels,
     counts_by_type: summary.counts_by_type,
@@ -239,12 +264,38 @@ function runReplay(replay, outDir) {
   };
 }
 
+function buildReplayFailure(replay, summary, missingEvents, lastHudMismatches) {
+  const failures = [];
+  if (replay.expected_outcome !== null && summary.outcome !== replay.expected_outcome) {
+    failures.push(`expected outcome ${replay.expected_outcome}, got ${summary.outcome}`);
+  }
+  if (missingEvents.length > 0) {
+    failures.push(`missing expected events: ${missingEvents.join(', ')}`);
+  }
+  if (lastHudMismatches.length > 0) {
+    failures.push(`last_hud mismatches: ${lastHudMismatches.join(', ')}`);
+  }
+  return failures.join('; ');
+}
+
+function getObjectSubsetMismatches(expected, actual) {
+  return Object.entries(expected).flatMap(([key, expectedValue]) => {
+    const actualValue = actual?.[key];
+    if (actualValue === expectedValue) {
+      return [];
+    }
+    return [`${key} expected ${JSON.stringify(expectedValue)}, got ${JSON.stringify(actualValue)}`];
+  });
+}
+
 function failureResult(replay, tracePath, failure, result = null) {
   return {
     id: replay.id,
     replay_path: replay.replay_path,
     trace_path: tracePath,
     expected_outcome: replay.expected_outcome,
+    expected_events: replay.expected_events ?? [],
+    expected_last_hud: replay.expected_last_hud ?? {},
     outcome: null,
     status: 'failed',
     failure,

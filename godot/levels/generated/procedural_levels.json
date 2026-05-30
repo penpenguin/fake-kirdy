@@ -109,6 +109,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_001_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -116,6 +120,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "leaf",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -126,7 +134,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_001_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -165,6 +173,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_001_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_001_sword_gate",
+              "required_ability_type": "sword",
+              "gate_effect": "cut_vines",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -285,6 +319,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_002_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -292,6 +330,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "leaf",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -302,7 +344,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_002_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -341,6 +383,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_002_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_002_sword_gate",
+              "required_ability_type": "sword",
+              "gate_effect": "cut_vines",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -461,6 +529,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_003_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -468,6 +540,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "leaf",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -478,7 +554,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_003_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -517,6 +593,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_003_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_003_sword_gate",
+              "required_ability_type": "sword",
+              "gate_effect": "cut_vines",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -637,6 +739,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_004_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -644,6 +750,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "leaf",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -654,7 +764,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_004_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -693,6 +803,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_004_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_004_sword_gate",
+              "required_ability_type": "sword",
+              "gate_effect": "cut_vines",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -813,6 +949,11 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "collect_key",
+            "objective_id": "labyrinth_005_collect_key",
+            "required_item_id": "forest-generated-shard"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -820,6 +961,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "leaf",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -830,7 +975,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_005_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -876,6 +1021,32 @@
               "trigger_radius": 48,
               "position": {
                 "x": 592,
+                "y": 368
+              }
+            }
+          ],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_005_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_005_sword_gate",
+              "required_ability_type": "sword",
+              "gate_effect": "cut_vines",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
                 "y": 368
               }
             }
@@ -1011,6 +1182,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_006_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -1018,9 +1193,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "frost",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_006_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "frost",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -1028,7 +1222,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_006_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -1067,6 +1261,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_006_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_006_ice_gate",
+              "required_ability_type": "ice",
+              "gate_effect": "freeze_water",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -1198,6 +1418,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_007_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -1205,9 +1429,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "frost",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_007_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "frost",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -1215,7 +1458,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_007_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -1254,6 +1497,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_007_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_007_ice_gate",
+              "required_ability_type": "ice",
+              "gate_effect": "freeze_water",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -1385,6 +1654,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_008_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -1392,9 +1665,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "frost",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_008_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "frost",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -1402,7 +1694,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_008_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -1441,6 +1733,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_008_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_008_ice_gate",
+              "required_ability_type": "ice",
+              "gate_effect": "freeze_water",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -1572,6 +1890,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_009_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -1579,9 +1901,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "frost",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_009_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "frost",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -1589,7 +1930,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_009_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -1628,6 +1969,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_009_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_009_ice_gate",
+              "required_ability_type": "ice",
+              "gate_effect": "freeze_water",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -1759,6 +2126,11 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "collect_key",
+            "objective_id": "labyrinth_010_collect_key",
+            "required_item_id": "ice-generated-shard"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -1766,9 +2138,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "frost",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_010_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "frost",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -1776,7 +2167,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_010_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -1822,6 +2213,32 @@
               "trigger_radius": 48,
               "position": {
                 "x": 592,
+                "y": 368
+              }
+            }
+          ],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_010_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_010_ice_gate",
+              "required_ability_type": "ice",
+              "gate_effect": "freeze_water",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
                 "y": 368
               }
             }
@@ -1968,6 +2385,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_011_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -1975,9 +2396,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_011_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -1985,7 +2425,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_011_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -2024,6 +2464,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_011_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_011_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -2155,6 +2621,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_012_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -2162,9 +2632,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_012_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -2172,7 +2661,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_012_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -2211,6 +2700,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_012_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_012_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -2342,6 +2857,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_013_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -2349,9 +2868,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_013_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -2359,7 +2897,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_013_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -2398,6 +2936,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_013_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_013_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -2529,6 +3093,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_014_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -2536,9 +3104,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_014_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -2546,7 +3133,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_014_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -2585,6 +3172,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_014_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_014_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -2716,6 +3329,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_015_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -2723,9 +3340,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_015_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -2733,7 +3369,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_015_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -2772,6 +3408,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_015_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_015_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -2903,6 +3565,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_016_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -2910,9 +3576,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_016_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -2920,7 +3605,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_016_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -2959,6 +3644,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_016_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_016_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -3090,6 +3801,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_017_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -3097,9 +3812,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_017_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -3107,7 +3841,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_017_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -3146,6 +3880,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_017_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_017_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -3277,6 +4037,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_018_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -3284,9 +4048,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_018_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -3294,7 +4077,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_018_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -3333,6 +4116,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_018_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_018_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -3464,6 +4273,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_019_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -3471,9 +4284,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_019_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -3481,7 +4313,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_019_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -3520,6 +4352,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_019_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_019_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -3651,6 +4509,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_020_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -3658,9 +4520,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_020_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -3668,7 +4549,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_020_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -3707,6 +4588,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_020_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_020_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -3838,6 +4745,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_021_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -3845,9 +4756,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_021_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -3855,7 +4785,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_021_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -3894,6 +4824,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_021_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_021_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -4025,6 +4981,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_022_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -4032,9 +4992,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_022_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -4042,7 +5021,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_022_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -4081,6 +5060,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_022_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_022_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -4212,6 +5217,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_023_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -4219,9 +5228,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_023_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -4229,7 +5257,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_023_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -4268,6 +5296,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_023_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_023_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -4399,6 +5453,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_024_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -4406,9 +5464,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_024_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -4416,7 +5493,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_024_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -4455,6 +5532,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_024_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_024_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -4586,6 +5689,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_025_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -4593,9 +5700,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_025_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -4603,7 +5729,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_025_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -4642,6 +5768,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_025_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_025_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -4773,6 +5925,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_026_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -4780,9 +5936,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_026_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -4790,7 +5965,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_026_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -4829,6 +6004,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_026_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_026_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -4960,6 +6161,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_027_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -4967,9 +6172,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_027_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -4977,7 +6201,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_027_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -5016,6 +6240,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_027_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_027_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -5147,6 +6397,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_028_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -5154,9 +6408,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_028_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -5164,7 +6437,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_028_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -5203,6 +6476,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_028_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_028_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -5334,6 +6633,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_029_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -5341,9 +6644,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_029_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -5351,7 +6673,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_029_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -5390,6 +6712,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_029_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_029_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -5521,6 +6869,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_030_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -5528,9 +6880,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_030_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -5538,7 +6909,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_030_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -5577,6 +6948,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_030_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_030_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -5708,6 +7105,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_031_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -5715,9 +7116,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_031_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -5725,7 +7145,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_031_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -5764,6 +7184,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_031_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_031_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -5895,6 +7341,11 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "collect_key",
+            "objective_id": "labyrinth_032_collect_key",
+            "required_item_id": "fire-generated-shard"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -5902,9 +7353,28 @@
               "enemy_type": "generated_ground",
               "ability_type": "flame",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_032_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "flame",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
               }
             }
           ],
@@ -5912,7 +7382,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_032_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -5958,6 +7428,32 @@
               "trigger_radius": 48,
               "position": {
                 "x": 592,
+                "y": 368
+              }
+            }
+          ],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_032_lava_hazard",
+              "hazard_type": "lava",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_032_fire_gate",
+              "required_ability_type": "fire",
+              "gate_effect": "melt_ice",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
                 "y": 368
               }
             }
@@ -6093,6 +7589,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_033_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -6100,6 +7600,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "stone",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -6110,7 +7614,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_033_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -6149,6 +7653,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_033_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_033_stone_gate",
+              "required_ability_type": "stone",
+              "gate_effect": "press_switch",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -6269,6 +7799,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_034_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -6276,6 +7810,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "stone",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -6286,7 +7824,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_034_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -6325,6 +7863,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_034_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_034_stone_gate",
+              "required_ability_type": "stone",
+              "gate_effect": "press_switch",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -6445,6 +8009,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_035_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -6452,6 +8020,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "stone",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -6462,7 +8034,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_035_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -6501,6 +8073,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_035_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_035_stone_gate",
+              "required_ability_type": "stone",
+              "gate_effect": "press_switch",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -6621,6 +8219,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_036_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -6628,6 +8230,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "stone",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -6638,7 +8244,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_036_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -6677,6 +8283,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_036_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_036_stone_gate",
+              "required_ability_type": "stone",
+              "gate_effect": "press_switch",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -6797,6 +8429,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_037_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -6804,6 +8440,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "stone",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -6814,7 +8454,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_037_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -6853,6 +8493,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_037_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_037_stone_gate",
+              "required_ability_type": "stone",
+              "gate_effect": "press_switch",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -6973,6 +8639,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_038_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -6980,6 +8650,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "stone",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -6990,7 +8664,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_038_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -7029,6 +8703,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_038_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_038_stone_gate",
+              "required_ability_type": "stone",
+              "gate_effect": "press_switch",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -7149,6 +8849,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_039_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -7156,6 +8860,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "stone",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -7166,7 +8874,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_039_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -7205,6 +8913,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_039_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_039_stone_gate",
+              "required_ability_type": "stone",
+              "gate_effect": "press_switch",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -7325,6 +9059,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_040_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -7332,6 +9070,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "stone",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -7342,7 +9084,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_040_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -7381,6 +9123,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_040_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_040_stone_gate",
+              "required_ability_type": "stone",
+              "gate_effect": "press_switch",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -7501,6 +9269,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_041_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -7508,6 +9280,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "stone",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -7518,7 +9294,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_041_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -7557,6 +9333,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_041_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_041_stone_gate",
+              "required_ability_type": "stone",
+              "gate_effect": "press_switch",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -7677,6 +9479,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_042_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -7684,6 +9490,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "stone",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -7694,7 +9504,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_042_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -7733,6 +9543,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_042_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_042_stone_gate",
+              "required_ability_type": "stone",
+              "gate_effect": "press_switch",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -7853,6 +9689,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_043_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -7860,6 +9700,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "stone",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -7870,7 +9714,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_043_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -7909,6 +9753,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_043_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_043_stone_gate",
+              "required_ability_type": "stone",
+              "gate_effect": "press_switch",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -8029,6 +9899,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_044_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -8036,6 +9910,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "stone",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -8046,7 +9924,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_044_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -8085,6 +9963,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_044_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_044_stone_gate",
+              "required_ability_type": "stone",
+              "gate_effect": "press_switch",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -8205,6 +10109,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_045_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -8212,6 +10120,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "stone",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -8222,7 +10134,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_045_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -8261,6 +10173,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_045_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_045_stone_gate",
+              "required_ability_type": "stone",
+              "gate_effect": "press_switch",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -8381,6 +10319,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_046_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -8388,6 +10330,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "stone",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -8398,7 +10344,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_046_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -8437,6 +10383,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_046_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_046_stone_gate",
+              "required_ability_type": "stone",
+              "gate_effect": "press_switch",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -8557,6 +10529,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_047_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -8564,6 +10540,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "stone",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -8574,7 +10554,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_047_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -8613,6 +10593,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_047_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_047_stone_gate",
+              "required_ability_type": "stone",
+              "gate_effect": "press_switch",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -8733,6 +10739,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_048_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -8740,6 +10750,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "stone",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -8750,7 +10764,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_048_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -8789,6 +10803,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_048_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_048_stone_gate",
+              "required_ability_type": "stone",
+              "gate_effect": "press_switch",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -8909,6 +10949,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_049_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -8916,6 +10960,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "stone",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -8926,7 +10974,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_049_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -8965,6 +11013,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_049_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_049_stone_gate",
+              "required_ability_type": "stone",
+              "gate_effect": "press_switch",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -9085,6 +11159,11 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "collect_key",
+            "objective_id": "labyrinth_050_collect_key",
+            "required_item_id": "ruins-generated-shard"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -9092,6 +11171,10 @@
               "enemy_type": "generated_ground",
               "ability_type": "stone",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
@@ -9102,7 +11185,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_050_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -9148,6 +11231,32 @@
               "trigger_radius": 48,
               "position": {
                 "x": 592,
+                "y": 368
+              }
+            }
+          ],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_050_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_050_stone_gate",
+              "required_ability_type": "stone",
+              "gate_effect": "press_switch",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
                 "y": 368
               }
             }
@@ -9294,6 +11403,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_051_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -9301,9 +11414,43 @@
               "enemy_type": "generated_ground",
               "ability_type": "spark",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_051_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
+              }
+            },
+            {
+              "id": "GeneratedEliteEnemySpawn",
+              "spawn_id": "labyrinth_051_generated_elite",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 172,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 128,
+              "position": {
+                "x": 220,
+                "y": 280
               }
             }
           ],
@@ -9311,7 +11458,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_051_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -9350,6 +11497,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_051_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_051_spark_gate",
+              "required_ability_type": "spark",
+              "gate_effect": "power_device",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -9481,6 +11654,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_052_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -9488,9 +11665,43 @@
               "enemy_type": "generated_ground",
               "ability_type": "spark",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_052_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
+              }
+            },
+            {
+              "id": "GeneratedEliteEnemySpawn",
+              "spawn_id": "labyrinth_052_generated_elite",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 172,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 128,
+              "position": {
+                "x": 220,
+                "y": 280
               }
             }
           ],
@@ -9498,7 +11709,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_052_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -9537,6 +11748,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_052_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_052_spark_gate",
+              "required_ability_type": "spark",
+              "gate_effect": "power_device",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -9668,6 +11905,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_053_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -9675,9 +11916,43 @@
               "enemy_type": "generated_ground",
               "ability_type": "spark",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_053_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
+              }
+            },
+            {
+              "id": "GeneratedEliteEnemySpawn",
+              "spawn_id": "labyrinth_053_generated_elite",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 172,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 128,
+              "position": {
+                "x": 220,
+                "y": 280
               }
             }
           ],
@@ -9685,7 +11960,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_053_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -9724,6 +11999,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_053_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_053_spark_gate",
+              "required_ability_type": "spark",
+              "gate_effect": "power_device",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -9855,6 +12156,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_054_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -9862,9 +12167,43 @@
               "enemy_type": "generated_ground",
               "ability_type": "spark",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_054_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
+              }
+            },
+            {
+              "id": "GeneratedEliteEnemySpawn",
+              "spawn_id": "labyrinth_054_generated_elite",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 172,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 128,
+              "position": {
+                "x": 220,
+                "y": 280
               }
             }
           ],
@@ -9872,7 +12211,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_054_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -9911,6 +12250,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_054_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_054_spark_gate",
+              "required_ability_type": "spark",
+              "gate_effect": "power_device",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -10042,6 +12407,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_055_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -10049,9 +12418,43 @@
               "enemy_type": "generated_ground",
               "ability_type": "spark",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_055_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
+              }
+            },
+            {
+              "id": "GeneratedEliteEnemySpawn",
+              "spawn_id": "labyrinth_055_generated_elite",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 172,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 128,
+              "position": {
+                "x": 220,
+                "y": 280
               }
             }
           ],
@@ -10059,7 +12462,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_055_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -10098,6 +12501,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_055_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_055_spark_gate",
+              "required_ability_type": "spark",
+              "gate_effect": "power_device",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -10229,6 +12658,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_056_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -10236,9 +12669,43 @@
               "enemy_type": "generated_ground",
               "ability_type": "spark",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_056_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
+              }
+            },
+            {
+              "id": "GeneratedEliteEnemySpawn",
+              "spawn_id": "labyrinth_056_generated_elite",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 172,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 128,
+              "position": {
+                "x": 220,
+                "y": 280
               }
             }
           ],
@@ -10246,7 +12713,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_056_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -10285,6 +12752,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_056_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_056_spark_gate",
+              "required_ability_type": "spark",
+              "gate_effect": "power_device",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -10416,6 +12909,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_057_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -10423,9 +12920,43 @@
               "enemy_type": "generated_ground",
               "ability_type": "spark",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_057_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
+              }
+            },
+            {
+              "id": "GeneratedEliteEnemySpawn",
+              "spawn_id": "labyrinth_057_generated_elite",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 172,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 128,
+              "position": {
+                "x": 220,
+                "y": 280
               }
             }
           ],
@@ -10433,7 +12964,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_057_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -10472,6 +13003,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_057_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_057_spark_gate",
+              "required_ability_type": "spark",
+              "gate_effect": "power_device",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -10603,6 +13160,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_058_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -10610,9 +13171,43 @@
               "enemy_type": "generated_ground",
               "ability_type": "spark",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_058_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
+              }
+            },
+            {
+              "id": "GeneratedEliteEnemySpawn",
+              "spawn_id": "labyrinth_058_generated_elite",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 172,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 128,
+              "position": {
+                "x": 220,
+                "y": 280
               }
             }
           ],
@@ -10620,7 +13215,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_058_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -10659,6 +13254,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_058_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_058_spark_gate",
+              "required_ability_type": "spark",
+              "gate_effect": "power_device",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -10790,6 +13411,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_059_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -10797,9 +13422,43 @@
               "enemy_type": "generated_ground",
               "ability_type": "spark",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_059_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
+              }
+            },
+            {
+              "id": "GeneratedEliteEnemySpawn",
+              "spawn_id": "labyrinth_059_generated_elite",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 172,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 128,
+              "position": {
+                "x": 220,
+                "y": 280
               }
             }
           ],
@@ -10807,7 +13466,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_059_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -10846,6 +13505,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_059_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_059_spark_gate",
+              "required_ability_type": "spark",
+              "gate_effect": "power_device",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -10977,6 +13662,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_060_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -10984,9 +13673,43 @@
               "enemy_type": "generated_ground",
               "ability_type": "spark",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_060_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
+              }
+            },
+            {
+              "id": "GeneratedEliteEnemySpawn",
+              "spawn_id": "labyrinth_060_generated_elite",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 172,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 128,
+              "position": {
+                "x": 220,
+                "y": 280
               }
             }
           ],
@@ -10994,7 +13717,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_060_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -11033,6 +13756,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_060_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_060_spark_gate",
+              "required_ability_type": "spark",
+              "gate_effect": "power_device",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -11164,6 +13913,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_061_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -11171,9 +13924,43 @@
               "enemy_type": "generated_ground",
               "ability_type": "spark",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_061_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
+              }
+            },
+            {
+              "id": "GeneratedEliteEnemySpawn",
+              "spawn_id": "labyrinth_061_generated_elite",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 172,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 128,
+              "position": {
+                "x": 220,
+                "y": 280
               }
             }
           ],
@@ -11181,7 +13968,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_061_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -11220,6 +14007,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_061_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_061_spark_gate",
+              "required_ability_type": "spark",
+              "gate_effect": "power_device",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -11351,6 +14164,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_062_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -11358,9 +14175,43 @@
               "enemy_type": "generated_ground",
               "ability_type": "spark",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_062_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
+              }
+            },
+            {
+              "id": "GeneratedEliteEnemySpawn",
+              "spawn_id": "labyrinth_062_generated_elite",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 172,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 128,
+              "position": {
+                "x": 220,
+                "y": 280
               }
             }
           ],
@@ -11368,7 +14219,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_062_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -11407,6 +14258,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_062_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_062_spark_gate",
+              "required_ability_type": "spark",
+              "gate_effect": "power_device",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -11538,6 +14415,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_063_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -11545,9 +14426,43 @@
               "enemy_type": "generated_ground",
               "ability_type": "spark",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_063_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
+              }
+            },
+            {
+              "id": "GeneratedEliteEnemySpawn",
+              "spawn_id": "labyrinth_063_generated_elite",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 172,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 128,
+              "position": {
+                "x": 220,
+                "y": 280
               }
             }
           ],
@@ -11555,7 +14470,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_063_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -11594,6 +14509,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_063_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_063_spark_gate",
+              "required_ability_type": "spark",
+              "gate_effect": "power_device",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -11725,6 +14666,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_064_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -11732,9 +14677,43 @@
               "enemy_type": "generated_ground",
               "ability_type": "spark",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_064_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
+              }
+            },
+            {
+              "id": "GeneratedEliteEnemySpawn",
+              "spawn_id": "labyrinth_064_generated_elite",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 172,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 128,
+              "position": {
+                "x": 220,
+                "y": 280
               }
             }
           ],
@@ -11742,7 +14721,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_064_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -11781,6 +14760,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_064_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_064_spark_gate",
+              "required_ability_type": "spark",
+              "gate_effect": "power_device",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -11912,6 +14917,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_065_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -11919,9 +14928,43 @@
               "enemy_type": "generated_ground",
               "ability_type": "spark",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_065_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
+              }
+            },
+            {
+              "id": "GeneratedEliteEnemySpawn",
+              "spawn_id": "labyrinth_065_generated_elite",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 172,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 128,
+              "position": {
+                "x": 220,
+                "y": 280
               }
             }
           ],
@@ -11929,7 +14972,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_065_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -11968,6 +15011,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_065_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_065_spark_gate",
+              "required_ability_type": "spark",
+              "gate_effect": "power_device",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -12099,6 +15168,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_066_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -12106,9 +15179,43 @@
               "enemy_type": "generated_ground",
               "ability_type": "spark",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_066_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
+              }
+            },
+            {
+              "id": "GeneratedEliteEnemySpawn",
+              "spawn_id": "labyrinth_066_generated_elite",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 172,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 128,
+              "position": {
+                "x": 220,
+                "y": 280
               }
             }
           ],
@@ -12116,7 +15223,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_066_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -12155,6 +15262,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_066_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_066_spark_gate",
+              "required_ability_type": "spark",
+              "gate_effect": "power_device",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -12286,6 +15419,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_067_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -12293,9 +15430,43 @@
               "enemy_type": "generated_ground",
               "ability_type": "spark",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_067_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
+              }
+            },
+            {
+              "id": "GeneratedEliteEnemySpawn",
+              "spawn_id": "labyrinth_067_generated_elite",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 172,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 128,
+              "position": {
+                "x": 220,
+                "y": 280
               }
             }
           ],
@@ -12303,7 +15474,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_067_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -12342,6 +15513,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_067_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_067_spark_gate",
+              "required_ability_type": "spark",
+              "gate_effect": "power_device",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -12484,6 +15681,10 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "defeat_enemies",
+            "objective_id": "labyrinth_068_defeat_enemies"
+          },
           "enemies": [
             {
               "id": "GeneratedEnemySpawn",
@@ -12491,9 +15692,43 @@
               "enemy_type": "generated_ground",
               "ability_type": "spark",
               "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 112,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 64,
               "position": {
                 "x": 336,
                 "y": 400
+              }
+            },
+            {
+              "id": "GeneratedFlyingEnemySpawn",
+              "spawn_id": "labyrinth_068_generated_flying",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 148,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 96,
+              "position": {
+                "x": 520,
+                "y": 320
+              }
+            },
+            {
+              "id": "GeneratedEliteEnemySpawn",
+              "spawn_id": "labyrinth_068_generated_elite",
+              "enemy_type": "generated_flying",
+              "ability_type": "spark",
+              "contact_damage": 1,
+              "attack_damage": 1,
+              "attack_radius": 172,
+              "attack_cooldown_ms": 4000,
+              "patrol_radius": 128,
+              "position": {
+                "x": 220,
+                "y": 280
               }
             }
           ],
@@ -12501,7 +15736,7 @@
             {
               "id": "GeneratedHealMarkerRoute",
               "heal_id": "labyrinth_068_generated_heal",
-              "amount": 1,
+              "amount": 3,
               "reward_type": "health",
               "position": {
                 "x": 456,
@@ -12540,6 +15775,32 @@
             }
           ],
           "collectibles": [],
+          "hazards": [
+            {
+              "id": "GeneratedHazardMarker",
+              "hazard_id": "labyrinth_068_spike_hazard",
+              "hazard_type": "spike",
+              "damage": 1,
+              "trigger_radius": 40,
+              "position": {
+                "x": 252,
+                "y": 288
+              }
+            }
+          ],
+          "ability_gates": [
+            {
+              "id": "GeneratedAbilityGateMarker",
+              "gate_id": "labyrinth_068_spark_gate",
+              "required_ability_type": "spark",
+              "gate_effect": "power_device",
+              "trigger_radius": 96,
+              "position": {
+                "x": 500,
+                "y": 368
+              }
+            }
+          ],
           "goals": []
         }
       },
@@ -12660,9 +15921,15 @@
           }
         ],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_069_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -12771,9 +16038,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_070_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -12882,9 +16155,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_071_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -12993,9 +16272,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_072_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -13104,9 +16389,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_073_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -13215,9 +16506,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_074_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -13326,9 +16623,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_075_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -13437,9 +16740,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_076_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -13548,9 +16857,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_077_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -13659,9 +16974,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_078_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -13770,9 +17091,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_079_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -13881,9 +17208,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_080_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -13992,9 +17325,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_081_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -14103,9 +17442,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_082_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -14214,9 +17559,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_083_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -14325,9 +17676,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_084_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -14436,9 +17793,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_085_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -14547,9 +17910,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_086_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -14658,9 +18027,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_087_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -14769,9 +18144,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_088_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -14880,9 +18261,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_089_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -14991,9 +18378,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_090_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -15102,9 +18495,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_091_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -15213,9 +18612,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_092_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -15324,9 +18729,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_093_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -15435,9 +18846,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_094_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -15546,9 +18963,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_095_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -15657,9 +19080,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_096_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -15768,9 +19197,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_097_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -15879,9 +19314,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_098_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -15990,9 +19431,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_099_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -16101,9 +19548,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_100_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -16212,9 +19665,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_101_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -16323,9 +19782,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_102_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -16434,9 +19899,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_103_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -16545,9 +20016,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_104_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -16656,9 +20133,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_105_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -16767,9 +20250,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_106_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -16878,9 +20367,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_107_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -16989,9 +20484,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_108_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -17100,9 +20601,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_109_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -17211,9 +20718,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_110_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -17322,9 +20835,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_111_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -17433,9 +20952,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_112_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -17544,9 +21069,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_113_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -17655,9 +21186,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_114_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -17766,9 +21303,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_115_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -17877,9 +21420,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_116_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -17988,9 +21537,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_117_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -18099,9 +21654,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_118_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -18210,9 +21771,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_119_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -18321,9 +21888,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_120_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -18432,9 +22005,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_121_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -18543,9 +22122,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_122_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -18654,9 +22239,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_123_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -18765,9 +22356,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_124_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -18876,9 +22473,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_125_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -18987,9 +22590,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_126_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -19098,9 +22707,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_127_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -19209,9 +22824,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_128_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -19320,9 +22941,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_129_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -19431,9 +23058,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_130_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -19542,9 +23175,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "explore",
+            "objective_id": "labyrinth_131_explore"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": []
         }
       },
@@ -19653,9 +23292,15 @@
         },
         "platforms": [],
         "content": {
+          "objective": {
+            "objective_type": "goal",
+            "objective_id": "labyrinth_132_goal"
+          },
           "enemies": [],
           "heals": [],
           "collectibles": [],
+          "hazards": [],
+          "ability_gates": [],
           "goals": [
             {
               "id": "GeneratedGoalMarker",

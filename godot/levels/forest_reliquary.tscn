@@ -16,6 +16,11 @@ position = Vector2(96, 368)
 script = ExtResource("1_spawn")
 spawn_id = "default"
 
+[node name="PlayerSpawnDoorCheck" type="Node2D" parent="."]
+position = Vector2(560, 368)
+script = ExtResource("1_spawn")
+spawn_id = "door_check"
+
 [node name="ForestKeystone" type="Node2D" parent="."]
 position = Vector2(220, 368)
 script = ExtResource("4_collectible")
@@ -38,6 +43,7 @@ door_id = "forest_reliquary_to_labyrinth_001"
 target_level_id = "labyrinth_001"
 target_spawn_id = "default"
 trigger_radius = 48.0
+required_item_id = "forest-keystone"
 
 [node name="CameraBoundsMarker" type="Node2D" parent="."]
 position = Vector2(380, 270)

@@ -175,18 +175,8 @@ function buildRuntimePlatforms(difficulty, roomVariant) {
 
 function buildRuntimeContent(levelId, cluster, difficulty, neighbors, deadEnds, tileSize) {
   return {
-    enemies: difficulty >= 2
-      ? [
-          {
-            id: 'GeneratedEnemySpawn',
-            spawn_id: `${levelId}_generated_enemy`,
-            enemy_type: 'generated_ground',
-            ability_type: getGeneratedAbilityType(cluster),
-            contact_damage: 1,
-            position: { x: 336, y: 400 },
-          },
-        ]
-      : [],
+    objective: buildRuntimeObjective(levelId, cluster, difficulty, neighbors),
+    enemies: buildRuntimeEnemies(levelId, cluster, difficulty),
     heals: difficulty >= 2 ? buildRuntimeHeals(levelId, deadEnds, tileSize) : [],
     collectibles: shouldAddGeneratedCollectible(neighbors)
       ? [
@@ -199,6 +189,8 @@ function buildRuntimeContent(levelId, cluster, difficulty, neighbors, deadEnds, 
           },
         ]
       : [],
+    hazards: buildRuntimeHazards(levelId, cluster, difficulty),
+    ability_gates: buildRuntimeAbilityGates(levelId, cluster, difficulty),
     goals: shouldAddGeneratedGoal(cluster, neighbors)
       ? [
           {
@@ -213,12 +205,131 @@ function buildRuntimeContent(levelId, cluster, difficulty, neighbors, deadEnds, 
   };
 }
 
+function buildRuntimeEnemies(levelId, cluster, difficulty) {
+  if (difficulty < 2) {
+    return [];
+  }
+
+  const abilityType = getGeneratedAbilityType(cluster);
+  const enemies = [
+    {
+      id: 'GeneratedEnemySpawn',
+      spawn_id: `${levelId}_generated_enemy`,
+      enemy_type: 'generated_ground',
+      ability_type: abilityType,
+      contact_damage: 1,
+      attack_damage: 1,
+      attack_radius: 112,
+      attack_cooldown_ms: 4000,
+      patrol_radius: 64,
+      position: { x: 336, y: 400 },
+    },
+  ];
+
+  if (difficulty >= 3) {
+    enemies.push({
+      id: 'GeneratedFlyingEnemySpawn',
+      spawn_id: `${levelId}_generated_flying`,
+      enemy_type: 'generated_flying',
+      ability_type: abilityType,
+      contact_damage: 1,
+      attack_damage: 1,
+      attack_radius: 148,
+      attack_cooldown_ms: 4000,
+      patrol_radius: 96,
+      position: { x: 520, y: 320 },
+    });
+  }
+
+  if (difficulty >= 4) {
+    enemies.push({
+      id: 'GeneratedEliteEnemySpawn',
+      spawn_id: `${levelId}_generated_elite`,
+      enemy_type: 'generated_flying',
+      ability_type: abilityType,
+      contact_damage: 1,
+      attack_damage: 1,
+      attack_radius: 172,
+      attack_cooldown_ms: 4000,
+      patrol_radius: 128,
+      position: { x: 220, y: 280 },
+    });
+  }
+
+  return enemies;
+}
+
+function buildRuntimeObjective(levelId, cluster, difficulty, neighbors) {
+  if (shouldAddGeneratedGoal(cluster, neighbors)) {
+    return {
+      objective_type: 'goal',
+      objective_id: `${levelId}_goal`,
+    };
+  }
+
+  if (shouldAddGeneratedCollectible(neighbors)) {
+    return {
+      objective_type: 'collect_key',
+      objective_id: `${levelId}_collect_key`,
+      required_item_id: `${cluster}-generated-shard`,
+    };
+  }
+
+  if (difficulty >= 2) {
+    return {
+      objective_type: 'defeat_enemies',
+      objective_id: `${levelId}_defeat_enemies`,
+    };
+  }
+
+  return {
+    objective_type: 'explore',
+    objective_id: `${levelId}_explore`,
+  };
+}
+
+function buildRuntimeHazards(levelId, cluster, difficulty) {
+  if (difficulty < 2) {
+    return [];
+  }
+
+  const isFire = cluster === 'fire';
+  return [
+    {
+      id: 'GeneratedHazardMarker',
+      hazard_id: `${levelId}_${isFire ? 'lava' : 'spike'}_hazard`,
+      hazard_type: isFire ? 'lava' : 'spike',
+      damage: 1,
+      trigger_radius: 40,
+      position: { x: 252, y: 288 },
+    },
+  ];
+}
+
+function buildRuntimeAbilityGates(levelId, cluster, difficulty) {
+  const gateSpec = getGeneratedGateSpec(cluster);
+  if (gateSpec === undefined || difficulty < 2) {
+    return [];
+  }
+
+  return [
+    {
+      id: 'GeneratedAbilityGateMarker',
+      gate_id: `${levelId}_${gateSpec.id}_gate`,
+      required_ability_type: gateSpec.requiredAbilityType,
+      gate_effect: gateSpec.gateEffect,
+      trigger_radius: 96,
+      position: { x: 500, y: 368 },
+    },
+  ];
+}
+
 function buildRuntimeHeals(levelId, deadEnds, tileSize) {
   return [
     {
       id: 'GeneratedHealMarkerRoute',
       heal_id: `${levelId}_generated_heal`,
-      amount: 1,
+      amount: 3,
       reward_type: 'health',
       position: { x: 456, y: 368 },
     },
@@ -268,6 +379,43 @@ function getGeneratedAbilityType(cluster) {
       return 'stone';
     default:
       return 'spark';
+  }
+}
+
+function getGeneratedGateSpec(cluster) {
+  switch (cluster) {
+    case 'forest':
+      return {
+        id: 'sword',
+        requiredAbilityType: 'sword',
+        gateEffect: 'cut_vines',
+      };
+    case 'ice':
+      return {
+        id: 'ice',
+        requiredAbilityType: 'ice',
+        gateEffect: 'freeze_water',
+      };
+    case 'fire':
+      return {
+        id: 'fire',
+        requiredAbilityType: 'fire',
+        gateEffect: 'melt_ice',
+      };
+    case 'sky':
+      return {
+        id: 'spark',
+        requiredAbilityType: 'spark',
+        gateEffect: 'power_device',
+      };
+    case 'ruins':
+      return {
+        id: 'stone',
+        requiredAbilityType: 'stone',
+        gateEffect: 'press_switch',
+      };
+    default:
+      return undefined;
   }
 }
 

@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://forestarealevel01"]
+[gd_scene load_steps=8 format=3 uid="uid://forestarealevel01"]
 
 [ext_resource type="Script" path="res://scripts/level/markers/PlayerSpawn.gd" id="1_spawn"]
 [ext_resource type="Script" path="res://scripts/level/markers/DoorMarker.gd" id="2_door"]
 [ext_resource type="Script" path="res://scripts/level/markers/EnemySpawnMarker.gd" id="3_enemy"]
 [ext_resource type="Script" path="res://scripts/level/markers/CameraBoundsMarker.gd" id="4_camera_bounds"]
+[ext_resource type="Script" path="res://scripts/level/markers/AbilityGateMarker.gd" id="5_ability_gate"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(760, 32)
@@ -38,6 +39,14 @@ spawn_id = "forest_area_enemy"
 enemy_type = "simple_ground"
 ability_type = "leaf"
 contact_damage = 1
+
+[node name="VineGate" type="Node2D" parent="."]
+position = Vector2(430, 368)
+script = ExtResource("5_ability_gate")
+gate_id = "forest_area_vines"
+required_ability_type = "sword"
+gate_effect = "cut_vines"
+trigger_radius = 96.0
 
 [node name="CameraBoundsMarker" type="Node2D" parent="."]
 position = Vector2(380, 270)

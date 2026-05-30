@@ -7,6 +7,11 @@ const DoorTexture = preload("res://resources/assets/images/ui/door-marker.webp")
 @export var target_level_id: String = ""
 @export var target_spawn_id: String = "default"
 @export var trigger_radius: float = 64.0
+@export var required_item_id: String = ""
+@export var required_ability_type: String = ""
+@export var required_completed_level_id: String = ""
+@export var required_defeated_enemy_group_id: String = ""
+@export var required_boss_id: String = ""
 
 
 func _ready() -> void:
@@ -39,5 +44,10 @@ func to_level_marker() -> Dictionary:
             "target_level_id": target_level_id,
             "target_spawn_id": target_spawn_id,
             "trigger_radius": trigger_radius,
+            "required_item_id": required_item_id,
+            "required_ability_type": required_ability_type,
+            "required_completed_level_id": required_completed_level_id,
+            "required_defeated_enemy_group_id": required_defeated_enemy_group_id,
+            "required_boss_id": required_boss_id,
         },
     }

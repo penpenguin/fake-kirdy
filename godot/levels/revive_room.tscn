@@ -29,6 +29,7 @@ spawn_id = "revive_room_first_contact"
 enemy_type = "simple_ground"
 ability_type = "spark"
 contact_damage = 3
+attack_damage = 3
 
 [node name="SecondDangerEnemySpawn" type="Node2D" parent="."]
 position = Vector2(500, 400)
@@ -37,6 +38,7 @@ spawn_id = "revive_room_second_contact"
 enemy_type = "simple_ground"
 ability_type = "spark"
 contact_damage = 3
+attack_damage = 3
 
 [node name="CameraBoundsMarker" type="Node2D" parent="."]
 position = Vector2(380, 270)

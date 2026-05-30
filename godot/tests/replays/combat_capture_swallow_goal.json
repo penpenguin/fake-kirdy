@@ -3,7 +3,7 @@
   "start_spawn_id": "default",
   "level_id": "combat_room",
   "fps": 60,
-  "max_frames": 260,
+  "max_frames": 720,
   "frames": [
     {
       "frame": 0,
@@ -40,7 +40,7 @@
       }
     },
     {
-      "frame": 240,
+      "frame": 680,
       "actions": {
         "move_right": false
       }
