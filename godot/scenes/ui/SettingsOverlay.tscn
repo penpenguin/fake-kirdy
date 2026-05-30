@@ -1,14 +1,38 @@
-[gd_scene load_steps=2 format=3 uid="uid://settingsoverlay01"]
+[gd_scene load_steps=4 format=3 uid="uid://settingsoverlay01"]
 
 [ext_resource type="Script" path="res://scripts/ui/SettingsOverlay.gd" id="1_settings"]
+[ext_resource type="Shader" path="res://resources/shaders/SettingsBlur.gdshader" id="2_blur_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_settings_blur"]
+shader = ExtResource("2_blur_shader")
 
 [node name="SettingsOverlay" type="Control"]
+visible = false
 offset_left = 16.0
 offset_top = 424.0
 offset_right = 320.0
 offset_bottom = 520.0
 mouse_filter = 2
 script = ExtResource("1_settings")
+
+[node name="PostProcessBlur" type="ColorRect" parent="."]
+visible = false
+offset_left = -16.0
+offset_top = -424.0
+offset_right = 944.0
+offset_bottom = 116.0
+mouse_filter = 2
+material = SubResource("ShaderMaterial_settings_blur")
+color = Color(1, 1, 1, 1)
+
+[node name="BlurFallback" type="ColorRect" parent="."]
+visible = false
+offset_left = -16.0
+offset_top = -424.0
+offset_right = 944.0
+offset_bottom = 116.0
+mouse_filter = 2
+color = Color(0.02, 0.03, 0.07, 0.52)
 
 [node name="VolumeLabel" type="Label" parent="."]
 offset_left = 0.0

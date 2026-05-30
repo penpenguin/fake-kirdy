@@ -6,6 +6,7 @@ const HealTexture = preload("res://resources/assets/images/items/heal-orb.webp")
 @export var heal_id: String = "heal"
 @export var amount: int = 1
 @export var reward_type: String = "health"
+@export var dead_end_id: String = ""
 
 
 func _ready() -> void:
@@ -37,5 +38,6 @@ func to_level_marker() -> Dictionary:
         "payload": {
             "amount": amount,
             "reward_type": reward_type,
+            "dead_end_id": dead_end_id,
         },
     }

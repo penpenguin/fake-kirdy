@@ -1,0 +1,41 @@
+[gd_scene load_steps=2 format=3 uid="uid://pausescene01"]
+
+[ext_resource type="Script" path="res://scripts/ui/PauseScene.gd" id="1_pause_scene"]
+
+[node name="PauseScene" type="Control"]
+visible = false
+offset_right = 960.0
+offset_bottom = 540.0
+mouse_filter = 2
+script = ExtResource("1_pause_scene")
+
+[node name="BlurFallback" type="ColorRect" parent="."]
+visible = false
+offset_right = 960.0
+offset_bottom = 540.0
+mouse_filter = 2
+color = Color(0.03, 0.04, 0.08, 0.46)
+
+[node name="TitleLabel" type="Label" parent="."]
+offset_left = 320.0
+offset_top = 176.0
+offset_right = 640.0
+offset_bottom = 208.0
+text = "Paused"
+horizontal_alignment = 1
+
+[node name="ResumeLabel" type="Label" parent="."]
+offset_left = 320.0
+offset_top = 216.0
+offset_right = 640.0
+offset_bottom = 240.0
+text = "Press Esc to resume"
+horizontal_alignment = 1
+
+[node name="SettingsLabel" type="Label" parent="."]
+offset_left = 320.0
+offset_top = 248.0
+offset_right = 640.0
+offset_bottom = 272.0
+text = "Press Enter for settings"
+horizontal_alignment = 1

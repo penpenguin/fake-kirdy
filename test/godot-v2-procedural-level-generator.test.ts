@@ -11,6 +11,17 @@ const proceduralLevelsPath = join(repoRoot, 'godot', 'levels', 'generated', 'pro
 type ProceduralLevelExport = {
   version?: number;
   generated_from?: string;
+  validation?: {
+    branch_density_minimum?: number;
+    branch_density_by_cluster?: Record<string, {
+      level_count?: number;
+      branch_level_count?: number;
+      ratio?: number;
+    }>;
+    multi_shape_layout_minimum?: number;
+    multi_shape_layouts_by_shape?: Record<string, number>;
+    branch_exit_rule_count?: number;
+  };
   levels?: Array<{
     id?: string;
     stage_id?: string;
@@ -23,15 +34,32 @@ type ProceduralLevelExport = {
     runtime_layout?: {
       tile_size?: { x?: number; y?: number };
       grid?: { columns?: number; rows?: number };
-      room?: { width?: number; height?: number; variant?: string };
+      room?: { width?: number; height?: number; variant?: string; shape_profile?: string };
       camera_bounds?: { position?: { x?: number; y?: number }; size?: { x?: number; y?: number } };
       spawns?: Record<string, { x?: number; y?: number }>;
       doors?: Record<string, { x?: number; y?: number }>;
       safety?: {
         door_trigger_radius?: number;
         min_spawn_door_distance?: number;
+        door_safe_radius?: number;
+        vertical_transition?: {
+          enabled?: boolean;
+          max_spawn_drop_distance?: number;
+          spawn_clearance_radius?: number;
+          protected_spawn_ids?: string[];
+          landing_surface_ids?: string[];
+        };
       };
+      floor?: { id?: string; position?: { x?: number; y?: number }; size?: { x?: number; y?: number } };
+      floor_segments?: Array<{ id?: string; position?: { x?: number; y?: number }; size?: { x?: number; y?: number } }>;
       platforms?: Array<{ id?: string; position?: { x?: number; y?: number }; size?: { x?: number; y?: number } }>;
+      branch_exit_rules?: Array<{
+        direction?: string;
+        target_level_id?: string;
+        rule_type?: string;
+        required_item_id?: string;
+        required_keystone_item_id?: string;
+      }>;
       content?: {
         objective?: {
           objective_type?: string;
@@ -176,6 +204,7 @@ describe('Godot v2 procedural level schema generation', () => {
       safety: {
         door_trigger_radius: 48,
         min_spawn_door_distance: 64,
+        door_safe_radius: 96,
       },
     });
     expect(iceRoom?.runtime_layout?.platforms?.map((platform) => platform.id)).toEqual([
@@ -183,6 +212,41 @@ describe('Godot v2 procedural level schema generation', () => {
       'GeneratedPlatformHigh',
     ]);
     expect(terminalRoom?.runtime_layout?.platforms?.map((platform) => platform.id)).toEqual([]);
+  });
+
+  it('exports multi-shape generated room geometry as schema-owned floor segments', () => {
+    const generated = JSON.parse(readFileSync(proceduralLevelsPath, 'utf8')) as ProceduralLevelExport;
+    const levels = new Map(generated.levels?.map((level) => [level.id, level]));
+    const branchRoom = levels.get('labyrinth_001');
+    const reliquaryRoute = levels.get('labyrinth_010');
+    const terminalRoom = levels.get('labyrinth_132');
+
+    expect(generated.validation?.multi_shape_layout_minimum).toBe(4);
+    expect(generated.validation?.multi_shape_layouts_by_shape).toMatchObject({
+      branch_room: expect.any(Number),
+      reliquary_gate: expect.any(Number),
+      vertical_route: expect.any(Number),
+      terminal_goal: expect.any(Number),
+    });
+
+    expect(branchRoom?.runtime_layout?.room?.shape_profile).toBe('branch_room');
+    expect(branchRoom?.runtime_layout?.floor_segments?.map((segment) => segment.id)).toEqual([
+      'FloorMain',
+      'FloorBranchLeft',
+      'FloorBranchHigh',
+    ]);
+
+    expect(reliquaryRoute?.runtime_layout?.room?.shape_profile).toBe('reliquary_gate');
+    expect(reliquaryRoute?.runtime_layout?.floor_segments?.map((segment) => segment.id)).toEqual([
+      'FloorMain',
+      'FloorGateApproach',
+    ]);
+
+    expect(terminalRoom?.runtime_layout?.room?.shape_profile).toBe('terminal_goal');
+    expect(terminalRoom?.runtime_layout?.floor_segments?.map((segment) => segment.id)).toEqual([
+      'FloorMain',
+      'FloorGoalDais',
+    ]);
   });
 
   it('exports generated gameplay marker placement in runtime layout metadata', () => {
@@ -202,7 +266,7 @@ describe('Godot v2 procedural level schema generation', () => {
           attack_damage: 1,
           attack_radius: 112,
           attack_cooldown_ms: 4000,
-          position: { x: 336, y: 400 },
+          position: { x: 256, y: 368 },
         },
         {
           id: 'GeneratedFlyingEnemySpawn',
@@ -233,14 +297,14 @@ describe('Godot v2 procedural level schema generation', () => {
         heal_id: 'labyrinth_010_generated_heal',
         amount: 3,
         reward_type: 'health',
-        position: { x: 456, y: 368 },
+        position: { x: 520, y: 368 },
       },
       {
         id: 'GeneratedHealMarkerHealth',
         heal_id: 'labyrinth_010_dead_end_health',
         amount: 1,
         reward_type: 'health',
-        position: { x: 80, y: 304 },
+        position: { x: 112, y: 304 },
       },
       {
         id: 'GeneratedHealMarkerMaxHealth',
@@ -318,6 +382,34 @@ describe('Godot v2 procedural level schema generation', () => {
     });
   });
 
+  it('publishes branch-exit rules and locks generated reliquary exits behind local route shards', () => {
+    const generated = JSON.parse(readFileSync(proceduralLevelsPath, 'utf8')) as ProceduralLevelExport;
+    const levels = new Map(generated.levels?.map((level) => [level.id, level]));
+    const iceReliquaryRoute = levels.get('labyrinth_010');
+    const skyCrossClusterRoute = levels.get('labyrinth_051');
+    const loader = readFileSync(join(repoRoot, 'godot', 'scripts', 'level', 'LevelLoader.gd'), 'utf8');
+
+    expect(generated.validation?.branch_exit_rule_count).toBeGreaterThan(0);
+    expect(iceReliquaryRoute?.runtime_layout?.branch_exit_rules).toEqual(expect.arrayContaining([
+      {
+        direction: 'east',
+        target_level_id: 'ice_reliquary',
+        rule_type: 'reliquary_requires_route_shard',
+        required_item_id: 'ice-generated-shard',
+      },
+    ]));
+    expect(skyCrossClusterRoute?.runtime_layout?.branch_exit_rules).toEqual(expect.arrayContaining([
+      {
+        direction: 'south',
+        target_level_id: 'sky_sanctum',
+        rule_type: 'cross_cluster_keystone',
+        required_keystone_item_id: 'cave-keystone',
+      },
+    ]));
+    expect(loader).toContain('func get_generated_branch_exit_rule(runtime_layout: Dictionary, direction: String) -> Dictionary:');
+    expect(loader).toContain('door.set("required_item_id", String(branch_rule.get("required_item_id", "")))');
+  });
+
   it('varies generated enemy encounters with multiple enemy roles and attack timing', () => {
     const generated = JSON.parse(readFileSync(proceduralLevelsPath, 'utf8')) as ProceduralLevelExport;
     const levels = new Map(generated.levels?.map((level) => [level.id, level]));
@@ -367,8 +459,54 @@ describe('Godot v2 procedural level schema generation', () => {
     expect(northLinkRoom?.neighbors?.north).toBe('labyrinth_068');
     expect(northLinkRoom?.runtime_layout?.room?.variant).toBe('vertical_route');
     expect(northLinkRoom?.runtime_layout?.platforms?.map((platform) => platform.id)).toEqual([
+      'GeneratedPlatformVerticalLanding',
       'GeneratedPlatformVerticalStep',
     ]);
+  });
+
+  it('adds landing and clearance metadata for generated vertical transitions', () => {
+    const generated = JSON.parse(readFileSync(proceduralLevelsPath, 'utf8')) as ProceduralLevelExport;
+
+    for (const level of generated.levels ?? []) {
+      const verticalDirections = ['north', 'south'].filter((direction) => level.neighbors?.[direction] !== undefined);
+      if (verticalDirections.length === 0) {
+        continue;
+      }
+
+      const layout = level.runtime_layout;
+      const verticalSafety = layout?.safety?.vertical_transition;
+      const maxDropDistance = Number(verticalSafety?.max_spawn_drop_distance);
+
+      expect(verticalSafety?.enabled, `${level.id} missing vertical safety flag`).toBe(true);
+      expect(verticalSafety?.spawn_clearance_radius, `${level.id} missing vertical spawn clearance`).toBe(72);
+      expect(maxDropDistance, `${level.id} missing vertical max drop`).toBe(96);
+      expect(verticalSafety?.protected_spawn_ids).toEqual(['north', 'south']);
+      expect(verticalSafety?.landing_surface_ids).toEqual([
+        'GeneratedPlatformVerticalLanding',
+        'Floor',
+      ]);
+
+      const landingSurfaces = [
+        layout?.floor,
+        ...(layout?.platforms ?? []),
+      ].filter((surface): surface is NonNullable<typeof surface> => surface !== undefined);
+
+      for (const spawnId of verticalSafety?.protected_spawn_ids ?? []) {
+        const spawn = layout?.spawns?.[spawnId];
+        expect(spawn, `${level.id} missing ${spawnId} protected spawn`).toBeTruthy();
+
+        const reachableLanding = landingSurfaces.find((surface) => {
+          const surfaceTop = Number(surface.position?.y) - Number(surface.size?.y) / 2;
+          const halfWidth = Number(surface.size?.x) / 2;
+          const horizontalDelta = Math.abs(Number(spawn?.x) - Number(surface.position?.x));
+          const verticalDrop = surfaceTop - Number(spawn?.y);
+
+          return horizontalDelta <= halfWidth && verticalDrop >= 0 && verticalDrop <= maxDropDistance;
+        });
+
+        expect(reachableLanding?.id, `${level.id} ${spawnId} spawn has no protected landing`).toBeTruthy();
+      }
+    }
   });
 
   it('keeps generated target spawns outside their corresponding door trigger radius', () => {
@@ -399,6 +537,64 @@ describe('Godot v2 procedural level schema generation', () => {
           minSpawnDoorDistance,
         );
       }
+    }
+  });
+
+  it('keeps generated gameplay markers outside door safe rings', () => {
+    const generated = JSON.parse(readFileSync(proceduralLevelsPath, 'utf8')) as ProceduralLevelExport;
+
+    for (const level of generated.levels ?? []) {
+      const layout = level.runtime_layout;
+      const doorSafeRadius = layout?.safety?.door_safe_radius;
+      expect(doorSafeRadius, `${level.id} missing door_safe_radius`).toBe(96);
+
+      const activeDoorPositions = Object.keys(level.neighbors ?? {})
+        .map((direction) => layout?.doors?.[direction])
+        .filter((position): position is { x?: number; y?: number } => position !== undefined);
+
+      const content = layout?.content ?? {};
+      const gameplayMarkers = [
+        ...(content.enemies ?? []),
+        ...(content.heals ?? []),
+        ...(content.collectibles ?? []),
+        ...(content.hazards ?? []),
+        ...(content.ability_gates ?? []),
+        ...(content.goals ?? []),
+      ];
+
+      for (const marker of gameplayMarkers) {
+        for (const door of activeDoorPositions) {
+          const distance = Math.hypot(
+            Number(marker.position?.x) - Number(door.x),
+            Number(marker.position?.y) - Number(door.y),
+          );
+          expect(
+            distance,
+            `${level.id} ${marker.id} is inside a generated door safe ring`,
+          ).toBeGreaterThanOrEqual(Number(doorSafeRadius));
+        }
+      }
+    }
+  });
+
+  it('publishes CI branch density metrics with at least 20 percent dead-end coverage per biome', () => {
+    const generated = JSON.parse(readFileSync(proceduralLevelsPath, 'utf8')) as ProceduralLevelExport;
+    const densityByCluster = generated.validation?.branch_density_by_cluster ?? {};
+
+    expect(generated.validation?.branch_density_minimum).toBe(0.2);
+    expect(Object.keys(densityByCluster)).toEqual(expect.arrayContaining([
+      'forest',
+      'ice',
+      'fire',
+      'ruins',
+      'sky',
+      'void',
+    ]));
+
+    for (const [cluster, density] of Object.entries(densityByCluster)) {
+      expect(density.level_count, `${cluster} level count`).toBeGreaterThan(0);
+      expect(density.branch_level_count, `${cluster} branch count`).toBeGreaterThan(0);
+      expect(density.ratio, `${cluster} branch density`).toBeGreaterThanOrEqual(0.2);
     }
   });
 

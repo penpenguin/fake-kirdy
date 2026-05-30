@@ -18,7 +18,7 @@ None. Root Phaser/Vite dependencies have been removed.
 
 Use `npm run legacy:inventory` for the current machine-readable inventory. The inventory marks this surface as `removed from canonical repository` and `required_by_canonical_runtime: false`.
 
-Use `docs/godot-v2/phaser-parity-ledger.json` and `npm run godot:parity-ledger -- --check` to see which Phaser reference systems are ported, partial, deferred, deprecated, or still blocking retirement.
+The Phaser parity ledger gate was retired after the Godot mainline switch. Ongoing validation now lives in Godot-owned manifests, generated schema, content checks, replay fixtures, trace metrics, export checks, and the legacy inventory.
 
 ## Allowed Uses
 
@@ -31,7 +31,6 @@ Do not reintroduce optional legacy/reference copies or add new Phaser runtime be
 The retirement gates now tracked for the remaining reference source:
 
 - `npm run test:canonical` passes, including the Godot replay suite when Godot is available.
-- `npm run godot:parity-ledger -- --fail-on-blockers` passes after blockers are intentionally resolved.
 - Godot export validation either succeeds or the missing export templates are explicitly reported as a graceful skip.
 - Useful Phaser reference behavior is ported to Godot, represented in Godot docs/import data, or explicitly deprecated in the ExecPlan.
 - The legacy migration decision is recorded in `docs/godot-v2/full-migration-execplan.md`.

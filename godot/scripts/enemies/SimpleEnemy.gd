@@ -17,6 +17,10 @@ class_name SimpleEnemy
 @export var attack_cooldown_ms: int = 1200
 @export var enemy_group_id: String = ""
 @export var boss_id: String = ""
+@export var hit_flash_ms: int = 140
+@export var defeat_flash_ms: int = 220
+@export var hit_flash_color: Color = Color(1.0, 0.32, 0.28, 1.0)
+@export var normal_modulate: Color = Color(1.0, 1.0, 1.0, 1.0)
 
 var state: String = "enemy.idle"
 var hp: int = 2
@@ -28,6 +32,8 @@ var spawn_position: Vector2 = Vector2.ZERO
 var patrol_direction: float = 1.0
 var ai_player: Node = null
 var attack_cooldown_remaining_ms: int = 0
+var feedback_flash_remaining_ms: int = 0
+var defeat_pending_hide: bool = false
 
 
 func _ready() -> void:
@@ -35,11 +41,14 @@ func _ready() -> void:
     initial_collision_mask = collision_mask
     hp = max(max_hp, 1)
     spawn_position = global_position
+    reset_hit_feedback_visual()
     if patrol_radius > 0.0:
         state = "enemy.patrolling"
 
 
 func _physics_process(delta: float) -> void:
+    tick_hit_feedback(delta)
+
     if state == "enemy.captured" and captured_by != null:
         global_position = captured_by.global_position + follow_offset
         velocity = Vector2.ZERO
@@ -185,6 +194,7 @@ func take_damage(amount: int, source: Dictionary = {}) -> Dictionary:
 
     hp = max(hp - normalized_amount, 0)
     hurt_invulnerability_remaining_ms = max(hurt_invulnerability_ms, 0)
+    show_hit_feedback(normalized_amount, hp <= 0)
     if hp <= 0:
         die(source)
 
@@ -194,11 +204,14 @@ func take_damage(amount: int, source: Dictionary = {}) -> Dictionary:
 func die(_source: Dictionary = {}) -> void:
     captured_by = null
     state = "enemy.defeated"
-    visible = false
     collision_layer = 0
     collision_mask = 0
     velocity = Vector2.ZERO
-    set_physics_process(false)
+    if feedback_flash_remaining_ms <= 0:
+        visible = false
+        set_physics_process(false)
+    else:
+        visible = true
 
 
 func apply_knockback(knockback: Vector2) -> void:
@@ -206,6 +219,38 @@ func apply_knockback(knockback: Vector2) -> void:
         return
 
     global_position += knockback
+
+
+func show_hit_feedback(damage: int, defeated: bool = false) -> void:
+    if damage <= 0:
+        return
+
+    feedback_flash_remaining_ms = max(defeat_flash_ms if defeated else hit_flash_ms, 0)
+    defeat_pending_hide = defeated
+    var body := get_node_or_null("Body")
+    if body != null:
+        body.modulate = hit_flash_color
+
+
+func tick_hit_feedback(delta: float) -> void:
+    if feedback_flash_remaining_ms <= 0:
+        return
+
+    var elapsed_ms: int = int(round(max(delta, 0.0) * 1000.0))
+    feedback_flash_remaining_ms = max(feedback_flash_remaining_ms - elapsed_ms, 0)
+    if feedback_flash_remaining_ms > 0:
+        return
+
+    reset_hit_feedback_visual()
+    if defeat_pending_hide:
+        visible = false
+        set_physics_process(false)
+
+
+func reset_hit_feedback_visual() -> void:
+    var body := get_node_or_null("Body")
+    if body != null:
+        body.modulate = normal_modulate
 
 
 func build_damage_result(damage: int, source: Dictionary = {}) -> Dictionary:
@@ -219,5 +264,7 @@ func build_damage_result(damage: int, source: Dictionary = {}) -> Dictionary:
         "defeated": state == "enemy.defeated",
         "enemy_group_id": enemy_group_id,
         "boss_id": boss_id,
+        "feedback_type": "hit_flash",
+        "feedback_flash_ms": defeat_flash_ms if state == "enemy.defeated" else hit_flash_ms,
         "source": source,
     }

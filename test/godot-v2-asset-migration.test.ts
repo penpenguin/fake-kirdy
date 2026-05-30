@@ -68,6 +68,29 @@ describe('Godot v2 asset migration', () => {
     expect(controller).toContain('ability_type');
   });
 
+  it('falls back safely when ability-specific Kirdy textures are unavailable', () => {
+    const controller = readGodotFile('scripts/player/PlayerController.gd');
+    const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
+      replays?: Array<{
+        id?: string;
+        expected_events?: string[];
+      }>;
+    };
+
+    expect(controller).toContain('@export var ability_texture_fallback_enabled: bool = true');
+    expect(controller).toContain('func get_ability_texture(next_ability_type: String) -> Texture2D:');
+    expect(controller).toContain('func get_ability_fallback_texture() -> Texture2D:');
+    expect(controller).toContain('func emit_ability_texture_fallback(next_ability_type: String, fallback_texture: Texture2D) -> void:');
+    expect(controller).toContain('"fire", "burn"');
+    expect(controller).toContain('"ice", "frost"');
+    expect(controller).toContain('"sword", "blade"');
+    expect(controller).toContain('player.ability_texture.fallback');
+    expect(controller).toContain('last_ability_texture_fallback_key');
+    expect(suite.replays?.find((entry) => entry.id === 'spark_ability_dash_movement')?.expected_events).toEqual(
+      expect.arrayContaining(['player.ability_texture.fallback']),
+    );
+  });
+
   it('renders combat actors, pickups, goals, and doors with migrated visual assets', () => {
     const simpleEnemyScene = readGodotFile('scenes/enemies/SimpleEnemy.tscn');
     const flyingEnemyScene = readGodotFile('scenes/enemies/FlyingEnemy.tscn');

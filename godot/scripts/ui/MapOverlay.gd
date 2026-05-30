@@ -5,10 +5,14 @@ class_name MapOverlay
 @export var level_gap: float = 8.0
 @export var current_level_color: Color = Color(0.95, 0.80, 0.36, 0.9)
 @export var visited_level_color: Color = Color(0.35, 0.65, 0.82, 0.72)
+@export var discovered_feature_color: Color = Color(0.68, 0.95, 0.52, 0.95)
+@export var undiscovered_feature_color: Color = Color(0.82, 0.82, 0.88, 0.42)
+@export var dead_end_completed_color: Color = Color(1.0, 0.35, 0.70, 0.95)
 @export var background_color: Color = Color(0.03, 0.04, 0.05, 0.72)
 
 var current_level_id: String = ""
 var explored_tiles: Dictionary = {}
+var map_features: Array = []
 
 
 func _ready() -> void:
@@ -16,9 +20,10 @@ func _ready() -> void:
     custom_minimum_size = Vector2(160.0, 96.0)
 
 
-func set_map_state(level_id: String, next_explored_tiles: Dictionary) -> void:
+func set_map_state(level_id: String, next_explored_tiles: Dictionary, next_features: Array = []) -> void:
     current_level_id = level_id
     explored_tiles = duplicate_explored_tiles(next_explored_tiles)
+    map_features = duplicate_map_features(next_features)
     queue_redraw()
 
 
@@ -63,11 +68,73 @@ func build_tile_rects() -> Array:
     return rects
 
 
+func build_feature_markers() -> Array:
+    var markers := []
+    var level_ids := explored_tiles.keys()
+    level_ids.sort()
+
+    for feature in map_features:
+        if typeof(feature) != TYPE_DICTIONARY:
+            continue
+
+        var feature_level_id := String(feature.get("level_id", current_level_id))
+        var level_index := level_ids.find(feature_level_id)
+        if level_index < 0:
+            continue
+
+        var tile_position := parse_tile_key(String(feature.get("tile_key", "")))
+        if tile_position.x < 0 or tile_position.y < 0:
+            continue
+
+        var level_offset := Vector2(0.0, float(level_index) * (map_tile_size * 4.0 + level_gap))
+        markers.append({
+            "level_id": feature_level_id,
+            "feature_type": String(feature.get("feature_type", "")),
+            "feature_id": String(feature.get("feature_id", "")),
+            "position": level_offset + Vector2(
+                (float(tile_position.x) + 0.5) * map_tile_size,
+                (float(tile_position.y) + 0.5) * map_tile_size
+            ),
+            "discovered": bool(feature.get("discovered", false)),
+            "completed": bool(feature.get("completed", false)),
+        })
+
+    return markers
+
+
 func _draw() -> void:
     draw_rect(Rect2(Vector2.ZERO, custom_minimum_size), background_color, true)
     for tile in build_tile_rects():
         var color := current_level_color if bool(tile.get("is_current_level", false)) else visited_level_color
         draw_rect(tile["rect"], color, true)
+    for marker in build_feature_markers():
+        var marker_color := discovered_feature_color if bool(marker.get("discovered", false)) else undiscovered_feature_color
+        if String(marker.get("feature_type", "")) == "dead_end":
+            if bool(marker.get("completed", false)):
+                marker_color = dead_end_completed_color
+            var marker_size: float = maxf(map_tile_size * 0.85, 4.0)
+            draw_rect(Rect2(marker["position"] - Vector2(marker_size * 0.5, marker_size * 0.5), Vector2(marker_size, marker_size)), marker_color, true)
+        else:
+            draw_circle(marker["position"], max(map_tile_size * 0.42, 2.0), marker_color)
+
+
+func duplicate_map_features(source: Array) -> Array:
+    var copy := []
+    for feature in source:
+        if typeof(feature) != TYPE_DICTIONARY:
+            continue
+
+        copy.append({
+            "level_id": String(feature.get("level_id", "")),
+            "feature_type": String(feature.get("feature_type", "")),
+            "feature_id": String(feature.get("feature_id", "")),
+            "tile_key": String(feature.get("tile_key", "")),
+            "discovered": bool(feature.get("discovered", false)),
+            "hidden": bool(feature.get("hidden", false)),
+            "completed": bool(feature.get("completed", false)),
+        })
+
+    return copy
 
 
 func duplicate_explored_tiles(source: Dictionary) -> Dictionary:

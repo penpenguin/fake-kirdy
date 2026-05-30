@@ -1,0 +1,47 @@
+[gd_scene load_steps=2 format=3 uid="uid://resultsscene01"]
+
+[ext_resource type="Script" path="res://scripts/ui/ResultsScene.gd" id="1_results"]
+
+[node name="ResultsScene" type="Control"]
+visible = false
+offset_left = 270.0
+offset_top = 136.0
+offset_right = 690.0
+offset_bottom = 356.0
+mouse_filter = 2
+script = ExtResource("1_results")
+
+[node name="TitleLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 420.0
+offset_bottom = 32.0
+text = "Results"
+
+[node name="OutcomeLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 44.0
+offset_right = 420.0
+offset_bottom = 68.0
+text = "Outcome"
+
+[node name="TimeLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 76.0
+offset_right = 420.0
+offset_bottom = 100.0
+text = "Time"
+
+[node name="ScoreLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 108.0
+offset_right = 420.0
+offset_bottom = 132.0
+text = "Score"
+
+[node name="BonusLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 140.0
+offset_right = 420.0
+offset_bottom = 164.0
+text = "Life Bonus"

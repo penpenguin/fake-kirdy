@@ -1,0 +1,30 @@
+{
+  "start_level_id": "combat_room",
+  "start_spawn_id": "default",
+  "initial_ability_type": "spark",
+  "fps": 60,
+  "max_frames": 12,
+  "frames": [
+    {
+      "frame": 0,
+      "actions": {
+        "move_right": false,
+        "inhale": false,
+        "swallow": false,
+        "use_ability": false
+      }
+    },
+    {
+      "frame": 2,
+      "actions": {
+        "swallow": true
+      }
+    },
+    {
+      "frame": 3,
+      "actions": {
+        "swallow": false
+      }
+    }
+  ]
+}

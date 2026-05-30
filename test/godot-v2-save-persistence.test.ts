@@ -87,6 +87,49 @@ describe('Godot v2 save persistence foundation', () => {
     expect(session).toContain('build_save_payload');
   });
 
+  it('falls back to browser sessionStorage when the primary save write fails on web', () => {
+    const store = readGodotFile('scripts/save/SaveStore.gd');
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const docs = readFileSync(join(repoRoot, 'docs', 'godot-v2', 'save-persistence.md'), 'utf8');
+
+    expect(store).toContain('SESSION_STORAGE_FALLBACK_KEY');
+    expect(store).toContain('var last_storage_backend: String = "file"');
+    expect(store).toContain('session_storage_fallback_enabled');
+    expect(store).toContain('func save_state_to_session_storage(save_json: String) -> bool:');
+    expect(store).toContain('func load_state_from_session_storage():');
+    expect(store).toContain('OS.has_feature("web")');
+    expect(store).toContain('JavaScriptBridge.eval');
+    expect(store).toContain('sessionStorage.setItem');
+    expect(store).toContain('sessionStorage.getItem');
+    expect(store).toContain('last_storage_backend = "sessionStorage"');
+
+    expect(session).toContain('save.session_storage_fallback.written');
+    expect(session).toContain('"storage_backend": save_store.get("last_storage_backend")');
+    expect(docs).toContain('sessionStorage fallback');
+    expect(docs).toContain('save.session_storage_fallback.written');
+  });
+
+  it('uses browser localStorage as the primary web save backend', () => {
+    const store = readGodotFile('scripts/save/SaveStore.gd');
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const docs = readFileSync(join(repoRoot, 'docs', 'godot-v2', 'save-persistence.md'), 'utf8');
+
+    expect(store).toContain('LOCAL_STORAGE_SAVE_KEY');
+    expect(store).toContain('browser_local_storage_enabled');
+    expect(store).toContain('func save_state_to_local_storage(save_json: String) -> bool:');
+    expect(store).toContain('func load_state_from_local_storage():');
+    expect(store).toContain('window.localStorage.setItem');
+    expect(store).toContain('window.localStorage.getItem');
+    expect(store).toContain('last_storage_backend = "localStorage"');
+    expect(store).toContain('save_state_to_local_storage(save_json)');
+    expect(store).toContain('load_state_from_local_storage()');
+    expect(store).toContain('return browser_local_storage_enabled and OS.has_feature("web")');
+
+    expect(session).toContain('save.local_storage.written');
+    expect(docs).toContain('localStorage["kirdy-save"]');
+    expect(docs).toContain('save.local_storage.written');
+  });
+
   it('lets headless replay opt into a deterministic save path', () => {
     const runner = readGodotFile('tests/run_replay.gd');
     const replayPath = join(godotRoot, 'tests', 'replays', 'use_saved_ability.json');

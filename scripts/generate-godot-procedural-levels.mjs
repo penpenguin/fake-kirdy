@@ -8,6 +8,10 @@ const outputPath = join(repoRoot, 'godot', 'levels', 'generated', 'procedural_le
 const checkOnly = process.argv.includes('--check');
 const doorTriggerRadius = 48;
 const minSpawnDoorDistance = 64;
+const doorSafeRadius = 96;
+const verticalSpawnClearanceRadius = 72;
+const verticalMaxSpawnDropDistance = 96;
+const branchDensityMinimum = 0.2;
 
 const manifest = loadJson(manifestPath, 'stage manifest');
 const catalogSource = loadJson(catalogSourcePath, 'Godot level catalog source');
@@ -61,11 +65,48 @@ function buildProceduralLevelExport(stageManifest, idMap) {
     .filter((stage) => stage.origin === 'generated_schema')
     .sort((left, right) => requireString(left.id, 'stage.id').localeCompare(requireString(right.id, 'stage.id')));
 
+  const levels = proceduralStages.map((stage) => buildProceduralLevel(stage, idMap));
+
   return {
     version: 1,
     generated_from: 'godot/levels/stage_manifest.json',
-    levels: proceduralStages.map((stage) => buildProceduralLevel(stage, idMap)),
+    validation: {
+      branch_density_minimum: branchDensityMinimum,
+      branch_density_by_cluster: buildBranchDensityByCluster(proceduralStages),
+      multi_shape_layout_minimum: 4,
+      multi_shape_layouts_by_shape: buildMultiShapeLayoutMetrics(levels),
+      branch_exit_rule_count: countBranchExitRules(levels),
+    },
+    levels,
   };
+}
+
+function buildBranchDensityByCluster(stages) {
+  const densityByCluster = {};
+  for (const stage of stages) {
+    const cluster = String(stage.metadata?.cluster ?? 'unknown');
+    if (densityByCluster[cluster] === undefined) {
+      densityByCluster[cluster] = {
+        level_count: 0,
+        branch_level_count: 0,
+        ratio: 0,
+      };
+    }
+
+    densityByCluster[cluster].level_count += 1;
+    if (Array.isArray(stage.dead_ends) && stage.dead_ends.length > 0) {
+      densityByCluster[cluster].branch_level_count += 1;
+    }
+  }
+
+  for (const [cluster, density] of Object.entries(densityByCluster)) {
+    density.ratio = Number((density.branch_level_count / density.level_count).toFixed(4));
+    if (density.ratio < branchDensityMinimum) {
+      throw new Error(`${cluster} generated branch density ${density.ratio} is below ${branchDensityMinimum}`);
+    }
+  }
+
+  return densityByCluster;
 }
 
 function buildProceduralLevel(stage, idMap) {
@@ -98,6 +139,7 @@ function buildRuntimeLayout(layout, metadata, stageId, neighbors, deadEnds) {
   const levelId = mapStageIdToGodotId(stageId, new Map());
   const cluster = String(normalizedMetadata.cluster ?? 'void');
   const roomVariant = hasVerticalRoute(neighbors) ? 'vertical_route' : 'horizontal_route';
+  const shapeProfile = getRuntimeShapeProfile(cluster, difficulty, neighbors, deadEnds);
 
   return {
     tile_size: {
@@ -112,6 +154,7 @@ function buildRuntimeLayout(layout, metadata, stageId, neighbors, deadEnds) {
       width: 760,
       height: 432,
       variant: roomVariant,
+      shape_profile: shapeProfile,
     },
     camera_bounds: {
       position: { x: 380, y: 270 },
@@ -133,15 +176,188 @@ function buildRuntimeLayout(layout, metadata, stageId, neighbors, deadEnds) {
     safety: {
       door_trigger_radius: doorTriggerRadius,
       min_spawn_door_distance: minSpawnDoorDistance,
+      door_safe_radius: doorSafeRadius,
+      ...(roomVariant === 'vertical_route'
+        ? {
+            vertical_transition: {
+              enabled: true,
+              max_spawn_drop_distance: verticalMaxSpawnDropDistance,
+              spawn_clearance_radius: verticalSpawnClearanceRadius,
+              protected_spawn_ids: ['north', 'south'],
+              landing_surface_ids: ['GeneratedPlatformVerticalLanding', 'Floor'],
+            },
+          }
+        : {}),
     },
     floor: {
       id: 'Floor',
       position: { x: 380, y: 432 },
       size: { x: 760, y: 32 },
     },
+    floor_segments: buildRuntimeFloorSegments(shapeProfile),
     platforms: buildRuntimePlatforms(difficulty, roomVariant),
+    branch_exit_rules: buildRuntimeBranchExitRules(cluster, neighbors),
     content: buildRuntimeContent(levelId, cluster, difficulty, neighbors, deadEnds, normalizedLayout.tile_size),
   };
+}
+
+function buildMultiShapeLayoutMetrics(levels) {
+  const counts = {};
+  for (const level of levels) {
+    const shape = String(level.runtime_layout?.room?.shape_profile ?? 'single_corridor');
+    counts[shape] = (counts[shape] ?? 0) + 1;
+  }
+  return Object.fromEntries(Object.entries(counts).sort(([left], [right]) => left.localeCompare(right)));
+}
+
+function countBranchExitRules(levels) {
+  return levels.reduce((count, level) => count + (level.runtime_layout?.branch_exit_rules?.length ?? 0), 0);
+}
+
+function getRuntimeShapeProfile(cluster, difficulty, neighbors, deadEnds) {
+  if (shouldAddGeneratedGoal(cluster, neighbors)) {
+    return 'terminal_goal';
+  }
+
+  if (shouldAddGeneratedCollectible(neighbors)) {
+    return 'reliquary_gate';
+  }
+
+  if (hasVerticalRoute(neighbors)) {
+    return 'vertical_route';
+  }
+
+  if (Array.isArray(deadEnds) && deadEnds.length > 0) {
+    return 'branch_room';
+  }
+
+  if (difficulty >= 4) {
+    return 'arena_route';
+  }
+
+  return 'single_corridor';
+}
+
+function buildRuntimeFloorSegments(shapeProfile) {
+  const floorMain = {
+    id: 'FloorMain',
+    position: { x: 380, y: 432 },
+    size: { x: 760, y: 32 },
+  };
+
+  switch (shapeProfile) {
+    case 'branch_room':
+      return [
+        floorMain,
+        {
+          id: 'FloorBranchLeft',
+          position: { x: 128, y: 320 },
+          size: { x: 192, y: 24 },
+        },
+        {
+          id: 'FloorBranchHigh',
+          position: { x: 560, y: 192 },
+          size: { x: 160, y: 24 },
+        },
+      ];
+    case 'reliquary_gate':
+      return [
+        floorMain,
+        {
+          id: 'FloorGateApproach',
+          position: { x: 636, y: 368 },
+          size: { x: 160, y: 24 },
+        },
+      ];
+    case 'terminal_goal':
+      return [
+        floorMain,
+        {
+          id: 'FloorGoalDais',
+          position: { x: 224, y: 368 },
+          size: { x: 176, y: 24 },
+        },
+      ];
+    case 'vertical_route':
+      return [
+        floorMain,
+        {
+          id: 'FloorVerticalLower',
+          position: { x: 380, y: 368 },
+          size: { x: 240, y: 24 },
+        },
+      ];
+    case 'arena_route':
+      return [
+        floorMain,
+        {
+          id: 'FloorArenaLeft',
+          position: { x: 188, y: 344 },
+          size: { x: 144, y: 24 },
+        },
+        {
+          id: 'FloorArenaRight',
+          position: { x: 572, y: 344 },
+          size: { x: 144, y: 24 },
+        },
+      ];
+    default:
+      return [floorMain];
+  }
+}
+
+function buildRuntimeBranchExitRules(cluster, neighbors) {
+  return Object.entries(neighbors)
+    .map(([direction, targetLevelId]) => buildRuntimeBranchExitRule(cluster, direction, String(targetLevelId)))
+    .filter((rule) => rule !== null)
+    .sort((left, right) => left.direction.localeCompare(right.direction));
+}
+
+function buildRuntimeBranchExitRule(cluster, direction, targetLevelId) {
+  if (targetLevelId.endsWith('_reliquary')) {
+    return {
+      direction,
+      target_level_id: targetLevelId,
+      rule_type: 'reliquary_requires_route_shard',
+      required_item_id: `${cluster}-generated-shard`,
+    };
+  }
+
+  const requiredKeystone = getClusterEntryKeystoneRequirement(targetLevelId);
+  if (requiredKeystone !== '') {
+    return {
+      direction,
+      target_level_id: targetLevelId,
+      rule_type: 'cross_cluster_keystone',
+      required_keystone_item_id: requiredKeystone,
+    };
+  }
+
+  if (targetLevelId.includes('labyrinth_')) {
+    return {
+      direction,
+      target_level_id: targetLevelId,
+      rule_type: 'route_continue',
+    };
+  }
+
+  return null;
+}
+
+function getClusterEntryKeystoneRequirement(targetLevelId) {
+  switch (targetLevelId) {
+    case 'ice_area':
+      return 'forest-keystone';
+    case 'fire_area':
+      return 'ice-keystone';
+    case 'cave_area':
+    case 'goal_sanctum':
+      return 'fire-keystone';
+    case 'sky_sanctum':
+      return 'cave-keystone';
+    default:
+      return '';
+  }
 }
 
 function buildRuntimePlatforms(difficulty, roomVariant) {
@@ -163,6 +379,11 @@ function buildRuntimePlatforms(difficulty, roomVariant) {
   }
 
   if (roomVariant === 'vertical_route') {
+    platforms.push({
+      id: 'GeneratedPlatformVerticalLanding',
+      position: { x: 380, y: 200 },
+      size: { x: 160, y: 24 },
+    });
     platforms.push({
       id: 'GeneratedPlatformVerticalStep',
       position: { x: 380, y: 304 },
@@ -222,7 +443,7 @@ function buildRuntimeEnemies(levelId, cluster, difficulty) {
       attack_radius: 112,
       attack_cooldown_ms: 4000,
       patrol_radius: 64,
-      position: { x: 336, y: 400 },
+      position: { x: 256, y: 368 },
     },
   ];
 
@@ -331,7 +552,7 @@ function buildRuntimeHeals(levelId, deadEnds, tileSize) {
       heal_id: `${levelId}_generated_heal`,
       amount: 3,
       reward_type: 'health',
-      position: { x: 456, y: 368 },
+      position: { x: 520, y: 368 },
     },
     ...buildRuntimeDeadEndHeals(levelId, deadEnds, tileSize),
   ];
@@ -350,11 +571,16 @@ function buildRuntimeDeadEndHeals(levelId, deadEnds, tileSize) {
       amount: 1,
       reward_type: reward,
       position: {
-        x: (Number(deadEnd.column) * tileSize) + (tileSize / 2),
+        x: getDoorSafeDeadEndX(Number(deadEnd.column), tileSize),
         y: (Number(deadEnd.row) * tileSize) + (tileSize / 2),
       },
     };
   });
+}
+
+function getDoorSafeDeadEndX(column, tileSize) {
+  const x = (column * tileSize) + (tileSize / 2);
+  return x < 96 ? 112 : x;
 }
 
 function toPascalCase(value) {

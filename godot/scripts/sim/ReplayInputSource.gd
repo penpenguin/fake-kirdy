@@ -7,10 +7,12 @@ var scene_path: String = ""
 var start_level_id: String = ""
 var start_spawn_id: String = "default"
 var initial_ability_type: String = ""
+var initial_item_ids: Array[String] = []
 var setting_difficulty: String = ""
 var level_id: String = "controller_lab"
 var fps: int = 60
 var max_frames: int = 0
+var continue_after_finished: bool = false
 var current_frame: int = -1
 var error_message: String = ""
 
@@ -34,10 +36,12 @@ func load_replay(path: String) -> bool:
     start_level_id = String(parsed.get("start_level_id", ""))
     start_spawn_id = String(parsed.get("start_spawn_id", "default"))
     initial_ability_type = String(parsed.get("initial_ability_type", ""))
+    initial_item_ids = parse_string_array(parsed.get("initial_item_ids", []))
     setting_difficulty = String(parsed.get("setting_difficulty", ""))
     level_id = String(parsed.get("level_id", level_id))
     fps = int(parsed.get("fps", fps))
     max_frames = int(parsed.get("max_frames", 0))
+    continue_after_finished = bool(parsed.get("continue_after_finished", false))
     keyframes.clear()
     current_actions.clear()
     previous_actions.clear()
@@ -49,6 +53,21 @@ func load_replay(path: String) -> bool:
 
     error_message = ""
     return true
+
+
+func parse_string_array(value) -> Array[String]:
+    var result: Array[String] = []
+    if typeof(value) != TYPE_ARRAY:
+        return result
+
+    for item in value:
+        var item_id := String(item)
+        if item_id == "" or result.has(item_id):
+            continue
+
+        result.append(item_id)
+
+    return result
 
 
 func advance_frame() -> RefCounted:

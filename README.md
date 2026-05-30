@@ -20,7 +20,6 @@ Fake Kirdy uses Godot 4 as the canonical runtime. The former Phaser + Matter.js 
 - Summarize a trace file: `npm run trace:summary -- <trace.json|trace.ndjson>`
 - Validate the repository: `npm test`
 - Validate canonical Godot behavior, including the replay suite when available: `npm run test:canonical`
-- Check the Phaser-to-Godot parity ledger: `npm run godot:parity-ledger -- --check`
 
 The canonical Godot project lives in `godot/`. The default export preset is `Web` and writes the public artifact to `dist/index.html`; the `Linux Headless` preset remains available through `npm run godot:export -- --preset="Linux Headless"`. The regular export wrapper skips gracefully if Godot or export templates are unavailable, while `npm run build:public` requires a complete Godot Web export for deployment. The promoted Godot prototype tree has been removed; use `godot/` for all runtime, replay, export, and content work.
 
@@ -30,4 +29,4 @@ GitHub Pages publishes the Godot Web export from `dist/`. Phaser/Vite publishing
 
 The root package no longer exposes Phaser/Vite runtime commands or dependencies, and the legacy reference copy has been removed. Use Godot commands for run/build/test.
 
-Run `npm run legacy:inventory` to confirm the removed legacy surface remains empty. Run `npm run godot:parity-ledger -- --fail-on-blockers` before changing that boundary again.
+Run `npm run legacy:inventory` to confirm the removed legacy surface remains empty. The Phaser parity ledger gate was retired after the Godot mainline switch; canonical validation now lives in Godot-owned data, replay, trace, export, and content checks.

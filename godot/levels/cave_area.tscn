@@ -1,15 +1,25 @@
-[gd_scene load_steps=8 format=3 uid="uid://cavearealevel01"]
+[gd_scene load_steps=9 format=3 uid="uid://cavearealevel01"]
 
 [ext_resource type="Script" path="res://scripts/level/markers/PlayerSpawn.gd" id="1_spawn"]
 [ext_resource type="Script" path="res://scripts/level/markers/DoorMarker.gd" id="2_door"]
 [ext_resource type="Script" path="res://scripts/level/markers/EnemySpawnMarker.gd" id="3_enemy"]
 [ext_resource type="Script" path="res://scripts/level/markers/CameraBoundsMarker.gd" id="4_camera_bounds"]
 [ext_resource type="Script" path="res://scripts/level/markers/AbilityGateMarker.gd" id="5_ability_gate"]
+[ext_resource type="Script" path="res://scripts/level/markers/LevelPacingMarker.gd" id="6_pacing"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(760, 32)
 
 [node name="CaveArea" type="Node2D"]
+
+[node name="BranchPacingMarker" type="Node2D" parent="."]
+script = ExtResource("6_pacing")
+pacing_profile = "branch"
+critical_path_px = 560.0
+rest_stop_count = 1
+safe_spawn_radius = 96.0
+door_preview_spacing_px = 144.0
+encounter_budget = 1
 
 [node name="PlayerSpawn" type="Node2D" parent="."]
 position = Vector2(96, 368)

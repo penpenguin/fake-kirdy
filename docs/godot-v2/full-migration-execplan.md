@@ -343,6 +343,8 @@ The former Godot prototype has been promoted into the repo-level `godot/` mainli
 - 2026-05-28: Persist player position in the Godot save file, but gate restoration by level id. Explicit replay scene selection remains authoritative when it disagrees with a saved `current_level_id`.
 - 2026-05-28: Persist `ability_type` in the Godot save file and restore it independently of saved level id. Ability ownership is session/player state, while position is level-local state.
 - 2026-05-28: Persist `visited_level_ids` and `unlocked_door_ids` before tile-level map exploration. Door ids are stored as `source_level_id:door_id` so they remain stable and unique across scenes.
+- 2026-05-31: Add the Web `localStorage["kirdy-save"]` save backend through `JavaScriptBridge`, while keeping `FileAccess` as the non-Web/headless backend. `GameSession.gd` now traces successful browser primary writes as `save.local_storage.written`.
+- 2026-05-31: Add a Web-only sessionStorage fallback for failed primary Godot save writes. `SaveStore.gd` now writes the same JSON payload to `sessionStorage["kirdy-save-temp"]`, and `GameSession.gd` traces fallback success with `save.session_storage_fallback.written`.
 - 2026-05-28: Store generated spawn/door safety as `runtime_layout.safety` instead of only documenting it or leaving it as loader constants. The schema now owns `door_trigger_radius` and `min_spawn_door_distance`, while Godot reads the generated door radius from that data.
 - 2026-05-28: Promote the default `build` command to Godot export before moving or deleting Phaser runtime files. This makes the repo command surface Godot-canonical while preserving `build:legacy:web` for the current web reference.
 - 2026-05-28: Promote the default `dev` command to Godot before moving or deleting Phaser runtime files. Vite remains available through explicit legacy web commands so the reference implementation can still be inspected during migration.
@@ -351,6 +353,7 @@ The former Godot prototype has been promoted into the repo-level `godot/` mainli
 - 2026-05-28: Connect `explored_tiles` to a minimal `MapOverlay` before building a full map screen. This gives the Godot mainline a visible exploration consumer and a `map.updated` trace contract while preserving freedom to redesign the final UI.
 - 2026-05-28: Add a minimal `HudOverlay` before the full UI port. HP, ability, item count, level id, and outcome are now visible and traceable through `hud.updated`, while detailed menus, animation, audio, and inventory screens remain deferred.
 - 2026-05-28: Add a minimal `ResultOverlay` before porting the full Phaser results UI. Completed and game-over runs now have player-facing result state and `result.overlay.shown` trace metrics, while scoring, menus, animation, and audio remain deferred.
+- 2026-05-31: Add a minimal `ErrorOverlay` for runtime load failures before porting the full error-handling UI. Failed level loads now show a retry prompt, emit `runtime.error.shown`, and surface `last_runtime_error` in trace summaries while replay startup failures continue to exit non-zero.
 - 2026-05-28: Generate the full `labyrinth-001` through `labyrinth-132` procedural topology into `stage_manifest.json`, but do not automatically add all of those nodes to `level_catalog.source.json` until a Godot scene/schema generator can make them playable.
 - 2026-05-28: Add `procedural_levels.json` as a generated schema layer before adding runtime-generated scenes. This keeps the full procedural graph canonical and validated without creating 132 placeholder scenes or overloading `level_catalog.json`, which still represents scene-loadable levels.
 - 2026-05-28: Keep generated procedural rooms out of `level_catalog.json` and resolve them through a `LevelLoader` fallback. This preserves the catalog as the list of hand-authored scenes while still making generated rooms playable and traceable.
@@ -360,6 +363,7 @@ The former Godot prototype has been promoted into the repo-level `godot/` mainli
 - 2026-05-28: Broaden generated replay coverage with fixtures rather than adding more hand-authored scenes. This keeps the procedural migration focused on schema/runtime generation while still producing trace evidence for cluster-specific topology.
 - 2026-05-28: Use short end-of-cluster replay chains for fire and ruins instead of traversing all generated rooms in each cluster. This keeps validation runtime practical while proving the generated reliquary exit contract for each cluster.
 - 2026-05-28: Keep `godot:replay-suite` as an explicit command rather than folding it into `npm test`. The suite is canonical replay validation when Godot is available, while normal `npm test` must remain useful and graceful on machines without Godot.
+- 2026-05-31: Add `npm run godot:performance` as an explicit performance budget gate outside the default `npm test` path. It measures selected replay effective trace FPS, replay wall time, Linux peak RSS, Godot import/load time, and trace size against `godot/tests/performance_budget.json`.
 - 2026-05-28: Add a flying enemy variant and release replay before porting the full enemy roster. This covers the missing `enemy.released` trace path and proves marker-selected enemy types while keeping combat scope intentionally small.
 - 2026-05-28: Include controller movement replay in the canonical replay suite and emit per-frame samples only for scene replay runs. This gives movement tuning stable metrics while avoiding noisy per-frame trace output for every `GameSession` content replay.
 - 2026-05-28: Add TileMap metadata to `LevelDefinition` before replacing StaticBody collision. This lets editor-authored grid size and tile size become canonical while preserving playable collision during migration.
@@ -377,9 +381,11 @@ The former Godot prototype has been promoted into the repo-level `godot/` mainli
 - 2026-05-28: Add a Phaser parity ledger and make `check:godot` validate its schema and evidence paths. Blocker enforcement remains explicit through `--fail-on-blockers` so daily checks stay green while still making unfinished parity visible.
 - 2026-05-28: Treat the Godot settings scope as ported once settings are persisted, sanitized, visible in a minimal overlay, adjustable through replay actions, and summarized through trace metrics. Full menu polish remains part of the broader UI/polish blocker rather than the save/settings blocker.
 - 2026-05-28: Count minimal map, HUD, inventory/progress, settings, and result overlays as the runtime-retirement UI baseline. Polished menus, animation, audio cues, and final visual treatment remain tracked by deferred `audio-and-polish` backlog rather than blocking Phaser runtime retirement.
+- 2026-05-31: Add `npm run godot:usability` as an explicit usability/accessibility contract. It checks keyboard action coverage, representative difficulty/touch/pause/restart replays, visible UI text, visual feedback tokens, and minimap color-role separation.
 - 2026-05-28: Treat retained `legacy/phaser-reference/src/`, `legacy/phaser-reference/public/`, `legacy/phaser-reference/index.html`, and `legacy/phaser-reference/vite.config.ts` as legacy/reference source only. Root runtime commands, package dependencies, typecheck, and Vitest validation are now Godot canonical; Phaser/Vite can be audited from source but not run from the root package.
 - 2026-05-29: Keep optional legacy/reference copies discoverable through `legacy:inventory`, but do not make current generators, docs, tests, or parity evidence depend on their paths. The canonical source of migrated stage topology is now `godot/levels/stage_manifest.json`.
 - 2026-05-29: The legacy reference copy has been removed from the repository after Godot-owned stage manifests, generated schema, migrated assets, replay fixtures, and docs became the canonical audit evidence.
+- 2026-05-30: Retire the Phaser parity ledger command after it reached zero blockers. `check:godot` now relies on active Godot-owned validation only: manifests, generated schema, catalog checks, content topology, export configuration, and project checks.
 
 ## Plan Of Work
 
@@ -459,7 +465,6 @@ Node validation scripts:
 - `scripts/generate-godot-procedural-levels.mjs`
 - `scripts/check-godot-stage-manifest.mjs`
 - `scripts/legacy-inventory.mjs`
-- `scripts/check-godot-parity-ledger.mjs`
 - `scripts/run-godot-replay-suite.mjs`
 - `scripts/run-godot-replay.mjs`
 - `scripts/trace-summary.mjs`
@@ -476,7 +481,6 @@ Package commands:
 - `npm run godot:stage-manifest`
 - `npm run godot:procedural-levels`
 - `npm run godot:content-check`
-- `npm run godot:parity-ledger`
 - `npm run check:godot`
 - `npm run trace:summary`
 - `npm run legacy:inventory`

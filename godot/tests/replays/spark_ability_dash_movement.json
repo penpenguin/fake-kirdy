@@ -1,0 +1,31 @@
+{
+  "start_level_id": "flat_room",
+  "start_spawn_id": "default",
+  "level_id": "flat_room",
+  "initial_ability_type": "spark",
+  "fps": 60,
+  "max_frames": 12,
+  "frames": [
+    {
+      "frame": 0,
+      "actions": {
+        "move_right": false,
+        "inhale": false,
+        "swallow": false,
+        "use_ability": false
+      }
+    },
+    {
+      "frame": 2,
+      "actions": {
+        "use_ability": true
+      }
+    },
+    {
+      "frame": 3,
+      "actions": {
+        "use_ability": false
+      }
+    }
+  ]
+}

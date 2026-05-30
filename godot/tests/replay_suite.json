@@ -11,14 +11,29 @@
       "id": "combat_capture_swallow_goal",
       "replay_path": "res://tests/replays/combat_capture_swallow_goal.json",
       "expected_outcome": "complete",
+      "expected_events": ["enemy.captured", "inhale.effect.fallback"],
       "tags": ["combat", "ability", "goal"]
     },
     {
       "id": "combat_ability_damage_enemy",
       "replay_path": "res://tests/replays/combat_ability_damage_enemy.json",
       "expected_outcome": "replay.max_frames_reached",
-      "expected_events": ["ability.used", "enemy.damaged", "enemy.defeated"],
+      "expected_events": ["ability.used", "enemy.damaged", "enemy.feedback.shown", "enemy.defeated"],
       "tags": ["combat", "ability", "damage", "defeat", "trace"]
+    },
+    {
+      "id": "spark_ability_dash_movement",
+      "replay_path": "res://tests/replays/spark_ability_dash_movement.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["ability.used", "ability.movement.applied", "player.ability_texture.fallback"],
+      "tags": ["combat", "ability", "movement", "trace"]
+    },
+    {
+      "id": "fire_ability_projectile_hit",
+      "replay_path": "res://tests/replays/fire_ability_projectile_hit.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["ability.used", "ability.projectile.spawned", "ability.projectile.hit", "enemy.damaged"],
+      "tags": ["combat", "ability", "projectile", "fire", "trace"]
     },
     {
       "id": "combat_locked_door_without_ability",
@@ -35,10 +50,48 @@
       "tags": ["combat", "door", "ability-gate", "transition", "trace"]
     },
     {
+      "id": "combat_detach_ability",
+      "replay_path": "res://tests/replays/combat_detach_ability.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["ability.detached", "hud.updated", "inventory.updated"],
+      "expected_last_hud": {
+        "ability_type": ""
+      },
+      "tags": ["combat", "ability", "detach", "trace", "hud"]
+    },
+    {
+      "id": "capture_defeated_enemy_auto_clear",
+      "replay_path": "res://tests/replays/capture_defeated_enemy_auto_clear.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["enemy.captured", "enemy.defeated", "enemy.capture.cleared"],
+      "tags": ["combat", "capture", "defeat", "trace"]
+    },
+    {
+      "id": "enemy_spawn_limit",
+      "replay_path": "res://tests/replays/enemy_spawn_limit.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["enemy.spawn.skipped"],
+      "tags": ["combat", "spawn_limit", "trace"]
+    },
+    {
+      "id": "enemy_crowd_spacing",
+      "replay_path": "res://tests/replays/enemy_crowd_spacing.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["enemy.crowd.spacing_applied"],
+      "tags": ["combat", "crowd_spacing", "trace"]
+    },
+    {
       "id": "flying_enemy_release_swallow_goal",
       "replay_path": "res://tests/replays/flying_enemy_release_swallow_goal.json",
       "expected_outcome": "complete",
       "tags": ["combat", "flying_enemy", "release", "ability", "goal"]
+    },
+    {
+      "id": "frost_enemy_ai_profile",
+      "replay_path": "res://tests/replays/frost_enemy_ai_profile.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["enemy.ai.profile.applied"],
+      "tags": ["combat", "enemy-ai", "ability", "trace"]
     },
     {
       "id": "flying_spit_projectile_hit",
@@ -57,6 +110,10 @@
       "id": "central_hub_dead_end_max_health",
       "replay_path": "res://tests/replays/central_hub_dead_end_max_health.json",
       "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["dead_end.completed", "map.updated"],
+      "expected_last_hud": {
+        "score": 400
+      },
       "tags": ["hub", "heal", "max-health", "dead-end"]
     },
     {
@@ -66,10 +123,70 @@
       "tags": ["settings", "save", "ui", "trace"]
     },
     {
+      "id": "settings_menu_flow",
+      "replay_path": "res://tests/replays/settings_menu_flow.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["settings.menu.opened", "settings.focus.changed", "settings.updated", "settings.menu.closed"],
+      "tags": ["settings", "menu", "focus", "ui", "trace"]
+    },
+    {
+      "id": "map_toggle_visibility",
+      "replay_path": "res://tests/replays/map_toggle_visibility.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["map.toggled"],
+      "tags": ["map", "ui", "input", "trace"]
+    },
+    {
+      "id": "hidden_discovery_path",
+      "replay_path": "res://tests/replays/hidden_discovery_path.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["hidden.discovered", "collectible.collected", "door.entered"],
+      "tags": ["exploration", "hidden", "collectible", "door", "trace"]
+    },
+    {
+      "id": "pause_toggle_menu",
+      "replay_path": "res://tests/replays/pause_toggle_menu.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["pause.toggled", "pause.scene.shown"],
+      "tags": ["pause", "ui", "input", "trace"]
+    },
+    {
+      "id": "pause_settings_flow",
+      "replay_path": "res://tests/replays/pause_settings_flow.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["pause.settings.opened", "settings.updated", "pause.settings.closed", "pause.toggled"],
+      "tags": ["pause", "settings", "ui", "input", "trace"]
+    },
+    {
+      "id": "virtual_controls_touch_mode",
+      "replay_path": "res://tests/replays/virtual_controls_touch_mode.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["settings.updated", "virtual_controls.updated"],
+      "tags": ["touch", "settings", "ui", "input", "trace"]
+    },
+    {
       "id": "revive_room_revive_then_game_over",
       "replay_path": "res://tests/replays/revive_room_revive_then_game_over.json",
       "expected_outcome": "game_over",
       "tags": ["damage", "revive", "game_over"]
+    },
+    {
+      "id": "game_over_restart_option",
+      "replay_path": "res://tests/replays/game_over_restart_option.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["game.over", "run.restart.selected", "level.loaded"],
+      "expected_last_hud": {
+        "hp": 3,
+        "outcome": "running"
+      },
+      "tags": ["failure", "game-over", "restart", "ui", "trace"]
+    },
+    {
+      "id": "results_scene_continue",
+      "replay_path": "res://tests/replays/results_scene_continue.json",
+      "expected_outcome": "complete",
+      "expected_events": ["result.overlay.shown", "results.scene.shown"],
+      "tags": ["results", "ui", "input", "trace"]
     },
     {
       "id": "danger_hazard_trace",
@@ -95,6 +212,13 @@
         "target_enemy_hp": 3
       },
       "tags": ["combat", "enemy-attack", "difficulty", "hard", "trace"]
+    },
+    {
+      "id": "central_hub_ice_gate_without_keystone",
+      "replay_path": "res://tests/replays/central_hub_ice_gate_without_keystone.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["door.locked"],
+      "tags": ["progression", "cluster", "keystone", "door", "locked", "trace"]
     },
     {
       "id": "forest_reliquary_locked_without_key",
@@ -138,7 +262,15 @@
       "id": "sky_generated_goal_path",
       "replay_path": "res://tests/replays/labyrinth_051_to_sky_sanctum_generated_exit.json",
       "expected_outcome": "complete",
+      "expected_events": ["door.entered", "goal.door.entered", "run.finished"],
       "tags": ["procedural", "sky", "door-chain", "goal"]
+    },
+    {
+      "id": "mirror_to_goal_sanctum_finish",
+      "replay_path": "res://tests/replays/mirror_to_goal_sanctum_finish.json",
+      "expected_outcome": "complete",
+      "expected_events": ["goal.door.entered", "run.finished", "result.overlay.shown"],
+      "tags": ["goal-door", "result", "metrics", "trace"]
     },
     {
       "id": "terminal_generated_goal",

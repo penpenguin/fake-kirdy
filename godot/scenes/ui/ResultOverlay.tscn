@@ -7,7 +7,7 @@ visible = false
 offset_left = 300.0
 offset_top = 160.0
 offset_right = 660.0
-offset_bottom = 340.0
+offset_bottom = 428.0
 mouse_filter = 2
 script = ExtResource("1_result")
 
@@ -34,7 +34,28 @@ text = "Time"
 
 [node name="ItemsLabel" type="Label" parent="."]
 offset_left = 0.0
+offset_top = 156.0
+offset_right = 360.0
+offset_bottom = 180.0
+text = "Items"
+
+[node name="ScoreLabel" type="Label" parent="."]
+offset_left = 0.0
 offset_top = 100.0
 offset_right = 360.0
 offset_bottom = 124.0
-text = "Items"
+text = "Score"
+
+[node name="BonusLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 128.0
+offset_right = 360.0
+offset_bottom = 152.0
+text = "Life Bonus"
+
+[node name="RestartLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 188.0
+offset_right = 360.0
+offset_bottom = 212.0
+text = "Press R to restart"

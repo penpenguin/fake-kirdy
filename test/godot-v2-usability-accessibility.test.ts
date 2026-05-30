@@ -1,0 +1,75 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { describe, expect, it } from 'vitest';
+
+const currentDir = dirname(fileURLToPath(import.meta.url));
+const repoRoot = join(currentDir, '..');
+const godotRoot = join(repoRoot, 'godot');
+
+const readRepoFile = (relativePath: string): string =>
+  readFileSync(join(repoRoot, relativePath), 'utf8');
+
+describe('Godot v2 usability and accessibility checks', () => {
+  it('defines an explicit usability/accessibility contract and command', () => {
+    const packageJson = JSON.parse(readRepoFile('package.json')) as {
+      scripts?: Record<string, string>;
+    };
+    const scriptPath = join(repoRoot, 'scripts', 'check-godot-usability.mjs');
+    const contractPath = join(godotRoot, 'tests', 'usability_accessibility_contract.json');
+    const docsPath = join(repoRoot, 'docs', 'godot-v2', 'usability-accessibility-testing.md');
+
+    expect(packageJson.scripts?.['godot:usability']).toBe('node scripts/check-godot-usability.mjs');
+    expect(existsSync(scriptPath)).toBe(true);
+    expect(existsSync(contractPath)).toBe(true);
+    expect(existsSync(docsPath)).toBe(true);
+
+    const script = readRepoFile('scripts/check-godot-usability.mjs');
+    expect(script).toContain('usability_accessibility_contract.json');
+    expect(script).toContain('required_keyboard_actions');
+    expect(script).toContain('required_replay_ids');
+    expect(script).toContain('required_ui_scenes');
+    expect(script).toContain('required_visual_feedback_tokens');
+    expect(script).toContain('required_color_roles');
+    expect(script).toContain('parseInputActions');
+    expect(script).toContain('assertMinimumColorDistance');
+
+    const contract = JSON.parse(readFileSync(contractPath, 'utf8')) as {
+      version: number;
+      required_keyboard_actions: string[];
+      required_replay_ids: string[];
+      required_ui_scenes: string[];
+      required_visual_feedback_tokens: Array<{ file: string; token: string }>;
+      required_color_roles: string[];
+      min_color_distance: number;
+    };
+    expect(contract.version).toBe(1);
+    expect(contract.required_keyboard_actions).toEqual(
+      expect.arrayContaining(['move_left', 'move_right', 'jump', 'inhale', 'swallow', 'use_ability', 'pause_toggle']),
+    );
+    expect(contract.required_replay_ids).toEqual(
+      expect.arrayContaining(['hard_enemy_attack_trace', 'virtual_controls_touch_mode', 'pause_toggle_menu']),
+    );
+    expect(contract.required_ui_scenes).toEqual(
+      expect.arrayContaining(['HudOverlay.tscn', 'SettingsOverlay.tscn', 'VirtualControlsOverlay.tscn']),
+    );
+    expect(contract.required_visual_feedback_tokens).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ file: 'godot/scripts/ui/VirtualControlsOverlay.gd', token: 'BUTTON_PRESSED_MODULATE' }),
+        expect.objectContaining({ file: 'godot/scripts/enemies/SimpleEnemy.gd', token: 'hit_flash_color' }),
+      ]),
+    );
+    expect(contract.required_color_roles).toEqual(
+      expect.arrayContaining(['discovered_feature_color', 'undiscovered_feature_color', 'dead_end_completed_color']),
+    );
+    expect(contract.min_color_distance).toBeGreaterThan(0);
+
+    const docs = readFileSync(docsPath, 'utf8');
+    expect(docs).toContain('Usability and Accessibility Testing');
+    expect(docs).toContain('npm run godot:usability');
+    expect(docs).toContain('keyboard');
+    expect(docs).toContain('visual feedback');
+    expect(docs).toContain('difficulty');
+    expect(docs).toContain('color roles');
+  });
+});

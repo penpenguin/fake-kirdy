@@ -106,6 +106,8 @@ describe('trace summary metrics', () => {
             revive_count: 1,
             ability_type: 'spark',
             items_collected: ['forest-keystone', 'ice-keystone'],
+            score: 2600,
+            remaining_life_bonus: 700,
             outcome: 'running',
           },
         }),
@@ -178,6 +180,24 @@ describe('trace summary metrics', () => {
             frames: 42,
             items_collected: ['forest-keystone'],
             completed_level_ids: ['flat_room'],
+            score: 1700,
+            remaining_life_bonus: 700,
+          },
+        }),
+        JSON.stringify({
+          frame: 43,
+          time_ms: 717,
+          event_type: 'results.scene.shown',
+          level_id: 'flat_room',
+          payload: {
+            level_id: 'flat_room',
+            outcome: 'completed',
+            time_ms: 700,
+            frames: 42,
+            items_collected: ['forest-keystone'],
+            completed_level_ids: ['flat_room'],
+            score: 1700,
+            remaining_life_bonus: 700,
           },
         }),
         JSON.stringify({
@@ -236,6 +256,8 @@ describe('trace summary metrics', () => {
         revive_count: number;
         ability_type: string;
         items_collected: string[];
+        score: number;
+        remaining_life_bonus: number;
         outcome: string;
       } | null;
       last_result_overlay?: {
@@ -245,6 +267,16 @@ describe('trace summary metrics', () => {
         frames: number;
         items_collected: string[];
         completed_level_ids: string[];
+        score: number;
+        remaining_life_bonus: number;
+      } | null;
+      last_results_scene?: {
+        level_id: string;
+        outcome: string;
+        time_ms: number;
+        frames: number;
+        score: number;
+        remaining_life_bonus: number;
       } | null;
       player_motion: {
         sample_count: number;
@@ -256,9 +288,9 @@ describe('trace summary metrics', () => {
       };
     };
 
-    expect(summary.event_count).toBe(16);
+    expect(summary.event_count).toBe(17);
     expect(summary.levels).toEqual(['combat_room', 'danger_room', 'fire_area', 'flat_room', 'forest_reliquary', 'heal_room', 'sky_sanctum']);
-    expect(summary.duration_ms).toBe(700);
+    expect(summary.duration_ms).toBe(717);
     expect(summary.outcome).toBe('complete');
     expect(summary.counts_by_type['ability.acquired']).toBe(1);
     expect(summary.counts_by_type['collectible.collected']).toBe(1);
@@ -270,6 +302,7 @@ describe('trace summary metrics', () => {
     expect(summary.counts_by_type['ability_gate.opened']).toBe(1);
     expect(summary.counts_by_type['map.updated']).toBe(1);
     expect(summary.counts_by_type['result.overlay.shown']).toBe(1);
+    expect(summary.counts_by_type['results.scene.shown']).toBe(1);
     expect(summary.counts_by_type['run.finished']).toBe(1);
     expect(summary.counts_by_type['settings.updated']).toBe(1);
     expect(summary.counts_by_type['inventory.updated']).toBe(1);
@@ -313,6 +346,8 @@ describe('trace summary metrics', () => {
       revive_count: 1,
       ability_type: 'spark',
       items_collected: ['forest-keystone', 'ice-keystone'],
+      score: 2600,
+      remaining_life_bonus: 700,
       outcome: 'running',
     });
     expect(summary.last_result_overlay).toEqual({
@@ -322,6 +357,18 @@ describe('trace summary metrics', () => {
       frames: 42,
       items_collected: ['forest-keystone'],
       completed_level_ids: ['flat_room'],
+      score: 1700,
+      remaining_life_bonus: 700,
+    });
+    expect(summary.last_results_scene).toEqual({
+      level_id: 'flat_room',
+      outcome: 'completed',
+      time_ms: 700,
+      frames: 42,
+      items_collected: ['forest-keystone'],
+      completed_level_ids: ['flat_room'],
+      score: 1700,
+      remaining_life_bonus: 700,
     });
     expect(summary.player_motion).toEqual({
       sample_count: 3,

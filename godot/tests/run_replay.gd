@@ -94,13 +94,17 @@ func run_session_replay(input_source: Node, output_path: String, args: Dictionar
         session.player.call("set_ability_type", String(input_source.get("initial_ability_type")))
         session.call("sync_hud_overlay", "replay.initial_ability", true)
 
+    for item_id in input_source.get("initial_item_ids"):
+        session.call("acquire_item", String(item_id), "replay_initial_item")
+
     await process_frame
 
     for frame in range(input_source.get("max_frames")):
         input_source.call("advance_frame")
         await physics_frame
+        apply_session_replay_hooks(input_source, session)
 
-        if session.call("is_finished"):
+        if session.call("is_finished") and not input_source.get("continue_after_finished"):
             break
 
     if not session.call("is_finished"):
@@ -112,6 +116,18 @@ func run_session_replay(input_source: Node, output_path: String, args: Dictionar
 
     session.trace_recorder.call("write_to_path", output_path)
     quit(0)
+
+
+func apply_session_replay_hooks(input_source: Node, session: Node) -> void:
+    if input_source.call("is_action_just_pressed", &"defeat_captured_enemy"):
+        var captured_enemy = session.get("captured_enemy")
+        if captured_enemy == null or not is_instance_valid(captured_enemy):
+            return
+
+        session.call("apply_damage_to_enemy", captured_enemy, 999, {
+            "source_type": "replay_external",
+            "action": "defeat_captured_enemy",
+        })
 
 
 func parse_user_args() -> Dictionary:

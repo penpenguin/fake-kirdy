@@ -89,11 +89,43 @@ describe('Godot v2 minimal combat slice', () => {
     expect(source).toContain('spawn_enemies');
     expect(source).toContain('check_combat_actions');
     expect(source).toContain('captured_enemy');
+    expect(source).toContain('detach_current_ability');
     expect(source).toContain('enemy.captured');
     expect(source).toContain('enemy.released');
     expect(source).toContain('enemy.swallowed');
     expect(source).toContain('ability.acquired');
     expect(source).toContain('ability.used');
+    expect(source).toContain('ability.detached');
+  });
+
+  it('uses a safe fallback visual for the inhale pull effect', () => {
+    const controller = readGodotFile('scripts/player/PlayerController.gd');
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
+      replays?: Array<{
+        id?: string;
+        expected_events?: string[];
+      }>;
+    };
+
+    expect(controller).toContain('@export var inhale_effect_fallback_enabled: bool = true');
+    expect(controller).toContain('func show_inhale_effect_fallback(target_position: Vector2) -> void:');
+    expect(controller).toContain('Line2D.new()');
+    expect(controller).toContain('InhaleEffectFallback');
+    expect(controller).toContain('func hide_inhale_effect_fallback() -> void:');
+    expect(session).toContain('show_inhale_effect_fallback');
+    expect(session).toContain('inhale.effect.fallback');
+    expect(suite.replays?.find((entry) => entry.id === 'combat_capture_swallow_goal')?.expected_events).toEqual(
+      expect.arrayContaining(['inhale.effect.fallback']),
+    );
+  });
+
+  it('clears the capture link when a held enemy is defeated externally', () => {
+    const source = readGodotFile('scripts/session/GameSession.gd');
+
+    expect(source).toContain('clear_defeated_captured_enemy');
+    expect(source).toContain('enemy.capture.cleared');
+    expect(source).toContain('String(captured_enemy.state) == "enemy.defeated"');
   });
 
   it('uses player facing when choosing inhale capture targets', () => {
@@ -108,9 +140,11 @@ describe('Godot v2 minimal combat slice', () => {
   it('adds combat replays and docs', () => {
     const replayPath = join(godotRoot, 'tests', 'replays', 'combat_capture_swallow_goal.json');
     const flyingReplayPath = join(godotRoot, 'tests', 'replays', 'flying_enemy_release_swallow_goal.json');
+    const detachReplayPath = join(godotRoot, 'tests', 'replays', 'combat_detach_ability.json');
     const docsPath = join(repoRoot, 'docs', 'godot-v2', 'combat-slice.md');
     const replay = JSON.parse(readFileSync(replayPath, 'utf8'));
     const flyingReplay = JSON.parse(readFileSync(flyingReplayPath, 'utf8'));
+    const detachReplay = JSON.parse(readFileSync(detachReplayPath, 'utf8'));
 
     expect(replay.start_level_id).toBe('combat_room');
     expect(replay.frames.some((frame: { actions?: Record<string, boolean> }) => frame.actions?.inhale)).toBe(true);
@@ -119,6 +153,8 @@ describe('Godot v2 minimal combat slice', () => {
     expect(flyingReplay.start_level_id).toBe('flying_combat_room');
     expect(flyingReplay.frames.some((frame: { actions?: Record<string, boolean> }) => frame.actions?.inhale === false)).toBe(true);
     expect(flyingReplay.frames.some((frame: { actions?: Record<string, boolean> }) => frame.actions?.swallow)).toBe(true);
+    expect(detachReplay.initial_ability_type).toBe('spark');
+    expect(detachReplay.frames.some((frame: { actions?: Record<string, boolean> }) => frame.actions?.swallow)).toBe(true);
     expect(existsSync(docsPath)).toBe(true);
 
     const docs = readFileSync(docsPath, 'utf8');
@@ -127,7 +163,10 @@ describe('Godot v2 minimal combat slice', () => {
     expect(docs).toContain('enemy.released');
     expect(docs).toContain('enemy.swallowed');
     expect(docs).toContain('ability.acquired');
+    expect(docs).toContain('ability.detached');
     expect(docs).toContain('combat_capture_swallow_goal.json');
     expect(docs).toContain('flying_enemy_release_swallow_goal.json');
+    expect(docs).toContain('combat_detach_ability.json');
+    expect(docs).toContain('capture_defeated_enemy_auto_clear.json');
   });
 });

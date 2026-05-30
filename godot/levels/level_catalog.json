@@ -230,6 +230,36 @@
       "source_ref": "docs/design.md"
     },
     {
+      "id": "enemy_spawn_limit_room",
+      "scene_path": "res://levels/enemy_spawn_limit_room.tscn",
+      "tags": [
+        "combat",
+        "spawn_limit",
+        "test_room"
+      ],
+      "source_ref": "docs/design.md"
+    },
+    {
+      "id": "enemy_crowd_spacing_room",
+      "scene_path": "res://levels/enemy_crowd_spacing_room.tscn",
+      "tags": [
+        "combat",
+        "crowd_spacing",
+        "test_room"
+      ],
+      "source_ref": "docs/design.md"
+    },
+    {
+      "id": "hidden_discovery_room",
+      "scene_path": "res://levels/hidden_discovery_room.tscn",
+      "tags": [
+        "exploration",
+        "hidden",
+        "test_room"
+      ],
+      "source_ref": "docs/design.md"
+    },
+    {
       "id": "revive_room",
       "scene_path": "res://levels/revive_room.tscn",
       "tags": [

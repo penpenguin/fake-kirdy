@@ -82,9 +82,11 @@ Each event uses this shape:
 }
 ```
 
-The runner always records `run.finished` at the end of a successful replay. Failures record `replay.error` with a payload message.
+The runner always records `run.finished` at the end of a successful replay. Failures record `replay.error` with a payload message. Hidden exploration flows emit `hidden.discovered` before a hidden collectible can be collected or a hidden door can transition.
 
-`npm run trace:summary -- <trace>` extracts run metrics for agent review, including event counts, visited levels, outcome, collected collectible ids, acquired item ids from pickup, save, and `inventory.updated` events, completed levels, saved visited level ids, unlocked door ids, explored tiles by level, explored tile count, `player_motion`, the last saved player position, the last saved ability type, the last saved settings payload, the latest inventory/progress payload as `last_inventory`, the last saved revive count, the latest HUD payload as `last_hud`, the latest result overlay payload as `last_result_overlay`, acquired abilities, and used abilities.
+Session replays normally stop once `GameSession.is_finished()` becomes true. A replay can opt into post-result input by setting `continue_after_finished: true`; this is used for result menu flows such as `game_over_restart_option.json`.
+
+`npm run trace:summary -- <trace>` extracts run metrics for agent review, including event counts, visited levels, outcome, collected collectible ids, acquired item ids from pickup, save, and `inventory.updated` events, completed levels, saved visited level ids, unlocked door ids, explored tiles by level, explored tile count, `player_motion`, the last saved player position, the last saved ability type, the last saved settings payload, the latest inventory/progress payload as `last_inventory`, the last saved revive count, the latest HUD payload as `last_hud`, the latest result overlay payload as `last_result_overlay`, the latest dedicated ResultsScene payload as `last_results_scene`, acquired abilities, and used abilities.
 
 `player_motion` is built from every trace event that contains a player position or velocity. It reports sample count, min/max player position, max absolute velocity per axis, max falling speed, and max rising speed. Use it to compare controller tuning changes such as acceleration, jump cut, hover descent, and landing behavior between replay runs.
 

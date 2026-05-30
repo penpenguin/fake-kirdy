@@ -1,10 +1,11 @@
-[gd_scene load_steps=12 format=3 uid="uid://centralhublevel01"]
+[gd_scene load_steps=13 format=3 uid="uid://centralhublevel01"]
 
 [ext_resource type="Script" path="res://scripts/level/markers/PlayerSpawn.gd" id="1_spawn"]
 [ext_resource type="Script" path="res://scripts/level/markers/DoorMarker.gd" id="2_door"]
 [ext_resource type="Script" path="res://scripts/level/markers/CameraBoundsMarker.gd" id="3_camera_bounds"]
 [ext_resource type="Script" path="res://scripts/level/LevelTileMap.gd" id="4_tilemap"]
 [ext_resource type="Script" path="res://scripts/level/markers/HealMarker.gd" id="5_heal"]
+[ext_resource type="Script" path="res://scripts/level/markers/LevelPacingMarker.gd" id="6_pacing"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(840, 32)
@@ -16,6 +17,15 @@ size = Vector2(120, 24)
 size = Vector2(120, 24)
 
 [node name="CentralHub" type="Node2D"]
+
+[node name="HubPacingMarker" type="Node2D" parent="."]
+script = ExtResource("6_pacing")
+pacing_profile = "hub"
+critical_path_px = 720.0
+rest_stop_count = 2
+safe_spawn_radius = 112.0
+door_preview_spacing_px = 120.0
+encounter_budget = 0
 
 [node name="TileMap" type="TileMap" parent="."]
 script = ExtResource("4_tilemap")
@@ -33,6 +43,11 @@ spawn_id = "default"
 position = Vector2(496, 240)
 script = ExtResource("1_spawn")
 spawn_id = "dead_end_max_health"
+
+[node name="PlayerSpawnIceGateCheck" type="Node2D" parent="."]
+position = Vector2(690, 300)
+script = ExtResource("1_spawn")
+spawn_id = "ice_gate_check"
 
 [node name="DoorToHealRoom" type="Node2D" parent="."]
 position = Vector2(220, 368)
@@ -109,6 +124,7 @@ script = ExtResource("5_heal")
 heal_id = "central_hub_dead_end_health"
 amount = 1
 reward_type = "health"
+dead_end_id = "central_hub_dead_end_health"
 
 [node name="DeadEndMaxHealthMarker" type="Node2D" parent="."]
 position = Vector2(496, 240)
@@ -116,6 +132,7 @@ script = ExtResource("5_heal")
 heal_id = "central_hub_dead_end_max_health"
 amount = 1
 reward_type = "max-health"
+dead_end_id = "central_hub_dead_end_max_health"
 
 [node name="Floor" type="StaticBody2D" parent="."]
 position = Vector2(420, 432)
