@@ -208,6 +208,9 @@ describe('Godot v2 gameplay completion backlog', () => {
     expect(session).toContain('func check_hidden_discoveries() -> void:');
     expect(session).toContain('hidden.discovered');
     expect(session).toContain('is_hidden_feature_discovered');
+    expect(session).toContain('reapply_discovered_hidden_marker_visuals()');
+    expect(session).toContain('if is_hidden_feature_discovered(feature_type, feature_id):');
+    expect(session).toContain('reveal_hidden_marker_visual(feature_type, feature_id)');
     expect(level).toContain('hidden_until_discovered = true');
     expect(suite.replays?.find((entry) => entry.id === 'hidden_discovery_path')?.expected_events).toEqual(
       expect.arrayContaining(['hidden.discovered', 'collectible.collected', 'door.entered']),

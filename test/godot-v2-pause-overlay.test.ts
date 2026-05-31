@@ -122,6 +122,17 @@ describe('Godot v2 pause overlay', () => {
     expect(runFrameIndex).toBeGreaterThan(pausedReturnIndex);
   });
 
+  it('pauses actor physics while the pause overlay is active', () => {
+    const session = readGodotFile('scripts/session/GameSession.gd');
+
+    expect(session).toContain('var paused_actor_physics_states: Dictionary = {}');
+    expect(session).toContain('func apply_actor_pause_state(paused: bool) -> void:');
+    expect(session).toContain('pause_actor_physics(player)');
+    expect(session).toContain('pause_actor_physics(enemy)');
+    expect(session).toContain('restore_paused_actor_physics()');
+    expect(session).toContain('apply_actor_pause_state(session_paused)');
+  });
+
   it('adds replay coverage for opening settings from pause and closing the menu hierarchy', () => {
     const replayPath = join(godotRoot, 'tests', 'replays', 'pause_settings_flow.json');
     const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {

@@ -94,6 +94,7 @@ var requested_spawn_id: String = "default"
 var session_paused: bool = false
 var pause_settings_open: bool = false
 var pause_scene_visible_traced: bool = false
+var paused_actor_physics_states: Dictionary = {}
 var settings_menu_open: bool = false
 var selected_setting_index: int = 0
 var result_elapsed_ms: int = 0
@@ -166,6 +167,7 @@ func start_session(start_level_id: String, start_spawn_id: String = "default", f
     session_paused = false
     pause_settings_open = false
     pause_scene_visible_traced = false
+    paused_actor_physics_states.clear()
     settings_menu_open = false
     selected_setting_index = 0
     result_elapsed_ms = 0
@@ -350,6 +352,7 @@ func load_level(level_id: String, spawn_id: String = "default") -> bool:
     current_definition = level_loader.call("build_level_definition", current_level, level_id)
     spawn_player(spawn_id)
     spawn_enemies()
+    reapply_discovered_hidden_marker_visuals()
     trace_recorder.call("configure", current_level_id, replay_fps)
     trace_recorder.call("record_event", "level.loaded", {
         "level_id": current_level_id,
@@ -1172,6 +1175,7 @@ func check_hidden_marker_discoveries(markers: Array, feature_type: String) -> vo
 
         var feature_id := String(marker.get("id", ""))
         if is_hidden_feature_discovered(feature_type, feature_id):
+            reveal_hidden_marker_visual(feature_type, feature_id)
             continue
 
         var payload: Dictionary = marker.get("payload", {})
@@ -1193,6 +1197,24 @@ func check_hidden_marker_discoveries(markers: Array, feature_type: String) -> vo
             },
         })
         sync_map_overlay("hidden.discovered", true)
+
+
+func reapply_discovered_hidden_marker_visuals() -> void:
+    if current_definition == null:
+        return
+
+    reapply_discovered_hidden_marker_visuals_for(current_definition.collectibles, "collectible")
+    reapply_discovered_hidden_marker_visuals_for(current_definition.doors, "door")
+
+
+func reapply_discovered_hidden_marker_visuals_for(markers: Array, feature_type: String) -> void:
+    for marker in markers:
+        if not is_hidden_feature(marker):
+            continue
+
+        var feature_id := String(marker.get("id", ""))
+        if is_hidden_feature_discovered(feature_type, feature_id):
+            reveal_hidden_marker_visual(feature_type, feature_id)
 
 
 func is_hidden_feature(marker: Dictionary) -> bool:
@@ -1964,6 +1986,7 @@ func check_pause_actions() -> void:
 
 func toggle_pause_menu() -> void:
     session_paused = not session_paused
+    apply_actor_pause_state(session_paused)
     if not session_paused:
         pause_settings_open = false
     play_ui_sfx()
@@ -1971,6 +1994,35 @@ func toggle_pause_menu() -> void:
     sync_virtual_controls_overlay("pause.toggled")
     sync_pause_overlay("pause.toggled", true)
     update_audio_mix("pause.toggled", true)
+
+
+func apply_actor_pause_state(paused: bool) -> void:
+    if paused:
+        pause_actor_physics(player)
+        for enemy in enemies:
+            pause_actor_physics(enemy)
+        return
+
+    restore_paused_actor_physics()
+
+
+func pause_actor_physics(actor) -> void:
+    if actor == null or not is_instance_valid(actor):
+        return
+
+    var actor_id := int(actor.get_instance_id())
+    if not paused_actor_physics_states.has(actor_id):
+        paused_actor_physics_states[actor_id] = actor.is_physics_processing()
+    actor.set_physics_process(false)
+
+
+func restore_paused_actor_physics() -> void:
+    for actor_id in paused_actor_physics_states.keys():
+        var actor = instance_from_id(int(actor_id))
+        if actor != null and is_instance_valid(actor):
+            actor.set_physics_process(bool(paused_actor_physics_states[actor_id]))
+
+    paused_actor_physics_states.clear()
 
 
 func open_pause_settings() -> void:
