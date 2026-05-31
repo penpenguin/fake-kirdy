@@ -293,18 +293,19 @@ func _physics_process(delta: float) -> void:
         check_result_actions()
         return
 
-    run_frame += 1
-    run_time_ms = int(round(float(run_frame) * 1000.0 / float(replay_fps)))
-    trace_recorder.call("set_frame", run_frame)
-    if mark_player_tile_explored():
-        sync_map_overlay("player.moved", true)
-        write_persistent_state()
     check_pause_actions()
     if session_paused:
         if pause_settings_open:
             check_settings_menu_actions()
             check_settings_actions()
         return
+
+    run_frame += 1
+    run_time_ms = int(round(float(run_frame) * 1000.0 / float(replay_fps)))
+    trace_recorder.call("set_frame", run_frame)
+    if mark_player_tile_explored():
+        sync_map_overlay("player.moved", true)
+        write_persistent_state()
 
     check_map_actions()
     check_settings_menu_actions()
@@ -2779,17 +2780,24 @@ func get_door_lock_reason(payload: Dictionary) -> String:
     if required_boss_id != "" and not defeated_boss_ids.has(required_boss_id):
         return "missing_boss:" + required_boss_id
 
-    var cluster_lock_reason := get_cluster_transition_lock_reason(String(payload.get("target_level_id", "")))
+    var cluster_lock_reason := get_cluster_transition_lock_reason(payload)
     if cluster_lock_reason != "":
         return cluster_lock_reason
 
     return ""
 
 
-func get_cluster_transition_lock_reason(target_level_id: String) -> String:
+func get_cluster_transition_lock_reason(payload: Dictionary) -> String:
     if not cluster_keystone_progression_enabled:
         return ""
 
+    var explicit_required_item_id := String(payload.get("required_keystone_item_id", ""))
+    if explicit_required_item_id != "":
+        if acquired_item_ids.has(explicit_required_item_id):
+            return ""
+        return "missing_cluster_keystone:" + explicit_required_item_id
+
+    var target_level_id := String(payload.get("target_level_id", ""))
     if target_level_id == "" or level_loader == null or not level_loader.has_method("get_level_cluster"):
         return ""
 

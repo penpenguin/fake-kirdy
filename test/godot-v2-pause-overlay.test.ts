@@ -109,6 +109,19 @@ describe('Godot v2 pause overlay', () => {
     expect(suiteEntry?.expected_events).toContain('pause.toggled');
   });
 
+  it('checks pause input before advancing replay timing while paused', () => {
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const physicsProcessStart = session.indexOf('func _physics_process(delta: float) -> void:');
+    const pauseCheckIndex = session.indexOf('check_pause_actions()', physicsProcessStart);
+    const runFrameIndex = session.indexOf('run_frame += 1', physicsProcessStart);
+    const pausedReturnIndex = session.indexOf('if session_paused:', physicsProcessStart);
+
+    expect(physicsProcessStart).toBeGreaterThanOrEqual(0);
+    expect(pauseCheckIndex).toBeGreaterThan(physicsProcessStart);
+    expect(pausedReturnIndex).toBeGreaterThan(pauseCheckIndex);
+    expect(runFrameIndex).toBeGreaterThan(pausedReturnIndex);
+  });
+
   it('adds replay coverage for opening settings from pause and closing the menu hierarchy', () => {
     const replayPath = join(godotRoot, 'tests', 'replays', 'pause_settings_flow.json');
     const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {

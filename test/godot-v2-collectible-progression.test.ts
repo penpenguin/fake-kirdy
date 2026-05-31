@@ -121,9 +121,11 @@ describe('Godot v2 collectible progression slice', () => {
     expect(loader).toContain('func get_level_cluster(level_id: String) -> String:');
     expect(session).toContain('@export var cluster_keystone_progression_enabled: bool = true');
     expect(session).toContain('const CLUSTER_KEYSTONE_REQUIREMENTS');
-    expect(session).toContain('func get_cluster_transition_lock_reason(target_level_id: String) -> String:');
+    expect(session).toContain('func get_cluster_transition_lock_reason(payload: Dictionary) -> String:');
+    expect(session).toContain('var explicit_required_item_id := String(payload.get("required_keystone_item_id", ""))');
     expect(session).toContain('missing_cluster_keystone');
     expect(session).toContain('clear_resolved_locked_door_reason("missing_cluster_keystone", item_id)');
+    expect(readGodotFile('scripts/level/markers/DoorMarker.gd')).toContain('@export var required_keystone_item_id: String = ""');
 
     expect(readGodotFile('levels/central_hub.tscn')).toContain('spawn_id = "ice_gate_check"');
     expect(existsSync(replayPath)).toBe(true);

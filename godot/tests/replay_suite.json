@@ -277,6 +277,9 @@
       "replay_path": "res://tests/replays/labyrinth_051_to_sky_sanctum_without_keystone.json",
       "expected_outcome": "replay.max_frames_reached",
       "expected_events": ["door.locked"],
+      "expected_last_hud": {
+        "locked_door_reason": "missing_cluster_keystone:cave-keystone"
+      },
       "tags": ["procedural", "sky", "keystone", "door", "locked", "trace"]
     },
     {

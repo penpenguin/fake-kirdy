@@ -180,6 +180,9 @@ describe('Godot v2 replay suite workflow', () => {
       'run.finished',
     ]));
     expect(byId.get('sky_generated_exit_locked_without_keystone')?.expected_events).toContain('door.locked');
+    expect(byId.get('sky_generated_exit_locked_without_keystone')?.expected_last_hud).toMatchObject({
+      locked_door_reason: 'missing_cluster_keystone:cave-keystone',
+    });
     expect(readReplay('labyrinth_051_to_sky_sanctum_without_keystone.json').initial_item_ids).toEqual([
       'forest-keystone',
       'ice-keystone',
