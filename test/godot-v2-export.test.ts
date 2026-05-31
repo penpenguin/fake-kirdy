@@ -130,7 +130,7 @@ describe('Godot v2 export workflow', () => {
     expect(project).toContain('renderer/rendering_method.web="gl_compatibility"');
   });
 
-  it('installs a Canvas 2D fallback for browsers without WebGL', () => {
+  it('installs a Canvas 2D fallback for browsers without WebGL 2', () => {
     const packageJson = JSON.parse(readText('package.json')) as {
       scripts?: Record<string, string>;
     };
@@ -141,12 +141,15 @@ describe('Godot v2 export workflow', () => {
     expect(packageJson.scripts?.['godot:web-fallback']).toContain('scripts/install-godot-web-fallback.mjs');
     expect(exportScript).toContain('installWebFallback');
     expect(fallbackInstaller).toContain('webgl-fallback.js');
-    expect(fallbackInstaller).toContain('getContext("webgl")');
+    expect(fallbackInstaller).toContain('function hasWebGL2()');
+    expect(fallbackInstaller).toContain('getContext("webgl2")');
+    expect(fallbackInstaller).not.toContain('getContext("webgl")');
+    expect(fallbackInstaller).not.toContain('getContext("experimental-webgl")');
     expect(fallbackInstaller).toContain('getContext("2d")');
     expect(fallbackInstaller).toContain('data-kirdy-canvas2d-fallback');
     expect(fallbackInstaller).toContain('Godot Web export artifacts are missing');
     expect(docs).toContain('Canvas 2D fallback');
-    expect(docs).toContain('WebGL unavailable');
+    expect(docs).toContain('WebGL 2 unavailable');
   });
 
   it('can inject the fallback script into an exported HTML page', () => {

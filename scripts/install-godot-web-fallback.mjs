@@ -42,14 +42,10 @@ function createFallbackScript() {
   return String.raw`(() => {
   const fallbackAttribute = "data-kirdy-canvas2d-fallback";
 
-  function hasWebGL() {
+  function hasWebGL2() {
     try {
       const probe = document.createElement("canvas");
-      return Boolean(
-        probe.getContext("webgl2") ||
-          probe.getContext("webgl") ||
-          probe.getContext("experimental-webgl"),
-      );
+      return Boolean(probe.getContext("webgl2"));
     } catch (_error) {
       return false;
     }
@@ -69,7 +65,7 @@ function createFallbackScript() {
     canvas.setAttribute("role", "img");
     canvas.setAttribute(
       "aria-label",
-      "WebGL unavailable. Fake Kirdy is showing a Canvas 2D compatibility fallback.",
+      "WebGL 2 unavailable. Fake Kirdy is showing a Canvas 2D compatibility fallback.",
     );
     canvas.style.display = "block";
     canvas.style.width = "100vw";
@@ -128,8 +124,8 @@ function createFallbackScript() {
     context.fillText("Fake Kirdy", width / 2, height * 0.22);
     context.font = Math.round(12 * scale) + "px sans-serif";
     context.fillStyle = "#b8c7d9";
-    context.fillText("WebGL unavailable - Canvas 2D fallback", width / 2, height * 0.22 + 28 * scale);
-    context.fillText("Use a WebGL-capable browser to play the Godot build.", width / 2, height * 0.22 + 48 * scale);
+    context.fillText("WebGL 2 unavailable - Canvas 2D fallback", width / 2, height * 0.22 + 28 * scale);
+    context.fillText("Use a WebGL 2-capable browser to play the Godot build.", width / 2, height * 0.22 + 48 * scale);
   }
 
   function startFallback() {
@@ -148,11 +144,11 @@ function createFallbackScript() {
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
-      if (!hasWebGL()) {
+      if (!hasWebGL2()) {
         startFallback();
       }
     });
-  } else if (!hasWebGL()) {
+  } else if (!hasWebGL2()) {
     startFallback();
   }
 })();`;
