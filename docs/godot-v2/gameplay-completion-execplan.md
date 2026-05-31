@@ -1,5 +1,7 @@
 # Complete the Godot Gameplay Loop
 
+Status: Completed historical record with one non-blocking follow-up for future polish and tuning. Current implementation work should start from `docs/README.md`, `docs/godot-v2/README.md`, `Task.md`, checked-in Godot data, and tests.
+
 This ExecPlan is a living document for turning the current Godot mainline from a replayable migration slice into a playable game loop. It follows `.agent/PLANS.md` and must stay self-contained so a new contributor can resume from this file alone.
 
 ## Purpose

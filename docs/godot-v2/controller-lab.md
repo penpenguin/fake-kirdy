@@ -1,12 +1,12 @@
 # Godot v2 Controller Lab
 
-The controller lab is the first Godot v2 movement slice. It exists to tune platformer feel before any enemy, inhale, swallow, HUD, save, or map systems are ported.
+The controller lab is the canonical movement tuning scene for the Godot mainline. It exists to tune platformer feel with deterministic replay and trace evidence.
 
 ## Running the Lab
 
 Open `godot/project.godot` in Godot and run the main scene. The main scene is `res://scenes/Main.tscn`, and the standalone controller lab scene is `res://levels/controller_lab.tscn`.
 
-The lab contains a player, a long floor, a ledge for coyote time checks, and a small platform for jump buffer checks. Use it to compare controller feel against the Phaser reference without expanding scope.
+The lab contains a player, a long floor, a ledge for coyote time checks, and a small platform for jump buffer checks. Use it to review controller changes before applying movement assumptions to larger gameplay rooms.
 
 ## Controls
 

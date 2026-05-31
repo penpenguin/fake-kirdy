@@ -1,6 +1,6 @@
 # Godot v2 Door Transition Flow
 
-Door Transition moves the prototype from one editable test room to another without adding a full area graph.
+Door Transition is the canonical level-change path for hand-authored scenes and generated schema rooms.
 
 ## Markers
 
@@ -38,4 +38,4 @@ Expected trace events include:
 - `level.loaded`
 - `run.finished`
 
-This flow does not implement the full area graph, enemy systems, HUD, save data, map UI, inhale, or swallow.
+Door transitions also update save, HUD, inventory, map discovery, and trace state when those systems are enabled by the session. Focused replay fixtures can still use small rooms such as `door_room` and `flat_room` to validate the transition contract in isolation.

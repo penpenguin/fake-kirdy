@@ -1,8 +1,8 @@
 # Godot v2 Level Lab
 
-The Level Lab moves gameplay metadata into editor-placeable marker nodes and TileMap metadata into a small editor-visible script. The goal is to make small Godot v2 test levels editable in the Godot editor without hard-coding spawn, door, goal, heal, enemy, tile grid, or camera-bound positions in gameplay code.
+The Level Lab keeps gameplay metadata in editor-placeable marker nodes and TileMap metadata in a small editor-visible script. The goal is to make Godot levels editable in the Godot editor without hard-coding spawn, door, goal, heal, enemy, collectible, hazard, ability gate, tile grid, or camera-bound positions in gameplay code.
 
-This is not the area graph, not a port of the existing 128+ Phaser areas, and not an enemy or item implementation.
+The current mainline has both hand-authored scenes and generated schema rooms. This lab defines the marker contract shared by both paths; it is not a place to hard-code level topology in session or controller scripts.
 
 ## Test Levels
 
@@ -32,7 +32,7 @@ Use `LevelTileMap` on TileMap nodes that represent the room grid. It exposes:
 
 - `metadata_tile_size`: tile dimensions for importer and map-system comparisons.
 - `columns` and `rows`: intended room grid size.
-- `collision_source`: where collision currently comes from, such as `static_body` while prototype rooms still use simple bodies.
+- `collision_source`: where collision currently comes from, such as `static_body` while transitional rooms still use simple bodies.
 
 `LevelTileMap` implements `to_level_tilemap()`, and `LevelLoader.gd` stores those entries in `LevelDefinition.tilemaps`. This keeps TileMap layout metadata next to the editor-authored scene instead of in session or player code.
 
@@ -47,7 +47,7 @@ Use `LevelTileMap` on TileMap nodes that represent the room grid. It exposes:
 7. Edit exported TileMap and marker fields in the inspector.
 8. Save the scene and run a static test or headless smoke before review.
 
-Do not put spawn, door, or goal coordinates into `PlayerController.gd`. Do not add a full area graph or port the existing Phaser map set in this lab.
+Do not put spawn, door, or goal coordinates into `PlayerController.gd`. Do not add topology or generated-room policy directly in this lab; keep that data in the catalog, manifest, generated schema, or marker-authored scenes.
 
 ## Loader Contract
 
@@ -62,4 +62,4 @@ Do not put spawn, door, or goal coordinates into `PlayerController.gd`. Do not a
 - `camera_bounds`
 - `tilemaps`
 
-The current lab proves metadata discovery plus minimal session consumption for doors, enemies, heals, collectibles, goals, and trace events. Future PRs can expand camera application and full area graph generation.
+The current lab proves metadata discovery plus session consumption for doors, enemies, heals, collectibles, goals, hazards, ability gates, camera bounds, and trace events. Future PRs should keep new placement metadata observable through `LevelDefinition` and replay traces.

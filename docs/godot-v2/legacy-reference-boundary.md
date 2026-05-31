@@ -28,10 +28,10 @@ Do not reintroduce optional legacy/reference copies or add new Phaser runtime be
 
 ## Retirement Gates
 
-The retirement gates now tracked for the remaining reference source:
+The retirement gates now tracked for the removed legacy surface:
 
 - `npm run test:canonical` passes, including the Godot replay suite when Godot is available.
 - Godot export validation either succeeds or the missing export templates are explicitly reported as a graceful skip.
-- Useful Phaser reference behavior is ported to Godot, represented in Godot docs/import data, or explicitly deprecated in the ExecPlan.
+- Durable behavior from the old runtime is ported to Godot, represented in Godot docs/import data, or explicitly deprecated in the ExecPlan.
 - The legacy migration decision is recorded in `docs/godot-v2/full-migration-execplan.md`.
 - Root runtime dependencies removed: `phaser`, `matter-js`, and direct `vite` are no longer in `package.json`.

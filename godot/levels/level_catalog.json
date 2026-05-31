@@ -206,7 +206,7 @@
         "ability",
         "representative"
       ],
-      "source_ref": "docs/design.md"
+      "source_ref": "docs/godot-v2/combat-slice.md"
     },
     {
       "id": "flying_combat_room",
@@ -217,7 +217,7 @@
         "flying_enemy",
         "representative"
       ],
-      "source_ref": "docs/design.md"
+      "source_ref": "docs/godot-v2/combat-slice.md"
     },
     {
       "id": "danger_room",
@@ -227,7 +227,7 @@
         "game_over",
         "test_room"
       ],
-      "source_ref": "docs/design.md"
+      "source_ref": "docs/godot-v2/session-outcomes.md"
     },
     {
       "id": "enemy_spawn_limit_room",
@@ -237,7 +237,7 @@
         "spawn_limit",
         "test_room"
       ],
-      "source_ref": "docs/design.md"
+      "source_ref": "docs/godot-v2/combat-slice.md"
     },
     {
       "id": "enemy_crowd_spacing_room",
@@ -247,7 +247,7 @@
         "crowd_spacing",
         "test_room"
       ],
-      "source_ref": "docs/design.md"
+      "source_ref": "docs/godot-v2/combat-slice.md"
     },
     {
       "id": "hidden_discovery_room",
@@ -257,7 +257,7 @@
         "hidden",
         "test_room"
       ],
-      "source_ref": "docs/design.md"
+      "source_ref": "docs/godot-v2/content-migration.md"
     },
     {
       "id": "revive_room",
@@ -267,7 +267,7 @@
         "revive",
         "test_room"
       ],
-      "source_ref": "docs/design.md"
+      "source_ref": "docs/godot-v2/session-outcomes.md"
     },
     {
       "id": "heal_room",
@@ -277,7 +277,7 @@
         "representative",
         "goal"
       ],
-      "source_ref": "docs/design.md"
+      "source_ref": "docs/godot-v2/session-outcomes.md"
     }
   ]
 }

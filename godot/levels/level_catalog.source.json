@@ -362,7 +362,7 @@
         "representative"
       ],
       "migration_status": "representative",
-      "source_ref": "docs/design.md"
+      "source_ref": "docs/godot-v2/combat-slice.md"
     },
     {
       "id": "flying_combat_room",
@@ -374,7 +374,7 @@
         "representative"
       ],
       "migration_status": "representative",
-      "source_ref": "docs/design.md"
+      "source_ref": "docs/godot-v2/combat-slice.md"
     },
     {
       "id": "danger_room",
@@ -385,7 +385,7 @@
         "test_room"
       ],
       "migration_status": "test",
-      "source_ref": "docs/design.md"
+      "source_ref": "docs/godot-v2/session-outcomes.md"
     },
     {
       "id": "enemy_spawn_limit_room",
@@ -396,7 +396,7 @@
         "test_room"
       ],
       "migration_status": "test",
-      "source_ref": "docs/design.md"
+      "source_ref": "docs/godot-v2/combat-slice.md"
     },
     {
       "id": "enemy_crowd_spacing_room",
@@ -407,7 +407,7 @@
         "test_room"
       ],
       "migration_status": "test",
-      "source_ref": "docs/design.md"
+      "source_ref": "docs/godot-v2/combat-slice.md"
     },
     {
       "id": "hidden_discovery_room",
@@ -418,7 +418,7 @@
         "test_room"
       ],
       "migration_status": "test",
-      "source_ref": "docs/design.md"
+      "source_ref": "docs/godot-v2/content-migration.md"
     },
     {
       "id": "revive_room",
@@ -429,7 +429,7 @@
         "test_room"
       ],
       "migration_status": "test",
-      "source_ref": "docs/design.md"
+      "source_ref": "docs/godot-v2/session-outcomes.md"
     },
     {
       "id": "heal_room",
@@ -440,7 +440,7 @@
         "goal"
       ],
       "migration_status": "representative",
-      "source_ref": "docs/design.md"
+      "source_ref": "docs/godot-v2/session-outcomes.md"
     }
   ]
 }

@@ -1,6 +1,6 @@
 # Content Migration
 
-This document tracks the current Godot content migrated from the original game intent. The full canonical stage topology is now covered by either hand-authored Godot scenes or generated schema, but most procedural rooms still use simple generated layouts rather than final authored room art.
+This document tracks the current canonical Godot content. The full stage topology is now covered by either hand-authored Godot scenes or generated schema, but most procedural rooms still use simple generated layouts rather than final authored room art.
 
 ## Current Subset
 
@@ -38,7 +38,7 @@ Each source entry has:
 - `expected_neighbors`: optional canonical neighbor target ids that must remain present in `stage_manifest.json`.
 - `expected_collectibles`: optional collectible ids or item ids that must remain present in `stage_manifest.json`.
 - `expected_dead_end_rewards`: optional dead-end reward types that must remain present in `stage_manifest.json`.
-- `migration_status`: whether the level is `representative`, `test`, or `prototype`.
+- `migration_status`: whether the level is `representative`, `test`, or another catalog-specific migration state.
 
 This is the first schema/importer boundary: new representative levels should be added to the source map and regenerated instead of hard-coded into `LevelLoader.gd`. `npm run check:godot` runs `npm run godot:stage-manifest -- --check`, `npm run godot:procedural-levels -- --check`, `npm run godot:catalog -- --check`, and `npm run godot:content-check`, so stale manifests, stale procedural schema, stale catalogs, missing scene door markers, missing canonical stage mappings, or unresolved generated neighbor targets fail validation. The content checker currently validates all 146 canonical stage ids and all generated neighbor edges against either hand-authored Godot scenes or generated schema.
 
@@ -48,10 +48,10 @@ For `central_hub`, the catalog generator validates `stage_id: central-hub`, repr
 
 ## Canonical Reference Data
 
-The Godot migration now uses checked-in canonical data rather than legacy source paths:
+The Godot mainline now uses checked-in canonical data rather than legacy source paths:
 
 - `godot/levels/stage_manifest.json` defines the hub role, branch directions, branch identities, metadata, return edges, sky-cluster edges, goal destination, collectible/reliquary targets, and generated procedural topology.
-- `docs/design.md` describes maze exploration, dead-end heals, collectibles, goal flow, and broad area count ambition.
+- `docs/map-structure.md`, `docs/README.md`, and the Godot docs in this directory describe maze exploration, dead-end heals, collectibles, goal flow, replay/trace evidence, and current validation commands.
 - `godot/levels/generated/procedural_levels.json` receives all generated `labyrinth-*` ids from `stage_manifest.json`, including representative `health`, `max-health`, and `revive` dead-end reward metadata. Generated `runtime_layout.content.heals` preserves those rewards as marker `reward_type` values instead of flattening them into a generic heal. The Godot runtime still only has a hand-authored scene for `labyrinth_001`, but generated-only rooms such as `labyrinth_002`, `labyrinth_003`, `labyrinth_004`, `labyrinth_005`, `labyrinth_006`, `labyrinth_010`, `labyrinth_029`, `labyrinth_032`, `labyrinth_047`, `labyrinth_050`, `labyrinth_051`, and `labyrinth_132` can now be loaded by `LevelLoader.gd` from schema data. `runtime_layout` now owns generated placement metadata, including route variants and enemy/heal/collectible/goal marker payloads, so future layout variation does not require editing GDScript constants.
 
 ## Next Content Steps

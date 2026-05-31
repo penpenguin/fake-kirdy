@@ -1,5 +1,7 @@
 # Full Godot Migration ExecPlan
 
+Status: Completed historical record. Godot is now the canonical runtime in `godot/`; root Phaser/Vite runtime commands and dependencies have been removed, and the legacy reference copy is no longer present in the repository. Use this file for migration history and decision context, not as the active docs index.
+
 This ExecPlan is a living document for making Godot 4 the canonical runtime for Fake Kirdy. It follows `.agent/PLANS.md` and must stay self-contained: a new agent should be able to resume from this file without relying on the chat history.
 
 ## Purpose
@@ -255,7 +257,7 @@ The former Godot prototype has been promoted into the repo-level `godot/` mainli
 ## Surprises & Discoveries
 
 - `GameScene` is the main Phaser integration point. It owns player creation, input, enemy systems, area transitions, results, game over, save persistence, and terrain visuals, so direct one-to-one file migration would be risky. Godot should instead keep these responsibilities split across `GameSession`, level scripts, player/enemy scripts, replay/trace utilities, and future UI/session nodes.
-- `docs/design.md` still reflects the Phaser/Matter runtime, but it has durable design intent: controls, inhale/swallow/ability flow, hover, enemies, 100+ area ambition, dead-end heals, collectible/relic progression, goal door, and run result behavior.
+- The superseded `docs/design.md` captured durable design intent before deletion: controls, inhale/swallow/ability flow, hover, enemies, 100+ area ambition, dead-end heals, collectible/relic progression, goal door, and run result behavior. Current docs now carry the Godot-owned form of that intent.
 - `legacy/phaser-reference/src/game/world/stages/procedural.ts` generates a large stage graph. Migrating all generated areas at once would be noisy and fragile; the safe path is a canonical Godot schema/importer plus a representative playable subset.
 - The Godot prototype already validates the core vertical slice better than expected: controller, markers, replay, trace, door transition, goal finish, and one-enemy combat exist. The main migration should promote and harden this rather than rebuild from scratch.
 - `AGENTS.md` still described Godot as a vertical slice and Phaser as the reference implementation. That guidance had to change now that the user made Godot canonical.
@@ -419,7 +421,7 @@ Make JSON replay input canonical. Run headless replay through Godot when availab
 
 Milestone 8: Content migration
 
-Migrate a representative playable subset of the Phaser area graph: central hub, several branch rooms, door graph examples, heal, collectible, goal, and combat rooms. Convert durable `docs/design.md` details into Godot-focused docs. Do not bulk-port all 128+ areas manually before the canonical schema/importer exists.
+Migrate a representative playable subset of the Phaser area graph: central hub, several branch rooms, door graph examples, heal, collectible, goal, and combat rooms. Convert durable design details into Godot-focused docs. Do not bulk-port all 128+ areas manually before the canonical schema/importer exists.
 
 Milestone 9: Mainline switch
 
