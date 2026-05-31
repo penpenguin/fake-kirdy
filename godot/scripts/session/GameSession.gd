@@ -4,6 +4,7 @@ class_name GameSession
 const PlayerScene = preload("res://scenes/player/Player.tscn")
 const SimpleEnemyScene = preload("res://scenes/enemies/SimpleEnemy.tscn")
 const FlyingEnemyScene = preload("res://scenes/enemies/FlyingEnemy.tscn")
+const AbilityProjectileScene = preload("res://scenes/combat/AbilityProjectile.tscn")
 const LevelLoaderScript = preload("res://scripts/level/LevelLoader.gd")
 const LevelVisualAssetsScript = preload("res://scripts/level/LevelVisualAssets.gd")
 const TraceRecorderScript = preload("res://scripts/sim/TraceRecorder.gd")
@@ -11,7 +12,12 @@ const SaveStoreScript = preload("res://scripts/save/SaveStore.gd")
 const MapOverlayScene = preload("res://scenes/ui/MapOverlay.tscn")
 const HudOverlayScene = preload("res://scenes/ui/HudOverlay.tscn")
 const ResultOverlayScene = preload("res://scenes/ui/ResultOverlay.tscn")
+const ResultsSceneScene = preload("res://scenes/ui/ResultsScene.tscn")
+const ErrorOverlayScene = preload("res://scenes/ui/ErrorOverlay.tscn")
+const PauseOverlayScene = preload("res://scenes/ui/PauseOverlay.tscn")
+const PauseSceneScene = preload("res://scenes/ui/PauseScene.tscn")
 const SettingsOverlayScene = preload("res://scenes/ui/SettingsOverlay.tscn")
+const VirtualControlsOverlayScene = preload("res://scenes/ui/VirtualControlsOverlay.tscn")
 const InventoryOverlayScene = preload("res://scenes/ui/InventoryOverlay.tscn")
 const BgmMain = preload("res://resources/assets/audio/bgm-main.wav")
 const SfxKirdyInhale = preload("res://resources/assets/audio/sfx/kirdy-inhale.wav")
@@ -20,6 +26,18 @@ const SfxKirdySpit = preload("res://resources/assets/audio/sfx/kirdy-spit.wav")
 const SfxAbilityFireAttack = preload("res://resources/assets/audio/sfx/ability-fire-attack.wav")
 const SfxAbilityIceAttack = preload("res://resources/assets/audio/sfx/ability-ice-attack.wav")
 const SfxAbilitySwordAttack = preload("res://resources/assets/audio/sfx/ability-sword-attack.wav")
+const SCORE_PER_ITEM := 1000
+const SCORE_PER_COMPLETED_LEVEL := 500
+const SCORE_PER_DEFEATED_GROUP := 300
+const SCORE_PER_DEFEATED_BOSS := 1000
+const SCORE_PER_REMAINING_HP := 100
+const SCORE_PER_REVIVE := 500
+const CLUSTER_KEYSTONE_REQUIREMENTS := {
+    "ice": "forest-keystone",
+    "fire": "ice-keystone",
+    "ruins": "fire-keystone",
+    "sky": "cave-keystone",
+}
 
 var current_level_id: String = ""
 var current_level = null
@@ -33,6 +51,7 @@ var replay_fps: int = 60
 var outcome: String = "running"
 var enemies: Array = []
 var captured_enemy = null
+var active_ability_projectiles: Array = []
 var capture_radius: float = 120.0
 var player_hp: int = 3
 var player_revive_count: int = 0
@@ -46,6 +65,9 @@ var unlocked_door_ids: Dictionary = {}
 var defeated_enemy_group_ids: Dictionary = {}
 var defeated_boss_ids: Dictionary = {}
 var opened_ability_gate_ids: Dictionary = {}
+var enemy_crowd_spacing_traced_level_ids: Dictionary = {}
+var discovered_hidden_feature_ids: Dictionary = {}
+var completed_dead_end_ids: Dictionary = {}
 var explored_tiles: Dictionary = {}
 var last_locked_door_reason: String = ""
 var ability_cooldown_remaining_ms: int = 0
@@ -57,7 +79,11 @@ var save_store: Node = null
 var map_overlay: Control = null
 var hud_overlay: Control = null
 var result_overlay: Control = null
+var results_scene: Control = null
+var error_overlay: Control = null
+var pause_overlay: Control = null
 var settings_overlay: Control = null
+var virtual_controls_overlay: Control = null
 var inventory_overlay: Control = null
 var bgm_player: AudioStreamPlayer = null
 var sfx_player: AudioStreamPlayer = null
@@ -65,6 +91,19 @@ var sfx_player: AudioStreamPlayer = null
 var level_loader = null
 var level_visual_assets = LevelVisualAssetsScript.new()
 var requested_spawn_id: String = "default"
+var session_paused: bool = false
+var pause_settings_open: bool = false
+var pause_scene_visible_traced: bool = false
+var paused_actor_physics_states: Dictionary = {}
+var settings_menu_open: bool = false
+var selected_setting_index: int = 0
+var result_elapsed_ms: int = 0
+var results_scene_shown: bool = false
+var runtime_error_message: String = ""
+var runtime_error_reason: String = ""
+var error_retry_level_id: String = ""
+var error_retry_spawn_id: String = "default"
+var error_retry_fps: int = 60
 
 @export var auto_start: bool = true
 @export var initial_level_id: String = "central_hub"
@@ -72,6 +111,9 @@ var requested_spawn_id: String = "default"
 @export var save_enabled: bool = false
 @export var save_path: String = "user://fake_kirdy_save.json"
 @export var player_max_hp: int = 3
+@export var max_active_enemy_count: int = 3
+@export var enemy_crowd_player_radius: float = 112.0
+@export var enemy_crowd_min_player_distance: float = 72.0
 @export var contact_damage_radius: float = 48.0
 @export var heal_pickup_radius: float = 48.0
 @export var player_invulnerability_ms: int = 800
@@ -79,17 +121,36 @@ var requested_spawn_id: String = "default"
 @export var setting_controls: String = "keyboard"
 @export var setting_difficulty: String = "normal"
 @export var settings_volume_step: float = 0.1
+@export var settings_menu_action: StringName = &"settings_menu"
+@export var settings_focus_next_action: StringName = &"settings_focus_next"
+@export var settings_focus_previous_action: StringName = &"settings_focus_previous"
 @export var settings_volume_up_action: StringName = &"settings_volume_up"
 @export var settings_volume_down_action: StringName = &"settings_volume_down"
 @export var settings_cycle_controls_action: StringName = &"settings_cycle_controls"
 @export var settings_cycle_difficulty_action: StringName = &"settings_cycle_difficulty"
 @export var exploration_tile_size: int = 32
 @export var map_overlay_enabled: bool = true
+@export var map_toggle_action: StringName = &"map_toggle"
 @export var hud_overlay_enabled: bool = true
 @export var result_overlay_enabled: bool = true
+@export var result_restart_action: StringName = &"result_restart"
+@export var result_continue_action: StringName = &"result_continue"
+@export var result_auto_results_delay_ms: int = 3000
+@export var cluster_keystone_progression_enabled: bool = true
+@export var error_overlay_enabled: bool = true
+@export var error_retry_action: StringName = &"result_restart"
+@export var pause_menu_enabled: bool = true
+@export var pause_scene_enabled: bool = true
+@export var pause_toggle_action: StringName = &"pause_toggle"
+@export var pause_settings_action: StringName = &"pause_settings"
 @export var settings_overlay_enabled: bool = true
+@export var virtual_controls_enabled: bool = true
 @export var inventory_overlay_enabled: bool = true
 @export var audio_enabled: bool = true
+@export var bgm_volume_scale: float = 0.65
+@export var sfx_volume_scale: float = 1.0
+@export var ui_sfx_volume_scale: float = 0.75
+@export var audio_ducking_volume_scale: float = 0.45
 
 
 func _ready() -> void:
@@ -100,9 +161,21 @@ func _ready() -> void:
 
 func start_session(start_level_id: String, start_spawn_id: String = "default", fps: int = 60) -> bool:
     replay_fps = max(fps, 1)
-    run_frame = 0
-    run_time_ms = 0
+    reset_run_clock()
     outcome = "running"
+    session_paused = false
+    pause_settings_open = false
+    pause_scene_visible_traced = false
+    paused_actor_physics_states.clear()
+    settings_menu_open = false
+    selected_setting_index = 0
+    result_elapsed_ms = 0
+    results_scene_shown = false
+    runtime_error_message = ""
+    runtime_error_reason = ""
+    error_retry_level_id = start_level_id
+    error_retry_spawn_id = start_spawn_id
+    error_retry_fps = replay_fps
     player_hp = max(player_max_hp, 1)
     player_revive_count = 0
     player_invulnerability_remaining_ms = 0
@@ -115,6 +188,9 @@ func start_session(start_level_id: String, start_spawn_id: String = "default", f
     defeated_enemy_group_ids.clear()
     defeated_boss_ids.clear()
     opened_ability_gate_ids.clear()
+    enemy_crowd_spacing_traced_level_ids.clear()
+    discovered_hidden_feature_ids.clear()
+    completed_dead_end_ids.clear()
     explored_tiles.clear()
     last_locked_door_reason = ""
     ability_cooldown_remaining_ms = 0
@@ -131,12 +207,30 @@ func start_session(start_level_id: String, start_spawn_id: String = "default", f
     if result_overlay != null and is_instance_valid(result_overlay):
         result_overlay.queue_free()
     result_overlay = null
+    if results_scene != null and is_instance_valid(results_scene):
+        results_scene.queue_free()
+    results_scene = null
+    if error_overlay != null and is_instance_valid(error_overlay):
+        error_overlay.queue_free()
+    error_overlay = null
+    if pause_overlay != null and is_instance_valid(pause_overlay):
+        pause_overlay.queue_free()
+    pause_overlay = null
     if settings_overlay != null and is_instance_valid(settings_overlay):
         settings_overlay.queue_free()
     settings_overlay = null
+    if virtual_controls_overlay != null and is_instance_valid(virtual_controls_overlay):
+        virtual_controls_overlay.queue_free()
+    virtual_controls_overlay = null
     if inventory_overlay != null and is_instance_valid(inventory_overlay):
         inventory_overlay.queue_free()
     inventory_overlay = null
+    if bgm_player != null and is_instance_valid(bgm_player):
+        bgm_player.queue_free()
+    bgm_player = null
+    if sfx_player != null and is_instance_valid(sfx_player):
+        sfx_player.queue_free()
+    sfx_player = null
 
     level_loader = LevelLoaderScript.new()
     trace_recorder = TraceRecorderScript.new()
@@ -147,14 +241,20 @@ func start_session(start_level_id: String, start_spawn_id: String = "default", f
     setup_map_overlay()
     setup_hud_overlay()
     setup_result_overlay()
+    setup_results_scene()
+    setup_error_overlay()
+    setup_pause_overlay()
     setup_settings_overlay()
+    setup_virtual_controls_overlay()
     setup_inventory_overlay()
     setup_audio_players()
     trace_recorder.call("configure", start_level_id, replay_fps)
     load_persistent_state()
+    update_audio_mix("session.started", true)
     sync_map_overlay("save.loaded")
     sync_hud_overlay("save.loaded", save_enabled)
     sync_settings_overlay("save.loaded", save_enabled)
+    sync_virtual_controls_overlay("save.loaded", save_enabled)
     sync_inventory_overlay("save.loaded", save_enabled)
 
     player = PlayerScene.instantiate()
@@ -164,8 +264,11 @@ func start_session(start_level_id: String, start_spawn_id: String = "default", f
         player.trace_event.connect(on_player_trace_event)
 
     if not load_level(start_level_id, start_spawn_id):
-        trace_recorder.call("record_replay_error", "Unable to load level: %s" % start_level_id)
+        var error_message := "Unable to load level: %s" % start_level_id
+        trace_recorder.call("record_replay_error", error_message)
         outcome = "error"
+        show_error_overlay(error_message, "load_level", start_level_id, start_spawn_id)
+        set_physics_process(true)
         return false
 
     apply_saved_player_position()
@@ -181,8 +284,28 @@ func start_session(start_level_id: String, start_spawn_id: String = "default", f
     return true
 
 
+func reset_run_clock() -> void:
+    run_frame = 0
+    run_time_ms = 0
+    if trace_recorder != null:
+        trace_recorder.call("set_frame", run_frame)
+
+
 func _physics_process(delta: float) -> void:
+    if outcome == "error":
+        check_error_actions()
+        return
+
     if is_finished():
+        result_elapsed_ms += int(round(delta * 1000.0))
+        check_result_actions()
+        return
+
+    check_pause_actions()
+    if session_paused:
+        if pause_settings_open:
+            check_settings_menu_actions()
+            check_settings_actions()
         return
 
     run_frame += 1
@@ -191,7 +314,13 @@ func _physics_process(delta: float) -> void:
     if mark_player_tile_explored():
         sync_map_overlay("player.moved", true)
         write_persistent_state()
-    check_settings_actions()
+
+    check_map_actions()
+    check_settings_menu_actions()
+    if settings_menu_open:
+        check_settings_actions()
+        return
+
     tick_player_invulnerability(delta)
     tick_ability_cooldown(delta)
     check_combat_actions()
@@ -199,11 +328,13 @@ func _physics_process(delta: float) -> void:
     if is_finished():
         return
 
+    apply_enemy_crowd_spacing()
     check_enemy_attacks(delta)
     check_enemy_contact_damage()
     if is_finished():
         return
 
+    check_hidden_discoveries()
     check_heal_pickups()
     check_collectible_pickups()
     check_door_transitions()
@@ -227,6 +358,7 @@ func load_level(level_id: String, spawn_id: String = "default") -> bool:
     current_definition = level_loader.call("build_level_definition", current_level, level_id)
     spawn_player(spawn_id)
     spawn_enemies()
+    reapply_discovered_hidden_marker_visuals()
     trace_recorder.call("configure", current_level_id, replay_fps)
     trace_recorder.call("record_event", "level.loaded", {
         "level_id": current_level_id,
@@ -272,9 +404,20 @@ func spawn_enemies() -> void:
             enemy.queue_free()
 
     enemies.clear()
+    clear_active_ability_projectiles()
     captured_enemy = null
 
     for enemy_marker in current_definition.enemy_spawns:
+        if enemies.size() >= max_active_enemy_count:
+            trace_recorder.call("record_event", "enemy.spawn.skipped", {
+                "level_id": current_level_id,
+                "reason": "max_active_enemy_count",
+                "active_enemy_count": enemies.size(),
+                "max_active_enemy_count": max_active_enemy_count,
+                "payload": enemy_marker,
+            })
+            continue
+
         var payload: Dictionary = enemy_marker.get("payload", {})
         var enemy_type := String(payload.get("enemy_type", "simple_ground"))
         var enemy = instantiate_enemy(enemy_type)
@@ -291,6 +434,7 @@ func spawn_enemies() -> void:
         enemy.call("configure_ai", player, float(payload.get("patrol_radius", 0.0)))
         add_child(enemy)
         enemies.append(enemy)
+        apply_enemy_ability_ai_profile(enemy)
 
 
 func instantiate_enemy(enemy_type: String) -> Node:
@@ -301,12 +445,131 @@ func instantiate_enemy(enemy_type: String) -> Node:
             return SimpleEnemyScene.instantiate()
 
 
+func apply_enemy_crowd_spacing() -> void:
+    if player == null or enemy_crowd_player_radius <= 0.0 or enemy_crowd_min_player_distance <= 0.0:
+        return
+
+    var nearby_enemies := []
+    for enemy in enemies:
+        if not is_instance_valid(enemy) or not can_target_enemy(enemy):
+            continue
+
+        var distance: float = player.global_position.distance_to(enemy.global_position)
+        if distance <= enemy_crowd_player_radius:
+            nearby_enemies.append(enemy)
+
+    if nearby_enemies.size() < 2:
+        return
+
+    var adjusted_enemies := []
+    for index in range(nearby_enemies.size()):
+        var enemy = nearby_enemies[index]
+        var offset: Vector2 = enemy.global_position - player.global_position
+        if offset.length() >= enemy_crowd_min_player_distance:
+            continue
+
+        var direction := offset.normalized()
+        if direction == Vector2.ZERO:
+            direction = Vector2(-1.0 if index % 2 == 0 else 1.0, 0.0)
+
+        enemy.global_position = player.global_position + direction * enemy_crowd_min_player_distance
+        enemy.velocity = Vector2.ZERO
+        adjusted_enemies.append(get_enemy_payload(enemy))
+
+    if adjusted_enemies.is_empty():
+        return
+
+    if enemy_crowd_spacing_traced_level_ids.has(current_level_id):
+        return
+
+    enemy_crowd_spacing_traced_level_ids[current_level_id] = true
+    trace_recorder.call("record_player_event", "enemy.crowd.spacing_applied", {
+        "level_id": current_level_id,
+        "player": get_player_trace(),
+        "payload": {
+            "nearby_enemy_count": nearby_enemies.size(),
+            "enemy_crowd_player_radius": enemy_crowd_player_radius,
+            "enemy_crowd_min_player_distance": enemy_crowd_min_player_distance,
+            "adjusted_enemies": adjusted_enemies,
+        },
+    })
+
+
+func get_enemy_ability_ai_profile(ability_type: String) -> Dictionary:
+    match ability_type:
+        "ice", "frost":
+            return {
+                "ai_behavior": "frost_hover",
+                "chase_speed": 54.0,
+                "detection_radius": 220.0,
+                "return_radius": 300.0,
+                "attack_cooldown_multiplier": 1.2,
+                "hover_amplitude": 24.0,
+                "hover_speed": 1.8,
+            }
+        "fire", "flame":
+            return {
+                "ai_behavior": "fire_rush",
+                "chase_speed": 92.0,
+                "detection_radius": 200.0,
+                "attack_cooldown_multiplier": 0.85,
+            }
+        "stone":
+            return {
+                "ai_behavior": "stone_sentry",
+                "chase_speed": 42.0,
+                "detection_radius": 140.0,
+                "return_radius": 180.0,
+                "attack_cooldown_multiplier": 1.35,
+            }
+        _:
+            return {}
+
+
+func apply_enemy_ability_ai_profile(enemy: Node) -> void:
+    if enemy == null or not is_instance_valid(enemy):
+        return
+
+    var profile := get_enemy_ability_ai_profile(String(enemy.ability_type))
+    if profile.is_empty():
+        return
+
+    if profile.has("chase_speed"):
+        enemy.chase_speed = float(profile.get("chase_speed", enemy.chase_speed))
+    if profile.has("detection_radius"):
+        enemy.detection_radius = float(profile.get("detection_radius", enemy.detection_radius))
+    if profile.has("return_radius"):
+        enemy.return_radius = float(profile.get("return_radius", enemy.return_radius))
+    if profile.has("attack_cooldown_multiplier"):
+        enemy.attack_cooldown_ms = max(int(round(float(enemy.attack_cooldown_ms) * float(profile.get("attack_cooldown_multiplier", 1.0)))), 120)
+    if profile.has("attack_radius_bonus"):
+        enemy.attack_radius = max(float(enemy.attack_radius) + float(profile.get("attack_radius_bonus", 0.0)), 1.0)
+    if profile.has("hover_amplitude") and enemy.get("hover_amplitude") != null:
+        enemy.set("hover_amplitude", float(profile.get("hover_amplitude", enemy.get("hover_amplitude"))))
+    if profile.has("hover_speed") and enemy.get("hover_speed") != null:
+        enemy.set("hover_speed", float(profile.get("hover_speed", enemy.get("hover_speed"))))
+
+    trace_recorder.call("record_player_event", "enemy.ai.profile.applied", {
+        "level_id": current_level_id,
+        "player": get_player_trace(),
+        "payload": {
+            "enemy": get_enemy_payload(enemy),
+            "profile": profile,
+        },
+    })
+
+
 func check_combat_actions() -> void:
     if player == null:
         return
 
+    clear_defeated_captured_enemy()
+
     if player.call("is_swallow_pressed"):
-        swallow_captured_enemy()
+        if captured_enemy != null:
+            swallow_captured_enemy()
+        else:
+            detach_current_ability()
 
     if player.call("is_use_ability_pressed"):
         use_ability()
@@ -345,12 +608,49 @@ func capture_nearest_enemy() -> void:
 
     captured_enemy = nearest_enemy
     captured_enemy.call("capture", player)
+    if player.has_method("show_inhale_effect_fallback"):
+        player.call("show_inhale_effect_fallback", captured_enemy.global_position)
     play_sfx(SfxKirdyInhale)
     trace_recorder.call("record_player_event", "enemy.captured", {
         "level_id": current_level_id,
         "player": get_player_trace(),
         "payload": get_enemy_payload(captured_enemy),
     })
+    trace_recorder.call("record_player_event", "inhale.effect.fallback", {
+        "level_id": current_level_id,
+        "player": get_player_trace(),
+        "payload": {
+            "effect_type": "line2d_pull",
+            "reason": "missing_inhale_effect_asset",
+            "enemy_id": get_enemy_payload(captured_enemy).get("enemy_id", ""),
+        },
+    })
+
+
+func clear_defeated_captured_enemy() -> void:
+    if captured_enemy == null:
+        return
+
+    if not is_instance_valid(captured_enemy):
+        captured_enemy = null
+        return
+
+    if String(captured_enemy.state) == "enemy.defeated":
+        var defeated_enemy = captured_enemy
+        captured_enemy = null
+        hide_inhale_effect_fallback()
+        trace_recorder.call("record_player_event", "enemy.capture.cleared", {
+            "level_id": current_level_id,
+            "player": get_player_trace(),
+            "payload": get_enemy_payload(defeated_enemy),
+        })
+        sync_hud_overlay("enemy.capture.cleared", true)
+        sync_inventory_overlay("enemy.capture.cleared", true)
+
+
+func hide_inhale_effect_fallback() -> void:
+    if player != null and player.has_method("hide_inhale_effect_fallback"):
+        player.call("hide_inhale_effect_fallback")
 
 
 func get_player_facing_direction() -> float:
@@ -370,6 +670,7 @@ func release_captured_enemy() -> void:
 
     var released_enemy = captured_enemy
     captured_enemy = null
+    hide_inhale_effect_fallback()
     released_enemy.call("release")
     play_sfx(SfxKirdySpit)
     var spit_profile := {
@@ -413,6 +714,7 @@ func swallow_captured_enemy() -> void:
 
     var swallowed_enemy = captured_enemy
     captured_enemy = null
+    hide_inhale_effect_fallback()
     swallowed_enemy.call("swallow")
     player.call("set_ability_type", swallowed_enemy.ability_type)
     clear_resolved_locked_door_reason("missing_ability", String(swallowed_enemy.ability_type))
@@ -435,6 +737,25 @@ func swallow_captured_enemy() -> void:
     write_persistent_state()
 
 
+func detach_current_ability() -> void:
+    var ability_type := get_player_ability_type()
+    if ability_type == "":
+        return
+
+    player.call("clear_ability_type")
+    ability_cooldown_remaining_ms = 0
+    trace_recorder.call("record_player_event", "ability.detached", {
+        "level_id": current_level_id,
+        "player": get_player_trace(),
+        "payload": {
+            "ability_type": ability_type,
+        },
+    })
+    sync_hud_overlay("ability.detached", true)
+    sync_inventory_overlay("ability.detached", true)
+    write_persistent_state()
+
+
 func use_ability() -> void:
     if String(player.ability_type) == "":
         return
@@ -446,6 +767,7 @@ func use_ability() -> void:
     var profile := get_ability_profile(ability_type)
     ability_cooldown_remaining_ms = int(profile.get("cooldown_ms", 0))
     play_sfx(get_ability_sfx(String(player.ability_type)))
+    apply_ability_movement(ability_type, profile)
     trace_recorder.call("record_player_event", "ability.used", {
         "level_id": current_level_id,
         "player": get_player_trace(),
@@ -455,6 +777,12 @@ func use_ability() -> void:
         },
     })
     check_ability_gate_interactions(ability_type, profile)
+    if String(profile.get("attack_type", "")) == "projectile":
+        var projectile := spawn_ability_projectile(ability_type, profile)
+        resolve_ability_projectile_hits(projectile, ability_type, profile)
+        retire_ability_projectile(projectile)
+        return
+
     var targets := find_enemy_targets(profile)
     for target in targets:
         apply_damage_to_enemy(target, int(profile.get("damage", 1)), {
@@ -473,6 +801,8 @@ func get_ability_profile(ability_type: String) -> Dictionary:
                 "cooldown_ms": 260,
                 "knockback": 22.0,
                 "attack_type": "projectile",
+                "projectile_speed": 520.0,
+                "pierce": false,
             }
         "ice", "frost":
             return {
@@ -500,6 +830,8 @@ func get_ability_profile(ability_type: String) -> Dictionary:
                 "half_height": 84.0,
                 "cooldown_ms": 240,
                 "knockback": 12.0,
+                "movement_effect": "dash",
+                "movement_impulse": 64.0,
                 "attack_type": "burst",
             }
         "leaf":
@@ -529,6 +861,118 @@ func get_ability_profile(ability_type: String) -> Dictionary:
                 "knockback": 12.0,
                 "attack_type": "generic",
             }
+
+
+func clear_active_ability_projectiles() -> void:
+    for projectile in active_ability_projectiles:
+        if is_instance_valid(projectile):
+            projectile.queue_free()
+
+    active_ability_projectiles.clear()
+
+
+func spawn_ability_projectile(ability_type: String, profile: Dictionary) -> Node:
+    var projectile = AbilityProjectileScene.instantiate()
+    projectile.global_position = player.global_position
+    add_child(projectile)
+    projectile.call("configure_projectile", ability_type, profile, get_player_facing_direction())
+    active_ability_projectiles.append(projectile)
+    trace_recorder.call("record_player_event", "ability.projectile.spawned", {
+        "level_id": current_level_id,
+        "player": get_player_trace(),
+        "payload": projectile.call("get_projectile_payload"),
+    })
+    return projectile
+
+
+func resolve_ability_projectile_hits(projectile: Node, ability_type: String, profile: Dictionary) -> void:
+    if projectile == null or not is_instance_valid(projectile):
+        return
+
+    var targets := sort_projectile_targets_by_forward_distance(find_enemy_targets(profile), projectile)
+    for target in targets:
+        projectile.call("mark_hit", target.global_position)
+        var hit_payload: Dictionary = projectile.call("get_projectile_payload")
+        hit_payload["enemy_id"] = String(target.enemy_id)
+        hit_payload["pierce"] = bool(profile.get("pierce", false))
+        trace_recorder.call("record_player_event", "ability.projectile.hit", {
+            "level_id": current_level_id,
+            "player": get_player_trace(),
+            "payload": hit_payload,
+        })
+        apply_damage_to_enemy(target, int(profile.get("damage", 1)), {
+            "source_type": "ability_projectile",
+            "ability_type": ability_type,
+            "attack_type": String(profile.get("attack_type", "projectile")),
+        }, float(profile.get("knockback", 0.0)))
+        if not bool(profile.get("pierce", false)):
+            return
+
+
+func sort_projectile_targets_by_forward_distance(targets: Array, projectile: Node) -> Array:
+    var sorted_targets := targets.duplicate()
+    sorted_targets.sort_custom(func(left, right):
+        return get_projectile_forward_distance(left, projectile) < get_projectile_forward_distance(right, projectile)
+    )
+    return sorted_targets
+
+
+func get_projectile_forward_distance(target: Node, projectile: Node) -> float:
+    if target == null or not is_instance_valid(target) or projectile == null or not is_instance_valid(projectile):
+        return 0.0
+
+    var direction := Vector2(get_player_facing_direction(), 0.0)
+    var projectile_direction = projectile.get("direction")
+    if typeof(projectile_direction) == TYPE_VECTOR2 and projectile_direction != Vector2.ZERO:
+        direction = projectile_direction.normalized()
+
+    return (target.global_position - projectile.global_position).dot(direction)
+
+
+func retire_ability_projectile(projectile: Node) -> void:
+    if projectile == null:
+        return
+
+    active_ability_projectiles.erase(projectile)
+    if is_instance_valid(projectile):
+        projectile.queue_free()
+
+
+func apply_ability_movement(ability_type: String, profile: Dictionary) -> void:
+    if player == null:
+        return
+
+    var movement_effect := String(profile.get("movement_effect", ""))
+    if movement_effect == "":
+        return
+
+    var start_position: Vector2 = player.global_position
+    var impulse := float(profile.get("movement_impulse", 0.0))
+    match movement_effect:
+        "dash":
+            var facing := get_player_facing_direction()
+            player.global_position += Vector2(facing * impulse, 0.0)
+            player.velocity.x = facing * max(abs(player.velocity.x), impulse * 6.0)
+        _:
+            return
+
+    trace_recorder.call("record_player_event", "ability.movement.applied", {
+        "level_id": current_level_id,
+        "player": get_player_trace(),
+        "payload": {
+            "ability_type": ability_type,
+            "movement_effect": movement_effect,
+            "movement_impulse": impulse,
+            "from": {
+                "x": start_position.x,
+                "y": start_position.y,
+            },
+            "to": {
+                "x": player.global_position.x,
+                "y": player.global_position.y,
+            },
+        },
+    })
 
 
 func find_enemy_targets(profile: Dictionary, ignored_enemy: Node = null) -> Array:
@@ -574,6 +1018,21 @@ func apply_damage_to_enemy(enemy: Node, amount: int, source: Dictionary = {}, kn
         "player": get_player_trace(),
         "payload": result,
     })
+    trace_recorder.call("record_player_event", "enemy.feedback.shown", {
+        "level_id": current_level_id,
+        "player": get_player_trace(),
+        "payload": {
+            "enemy_id": result.get("enemy_id", ""),
+            "ability_type": result.get("ability_type", ""),
+            "damage": result.get("damage", 0),
+            "hp": result.get("hp", 0),
+            "max_hp": result.get("max_hp", 0),
+            "defeated": result.get("defeated", false),
+            "feedback_type": result.get("feedback_type", "hit_flash"),
+            "feedback_flash_ms": result.get("feedback_flash_ms", 0),
+            "source": result.get("source", {}),
+        },
+    })
 
     if bool(result.get("defeated", false)):
         mark_enemy_defeated(result)
@@ -582,6 +1041,7 @@ func apply_damage_to_enemy(enemy: Node, amount: int, source: Dictionary = {}, kn
             "player": get_player_trace(),
             "payload": result,
         })
+        clear_defeated_captured_enemy()
         sync_inventory_overlay("enemy.defeated", true)
 
     sync_hud_overlay("enemy.damaged", true)
@@ -726,6 +1186,102 @@ func check_enemy_contact_damage() -> void:
         return
 
 
+func check_hidden_discoveries() -> void:
+    if player == null or current_definition == null or is_finished():
+        return
+
+    check_hidden_marker_discoveries(current_definition.collectibles, "collectible")
+    check_hidden_marker_discoveries(current_definition.doors, "door")
+
+
+func check_hidden_marker_discoveries(markers: Array, feature_type: String) -> void:
+    for marker in markers:
+        if not is_hidden_feature(marker):
+            continue
+
+        var feature_id := String(marker.get("id", ""))
+        if is_hidden_feature_discovered(feature_type, feature_id):
+            reveal_hidden_marker_visual(feature_type, feature_id)
+            continue
+
+        var payload: Dictionary = marker.get("payload", {})
+        var discovery_radius := float(payload.get("discovery_radius", payload.get("trigger_radius", 64.0)))
+        var marker_position := dictionary_to_vector2(marker.get("position", {}))
+        if player.global_position.distance_to(marker_position) > discovery_radius:
+            continue
+
+        var hidden_key := get_hidden_feature_key(feature_type, feature_id)
+        discovered_hidden_feature_ids[hidden_key] = true
+        reveal_hidden_marker_visual(feature_type, feature_id)
+        trace_recorder.call("record_player_event", "hidden.discovered", {
+            "level_id": current_level_id,
+            "player": get_player_trace(),
+            "payload": {
+                "feature_type": feature_type,
+                "feature_id": feature_id,
+                "tile_key": position_to_tile_key(marker_position),
+            },
+        })
+        sync_map_overlay("hidden.discovered", true)
+        write_persistent_state()
+
+
+func reapply_discovered_hidden_marker_visuals() -> void:
+    if current_definition == null:
+        return
+
+    reapply_discovered_hidden_marker_visuals_for(current_definition.collectibles, "collectible")
+    reapply_discovered_hidden_marker_visuals_for(current_definition.doors, "door")
+
+
+func reapply_discovered_hidden_marker_visuals_for(markers: Array, feature_type: String) -> void:
+    for marker in markers:
+        if not is_hidden_feature(marker):
+            continue
+
+        var feature_id := String(marker.get("id", ""))
+        if is_hidden_feature_discovered(feature_type, feature_id):
+            reveal_hidden_marker_visual(feature_type, feature_id)
+
+
+func is_hidden_feature(marker: Dictionary) -> bool:
+    var payload: Dictionary = marker.get("payload", {})
+    return bool(payload.get("hidden_until_discovered", false))
+
+
+func get_hidden_feature_key(feature_type: String, feature_id: String) -> String:
+    return "%s:%s:%s" % [current_level_id, feature_type, feature_id]
+
+
+func is_hidden_feature_discovered(feature_type: String, feature_id: String) -> bool:
+    if feature_id == "":
+        return false
+
+    return discovered_hidden_feature_ids.has(get_hidden_feature_key(feature_type, feature_id))
+
+
+func reveal_hidden_marker_visual(feature_type: String, feature_id: String) -> void:
+    if current_level == null:
+        return
+
+    var marker_group := "%s_marker" % feature_type
+    for marker in current_level.get_tree().get_nodes_in_group(marker_group):
+        if not current_level.is_ancestor_of(marker):
+            continue
+
+        var marker_id := ""
+        if feature_type == "collectible":
+            marker_id = String(marker.get("collectible_id"))
+        elif feature_type == "door":
+            marker_id = String(marker.get("door_id"))
+
+        if marker_id != feature_id or not marker.has_node("Visual"):
+            continue
+
+        marker.get_node("Visual").visible = true
+        return
+
+
 func check_hazard_contacts() -> void:
     if player == null or is_finished() or player_invulnerability_remaining_ms > 0:
         return
@@ -863,6 +1419,7 @@ func check_heal_pickups() -> void:
         consumed_heal_ids[heal_id] = true
         var amount := int(payload.get("amount", 1))
         var reward_type := String(payload.get("reward_type", "health"))
+        var dead_end_id := String(payload.get("dead_end_id", ""))
         trace_recorder.call("record_player_event", "heal.collected", {
             "level_id": current_level_id,
             "player": get_player_trace(),
@@ -870,9 +1427,11 @@ func check_heal_pickups() -> void:
                 "heal_id": heal_id,
                 "amount": amount,
                 "reward_type": reward_type,
+                "dead_end_id": dead_end_id,
             },
         })
         apply_heal_reward(amount, heal_id, reward_type)
+        complete_dead_end(dead_end_id, heal_id)
         return
 
 
@@ -884,6 +1443,31 @@ func apply_heal_reward(amount: int, heal_id: String = "", reward_type: String = 
             acquire_player_revive(max(amount, 1), heal_id)
         _:
             heal_player(amount, heal_id)
+
+
+func complete_dead_end(dead_end_id: String, heal_id: String) -> void:
+    if dead_end_id == "" or completed_dead_end_ids.has(dead_end_id):
+        return
+
+    completed_dead_end_ids[dead_end_id] = true
+    trace_recorder.call("record_player_event", "dead_end.completed", {
+        "level_id": current_level_id,
+        "player": get_player_trace(),
+        "payload": {
+            "dead_end_id": dead_end_id,
+            "heal_id": heal_id,
+            "completed_dead_end_ids": get_completed_dead_end_ids(),
+        },
+    })
+    sync_map_overlay("dead_end.completed", true)
+    sync_inventory_overlay("dead_end.completed", true)
+    write_persistent_state()
+
+
+func get_completed_dead_end_ids() -> Array:
+    var dead_end_ids := completed_dead_end_ids.keys()
+    dead_end_ids.sort()
+    return dead_end_ids
 
 
 func increase_player_max_hp(amount: int, heal_id: String = "") -> void:
@@ -986,6 +1570,9 @@ func check_collectible_pickups() -> void:
             continue
 
         var payload: Dictionary = collectible.get("payload", {})
+        if is_hidden_feature(collectible) and not is_hidden_feature_discovered("collectible", collectible_id):
+            continue
+
         var radius := float(payload.get("trigger_radius", 48.0))
         var collectible_position := dictionary_to_vector2(collectible.get("position", {}))
 
@@ -1012,6 +1599,7 @@ func acquire_item(item_id: String, collectible_id: String = "") -> void:
 
     acquired_item_ids[item_id] = true
     clear_resolved_locked_door_reason("missing_item", item_id)
+    clear_resolved_locked_door_reason("missing_cluster_keystone", item_id)
     trace_recorder.call("record_player_event", "item.acquired", {
         "level_id": current_level_id,
         "player": get_player_trace(),
@@ -1074,6 +1662,12 @@ func get_opened_ability_gate_ids() -> Array:
     return gate_ids
 
 
+func get_discovered_hidden_feature_ids() -> Array:
+    var feature_ids := discovered_hidden_feature_ids.keys()
+    feature_ids.sort()
+    return feature_ids
+
+
 func get_explored_tiles_payload() -> Dictionary:
     var payload := {}
     var level_ids := explored_tiles.keys()
@@ -1096,11 +1690,81 @@ func get_explored_tile_count() -> int:
     return count
 
 
+func get_map_features_payload() -> Array:
+    var features := []
+    if current_definition == null:
+        return features
+
+    append_map_features(features, current_definition.doors, "door")
+    append_map_features(features, current_definition.heals, "heal")
+    append_dead_end_map_features(features, current_definition.heals)
+    append_map_features(features, current_definition.collectibles, "collectible")
+    append_map_features(features, current_definition.hazards, "hazard")
+    append_map_features(features, current_definition.ability_gates, "ability_gate")
+    append_map_features(features, current_definition.goals, "goal")
+    return features
+
+
+func append_map_features(features: Array, markers: Array, feature_type: String) -> void:
+    for marker in markers:
+        var marker_position := dictionary_to_vector2(marker.get("position", {}))
+        var tile_key := position_to_tile_key(marker_position)
+        var feature_id := String(marker.get("id", ""))
+        var hidden := is_hidden_feature(marker)
+        var discovered := is_tile_explored(current_level_id, tile_key)
+        if hidden:
+            discovered = is_hidden_feature_discovered(feature_type, feature_id)
+        features.append({
+            "level_id": current_level_id,
+            "feature_type": feature_type,
+            "feature_id": feature_id,
+            "tile_key": tile_key,
+            "discovered": discovered,
+            "hidden": hidden,
+        })
+
+
+func append_dead_end_map_features(features: Array, markers: Array) -> void:
+    for marker in markers:
+        var payload: Dictionary = marker.get("payload", {})
+        var dead_end_id := String(payload.get("dead_end_id", ""))
+        if dead_end_id == "":
+            continue
+
+        var marker_position := dictionary_to_vector2(marker.get("position", {}))
+        features.append({
+            "level_id": current_level_id,
+            "feature_type": "dead_end",
+            "feature_id": dead_end_id,
+            "tile_key": position_to_tile_key(marker_position),
+            "discovered": completed_dead_end_ids.has(dead_end_id),
+            "completed": completed_dead_end_ids.has(dead_end_id),
+        })
+
+
+func position_to_tile_key(position: Vector2) -> String:
+    if exploration_tile_size <= 0:
+        return "0,0"
+
+    var column: int = max(int(floor(position.x / float(exploration_tile_size))), 0)
+    var row: int = max(int(floor(position.y / float(exploration_tile_size))), 0)
+    return "%d,%d" % [column, row]
+
+
+func is_tile_explored(level_id: String, tile_key: String) -> bool:
+    if not explored_tiles.has(level_id):
+        return false
+
+    var level_tiles: Dictionary = explored_tiles[level_id]
+    return level_tiles.has(tile_key)
+
+
 func setup_map_overlay() -> void:
     if not map_overlay_enabled:
         return
 
     map_overlay = MapOverlayScene.instantiate()
+    map_overlay.visible = true
     add_child(map_overlay)
 
 
@@ -1120,12 +1784,51 @@ func setup_result_overlay() -> void:
     add_child(result_overlay)
 
 
+func setup_results_scene() -> void:
+    if not result_overlay_enabled:
+        return
+
+    results_scene = ResultsSceneScene.instantiate()
+    add_child(results_scene)
+
+
+func setup_error_overlay() -> void:
+    if not error_overlay_enabled:
+        return
+
+    error_overlay = ErrorOverlayScene.instantiate()
+    add_child(error_overlay)
+
+
+func setup_pause_overlay() -> void:
+    setup_pause_scene()
+
+
+func setup_pause_scene() -> void:
+    if not pause_menu_enabled:
+        return
+
+    pause_overlay = PauseSceneScene.instantiate() if pause_scene_enabled else PauseOverlayScene.instantiate()
+    add_child(pause_overlay)
+    sync_pause_overlay("session.started")
+
+
 func setup_settings_overlay() -> void:
     if not settings_overlay_enabled:
         return
 
     settings_overlay = SettingsOverlayScene.instantiate()
     add_child(settings_overlay)
+    sync_settings_menu_visibility()
+
+
+func setup_virtual_controls_overlay() -> void:
+    if not virtual_controls_enabled:
+        return
+
+    virtual_controls_overlay = VirtualControlsOverlayScene.instantiate()
+    add_child(virtual_controls_overlay)
+    sync_virtual_controls_overlay("session.started")
 
 
 func setup_inventory_overlay() -> void:
@@ -1143,23 +1846,69 @@ func setup_audio_players() -> void:
     bgm_player = AudioStreamPlayer.new()
     bgm_player.name = "BgmPlayer"
     bgm_player.stream = BgmMain
-    bgm_player.volume_db = linear_to_db(clampf(setting_volume, 0.0, 1.0))
     add_child(bgm_player)
     bgm_player.play()
 
     sfx_player = AudioStreamPlayer.new()
     sfx_player.name = "SfxPlayer"
-    sfx_player.volume_db = linear_to_db(clampf(setting_volume, 0.0, 1.0))
     add_child(sfx_player)
+    update_audio_mix("audio.players.ready")
 
 
-func play_sfx(stream: AudioStream) -> void:
+func update_audio_mix(reason: String = "audio.mix.updated", emit_trace: bool = false) -> void:
+    if not audio_enabled:
+        return
+
+    var mix_payload := get_audio_mix_payload(reason)
+    if bgm_player != null and is_instance_valid(bgm_player):
+        bgm_player.volume_db = volume_to_db(float(mix_payload.get("bgm_volume", 0.0)))
+    if sfx_player != null and is_instance_valid(sfx_player):
+        sfx_player.volume_db = volume_to_db(float(mix_payload.get("sfx_volume", 0.0)))
+
+    if emit_trace and trace_recorder != null:
+        trace_recorder.call("record_event", "audio.mix.updated", mix_payload)
+
+
+func get_audio_mix_payload(reason: String = "") -> Dictionary:
+    var normalized_volume := clampf(setting_volume, 0.0, 1.0)
+    var ducking_active := session_paused or settings_menu_open or pause_settings_open
+    var bgm_volume := clampf(normalized_volume * bgm_volume_scale, 0.0, 1.0)
+    if ducking_active:
+        bgm_volume = clampf(bgm_volume * audio_ducking_volume_scale, 0.0, 1.0)
+
+    return {
+        "setting_volume": normalized_volume,
+        "bgm_volume": bgm_volume,
+        "sfx_volume": clampf(normalized_volume * sfx_volume_scale, 0.0, 1.0),
+        "ui_sfx_volume": clampf(normalized_volume * ui_sfx_volume_scale, 0.0, 1.0),
+        "ducking_active": ducking_active,
+        "audio_enabled": audio_enabled,
+        "bgm_playing": bgm_player != null and is_instance_valid(bgm_player) and bgm_player.playing,
+        "reason": reason,
+    }
+
+
+func volume_to_db(linear_volume: float) -> float:
+    var clamped_volume := clampf(linear_volume, 0.0, 1.0)
+    if clamped_volume <= 0.0:
+        return -80.0
+
+    return linear_to_db(clamped_volume)
+
+
+func play_sfx(stream: AudioStream, volume_scale: float = -1.0) -> void:
     if not audio_enabled or sfx_player == null or stream == null:
         return
 
+    var resolved_volume_scale := sfx_volume_scale if volume_scale < 0.0 else volume_scale
     sfx_player.stream = stream
-    sfx_player.volume_db = linear_to_db(clampf(setting_volume, 0.0, 1.0))
+    sfx_player.volume_db = volume_to_db(clampf(setting_volume * resolved_volume_scale, 0.0, 1.0))
     sfx_player.play()
+
+
+func play_ui_sfx(stream: AudioStream = null) -> void:
+    var resolved_stream := SfxKirdySwallow if stream == null else stream
+    play_sfx(resolved_stream, ui_sfx_volume_scale)
 
 
 func get_ability_sfx(current_ability_type: String) -> AudioStream:
@@ -1218,8 +1967,9 @@ func scale_enemy_damage_for_difficulty(amount: int, profile: Dictionary) -> int:
 
 func sync_map_overlay(reason: String = "", emit_trace: bool = false) -> void:
     var explored_payload := get_explored_tiles_payload()
+    var map_features_payload := get_map_features_payload()
     if map_overlay != null and is_instance_valid(map_overlay):
-        map_overlay.call("set_map_state", current_level_id, explored_payload)
+        map_overlay.call("set_map_state", current_level_id, explored_payload, map_features_payload)
 
     if not emit_trace or trace_recorder == null:
         return
@@ -1229,8 +1979,148 @@ func sync_map_overlay(reason: String = "", emit_trace: bool = false) -> void:
         "current_level_id": current_level_id,
         "explored_tiles": explored_payload,
         "explored_tile_count": get_explored_tile_count(),
+        "features": map_features_payload,
+        "map_visible": map_overlay.visible if map_overlay != null and is_instance_valid(map_overlay) else false,
         "visible_tile_count": int(map_overlay.call("get_visible_tile_count")) if map_overlay != null and is_instance_valid(map_overlay) else get_explored_tile_count(),
     })
+
+
+func check_map_actions() -> void:
+    if is_session_action_just_pressed(map_toggle_action):
+        toggle_map_overlay()
+
+
+func toggle_map_overlay() -> void:
+    if map_overlay == null or not is_instance_valid(map_overlay):
+        return
+
+    map_overlay.visible = not map_overlay.visible
+    trace_recorder.call("record_event", "map.toggled", {
+        "current_level_id": current_level_id,
+        "map_visible": map_overlay.visible,
+        "explored_tile_count": get_explored_tile_count(),
+        "visible_tile_count": int(map_overlay.call("get_visible_tile_count")),
+    })
+
+
+func check_pause_actions() -> void:
+    if is_session_action_just_pressed(pause_toggle_action):
+        if settings_menu_open:
+            close_settings_menu("settings.menu.closed")
+        elif pause_settings_open:
+            close_pause_settings()
+        else:
+            toggle_pause_menu()
+        return
+
+    if session_paused and not pause_settings_open and is_session_action_just_pressed(pause_settings_action):
+        open_pause_settings()
+
+
+func toggle_pause_menu() -> void:
+    session_paused = not session_paused
+    apply_actor_pause_state(session_paused)
+    if not session_paused:
+        pause_settings_open = false
+    play_ui_sfx()
+    sync_settings_menu_visibility()
+    sync_virtual_controls_overlay("pause.toggled")
+    sync_pause_overlay("pause.toggled", true)
+    update_audio_mix("pause.toggled", true)
+
+
+func apply_actor_pause_state(paused: bool) -> void:
+    if paused:
+        pause_actor_physics(player)
+        for enemy in enemies:
+            pause_actor_physics(enemy)
+        return
+
+    restore_paused_actor_physics()
+
+
+func pause_actor_physics(actor) -> void:
+    if actor == null or not is_instance_valid(actor):
+        return
+
+    var actor_id := int(actor.get_instance_id())
+    if not paused_actor_physics_states.has(actor_id):
+        paused_actor_physics_states[actor_id] = actor.is_physics_processing()
+    actor.set_physics_process(false)
+
+
+func restore_paused_actor_physics() -> void:
+    for actor_id in paused_actor_physics_states.keys():
+        var actor = instance_from_id(int(actor_id))
+        if actor != null and is_instance_valid(actor):
+            actor.set_physics_process(bool(paused_actor_physics_states[actor_id]))
+
+    paused_actor_physics_states.clear()
+
+
+func open_pause_settings() -> void:
+    if not session_paused or pause_settings_open:
+        return
+
+    pause_settings_open = true
+    selected_setting_index = 0
+    play_ui_sfx()
+    sync_settings_menu_visibility()
+    sync_settings_overlay("pause.settings.opened")
+    sync_virtual_controls_overlay("pause.settings.opened")
+    sync_pause_overlay("pause.settings.opened")
+    update_audio_mix("pause.settings.opened", true)
+    trace_recorder.call("record_event", "pause.settings.opened", build_pause_payload("pause.settings.opened"))
+
+
+func close_pause_settings() -> void:
+    if not pause_settings_open:
+        return
+
+    pause_settings_open = false
+    play_ui_sfx()
+    sync_settings_menu_visibility()
+    sync_settings_overlay("pause.settings.closed")
+    sync_virtual_controls_overlay("pause.settings.closed")
+    sync_pause_overlay("pause.settings.closed")
+    update_audio_mix("pause.settings.closed", true)
+    trace_recorder.call("record_event", "pause.settings.closed", build_pause_payload("pause.settings.closed"))
+
+
+func sync_pause_overlay(reason: String = "", emit_trace: bool = false) -> void:
+    var pause_payload := build_pause_payload(reason)
+    if pause_overlay != null and is_instance_valid(pause_overlay):
+        pause_overlay.call("set_pause_state", pause_payload)
+
+    if not emit_trace or trace_recorder == null:
+        sync_pause_scene(pause_payload, false)
+        return
+
+    trace_recorder.call("record_event", "pause.toggled", pause_payload)
+    sync_pause_scene(pause_payload, true)
+
+
+func sync_pause_scene(pause_payload: Dictionary, emit_trace: bool = false) -> void:
+    if not bool(pause_payload.get("is_paused", false)):
+        pause_scene_visible_traced = false
+        return
+
+    if not pause_scene_enabled or not emit_trace or trace_recorder == null or pause_scene_visible_traced:
+        return
+
+    pause_scene_visible_traced = true
+    trace_recorder.call("record_event", "pause.scene.shown", pause_payload)
+
+
+func build_pause_payload(reason: String = "") -> Dictionary:
+    return {
+        "is_paused": session_paused,
+        "settings_open": pause_settings_open,
+        "pause_scene_active": pause_scene_enabled and session_paused,
+        "blur_active": pause_scene_enabled and session_paused,
+        "blur_mode": "canvas_fallback" if pause_scene_enabled and session_paused else "none",
+        "reason": reason,
+    }
 
 
 func sync_hud_overlay(reason: String = "", emit_trace: bool = false) -> void:
@@ -1253,6 +2143,8 @@ func build_hud_payload() -> Dictionary:
         "revive_count": player_revive_count,
         "ability_type": get_player_ability_type(),
         "items_collected": get_acquired_item_ids(),
+        "score": calculate_total_score(),
+        "remaining_life_bonus": calculate_remaining_life_bonus(),
         "difficulty": sanitize_setting_difficulty(setting_difficulty),
         "objective_text": get_current_objective_text(),
         "ability_cooldown_ms": ability_cooldown_remaining_ms,
@@ -1297,6 +2189,23 @@ func get_target_enemy_hp() -> int:
     return int(nearest_enemy.hp)
 
 
+func calculate_progress_score() -> int:
+    return (
+        get_acquired_item_ids().size() * SCORE_PER_ITEM
+        + get_completed_level_ids().size() * SCORE_PER_COMPLETED_LEVEL
+        + get_defeated_enemy_group_ids().size() * SCORE_PER_DEFEATED_GROUP
+        + get_defeated_boss_ids().size() * SCORE_PER_DEFEATED_BOSS
+    )
+
+
+func calculate_remaining_life_bonus() -> int:
+    return max(player_hp, 0) * SCORE_PER_REMAINING_HP + max(player_revive_count, 0) * SCORE_PER_REVIVE
+
+
+func calculate_total_score() -> int:
+    return calculate_progress_score() + calculate_remaining_life_bonus()
+
+
 func sync_inventory_overlay(reason: String = "", emit_trace: bool = false) -> void:
     var inventory_payload := build_inventory_payload()
     if inventory_overlay != null and is_instance_valid(inventory_overlay):
@@ -1326,6 +2235,7 @@ func sync_settings_overlay(reason: String = "", emit_trace: bool = false) -> voi
     var settings_payload := build_settings_payload()
     if settings_overlay != null and is_instance_valid(settings_overlay):
         settings_overlay.call("set_settings_state", settings_payload)
+        sync_settings_menu_visibility()
 
     if not emit_trace or trace_recorder == null:
         return
@@ -1335,7 +2245,111 @@ func sync_settings_overlay(reason: String = "", emit_trace: bool = false) -> voi
 
 
 func build_settings_payload() -> Dictionary:
-    return get_settings_payload()
+    var settings_payload := get_settings_payload()
+    settings_payload["menu_open"] = is_settings_menu_active()
+    settings_payload["selected_setting_index"] = selected_setting_index
+    settings_payload["focus_target"] = get_settings_focus_target()
+    settings_payload["blur_active"] = is_settings_menu_active()
+    return settings_payload
+
+
+func sync_virtual_controls_overlay(reason: String = "", emit_trace: bool = false) -> void:
+    var controls_mode := sanitize_setting_controls(setting_controls)
+    var controls_visible := virtual_controls_enabled and setting_controls == "touch" and not session_paused and not settings_menu_open and outcome == "running"
+    var controls_payload := {
+        "visible": controls_visible,
+        "controls": controls_mode,
+        "reason": reason,
+    }
+    if virtual_controls_overlay != null and is_instance_valid(virtual_controls_overlay):
+        virtual_controls_overlay.call("set_virtual_controls_state", controls_payload)
+
+    if not emit_trace or trace_recorder == null:
+        return
+
+    trace_recorder.call("record_event", "virtual_controls.updated", controls_payload)
+
+
+func sync_settings_menu_visibility() -> void:
+    if settings_overlay == null or not is_instance_valid(settings_overlay):
+        return
+
+    settings_overlay.call("set_menu_visible", is_settings_menu_active())
+
+
+func check_settings_menu_actions() -> void:
+    if settings_menu_open and is_session_action_just_pressed(pause_toggle_action):
+        close_settings_menu("settings.menu.closed")
+        return
+
+    if is_session_action_just_pressed(settings_menu_action):
+        if settings_menu_open:
+            close_settings_menu("settings.menu.closed")
+        elif not session_paused:
+            open_settings_menu("settings.menu.opened")
+        return
+
+    if not is_settings_menu_active():
+        return
+
+    if is_session_action_just_pressed(settings_focus_next_action):
+        move_settings_focus(1)
+        return
+
+    if is_session_action_just_pressed(settings_focus_previous_action):
+        move_settings_focus(-1)
+
+
+func open_settings_menu(reason: String = "settings.menu.opened") -> void:
+    if settings_menu_open or session_paused:
+        return
+
+    settings_menu_open = true
+    selected_setting_index = 0
+    play_ui_sfx()
+    sync_settings_overlay(reason)
+    sync_virtual_controls_overlay(reason, true)
+    update_audio_mix(reason, true)
+    if trace_recorder != null:
+        trace_recorder.call("record_event", "settings.menu.opened", build_settings_payload())
+
+
+func close_settings_menu(reason: String = "settings.menu.closed") -> void:
+    if not settings_menu_open:
+        return
+
+    settings_menu_open = false
+    play_ui_sfx()
+    sync_settings_overlay(reason)
+    sync_virtual_controls_overlay(reason, true)
+    update_audio_mix(reason, true)
+    if trace_recorder != null:
+        trace_recorder.call("record_event", "settings.menu.closed", build_settings_payload())
+
+
+func move_settings_focus(direction: int) -> void:
+    if not is_settings_menu_active() or direction == 0:
+        return
+
+    selected_setting_index = wrapi(selected_setting_index + direction, 0, 3)
+    play_ui_sfx()
+    sync_settings_overlay("settings.focus.changed")
+    if trace_recorder != null:
+        trace_recorder.call("record_event", "settings.focus.changed", build_settings_payload())
+
+
+func is_settings_menu_active() -> bool:
+    return settings_menu_open or pause_settings_open
+
+
+func get_settings_focus_target() -> String:
+    match selected_setting_index:
+        1:
+            return "controls"
+        2:
+            return "difficulty"
+        _:
+            return "volume"
 
 
 func check_settings_actions() -> void:
@@ -1362,7 +2376,10 @@ func check_settings_actions() -> void:
 
 func apply_settings_update(next_settings: Dictionary, reason: String = "settings.updated") -> void:
     apply_settings_payload(next_settings)
+    play_ui_sfx()
     sync_settings_overlay(reason, true)
+    sync_virtual_controls_overlay(reason, true)
+    update_audio_mix(reason, true)
     write_persistent_state()
 
 
@@ -1371,6 +2388,22 @@ func is_session_action_just_pressed(action: StringName) -> bool:
         return input_source.is_action_just_pressed(action)
 
     return Input.is_action_just_pressed(action)
+
+
+func check_error_actions() -> void:
+    if outcome == "error" and is_session_action_just_pressed(error_retry_action):
+        retry_after_error()
+
+
+func retry_after_error() -> void:
+    if outcome != "error":
+        return
+
+    var retry_payload := build_error_payload(runtime_error_message, runtime_error_reason, error_retry_level_id, error_retry_spawn_id)
+    if trace_recorder != null:
+        trace_recorder.call("record_event", "runtime.error.retry_selected", retry_payload)
+
+    start_session(error_retry_level_id, error_retry_spawn_id, error_retry_fps)
 
 
 func cycle_string(current_value: String, values: Array) -> String:
@@ -1384,7 +2417,66 @@ func cycle_string(current_value: String, values: Array) -> String:
     return String(values[(current_index + 1) % values.size()])
 
 
+func check_result_actions() -> void:
+    if outcome == "game_over" and is_session_action_just_pressed(result_restart_action):
+        restart_current_run()
+        return
+
+    if results_scene_shown:
+        return
+
+    if is_session_action_just_pressed(result_continue_action):
+        show_results_scene("result.continued")
+        return
+
+    if result_auto_results_delay_ms > 0 and result_elapsed_ms >= result_auto_results_delay_ms:
+        show_results_scene("result.auto_timeout")
+
+
+func restart_current_run() -> void:
+    if outcome != "game_over":
+        return
+
+    var restart_level_id := current_level_id
+    var restart_spawn_id := requested_spawn_id
+    var previous_outcome := outcome
+    reset_run_clock()
+    trace_recorder.call("record_event", "run.restart.selected", {
+        "level_id": restart_level_id,
+        "spawn_id": restart_spawn_id,
+        "previous_outcome": previous_outcome,
+    })
+    outcome = "running"
+    session_paused = false
+    pause_settings_open = false
+    result_elapsed_ms = 0
+    results_scene_shown = false
+    player_hp = max(player_max_hp, 1)
+    player_invulnerability_remaining_ms = 0
+    ability_cooldown_remaining_ms = 0
+    last_locked_door_reason = ""
+    captured_enemy = null
+    if player != null:
+        player.call("set_ability_type", "")
+    if result_overlay != null and is_instance_valid(result_overlay):
+        result_overlay.call("set_result_state", {})
+    if results_scene != null and is_instance_valid(results_scene):
+        results_scene.call("set_results_state", {})
+
+    if load_level(restart_level_id, restart_spawn_id):
+        player_invulnerability_remaining_ms = max(int(get_difficulty_profile().get("player_invulnerability_ms", player_invulnerability_ms)), 0)
+        mark_level_visited(current_level_id)
+        mark_player_tile_explored()
+        sync_map_overlay("run.restarted", true)
+        sync_hud_overlay("run.restarted", true)
+        sync_inventory_overlay("run.restarted", true)
+        sync_virtual_controls_overlay("run.restarted", true)
+        write_persistent_state()
+
+
 func show_result_overlay(reason: String = "") -> void:
+    result_elapsed_ms = 0
+    results_scene_shown = false
     var result_payload := build_result_payload()
     if result_overlay != null and is_instance_valid(result_overlay):
         result_overlay.call("set_result_state", result_payload)
@@ -1396,6 +2488,55 @@ func show_result_overlay(reason: String = "") -> void:
     trace_recorder.call("record_event", "result.overlay.shown", result_payload)
 
 
+func show_results_scene(reason: String = "") -> void:
+    if results_scene_shown:
+        return
+
+    results_scene_shown = true
+    var results_payload := build_result_payload()
+    if results_scene != null and is_instance_valid(results_scene):
+        results_scene.call("set_results_state", results_payload)
+
+    if trace_recorder == null:
+        return
+
+    results_payload["reason"] = reason
+    trace_recorder.call("record_event", "results.scene.shown", results_payload)
+
+
+func show_error_overlay(message: String, reason: String = "", requested_level_id: String = "", requested_spawn_id: String = "default") -> void:
+    runtime_error_message = message
+    runtime_error_reason = reason
+    error_retry_level_id = requested_level_id if requested_level_id != "" else initial_level_id
+    error_retry_spawn_id = requested_spawn_id if requested_spawn_id != "" else initial_spawn_id
+    var error_payload := build_error_payload(message, reason, error_retry_level_id, error_retry_spawn_id)
+    if error_overlay != null and is_instance_valid(error_overlay):
+        error_overlay.call("set_error_state", error_payload)
+
+    if trace_recorder == null:
+        return
+
+    trace_recorder.call("record_event", "runtime.error.shown", error_payload)
+
+
+func build_error_payload(message: String = "", reason: String = "", requested_level_id: String = "", requested_spawn_id: String = "default") -> Dictionary:
+    var normalized_message := message if message != "" else runtime_error_message
+    var normalized_reason := reason if reason != "" else runtime_error_reason
+    var normalized_level_id := requested_level_id if requested_level_id != "" else error_retry_level_id
+    var normalized_spawn_id := requested_spawn_id if requested_spawn_id != "" else error_retry_spawn_id
+    return {
+        "runtime_error": normalized_message != "",
+        "level_id": current_level_id,
+        "requested_level_id": normalized_level_id,
+        "requested_spawn_id": normalized_spawn_id,
+        "outcome": outcome,
+        "reason": normalized_reason,
+        "message": normalized_message,
+        "retry_available": normalized_level_id != "",
+        "retry_action": String(error_retry_action),
+    }
+
+
 func build_result_payload() -> Dictionary:
     return {
         "level_id": current_level_id,
@@ -1404,6 +2545,9 @@ func build_result_payload() -> Dictionary:
         "frames": run_frame,
         "items_collected": get_acquired_item_ids(),
         "completed_level_ids": get_completed_level_ids(),
+        "score": calculate_total_score(),
+        "remaining_life_bonus": calculate_remaining_life_bonus(),
+        "restart_available": outcome == "game_over",
     }
 
 
@@ -1430,6 +2574,10 @@ func load_persistent_state() -> void:
         defeated_boss_ids[String(boss_id)] = true
     for gate_id in state.opened_ability_gate_ids:
         opened_ability_gate_ids[String(gate_id)] = true
+    for feature_id in state.discovered_hidden_feature_ids:
+        discovered_hidden_feature_ids[String(feature_id)] = true
+    for dead_end_id in state.completed_dead_end_ids:
+        completed_dead_end_ids[String(dead_end_id)] = true
     for level_id in state.explored_tiles.keys():
         var normalized_level_id := String(level_id)
         var level_tiles := {}
@@ -1449,6 +2597,7 @@ func load_persistent_state() -> void:
 
     trace_recorder.call("record_event", "save.loaded", {
         "save_path": save_path,
+        "storage_backend": save_store.get("last_storage_backend"),
         "items_collected": get_acquired_item_ids(),
         "consumed_heal_ids": get_consumed_heal_ids(),
         "completed_level_ids": get_completed_level_ids(),
@@ -1457,6 +2606,8 @@ func load_persistent_state() -> void:
         "defeated_enemy_group_ids": get_defeated_enemy_group_ids(),
         "defeated_boss_ids": get_defeated_boss_ids(),
         "opened_ability_gate_ids": get_opened_ability_gate_ids(),
+        "discovered_hidden_feature_ids": get_discovered_hidden_feature_ids(),
+        "completed_dead_end_ids": get_completed_dead_end_ids(),
         "explored_tiles": get_explored_tiles_payload(),
         "current_level_id": String(state.current_level_id),
         "player_position": get_saved_player_position_payload(),
@@ -1480,8 +2631,9 @@ func write_persistent_state() -> void:
         return
 
     if save_store.call("save_state", save_path, build_save_payload()):
-        trace_recorder.call("record_event", "save.written", {
+        var save_written_payload := {
             "save_path": save_path,
+            "storage_backend": save_store.get("last_storage_backend"),
             "items_collected": get_acquired_item_ids(),
             "consumed_heal_ids": get_consumed_heal_ids(),
             "completed_level_ids": get_completed_level_ids(),
@@ -1490,6 +2642,8 @@ func write_persistent_state() -> void:
             "defeated_enemy_group_ids": get_defeated_enemy_group_ids(),
             "defeated_boss_ids": get_defeated_boss_ids(),
             "opened_ability_gate_ids": get_opened_ability_gate_ids(),
+            "discovered_hidden_feature_ids": get_discovered_hidden_feature_ids(),
+            "completed_dead_end_ids": get_completed_dead_end_ids(),
             "explored_tiles": get_explored_tiles_payload(),
             "current_level_id": current_level_id,
             "player_position": get_player_position_payload(),
@@ -1498,12 +2652,18 @@ func write_persistent_state() -> void:
             "player_hp": player_hp,
             "player_max_hp": player_max_hp,
             "player_revive_count": player_revive_count,
-        })
+        }
+        trace_recorder.call("record_event", "save.written", save_written_payload)
+        if String(save_store.get("last_storage_backend")) == "localStorage":
+            trace_recorder.call("record_event", "save.local_storage.written", save_written_payload)
+        if String(save_store.get("last_storage_backend")) == "sessionStorage":
+            trace_recorder.call("record_event", "save.session_storage_fallback.written", save_written_payload)
         return
 
     trace_recorder.call("record_event", "save.error", {
         "operation": "write",
         "save_path": save_path,
+        "storage_backend": save_store.get("last_storage_backend"),
         "message": save_store.get("error_message"),
     })
 
@@ -1518,6 +2678,8 @@ func build_save_payload() -> Dictionary:
         "defeated_enemy_group_ids": get_defeated_enemy_group_ids(),
         "defeated_boss_ids": get_defeated_boss_ids(),
         "opened_ability_gate_ids": get_opened_ability_gate_ids(),
+        "discovered_hidden_feature_ids": get_discovered_hidden_feature_ids(),
+        "completed_dead_end_ids": get_completed_dead_end_ids(),
         "explored_tiles": get_explored_tiles_payload(),
         "current_level_id": current_level_id,
         "player_position": get_player_position_payload(),
@@ -1603,9 +2765,7 @@ func mark_player_tile_explored() -> bool:
     if player == null or current_level_id == "" or exploration_tile_size <= 0:
         return false
 
-    var column: int = max(int(floor(player.global_position.x / float(exploration_tile_size))), 0)
-    var row: int = max(int(floor(player.global_position.y / float(exploration_tile_size))), 0)
-    var tile_key := "%d,%d" % [column, row]
+    var tile_key := position_to_tile_key(player.global_position)
 
     if not explored_tiles.has(current_level_id):
         explored_tiles[current_level_id] = {}
@@ -1645,6 +2805,10 @@ func complete_level(level_id: String) -> void:
 func check_door_transitions() -> void:
     for door in current_definition.doors:
         var payload: Dictionary = door.get("payload", {})
+        var door_id := String(door.get("id", ""))
+        if is_hidden_feature(door) and not is_hidden_feature_discovered("door", door_id):
+            continue
+
         var radius := float(payload.get("trigger_radius", 64.0))
         var door_position := dictionary_to_vector2(door.get("position", {}))
 
@@ -1652,7 +2816,6 @@ func check_door_transitions() -> void:
             continue
 
         var source_level_id := current_level_id
-        var door_id := String(door.get("id", ""))
         var target_level_id := String(payload.get("target_level_id", ""))
         var target_spawn_id := String(payload.get("target_spawn_id", "default"))
         var unlocked_door_id := "%s:%s" % [source_level_id, door_id]
@@ -1715,7 +2878,40 @@ func get_door_lock_reason(payload: Dictionary) -> String:
     if required_boss_id != "" and not defeated_boss_ids.has(required_boss_id):
         return "missing_boss:" + required_boss_id
 
+    var cluster_lock_reason := get_cluster_transition_lock_reason(payload)
+    if cluster_lock_reason != "":
+        return cluster_lock_reason
+
     return ""
+
+
+func get_cluster_transition_lock_reason(payload: Dictionary) -> String:
+    if not cluster_keystone_progression_enabled:
+        return ""
+
+    var explicit_required_item_id := String(payload.get("required_keystone_item_id", ""))
+    if explicit_required_item_id != "":
+        if acquired_item_ids.has(explicit_required_item_id):
+            return ""
+        return "missing_cluster_keystone:" + explicit_required_item_id
+
+    var target_level_id := String(payload.get("target_level_id", ""))
+    if target_level_id == "" or level_loader == null or not level_loader.has_method("get_level_cluster"):
+        return ""
+
+    var target_cluster := String(level_loader.call("get_level_cluster", target_level_id))
+    if target_cluster == "" or target_cluster == "hub":
+        return ""
+
+    var source_cluster := String(level_loader.call("get_level_cluster", current_level_id))
+    if source_cluster == target_cluster:
+        return ""
+
+    var required_item_id := String(CLUSTER_KEYSTONE_REQUIREMENTS.get(target_cluster, ""))
+    if required_item_id == "" or acquired_item_ids.has(required_item_id):
+        return ""
+
+    return "missing_cluster_keystone:" + required_item_id
 
 
 func check_goal_reached() -> void:
@@ -1729,15 +2925,32 @@ func check_goal_reached() -> void:
 
         outcome = "completed"
         complete_level(current_level_id)
+        var finish_payload := {
+            "goal_id": goal.get("id", ""),
+            "result_label": payload.get("result_label", "complete"),
+            "time_ms": run_time_ms,
+            "frames": run_frame,
+            "score": calculate_total_score(),
+            "remaining_life_bonus": calculate_remaining_life_bonus(),
+        }
+        if String(payload.get("controller_type", "")) != "":
+            finish_payload["controller_type"] = String(payload.get("controller_type", ""))
+        if not bool(payload.get("collect_time_metrics", true)):
+            finish_payload.erase("time_ms")
+            finish_payload.erase("frames")
+        if not bool(payload.get("collect_score_metrics", true)):
+            finish_payload.erase("score")
+            finish_payload.erase("remaining_life_bonus")
+        if String(finish_payload.get("controller_type", "")) == "goal_door":
+            trace_recorder.call("record_player_event", "goal.door.entered", {
+                "level_id": current_level_id,
+                "player": get_player_trace(),
+                "payload": finish_payload,
+            })
         trace_recorder.call("record_player_event", "run.finished", {
             "level_id": current_level_id,
             "player": get_player_trace(),
-            "payload": {
-                "goal_id": goal.get("id", ""),
-                "result_label": payload.get("result_label", "complete"),
-                "time_ms": run_time_ms,
-                "frames": run_frame,
-            },
+            "payload": finish_payload,
         })
         sync_hud_overlay("run.finished", true)
         show_result_overlay("run.finished")

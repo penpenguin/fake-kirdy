@@ -78,6 +78,49 @@ describe('Godot v2 representative content migration', () => {
     }
   });
 
+  it('adds pacing/layout polish metadata to representative hub, branch, and reliquary scenes', () => {
+    const pacingMarker = readGodotFile('scripts/level/markers/LevelPacingMarker.gd');
+    const hub = readGodotFile('levels/central_hub.tscn');
+    const branchLevels = ['forest_area', 'ice_area', 'fire_area', 'cave_area', 'mirror_corridor'];
+    const reliquaryLevels = ['forest_reliquary', 'ice_reliquary', 'fire_reliquary', 'ruins_reliquary'];
+
+    expect(pacingMarker).toContain('class_name LevelPacingMarker');
+    expect(pacingMarker).toContain('@export var pacing_profile');
+    expect(pacingMarker).toContain('@export var critical_path_px');
+    expect(pacingMarker).toContain('@export var rest_stop_count');
+    expect(pacingMarker).toContain('@export var safe_spawn_radius');
+    expect(pacingMarker).toContain('@export var door_preview_spacing_px');
+    expect(pacingMarker).toContain('@export var encounter_budget');
+    expect(pacingMarker).toContain('@export var collectible_visibility');
+    expect(pacingMarker).toContain('"marker_type": "level_pacing"');
+
+    expect(hub).toContain('LevelPacingMarker.gd');
+    expect(hub).toContain('pacing_profile = "hub"');
+    expect(hub).toContain('critical_path_px = 720.0');
+    expect(hub).toContain('rest_stop_count = 2');
+    expect(hub).toContain('safe_spawn_radius = 112.0');
+    expect(hub).toContain('door_preview_spacing_px = 120.0');
+
+    for (const levelId of branchLevels) {
+      const scene = readGodotFile(`levels/${levelId}.tscn`);
+      expect(scene, `${levelId} missing pacing marker`).toContain('LevelPacingMarker.gd');
+      expect(scene, `${levelId} missing branch profile`).toContain('pacing_profile = "branch"');
+      expect(scene, `${levelId} missing critical path budget`).toContain('critical_path_px = 560.0');
+      expect(scene, `${levelId} missing spawn safety`).toContain('safe_spawn_radius = 96.0');
+      expect(scene, `${levelId} missing door preview spacing`).toContain('door_preview_spacing_px = 144.0');
+      expect(scene, `${levelId} missing encounter budget`).toContain('encounter_budget = 1');
+    }
+
+    for (const levelId of reliquaryLevels) {
+      const scene = readGodotFile(`levels/${levelId}.tscn`);
+      expect(scene, `${levelId} missing pacing marker`).toContain('LevelPacingMarker.gd');
+      expect(scene, `${levelId} missing reliquary profile`).toContain('pacing_profile = "reliquary"');
+      expect(scene, `${levelId} missing critical path budget`).toContain('critical_path_px = 520.0');
+      expect(scene, `${levelId} missing collectible visibility`).toContain('collectible_visibility = "critical_path"');
+      expect(scene, `${levelId} missing encounter budget`).toContain('encounter_budget = 1');
+    }
+  });
+
   it('adds a replay from central hub into a representative room completion path', () => {
     const replayPath = join(godotRoot, 'tests', 'replays', 'central_hub_to_heal_goal.json');
 

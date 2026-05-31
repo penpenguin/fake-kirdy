@@ -10,6 +10,8 @@ var unlocked_door_ids: Array[String] = []
 var defeated_enemy_group_ids: Array[String] = []
 var defeated_boss_ids: Array[String] = []
 var opened_ability_gate_ids: Array[String] = []
+var discovered_hidden_feature_ids: Array[String] = []
+var completed_dead_end_ids: Array[String] = []
 var explored_tiles: Dictionary = {}
 var current_level_id: String = ""
 var player_position: Dictionary = {}
@@ -35,6 +37,8 @@ func to_dictionary() -> Dictionary:
         "defeated_enemy_group_ids": defeated_enemy_group_ids,
         "defeated_boss_ids": defeated_boss_ids,
         "opened_ability_gate_ids": opened_ability_gate_ids,
+        "discovered_hidden_feature_ids": discovered_hidden_feature_ids,
+        "completed_dead_end_ids": completed_dead_end_ids,
         "explored_tiles": explored_tiles,
         "current_level_id": current_level_id,
         "player_position": player_position,
@@ -119,9 +123,25 @@ static func from_dictionary(data: Dictionary):
             continue
         state.opened_ability_gate_ids.append(opened_ability_gate_id)
 
+    var raw_discovered_hidden_features: Array = data.get("discovered_hidden_feature_ids", [])
+    for feature_id in raw_discovered_hidden_features:
+        var discovered_hidden_feature_id := String(feature_id)
+        if discovered_hidden_feature_id == "" or state.discovered_hidden_feature_ids.has(discovered_hidden_feature_id):
+            continue
+        state.discovered_hidden_feature_ids.append(discovered_hidden_feature_id)
+
+    var raw_completed_dead_ends: Array = data.get("completed_dead_end_ids", [])
+    for dead_end_id in raw_completed_dead_ends:
+        var completed_dead_end_id := String(dead_end_id)
+        if completed_dead_end_id == "" or state.completed_dead_end_ids.has(completed_dead_end_id):
+            continue
+        state.completed_dead_end_ids.append(completed_dead_end_id)
+
     state.acquired_item_ids.sort()
     state.completed_level_ids.sort()
+    state.completed_dead_end_ids.sort()
     state.consumed_heal_ids.sort()
+    state.discovered_hidden_feature_ids.sort()
     state.defeated_enemy_group_ids.sort()
     state.defeated_boss_ids.sort()
     state.opened_ability_gate_ids.sort()

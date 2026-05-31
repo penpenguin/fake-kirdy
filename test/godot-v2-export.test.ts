@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -127,5 +128,58 @@ describe('Godot v2 export workflow', () => {
 
     expect(project).toContain('[rendering]');
     expect(project).toContain('renderer/rendering_method.web="gl_compatibility"');
+  });
+
+  it('installs a Canvas 2D fallback for browsers without WebGL 2', () => {
+    const packageJson = JSON.parse(readText('package.json')) as {
+      scripts?: Record<string, string>;
+    };
+    const exportScript = readText('scripts/export-godot.mjs');
+    const fallbackInstaller = readText('scripts/install-godot-web-fallback.mjs');
+    const docs = readText('docs/godot-v2/web-fallback.md');
+
+    expect(packageJson.scripts?.['godot:web-fallback']).toContain('scripts/install-godot-web-fallback.mjs');
+    expect(exportScript).toContain('installWebFallback');
+    expect(fallbackInstaller).toContain('webgl-fallback.js');
+    expect(fallbackInstaller).toContain('function hasWebGL2()');
+    expect(fallbackInstaller).toContain('getContext("webgl2")');
+    expect(fallbackInstaller).not.toContain('getContext("webgl")');
+    expect(fallbackInstaller).not.toContain('getContext("experimental-webgl")');
+    expect(fallbackInstaller).toContain('getContext("2d")');
+    expect(fallbackInstaller).toContain('data-kirdy-canvas2d-fallback');
+    expect(fallbackInstaller).toContain('Godot Web export artifacts are missing');
+    expect(docs).toContain('Canvas 2D fallback');
+    expect(docs).toContain('WebGL 2 unavailable');
+  });
+
+  it('can inject the fallback script into an exported HTML page', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'fake-kirdy-web-fallback-'));
+
+    try {
+      writeFileSync(
+        join(tempDir, 'index.html'),
+        '<!doctype html><html><head><title>Fake Kirdy</title></head><body><canvas id="canvas"></canvas></body></html>',
+      );
+
+      execFileSync('node', ['scripts/install-godot-web-fallback.mjs', `--export-dir=${tempDir}`], {
+        cwd: repoRoot,
+        encoding: 'utf8',
+      });
+      execFileSync('node', ['scripts/install-godot-web-fallback.mjs', `--export-dir=${tempDir}`], {
+        cwd: repoRoot,
+        encoding: 'utf8',
+      });
+
+      const html = readFileSync(join(tempDir, 'index.html'), 'utf8');
+      const fallbackScript = readFileSync(join(tempDir, 'webgl-fallback.js'), 'utf8');
+
+      expect(html.match(/webgl-fallback\.js/g)).toHaveLength(1);
+      expect(html).toContain('<script src="./webgl-fallback.js" defer></script>');
+      expect(fallbackScript).toContain('requestAnimationFrame');
+      expect(fallbackScript).toContain('drawFallbackScene');
+      expect(fallbackScript).toContain('data-kirdy-canvas2d-fallback');
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
   });
 });

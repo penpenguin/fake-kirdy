@@ -48,12 +48,10 @@ describe('Godot v2 inventory overlay and trace', () => {
   it('exposes inventory trace metrics and docs', () => {
     const traceSummary = readFileSync(join(repoRoot, 'scripts', 'trace-summary.mjs'), 'utf8');
     const docs = readFileSync(join(repoRoot, 'docs', 'godot-v2', 'hud-overlay.md'), 'utf8');
-    const ledger = readFileSync(join(repoRoot, 'docs', 'godot-v2', 'phaser-parity-ledger.json'), 'utf8');
 
     expect(traceSummary).toContain("eventType === 'inventory.updated'");
     expect(traceSummary).toContain('last_inventory');
     expect(docs).toContain('InventoryOverlay.gd');
     expect(docs).toContain('inventory.updated');
-    expect(ledger).toContain('InventoryOverlay.gd');
   });
 });

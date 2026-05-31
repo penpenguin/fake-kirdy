@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "required_keyboard_actions": [
+    "move_left",
+    "move_right",
+    "jump",
+    "inhale",
+    "swallow",
+    "use_ability",
+    "map_toggle",
+    "pause_toggle",
+    "pause_settings",
+    "result_restart",
+    "result_continue"
+  ],
+  "required_replay_ids": [
+    "hard_enemy_attack_trace",
+    "virtual_controls_touch_mode",
+    "pause_toggle_menu",
+    "pause_settings_flow",
+    "game_over_restart_option"
+  ],
+  "required_ui_scenes": [
+    "HudOverlay.tscn",
+    "SettingsOverlay.tscn",
+    "VirtualControlsOverlay.tscn",
+    "PauseOverlay.tscn",
+    "ResultOverlay.tscn",
+    "ErrorOverlay.tscn"
+  ],
+  "required_visual_feedback_tokens": [
+    {
+      "file": "godot/scripts/ui/VirtualControlsOverlay.gd",
+      "token": "BUTTON_PRESSED_MODULATE"
+    },
+    {
+      "file": "godot/scripts/enemies/SimpleEnemy.gd",
+      "token": "hit_flash_color"
+    },
+    {
+      "file": "godot/scripts/ui/MapOverlay.gd",
+      "token": "dead_end_completed_color"
+    }
+  ],
+  "required_color_roles": [
+    "current_level_color",
+    "visited_level_color",
+    "discovered_feature_color",
+    "undiscovered_feature_color",
+    "dead_end_completed_color"
+  ],
+  "min_color_distance": 0.18
+}

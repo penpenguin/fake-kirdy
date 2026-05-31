@@ -6,7 +6,7 @@
 offset_left = 640.0
 offset_top = 16.0
 offset_right = 944.0
-offset_bottom = 136.0
+offset_bottom = 158.0
 mouse_filter = 2
 script = ExtResource("1_hud")
 
@@ -40,7 +40,14 @@ text = "Items"
 
 [node name="OutcomeLabel" type="Label" parent="."]
 offset_left = 0.0
+offset_top = 110.0
+offset_right = 288.0
+offset_bottom = 130.0
+text = "Run"
+
+[node name="ScoreLabel" type="Label" parent="."]
+offset_left = 0.0
 offset_top = 88.0
 offset_right = 288.0
 offset_bottom = 108.0
-text = "Run"
+text = "Score"

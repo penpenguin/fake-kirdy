@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/level/markers/PlayerSpawn.gd" id="1_spawn"]
 [ext_resource type="Script" path="res://scripts/level/markers/DoorMarker.gd" id="2_door"]
 [ext_resource type="Script" path="res://scripts/level/markers/EnemySpawnMarker.gd" id="3_enemy"]
-[ext_resource type="Script" path="res://scripts/level/markers/GoalMarker.gd" id="4_goal"]
+[ext_resource type="Script" path="res://scripts/level/markers/GoalDoorController.gd" id="4_goal"]
 [ext_resource type="Script" path="res://scripts/level/markers/CameraBoundsMarker.gd" id="5_camera_bounds"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]

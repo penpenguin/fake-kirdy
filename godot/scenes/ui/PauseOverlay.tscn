@@ -1,0 +1,33 @@
+[gd_scene load_steps=2 format=3 uid="uid://pauseoverlay01"]
+
+[ext_resource type="Script" path="res://scripts/ui/PauseOverlay.gd" id="1_pause"]
+
+[node name="PauseOverlay" type="Control"]
+visible = false
+offset_left = 320.0
+offset_top = 176.0
+offset_right = 640.0
+offset_bottom = 296.0
+mouse_filter = 2
+script = ExtResource("1_pause")
+
+[node name="TitleLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 320.0
+offset_bottom = 32.0
+text = "Paused"
+
+[node name="ResumeLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 40.0
+offset_right = 320.0
+offset_bottom = 64.0
+text = "Press Esc to resume"
+
+[node name="SettingsLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 72.0
+offset_right = 320.0
+offset_bottom = 96.0
+text = "Press Enter for settings"

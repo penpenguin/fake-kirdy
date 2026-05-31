@@ -1,0 +1,66 @@
+[gd_scene load_steps=5 format=3 uid="uid://enemyspawnlimit01"]
+
+[ext_resource type="Script" path="res://scripts/level/markers/PlayerSpawn.gd" id="1_spawn"]
+[ext_resource type="Script" path="res://scripts/level/markers/EnemySpawnMarker.gd" id="2_enemy"]
+[ext_resource type="Script" path="res://scripts/level/markers/CameraBoundsMarker.gd" id="3_camera_bounds"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
+size = Vector2(820, 32)
+
+[node name="EnemySpawnLimitRoom" type="Node2D"]
+
+[node name="PlayerSpawn" type="Node2D" parent="."]
+position = Vector2(96, 368)
+script = ExtResource("1_spawn")
+spawn_id = "default"
+
+[node name="EnemySpawnMarkerA" type="Node2D" parent="."]
+position = Vector2(224, 400)
+script = ExtResource("2_enemy")
+spawn_id = "spawn_limit_a"
+enemy_type = "simple_ground"
+ability_type = "spark"
+contact_damage = 0
+attack_radius = 1.0
+
+[node name="EnemySpawnMarkerB" type="Node2D" parent="."]
+position = Vector2(288, 400)
+script = ExtResource("2_enemy")
+spawn_id = "spawn_limit_b"
+enemy_type = "simple_ground"
+ability_type = "spark"
+contact_damage = 0
+attack_radius = 1.0
+
+[node name="EnemySpawnMarkerC" type="Node2D" parent="."]
+position = Vector2(352, 400)
+script = ExtResource("2_enemy")
+spawn_id = "spawn_limit_c"
+enemy_type = "simple_ground"
+ability_type = "spark"
+contact_damage = 0
+attack_radius = 1.0
+
+[node name="EnemySpawnMarkerD" type="Node2D" parent="."]
+position = Vector2(416, 400)
+script = ExtResource("2_enemy")
+spawn_id = "spawn_limit_d"
+enemy_type = "simple_ground"
+ability_type = "spark"
+contact_damage = 0
+attack_radius = 1.0
+
+[node name="CameraBoundsMarker" type="Node2D" parent="."]
+position = Vector2(410, 270)
+script = ExtResource("3_camera_bounds")
+size = Vector2(900, 540)
+
+[node name="Floor" type="StaticBody2D" parent="."]
+position = Vector2(410, 432)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]
+shape = SubResource("RectangleShape2D_floor")
+
+[node name="FloorVisual" type="Polygon2D" parent="Floor"]
+color = Color(0.24, 0.27, 0.30, 1)
+polygon = PackedVector2Array(-410, -16, 410, -16, 410, 16, -410, 16)

@@ -13,7 +13,9 @@ const readReplay = (filename: string): {
   start_level_id?: string;
   start_spawn_id?: string;
   initial_ability_type?: string;
+  initial_item_ids?: string[];
   setting_difficulty?: string;
+  continue_after_finished?: boolean;
   max_frames?: number;
   frames?: Array<{ frame?: number; actions?: Record<string, boolean> }>;
 } => JSON.parse(readFileSync(join(replayRoot, filename), 'utf8'));
@@ -43,8 +45,42 @@ describe('Godot v2 replay suite workflow', () => {
     expect(byId.get('flying_enemy_release_swallow_goal')?.expected_outcome).toBe('complete');
     expect(byId.get('central_hub_to_heal_goal')?.expected_outcome).toBe('complete');
     expect(byId.get('central_hub_dead_end_max_health')?.expected_outcome).toBe('replay.max_frames_reached');
+    expect(byId.get('central_hub_dead_end_max_health')?.expected_last_hud).toMatchObject({
+      score: 400,
+    });
     expect(byId.get('settings_adjustment')?.expected_outcome).toBe('replay.max_frames_reached');
+    expect(byId.get('settings_menu_pause_toggle_closes')?.expected_events).toEqual(expect.arrayContaining([
+      'settings.menu.opened',
+      'settings.menu.closed',
+    ]));
+    expect(byId.get('map_toggle_visibility')?.expected_events).toContain('map.toggled');
+    expect(byId.get('pause_toggle_menu')?.expected_events).toContain('pause.toggled');
+    expect(byId.get('pause_settings_flow')?.expected_events).toEqual(expect.arrayContaining([
+      'pause.settings.opened',
+      'settings.updated',
+      'pause.settings.closed',
+      'pause.toggled',
+    ]));
+    expect(byId.get('virtual_controls_touch_mode')?.expected_events).toEqual(expect.arrayContaining([
+      'settings.updated',
+      'virtual_controls.updated',
+    ]));
     expect(byId.get('revive_room_revive_then_game_over')?.expected_outcome).toBe('game_over');
+    expect(byId.get('game_over_restart_option')?.expected_outcome).toBe('replay.max_frames_reached');
+    expect(byId.get('game_over_restart_option')?.expected_events).toEqual(expect.arrayContaining([
+      'game.over',
+      'run.restart.selected',
+      'level.loaded',
+    ]));
+    expect(byId.get('game_over_restart_option')?.expected_last_hud).toMatchObject({
+      hp: 3,
+      outcome: 'running',
+    });
+    expect(byId.get('results_scene_continue')?.expected_outcome).toBe('complete');
+    expect(byId.get('results_scene_continue')?.expected_events).toEqual(expect.arrayContaining([
+      'result.overlay.shown',
+      'results.scene.shown',
+    ]));
     expect(byId.get('forest_generated_reliquary_chain')?.replay_path).toBe('res://tests/replays/labyrinth_002_to_forest_reliquary_generated_chain.json');
     expect(byId.get('ice_generated_reliquary_chain')?.replay_path).toBe('res://tests/replays/labyrinth_006_to_ice_reliquary_generated_chain.json');
     expect(byId.get('fire_generated_reliquary_chain')?.replay_path).toBe('res://tests/replays/labyrinth_029_to_fire_reliquary_generated_chain.json');
@@ -81,6 +117,23 @@ describe('Godot v2 replay suite workflow', () => {
       'level.loaded',
     ]));
     expect(readReplay('combat_ability_unlocks_door.json').initial_ability_type).toBe('spark');
+
+    expect(byId.get('combat_detach_ability')?.expected_events).toEqual(expect.arrayContaining([
+      'ability.detached',
+      'hud.updated',
+      'inventory.updated',
+    ]));
+    expect(byId.get('capture_defeated_enemy_auto_clear')?.expected_events).toEqual(expect.arrayContaining([
+      'enemy.captured',
+      'enemy.defeated',
+      'enemy.capture.cleared',
+    ]));
+    expect(byId.get('combat_detach_ability')?.expected_last_hud).toMatchObject({
+      ability_type: '',
+    });
+    expect(readReplay('combat_detach_ability.json').initial_ability_type).toBe('spark');
+    expect(readReplay('combat_detach_ability.json').frames?.some((frame) => frame.actions?.swallow)).toBe(true);
+    expect(readReplay('capture_defeated_enemy_auto_clear.json').frames?.some((frame) => frame.actions?.defeat_captured_enemy)).toBe(true);
 
     expect(byId.get('danger_hazard_trace')?.expected_events).toEqual(expect.arrayContaining([
       'hazard.entered',
@@ -121,6 +174,31 @@ describe('Godot v2 replay suite workflow', () => {
       'door.entered',
     ]));
     expect(readReplay('forest_reliquary_key_unlocks_door.json').start_level_id).toBe('forest_reliquary');
+    expect(byId.get('sky_generated_goal_path')?.expected_events).toEqual(expect.arrayContaining([
+      'door.entered',
+      'goal.door.entered',
+      'run.finished',
+    ]));
+    expect(byId.get('sky_generated_exit_locked_without_keystone')?.expected_events).toContain('door.locked');
+    expect(byId.get('sky_generated_exit_locked_without_keystone')?.expected_last_hud).toMatchObject({
+      locked_door_reason: 'missing_cluster_keystone:cave-keystone',
+    });
+    expect(readReplay('labyrinth_051_to_sky_sanctum_without_keystone.json').initial_item_ids).toEqual([
+      'forest-keystone',
+      'ice-keystone',
+      'fire-keystone',
+    ]);
+    expect(readReplay('labyrinth_051_to_sky_sanctum_generated_exit.json').initial_item_ids).toEqual([
+      'forest-keystone',
+      'ice-keystone',
+      'fire-keystone',
+      'cave-keystone',
+    ]);
+
+    expect(readReplay('game_over_restart_option.json').continue_after_finished).toBe(true);
+    expect(readReplay('game_over_restart_option.json').frames?.some((frame) => frame.actions?.result_restart)).toBe(true);
+    expect(readReplay('results_scene_continue.json').continue_after_finished).toBe(true);
+    expect(readReplay('results_scene_continue.json').frames?.some((frame) => frame.actions?.result_continue)).toBe(true);
   });
 
   it('provides a replay suite runner that can list the configured suite without Godot', () => {
@@ -136,12 +214,22 @@ describe('Godot v2 replay suite workflow', () => {
     expect(listed.replay_count).toBeGreaterThanOrEqual(13);
     expect(listed.replays?.map((replay) => replay.id)).toContain('terminal_generated_goal');
     expect(listed.replays?.map((replay) => replay.id)).toContain('settings_adjustment');
+    expect(listed.replays?.map((replay) => replay.id)).toContain('settings_menu_pause_toggle_closes');
+    expect(listed.replays?.map((replay) => replay.id)).toContain('map_toggle_visibility');
+    expect(listed.replays?.map((replay) => replay.id)).toContain('pause_toggle_menu');
+    expect(listed.replays?.map((replay) => replay.id)).toContain('pause_settings_flow');
+    expect(listed.replays?.map((replay) => replay.id)).toContain('virtual_controls_touch_mode');
     expect(listed.replays?.map((replay) => replay.id)).toContain('controller_lab_jump');
     expect(listed.replays?.map((replay) => replay.id)).toContain('revive_room_revive_then_game_over');
+    expect(listed.replays?.map((replay) => replay.id)).toContain('game_over_restart_option');
+    expect(listed.replays?.map((replay) => replay.id)).toContain('results_scene_continue');
     expect(listed.replays?.map((replay) => replay.id)).toContain('combat_ability_damage_enemy');
+    expect(listed.replays?.map((replay) => replay.id)).toContain('combat_detach_ability');
+    expect(listed.replays?.map((replay) => replay.id)).toContain('capture_defeated_enemy_auto_clear');
     expect(listed.replays?.map((replay) => replay.id)).toContain('fire_area_ability_gate_trace');
     expect(listed.replays?.map((replay) => replay.id)).toContain('flying_spit_projectile_hit');
     expect(listed.replays?.map((replay) => replay.id)).toContain('forest_reliquary_key_unlocks_door');
+    expect(listed.replays?.map((replay) => replay.id)).toContain('sky_generated_exit_locked_without_keystone');
   });
 
   it('wires the suite into package scripts and documentation', () => {

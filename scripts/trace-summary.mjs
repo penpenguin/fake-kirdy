@@ -35,6 +35,8 @@ let lastInventory = null;
 let lastPlayerReviveCount = null;
 let lastHud = null;
 let lastResultOverlay = null;
+let lastResultsScene = null;
+let lastRuntimeError = null;
 let maxTimeMs = 0;
 let outcome = 'unknown';
 
@@ -150,6 +152,20 @@ for (const event of events) {
     }
   }
 
+  if (eventType === 'results.scene.shown') {
+    const resultsScene = parseResultOverlay(event.payload);
+    if (resultsScene !== null) {
+      lastResultsScene = resultsScene;
+    }
+  }
+
+  if (eventType === 'runtime.error.shown') {
+    const runtimeError = parseRuntimeError(event.payload);
+    if (runtimeError !== null) {
+      lastRuntimeError = runtimeError;
+    }
+  }
+
   if (eventType === 'ability.acquired') {
     addPayloadString(abilitiesAcquired, event, 'ability_type');
   }
@@ -200,6 +216,8 @@ const summary = {
   last_player_revive_count: lastPlayerReviveCount,
   last_hud: lastHud,
   last_result_overlay: lastResultOverlay,
+  last_results_scene: lastResultsScene,
+  last_runtime_error: lastRuntimeError,
 };
 
 process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`);
@@ -354,6 +372,8 @@ function parseHud(value) {
     revive_count: value.revive_count,
     ability_type: value.ability_type,
     items_collected: value.items_collected.filter((item) => typeof item === 'string').sort(),
+    score: Number.isInteger(value.score) ? value.score : undefined,
+    remaining_life_bonus: Number.isInteger(value.remaining_life_bonus) ? value.remaining_life_bonus : undefined,
     difficulty: typeof value.difficulty === 'string' ? value.difficulty : undefined,
     target_enemy_hp: Number.isInteger(value.target_enemy_hp) ? value.target_enemy_hp : undefined,
     ability_cooldown_ms: Number.isInteger(value.ability_cooldown_ms) ? value.ability_cooldown_ms : undefined,
@@ -383,6 +403,31 @@ function parseResultOverlay(value) {
     frames: value.frames,
     items_collected: value.items_collected.filter((item) => typeof item === 'string').sort(),
     completed_level_ids: value.completed_level_ids.filter((levelId) => typeof levelId === 'string').sort(),
+    score: Number.isInteger(value.score) ? value.score : undefined,
+    remaining_life_bonus: Number.isInteger(value.remaining_life_bonus) ? value.remaining_life_bonus : undefined,
+  };
+}
+
+function parseRuntimeError(value) {
+  if (
+    value === null ||
+    typeof value !== 'object' ||
+    typeof value.message !== 'string' ||
+    value.message.length === 0 ||
+    typeof value.outcome !== 'string'
+  ) {
+    return null;
+  }
+
+  return {
+    level_id: typeof value.level_id === 'string' ? value.level_id : '',
+    requested_level_id: typeof value.requested_level_id === 'string' ? value.requested_level_id : '',
+    requested_spawn_id: typeof value.requested_spawn_id === 'string' ? value.requested_spawn_id : '',
+    outcome: value.outcome,
+    reason: typeof value.reason === 'string' ? value.reason : '',
+    message: value.message,
+    retry_available: value.retry_available === true,
+    retry_action: typeof value.retry_action === 'string' ? value.retry_action : '',
   };
 }
 

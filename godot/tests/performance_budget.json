@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "target_fps": 60,
+  "min_effective_trace_fps": 59,
+  "max_import_wall_time_ms": 120000,
+  "max_replay_wall_time_ms": 30000,
+  "max_replay_rss_bytes": 1500000000,
+  "max_trace_bytes": 5000000,
+  "replay_ids": [
+    "controller_lab_jump",
+    "combat_capture_swallow_goal"
+  ]
+}

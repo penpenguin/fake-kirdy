@@ -1,15 +1,26 @@
-[gd_scene load_steps=8 format=3 uid="uid://icereliquarylevel01"]
+[gd_scene load_steps=9 format=3 uid="uid://icereliquarylevel01"]
 
 [ext_resource type="Script" path="res://scripts/level/markers/PlayerSpawn.gd" id="1_spawn"]
 [ext_resource type="Script" path="res://scripts/level/markers/DoorMarker.gd" id="2_door"]
 [ext_resource type="Script" path="res://scripts/level/markers/EnemySpawnMarker.gd" id="3_enemy"]
 [ext_resource type="Script" path="res://scripts/level/markers/CollectibleMarker.gd" id="4_collectible"]
 [ext_resource type="Script" path="res://scripts/level/markers/CameraBoundsMarker.gd" id="5_camera_bounds"]
+[ext_resource type="Script" path="res://scripts/level/markers/LevelPacingMarker.gd" id="6_pacing"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(760, 32)
 
 [node name="IceReliquary" type="Node2D"]
+
+[node name="ReliquaryPacingMarker" type="Node2D" parent="."]
+script = ExtResource("6_pacing")
+pacing_profile = "reliquary"
+critical_path_px = 520.0
+rest_stop_count = 1
+safe_spawn_radius = 96.0
+door_preview_spacing_px = 144.0
+encounter_budget = 1
+collectible_visibility = "critical_path"
 
 [node name="PlayerSpawn" type="Node2D" parent="."]
 position = Vector2(96, 368)

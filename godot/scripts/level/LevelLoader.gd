@@ -127,6 +127,37 @@ func get_procedural_level_entry(level_id: String) -> Dictionary:
     return procedural_levels.get(level_id, {})
 
 
+func get_level_cluster(level_id: String) -> String:
+    if not catalog_loaded:
+        load_level_catalog()
+
+    var entry: Dictionary = catalog_levels.get(level_id, {})
+    if not entry.is_empty():
+        return get_cluster_from_entry(entry)
+
+    var procedural_entry := get_procedural_level_entry(level_id)
+    if procedural_entry.is_empty():
+        return ""
+
+    var metadata: Dictionary = procedural_entry.get("metadata", {})
+    return String(metadata.get("cluster", ""))
+
+
+func get_cluster_from_entry(entry: Dictionary) -> String:
+    var metadata: Dictionary = entry.get("expected_metadata", {})
+    var metadata_cluster := String(metadata.get("cluster", ""))
+    if metadata_cluster != "":
+        return metadata_cluster
+
+    var tags: Array = entry.get("tags", [])
+    for tag in tags:
+        var tag_name := String(tag)
+        if ["hub", "forest", "ice", "fire", "ruins", "sky"].has(tag_name):
+            return tag_name
+
+    return ""
+
+
 func create_generated_procedural_level(level_id: String) -> Node2D:
     var entry := get_procedural_level_entry(level_id)
     if entry.is_empty():
@@ -206,6 +237,21 @@ func add_generated_camera_bounds(root: Node2D, runtime_layout: Dictionary) -> vo
 
 
 func add_generated_floor(root: Node2D, runtime_layout: Dictionary) -> void:
+    var floor_segments: Array = runtime_layout.get("floor_segments", [])
+    if floor_segments.size() > 0:
+        for floor_segment in floor_segments:
+            if typeof(floor_segment) != TYPE_DICTIONARY:
+                continue
+
+            add_generated_solid_platform(
+                root,
+                String(floor_segment.get("id", "FloorSegment")),
+                dictionary_to_vector2(floor_segment.get("position", {}), Vector2(380.0, 432.0)),
+                dictionary_to_vector2(floor_segment.get("size", {}), Vector2(760.0, 32.0)),
+                Color(0.18, 0.28, 0.34, 1.0)
+            )
+        return
+
     var floor: Dictionary = runtime_layout.get("floor", {})
     add_generated_solid_platform(
         root,
@@ -316,6 +362,7 @@ func add_generated_heal_marker(root: Node2D, payload: Dictionary) -> void:
     heal.set("heal_id", String(payload.get("heal_id", "generated_heal")))
     heal.set("amount", int(payload.get("amount", 1)))
     heal.set("reward_type", String(payload.get("reward_type", "health")))
+    heal.set("dead_end_id", String(payload.get("dead_end_id", "")))
     root.add_child(heal)
 
 
@@ -401,7 +448,23 @@ func add_generated_doors(root: Node2D, entry: Dictionary, runtime_layout: Dictio
         door.set("target_level_id", target_level_id)
         door.set("target_spawn_id", get_generated_target_spawn_id(direction_name))
         door.set("trigger_radius", get_layout_number(runtime_layout, "safety", "door_trigger_radius", 48.0))
+        var branch_rule := get_generated_branch_exit_rule(runtime_layout, direction_name)
+        var required_item_id := String(branch_rule.get("required_item_id", ""))
+        door.set("required_item_id", required_item_id)
+        door.set("required_keystone_item_id", String(branch_rule.get("required_keystone_item_id", "")))
         root.add_child(door)
+
+
+func get_generated_branch_exit_rule(runtime_layout: Dictionary, direction: String) -> Dictionary:
+    var rules: Array = runtime_layout.get("branch_exit_rules", [])
+    for rule in rules:
+        if typeof(rule) != TYPE_DICTIONARY:
+            continue
+
+        if String(rule.get("direction", "")) == direction:
+            return rule
+
+    return {}
 
 
 func get_generated_door_position(direction: String, runtime_layout: Dictionary = {}) -> Vector2:

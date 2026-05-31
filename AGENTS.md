@@ -30,13 +30,11 @@ When writing complex features or significant refactors, use an ExecPlan (as desc
 - `npm run godot:export` exports the canonical Godot Web project by default when export templates are installed and skips gracefully when they are missing.
 - `npm run build:public` creates the required Godot Web artifact under `dist/` for GitHub Pages and fails when Godot or export templates are unavailable.
 - `npm run trace:summary -- <trace.json|trace.ndjson>` emits metrics JSON from a replay trace.
-- `npm run godot:parity-ledger -- --check` validates the Phaser-to-Godot parity ledger and referenced evidence paths.
 - `npm run check:godot` validates that the canonical Godot project exists and skips executable validation gracefully when Godot is unavailable.
 - `npm run build` runs the canonical Godot Web export wrapper and skips gracefully when Godot or export templates are unavailable.
 - `npm run test` executes the canonical Godot migration Vitest suite in jsdom and then `check:godot`.
 - `npm run test:canonical` runs `npm test` plus the canonical Godot replay suite; use it before claiming Godot gameplay parity.
 - `npm run legacy:inventory` confirms the removed legacy source/config surface remains empty and prints retirement gates as JSON.
-- `npm run godot:parity-ledger -- --fail-on-blockers` must pass before changing the legacy boundary again.
 - `npm run typecheck` runs `tsc --noEmit` to catch signature drift early.
 - For Godot files, keep optional scripts graceful when `godot` is not installed. `npm test` may include non-destructive Godot checks only if they skip gracefully without Godot.
 

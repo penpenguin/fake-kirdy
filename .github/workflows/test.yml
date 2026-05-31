@@ -57,6 +57,9 @@ jobs:
       - name: Build project
         run: npm run build:public
 
+      - name: Run browser performance gate
+        run: npm run godot:web-performance
+
       - name: Run unit tests
         run: npm run test
 

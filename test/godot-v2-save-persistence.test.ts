@@ -28,6 +28,8 @@ describe('Godot v2 save persistence foundation', () => {
     expect(state).toContain('var visited_level_ids');
     expect(state).toContain('var unlocked_door_ids');
     expect(state).toContain('var opened_ability_gate_ids');
+    expect(state).toContain('var discovered_hidden_feature_ids');
+    expect(state).toContain('var completed_dead_end_ids');
     expect(state).toContain('var explored_tiles');
     expect(state).toContain('sanitize_explored_tiles');
     expect(state).toContain('var current_level_id');
@@ -39,7 +41,11 @@ describe('Godot v2 save persistence foundation', () => {
     expect(state).toContain('var player_max_hp');
     expect(state).toContain('var consumed_heal_ids');
     expect(state).toContain('"consumed_heal_ids": consumed_heal_ids');
+    expect(state).toContain('"discovered_hidden_feature_ids": discovered_hidden_feature_ids');
+    expect(state).toContain('"completed_dead_end_ids": completed_dead_end_ids');
     expect(state).toContain('data.get("consumed_heal_ids", [])');
+    expect(state).toContain('data.get("discovered_hidden_feature_ids", [])');
+    expect(state).toContain('data.get("completed_dead_end_ids", [])');
     expect(state).toContain('to_dictionary');
     expect(state).toContain('from_dictionary');
     expect(store).toContain('class_name SaveStore');
@@ -66,6 +72,10 @@ describe('Godot v2 save persistence foundation', () => {
     expect(session).toContain('unlocked_door_ids');
     expect(session).toContain('opened_ability_gate_ids');
     expect(session).toContain('get_opened_ability_gate_ids');
+    expect(session).toContain('discovered_hidden_feature_ids');
+    expect(session).toContain('get_discovered_hidden_feature_ids');
+    expect(session).toContain('completed_dead_end_ids');
+    expect(session).toContain('get_completed_dead_end_ids');
     expect(session).toContain('explored_tiles');
     expect(session).toContain('mark_player_tile_explored');
     expect(session).toContain('get_explored_tiles_payload');
@@ -84,7 +94,64 @@ describe('Godot v2 save persistence foundation', () => {
     expect(session).toContain('player_hp');
     expect(session).toContain('for heal_id in state.consumed_heal_ids');
     expect(session).toContain('"consumed_heal_ids": get_consumed_heal_ids()');
+    expect(session).toContain('"discovered_hidden_feature_ids": get_discovered_hidden_feature_ids()');
+    expect(session).toContain('"completed_dead_end_ids": get_completed_dead_end_ids()');
+    expect(session).toContain('write_persistent_state()');
     expect(session).toContain('build_save_payload');
+  });
+
+  it('persists the restarted spawn after a save-enabled game over restart', () => {
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const restartBody = session.slice(
+      session.indexOf('func restart_current_run'),
+      session.indexOf('func show_result_overlay'),
+    );
+
+    expect(restartBody).toContain('if load_level(restart_level_id, restart_spawn_id):');
+    expect(restartBody).toContain('write_persistent_state()');
+  });
+
+  it('falls back to browser sessionStorage when the primary save write fails on web', () => {
+    const store = readGodotFile('scripts/save/SaveStore.gd');
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const docs = readFileSync(join(repoRoot, 'docs', 'godot-v2', 'save-persistence.md'), 'utf8');
+
+    expect(store).toContain('SESSION_STORAGE_FALLBACK_KEY');
+    expect(store).toContain('var last_storage_backend: String = "file"');
+    expect(store).toContain('session_storage_fallback_enabled');
+    expect(store).toContain('func save_state_to_session_storage(save_json: String) -> bool:');
+    expect(store).toContain('func load_state_from_session_storage():');
+    expect(store).toContain('OS.has_feature("web")');
+    expect(store).toContain('JavaScriptBridge.eval');
+    expect(store).toContain('sessionStorage.setItem');
+    expect(store).toContain('sessionStorage.getItem');
+    expect(store).toContain('last_storage_backend = "sessionStorage"');
+
+    expect(session).toContain('save.session_storage_fallback.written');
+    expect(session).toContain('"storage_backend": save_store.get("last_storage_backend")');
+    expect(docs).toContain('sessionStorage fallback');
+    expect(docs).toContain('save.session_storage_fallback.written');
+  });
+
+  it('uses browser localStorage as the primary web save backend', () => {
+    const store = readGodotFile('scripts/save/SaveStore.gd');
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const docs = readFileSync(join(repoRoot, 'docs', 'godot-v2', 'save-persistence.md'), 'utf8');
+
+    expect(store).toContain('LOCAL_STORAGE_SAVE_KEY');
+    expect(store).toContain('browser_local_storage_enabled');
+    expect(store).toContain('func save_state_to_local_storage(save_json: String) -> bool:');
+    expect(store).toContain('func load_state_from_local_storage():');
+    expect(store).toContain('window.localStorage.setItem');
+    expect(store).toContain('window.localStorage.getItem');
+    expect(store).toContain('last_storage_backend = "localStorage"');
+    expect(store).toContain('save_state_to_local_storage(save_json)');
+    expect(store).toContain('load_state_from_local_storage()');
+    expect(store).toContain('return browser_local_storage_enabled and OS.has_feature("web")');
+
+    expect(session).toContain('save.local_storage.written');
+    expect(docs).toContain('localStorage["kirdy-save"]');
+    expect(docs).toContain('save.local_storage.written');
   });
 
   it('lets headless replay opt into a deterministic save path', () => {

@@ -26,6 +26,12 @@ Fake Kirdy currently has a strong Godot migration foundation, but several game-f
 - [x] 2026-05-30: Added metadata-driven generated room objectives, generated hazards, and generated ability gates to `procedural_levels.json`, and taught `LevelLoader.gd` to instantiate the generated hazard and ability gate markers.
 - [x] 2026-05-30: Added active enemy attack timing with marker-authored attack radius/cooldown/damage, `enemy.attack.started` trace events, and difficulty-scaled attack cadence.
 - [x] 2026-05-30: Added focused replay fixtures and suite-level expected event/HUD checks for ability damage, enemy defeat, locked doors, ability-unlocked doors, hazards, ability terrain gates, and hard enemy attack traces.
+- [x] 2026-05-31: Added the canonical three-active-enemy spawn cap with `enemy.spawn.skipped` trace coverage in `enemy_spawn_limit_room`.
+- [x] 2026-05-31: Added Kirdy-adjacent enemy crowd spacing with `enemy.crowd.spacing_applied` trace coverage in `enemy_crowd_spacing_room`.
+- [x] 2026-05-31: Added a replayable `spark` dash movement effect with `ability.movement.applied` trace coverage.
+- [x] 2026-05-31: Added ability-specific enemy AI profiles with `enemy.ai.profile.applied` trace coverage.
+- [x] 2026-05-31: Added hidden collectible and hidden passage discovery with `hidden.discovered` replay coverage.
+- [x] 2026-05-31: Added dead-end reward completion tracking with `dead_end.completed` trace coverage and map feature state.
 - [x] 2026-05-30: Expanded generated enemy encounters with ground/flying/elite roles and generated attack timing metadata, restored by `LevelLoader.gd`.
 - [x] 2026-05-30: Added replay contracts for spit projectile hits and item-key door progression through `flying_spit_projectile_hit`, `forest_reliquary_locked_without_key`, and `forest_reliquary_key_unlocks_door`.
 - [x] 2026-05-30: Ran the expanded replay suite with Godot 4.6.3 and fixed the runtime-only failures surfaced by real traces.
@@ -125,7 +131,7 @@ If replay output is available, inspect focused traces through:
 
 ## Validation and Acceptance
 
-The current milestone is accepted when `test/godot-v2-gameplay-completion.test.ts` passes, `npm run check:test` passes, `npm run check:typecheck` passes, `npm run check:godot` passes or skips only Godot executable validation due to a missing local Godot binary, and a Godot-installed environment reports `passed_replays: 23`, `failed_replays: 0` for the expanded replay suite. The focused traces now show `ability.used`, `enemy.damaged`, `enemy.defeated`, `spit.projectile.fired`, `spit.projectile.hit`, `door.locked`, `hazard.entered`, `ability_gate.opened`, and `door.entered` after requirements are satisfied.
+The current milestone is accepted when `test/godot-v2-gameplay-completion.test.ts` passes, `npm run check:test` passes, `npm run check:typecheck` passes, `npm run check:godot` passes or skips only Godot executable validation due to a missing local Godot binary, and a Godot-installed environment reports all configured replay-suite entries passed. The focused traces now show `ability.used`, `enemy.damaged`, `enemy.defeated`, `spit.projectile.fired`, `spit.projectile.hit`, `door.locked`, `hazard.entered`, `ability_gate.opened`, `door.entered`, `dead_end.completed`, and `goal.door.entered` after requirements are satisfied.
 
 ## Idempotence and Recovery
 
@@ -150,8 +156,8 @@ The generated procedural objective/gate/hazard slice passed its focused contract
 
 The replay suite was also validated with a temporary official Godot 4.6.3 binary:
 
-    replay_count: 23
-    passed_replays: 23
+    replay_count: 37
+    passed_replays: 37
     failed_replays: 0
 
 ## Interfaces and Dependencies
@@ -159,6 +165,8 @@ The replay suite was also validated with a temporary official Godot 4.6.3 binary
 `DoorMarker.gd` now exposes `required_item_id`, `required_ability_type`, `required_completed_level_id`, `required_defeated_enemy_group_id`, and `required_boss_id`. `GameSession.gd` evaluates these with `get_door_lock_reason(payload)` and emits `door.locked` when a requirement is missing.
 
 `SimpleEnemy.gd` now exposes `max_hp`, `hurt_invulnerability_ms`, `patrol_radius`, `patrol_speed`, `chase_speed`, `detection_radius`, `return_radius`, `enemy_group_id`, and `boss_id`. It implements `take_damage(amount, source)`, `die(source)`, `apply_knockback(knockback)`, and `configure_ai(player, configured_patrol_radius)`.
+
+Enemy damage also has a visible hit feedback path. `SimpleEnemy.show_hit_feedback()` flashes the `Body` sprite with `hit_flash_color`, keeps defeated enemies visible for `defeat_flash_ms`, and `GameSession.apply_damage_to_enemy()` emits `enemy.feedback.shown` with the flash metrics before defeat handling.
 
 `SimpleEnemy.gd` also exposes `attack_damage`, `attack_radius`, `attack_cooldown_ms`, and `attack_cooldown_remaining_ms`. `EnemySpawnMarker.gd` can author those values, and `GameSession.gd` runs `check_enemy_attacks(delta)` to emit `enemy.attack.started` and damage the player with `source_type: enemy_attack`.
 
@@ -172,6 +180,20 @@ The replay suite was also validated with a temporary official Godot 4.6.3 binary
 
 Generated procedural levels now also export richer `runtime_layout.content.enemies`: difficulty 2 rooms have a ground enemy with attack timing, difficulty 3 rooms add a flying role, and difficulty 4 rooms add an elite flying role. Generated route enemies use longer attack cooldowns and stronger route heals so long traversal fixtures prove active threats without collapsing before progression evidence is collected. `LevelLoader.gd` restores `attack_damage`, `attack_radius`, `attack_cooldown_ms`, and `patrol_radius` onto generated enemy spawn markers.
 
-`godot/tests/replay_suite.json` now supports focused evidence checks through `expected_events` and `expected_last_hud`, enforced by `scripts/run-godot-replay-suite.mjs` after trace summary generation. `ReplayInputSource.gd` and `tests/run_replay.gd` accept `initial_ability_type` and `setting_difficulty` so focused fixtures can directly validate ability gates, locked doors, and difficulty-specific combat state.
+`godot/tests/replay_suite.json` now supports focused evidence checks through `expected_events` and `expected_last_hud`, enforced by `scripts/run-godot-replay-suite.mjs` after trace summary generation. `ReplayInputSource.gd` and `tests/run_replay.gd` accept `initial_ability_type` and `setting_difficulty` so focused fixtures can directly validate ability gates, locked doors, and difficulty-specific combat state. `GameSession.gd` also caps active spawned enemies at `max_active_enemy_count` and emits `enemy.spawn.skipped` when a room has more enemy markers than the current cap. When at least two active enemies crowd Kirdy within `enemy_crowd_player_radius`, `apply_enemy_crowd_spacing()` pushes enemies back to `enemy_crowd_min_player_distance` and records `enemy.crowd.spacing_applied` once per level.
+
+`spark_ability_dash_movement` validates the first enemy-ability movement effect. The `spark` profile carries `movement_effect: dash` and `movement_impulse: 64.0`; `GameSession.apply_ability_movement()` applies the facing-direction dash and emits `ability.movement.applied` before the normal `ability.used` trace.
+
+`PlayerController.gd` also owns ability texture fallback. `get_ability_texture()` maps `fire` / `burn`, `ice` / `frost`, and `sword` / `blade` to the migrated Kirdy ability textures. When a requested ability texture is unavailable, `get_ability_fallback_texture()` keeps the player visible through idle/run/current texture fallback and emits `player.ability_texture.fallback` once for the selected fallback. `spark_ability_dash_movement` now expects that fallback event because `spark` has movement behavior but no dedicated Kirdy texture yet.
+
+The inhale pull effect also has a runtime fallback. `PlayerController.show_inhale_effect_fallback()` creates a local `Line2D` named `InhaleEffectFallback` between Kirdy and the captured enemy, and `GameSession.capture_nearest_enemy()` emits `inhale.effect.fallback`. The fallback line is hidden when the enemy is released, swallowed, or cleared after defeat.
+
+`frost_enemy_ai_profile` validates ability-specific enemy AI profile application. `GameSession.get_enemy_ability_ai_profile()` gives `frost`, `fire`, and `stone` enemies distinct movement, detection, attack cadence, or hover tuning, and `apply_enemy_ability_ai_profile()` records `enemy.ai.profile.applied` when a profile changes spawned enemy behavior.
+
+`hidden_discovery_path` validates hidden exploration. `CollectibleMarker` and `DoorMarker` can set `hidden_until_discovered` plus `discovery_radius`; `GameSession.check_hidden_discoveries()` emits `hidden.discovered`, reveals marker visuals, and only then allows hidden collectible pickup or hidden door transition.
+
+`central_hub_dead_end_max_health` now also validates dead-end exploration completion. `HealMarker.dead_end_id` marks a heal reward as a dead-end completion target, `GameSession.complete_dead_end()` records `dead_end.completed`, and `MapOverlay.gd` renders completed dead-end map features with a dedicated square marker color.
+
+`mirror_to_goal_sanctum_finish` now validates the canonical goal-door completion controller. `goal_sanctum.tscn` uses `GoalDoorController.gd`, which preserves `GoalMarker` semantics while emitting `goal.door.entered`; that trace and `run.finished` both carry time, frame, score, and remaining-life bonus metrics.
 
 The focused replay suite now includes `flying_spit_projectile_hit`, `forest_reliquary_locked_without_key`, and `forest_reliquary_key_unlocks_door`. `flying_combat_room.tscn` has a second target enemy for spit projectile validation, and `forest_reliquary.tscn` has a `door_check` spawn so the item lock can be tested before collecting `forest-keystone`.

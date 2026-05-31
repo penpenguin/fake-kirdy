@@ -54,6 +54,45 @@ describe('Godot v2 gameplay completion backlog', () => {
     expect(session).toContain('enemy.defeated');
   });
 
+  it('limits active enemy spawning to three enemies and traces skipped spawns', () => {
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const level = readGodotFile('levels/enemy_spawn_limit_room.tscn');
+    const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
+      replays?: Array<{
+        id?: string;
+        expected_events?: string[];
+      }>;
+    };
+
+    expect(session).toContain('@export var max_active_enemy_count: int = 3');
+    expect(session).toContain('if enemies.size() >= max_active_enemy_count');
+    expect(session).toContain('enemy.spawn.skipped');
+    expect(level.match(/\[node name="EnemySpawnMarker/g)?.length).toBe(4);
+    expect(suite.replays?.find((entry) => entry.id === 'enemy_spawn_limit')?.expected_events).toContain(
+      'enemy.spawn.skipped',
+    );
+  });
+
+  it('keeps distance when two enemies crowd Kirdy and traces spacing', () => {
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const level = readGodotFile('levels/enemy_crowd_spacing_room.tscn');
+    const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
+      replays?: Array<{
+        id?: string;
+        expected_events?: string[];
+      }>;
+    };
+
+    expect(session).toContain('@export var enemy_crowd_player_radius: float = 112.0');
+    expect(session).toContain('@export var enemy_crowd_min_player_distance: float = 72.0');
+    expect(session).toContain('func apply_enemy_crowd_spacing() -> void:');
+    expect(session).toContain('enemy.crowd.spacing_applied');
+    expect(level.match(/\[node name="EnemySpawnMarker/g)?.length).toBe(2);
+    expect(suite.replays?.find((entry) => entry.id === 'enemy_crowd_spacing')?.expected_events).toContain(
+      'enemy.crowd.spacing_applied',
+    );
+  });
+
   it('turns ability use and spit release into real damage actions', () => {
     const session = readGodotFile('scripts/session/GameSession.gd');
 
@@ -68,6 +107,164 @@ describe('Godot v2 gameplay completion backlog', () => {
     expect(session).toContain('"spark"');
     expect(session).toContain('"leaf"');
     expect(session).toContain('"stone"');
+  });
+
+  it('uses a dedicated projectile node for fire ability attacks', () => {
+    const projectileScriptPath = join(godotRoot, 'scripts', 'combat', 'AbilityProjectile.gd');
+    const projectileScenePath = join(godotRoot, 'scenes', 'combat', 'AbilityProjectile.tscn');
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
+      replays?: Array<{
+        id?: string;
+        expected_events?: string[];
+      }>;
+    };
+
+    expect(existsSync(projectileScriptPath)).toBe(true);
+    expect(existsSync(projectileScenePath)).toBe(true);
+
+    const projectile = readFileSync(projectileScriptPath, 'utf8');
+    const projectileScene = readFileSync(projectileScenePath, 'utf8');
+    const replay = JSON.parse(readGodotFile('tests/replays/fire_ability_projectile_hit.json')) as {
+      initial_ability_type?: string;
+      frames?: Array<{ actions?: Record<string, boolean> }>;
+    };
+
+    expect(projectile).toContain('class_name AbilityProjectile');
+    expect(projectile).toContain('configure_projectile');
+    expect(projectile).toContain('mark_hit');
+    expect(projectileScene).toContain('AbilityProjectile.gd');
+    expect(session).toContain('AbilityProjectileScene');
+    expect(session).toContain('spawn_ability_projectile');
+    expect(session).toContain('resolve_ability_projectile_hits');
+    expect(session).toContain('ability.projectile.spawned');
+    expect(session).toContain('ability.projectile.hit');
+    expect(replay.initial_ability_type).toBe('fire');
+    expect(replay.frames?.some((frame) => frame.actions?.use_ability)).toBe(true);
+    expect(suite.replays?.find((entry) => entry.id === 'fire_ability_projectile_hit')?.expected_events).toEqual(
+      expect.arrayContaining(['ability.projectile.spawned', 'ability.projectile.hit', 'enemy.damaged']),
+    );
+  });
+
+  it('applies a movement effect for enemy abilities and traces it', () => {
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const replay = JSON.parse(readGodotFile('tests/replays/spark_ability_dash_movement.json')) as {
+      initial_ability_type?: string;
+    };
+    const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
+      replays?: Array<{
+        id?: string;
+        expected_events?: string[];
+      }>;
+    };
+
+    expect(session).toContain('func apply_ability_movement(ability_type: String, profile: Dictionary) -> void:');
+    expect(session).toContain('"movement_effect": "dash"');
+    expect(session).toContain('"movement_impulse": 64.0');
+    expect(session).toContain('ability.movement.applied');
+    expect(replay.initial_ability_type).toBe('spark');
+    expect(suite.replays?.find((entry) => entry.id === 'spark_ability_dash_movement')?.expected_events).toContain(
+      'ability.movement.applied',
+    );
+  });
+
+  it('applies ability-specific enemy AI profiles and traces them', () => {
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const replay = JSON.parse(readGodotFile('tests/replays/frost_enemy_ai_profile.json')) as {
+      start_level_id?: string;
+    };
+    const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
+      replays?: Array<{
+        id?: string;
+        expected_events?: string[];
+      }>;
+    };
+
+    expect(session).toContain('func get_enemy_ability_ai_profile(ability_type: String) -> Dictionary:');
+    expect(session).toContain('func apply_enemy_ability_ai_profile(enemy: Node) -> void:');
+    expect(session).toContain('"ai_behavior": "frost_hover"');
+    expect(session).toContain('enemy.ai.profile.applied');
+    expect(replay.start_level_id).toBe('flying_combat_room');
+    expect(suite.replays?.find((entry) => entry.id === 'frost_enemy_ai_profile')?.expected_events).toContain(
+      'enemy.ai.profile.applied',
+    );
+  });
+
+  it('discovers hidden collectibles and hidden passages before using them', () => {
+    const collectibleMarker = readGodotFile('scripts/level/markers/CollectibleMarker.gd');
+    const doorMarker = readGodotFile('scripts/level/markers/DoorMarker.gd');
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const level = readGodotFile('levels/hidden_discovery_room.tscn');
+    const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
+      replays?: Array<{
+        id?: string;
+        expected_events?: string[];
+      }>;
+    };
+
+    expect(collectibleMarker).toContain('@export var hidden_until_discovered: bool = false');
+    expect(doorMarker).toContain('@export var hidden_until_discovered: bool = false');
+    expect(session).toContain('var discovered_hidden_feature_ids: Dictionary = {}');
+    expect(session).toContain('func check_hidden_discoveries() -> void:');
+    expect(session).toContain('hidden.discovered');
+    expect(session).toContain('is_hidden_feature_discovered');
+    expect(session).toContain('reapply_discovered_hidden_marker_visuals()');
+    expect(session).toContain('if is_hidden_feature_discovered(feature_type, feature_id):');
+    expect(session).toContain('reveal_hidden_marker_visual(feature_type, feature_id)');
+    expect(level).toContain('hidden_until_discovered = true');
+    expect(suite.replays?.find((entry) => entry.id === 'hidden_discovery_path')?.expected_events).toEqual(
+      expect.arrayContaining(['hidden.discovered', 'collectible.collected', 'door.entered']),
+    );
+  });
+
+  it('marks dead-end rewards as exploration completion on the map', () => {
+    const healMarker = readGodotFile('scripts/level/markers/HealMarker.gd');
+    const mapOverlay = readGodotFile('scripts/ui/MapOverlay.gd');
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const level = readGodotFile('levels/central_hub.tscn');
+    const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
+      replays?: Array<{
+        id?: string;
+        expected_events?: string[];
+      }>;
+    };
+
+    expect(healMarker).toContain('@export var dead_end_id: String = ""');
+    expect(level).toContain('dead_end_id = "central_hub_dead_end_max_health"');
+    expect(session).toContain('var completed_dead_end_ids: Dictionary = {}');
+    expect(session).toContain('func complete_dead_end(dead_end_id: String, heal_id: String) -> void:');
+    expect(session).toContain('dead_end.completed');
+    expect(session).toContain('"feature_type": "dead_end"');
+    expect(mapOverlay).toContain('dead_end_completed_color');
+    expect(mapOverlay).toContain('draw_rect(Rect2(marker["position"]');
+    expect(suite.replays?.find((entry) => entry.id === 'central_hub_dead_end_max_health')?.expected_events).toEqual(
+      expect.arrayContaining(['dead_end.completed', 'map.updated']),
+    );
+  });
+
+  it('finishes the canonical goal door through a dedicated controller with result metrics', () => {
+    const goalDoorController = readGodotFile('scripts/level/markers/GoalDoorController.gd');
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const level = readGodotFile('levels/goal_sanctum.tscn');
+    const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
+      replays?: Array<{
+        id?: string;
+        expected_events?: string[];
+      }>;
+    };
+
+    expect(goalDoorController).toContain('class_name GoalDoorController');
+    expect(goalDoorController).toContain('extends GoalMarker');
+    expect(goalDoorController).toContain('goal-door.webp');
+    expect(goalDoorController).toContain('@export var collect_score_metrics: bool = true');
+    expect(goalDoorController).toContain('@export var collect_time_metrics: bool = true');
+    expect(level).toContain('GoalDoorController.gd');
+    expect(session).toContain('goal.door.entered');
+    expect(session).toContain('"score": calculate_total_score()');
+    expect(session).toContain('"remaining_life_bonus": calculate_remaining_life_bonus()');
+    expect(suite.replays?.find((entry) => entry.id === 'mirror_to_goal_sanctum_finish')?.expected_events).toEqual(
+      expect.arrayContaining(['goal.door.entered', 'run.finished', 'result.overlay.shown']),
+    );
   });
 
   it('supports item, ability, level, enemy-group, and boss door gates', () => {
@@ -114,6 +311,27 @@ describe('Godot v2 gameplay completion backlog', () => {
     expect(session).toContain('target_enemy_hp');
     expect(traceSummary).toContain('enemies_defeated');
     expect(traceSummary).toContain('door_lock_reasons');
+  });
+
+  it('shows visible enemy hit feedback and traces it during combat', () => {
+    const enemy = readGodotFile('scripts/enemies/SimpleEnemy.gd');
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
+      replays?: Array<{
+        id?: string;
+        expected_events?: string[];
+      }>;
+    };
+
+    expect(enemy).toContain('@export var hit_flash_ms: int = 140');
+    expect(enemy).toContain('func show_hit_feedback');
+    expect(enemy).toContain('feedback_flash_remaining_ms');
+    expect(enemy).toContain('get_node_or_null("Body")');
+    expect(enemy).toContain('modulate = hit_flash_color');
+    expect(session).toContain('enemy.feedback.shown');
+    expect(suite.replays?.find((entry) => entry.id === 'combat_ability_damage_enemy')?.expected_events).toEqual(
+      expect.arrayContaining(['enemy.feedback.shown']),
+    );
   });
 
   it('reflects dynamic branch neighbors as playable Godot doors', () => {

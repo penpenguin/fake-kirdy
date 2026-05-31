@@ -80,6 +80,16 @@ describe('Godot v2 replay and trace foundation', () => {
     expect(source).toContain('record_replay_error');
   });
 
+  it('allows selected session replays to continue after a finished state for result menu input', () => {
+    const runner = readGodotFile('tests/run_replay.gd');
+    const inputSource = readGodotFile('scripts/sim/ReplayInputSource.gd');
+
+    expect(inputSource).toContain('continue_after_finished');
+    expect(inputSource).toContain('parsed.get("continue_after_finished"');
+    expect(runner).toContain('continue_after_finished');
+    expect(runner).toContain('if session.call("is_finished") and not input_source.get("continue_after_finished")');
+  });
+
   it('lets PlayerController use replay input and emit recorder-ready player traces', () => {
     const source = readGodotFile('scripts/player/PlayerController.gd');
 

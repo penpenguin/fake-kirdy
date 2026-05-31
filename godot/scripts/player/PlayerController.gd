@@ -23,6 +23,8 @@ signal trace_event(event_type: String, payload: Dictionary)
 @export var kirdy_fire_texture: Texture2D
 @export var kirdy_ice_texture: Texture2D
 @export var kirdy_sword_texture: Texture2D
+@export var ability_texture_fallback_enabled: bool = true
+@export var inhale_effect_fallback_enabled: bool = true
 
 var ability_type: String = ""
 var coyote_time: float = 0.0
@@ -32,6 +34,8 @@ var is_hovering: bool = false
 var has_jump_cut: bool = false
 var input_source: Node = null
 var last_facing: float = 1.0
+var last_ability_texture_fallback_key: String = ""
+var inhale_effect_fallback_line: Line2D = null
 
 @onready var body_sprite: Sprite2D = $Body
 
@@ -131,6 +135,33 @@ func set_facing(direction: float) -> void:
         body_sprite.flip_h = last_facing < 0.0
 
 
+func show_inhale_effect_fallback(target_position: Vector2) -> void:
+    if not inhale_effect_fallback_enabled:
+        return
+
+    if inhale_effect_fallback_line == null or not is_instance_valid(inhale_effect_fallback_line):
+        inhale_effect_fallback_line = Line2D.new()
+        inhale_effect_fallback_line.name = "InhaleEffectFallback"
+        inhale_effect_fallback_line.width = 4.0
+        inhale_effect_fallback_line.default_color = Color(0.78, 0.92, 1.0, 0.78)
+        inhale_effect_fallback_line.z_index = 5
+        add_child(inhale_effect_fallback_line)
+
+    inhale_effect_fallback_line.visible = true
+    inhale_effect_fallback_line.points = PackedVector2Array([
+        Vector2.ZERO,
+        to_local(target_position),
+    ])
+
+
+func hide_inhale_effect_fallback() -> void:
+    if inhale_effect_fallback_line == null or not is_instance_valid(inhale_effect_fallback_line):
+        return
+
+    inhale_effect_fallback_line.visible = false
+    inhale_effect_fallback_line.points = PackedVector2Array()
+
+
 func update_visual_state(input_x: float, jump_held: bool) -> void:
     if body_sprite == null:
         return
@@ -150,15 +181,20 @@ func update_visual_state(input_x: float, jump_held: bool) -> void:
         next_texture = kirdy_jump_texture
     elif input_x != 0.0 and kirdy_run_texture != null:
         next_texture = kirdy_run_texture
-    elif ability_type == "fire" and kirdy_fire_texture != null:
-        next_texture = kirdy_fire_texture
-    elif ability_type == "ice" or ability_type == "frost":
-        if kirdy_ice_texture != null:
-            next_texture = kirdy_ice_texture
-    elif ability_type == "sword" and kirdy_sword_texture != null:
-        next_texture = kirdy_sword_texture
-    elif ability_type != "" and kirdy_fire_texture != null:
-        next_texture = kirdy_fire_texture
+    elif ability_type != "":
+        var ability_texture := get_ability_texture(ability_type)
+        if ability_texture != null:
+            next_texture = ability_texture
+            last_ability_texture_fallback_key = ""
+        elif ability_texture_fallback_enabled:
+            var fallback_texture := get_ability_fallback_texture()
+            if fallback_texture != null:
+                next_texture = fallback_texture
+                emit_ability_texture_fallback(ability_type, fallback_texture)
+        else:
+            last_ability_texture_fallback_key = ""
+    else:
+        last_ability_texture_fallback_key = ""
 
     if next_texture == null:
         return
@@ -166,6 +202,46 @@ func update_visual_state(input_x: float, jump_held: bool) -> void:
     if body_sprite.texture != next_texture:
         body_sprite.texture = next_texture
         fit_body_sprite()
+
+
+func get_ability_texture(next_ability_type: String) -> Texture2D:
+    match next_ability_type:
+        "fire", "burn":
+            return kirdy_fire_texture
+        "ice", "frost":
+            return kirdy_ice_texture
+        "sword", "blade":
+            return kirdy_sword_texture
+        _:
+            return null
+
+
+func get_ability_fallback_texture() -> Texture2D:
+    if kirdy_idle_texture != null:
+        return kirdy_idle_texture
+    if kirdy_run_texture != null:
+        return kirdy_run_texture
+    if body_sprite != null:
+        return body_sprite.texture
+
+    return null
+
+
+func emit_ability_texture_fallback(next_ability_type: String, fallback_texture: Texture2D) -> void:
+    if fallback_texture == null:
+        return
+
+    var fallback_path := fallback_texture.resource_path
+    var fallback_key := "%s:%s" % [next_ability_type, fallback_path]
+    if fallback_key == last_ability_texture_fallback_key:
+        return
+
+    last_ability_texture_fallback_key = fallback_key
+    emit_trace("player.ability_texture.fallback", {
+        "ability_type": next_ability_type,
+        "fallback_texture": fallback_path,
+        "reason": "missing_ability_texture",
+    })
 
 
 func fit_body_sprite() -> void:

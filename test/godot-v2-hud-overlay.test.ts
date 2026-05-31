@@ -11,7 +11,7 @@ const readGodotFile = (relativePath: string): string =>
   readFileSync(join(godotRoot, relativePath), 'utf8');
 
 describe('Godot v2 HUD overlay', () => {
-  it('adds a minimal mainline HUD for HP, ability, items, level, and outcome', () => {
+  it('adds a minimal mainline HUD for HP, ability, items, score, level, and outcome', () => {
     const scriptPath = join(godotRoot, 'scripts', 'ui', 'HudOverlay.gd');
     const scenePath = join(godotRoot, 'scenes', 'ui', 'HudOverlay.tscn');
 
@@ -28,11 +28,13 @@ describe('Godot v2 HUD overlay', () => {
     expect(script).toContain('hp');
     expect(script).toContain('ability_type');
     expect(script).toContain('items_collected');
+    expect(script).toContain('score');
     expect(script).toContain('outcome');
     expect(scene).toContain('HudOverlay.gd');
     expect(scene).toContain('HpLabel');
     expect(scene).toContain('AbilityLabel');
     expect(scene).toContain('ItemsLabel');
+    expect(scene).toContain('ScoreLabel');
     expect(scene).toContain('OutcomeLabel');
   });
 
@@ -46,6 +48,9 @@ describe('Godot v2 HUD overlay', () => {
     expect(session).toContain('setup_hud_overlay');
     expect(session).toContain('sync_hud_overlay');
     expect(session).toContain('build_hud_payload');
+    expect(session).toContain('calculate_total_score');
+    expect(session).toContain('calculate_remaining_life_bonus');
+    expect(session).toContain('"score"');
     expect(session).toContain('hud.updated');
     expect(mainScene).toContain('hud_overlay_enabled = true');
     expect(traceSummary).toContain('last_hud');

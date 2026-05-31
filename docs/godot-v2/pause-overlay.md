@@ -1,0 +1,9 @@
+# Godot v2 Pause Overlay
+
+`PauseOverlay.gd` is the minimal pause menu contract for the Godot mainline. It appears when `GameSession` receives the `pause_toggle` action, which is bound to Esc.
+
+The pause state remains session-owned so replay can pause and resume deterministically, but the visible menu now instantiates `PauseScene.gd` by default through `GameSession.pause_scene_enabled`. `PauseScene.gd` extends `PauseOverlay.gd`, keeps the existing labels and input hierarchy, and adds a canvas blur fallback background via `BlurFallback` when the session is paused.
+
+When paused, the `pause_settings` action opens the existing `SettingsOverlay`; Enter is the default keyboard binding. ESC closes settings first and leaves the game paused, then a second ESC resumes gameplay. Settings replay actions remain active only while that pause settings menu is open.
+
+The session emits `pause.toggled` with `is_paused`, `settings_open`, `pause_scene_active`, and `blur_active`. It also emits `pause.scene.shown` when the dedicated pause scene becomes visible, plus `pause.settings.opened` and `pause.settings.closed` for the settings hierarchy. `godot/tests/replays/pause_toggle_menu.json` covers pause/resume and the pause scene trace, and `godot/tests/replays/pause_settings_flow.json` covers opening settings from pause, changing a setting, closing settings, and resuming.

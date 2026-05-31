@@ -1,0 +1,41 @@
+{
+  "start_level_id": "flat_room",
+  "start_spawn_id": "default",
+  "fps": 60,
+  "max_frames": 12,
+  "frames": [
+    {
+      "frame": 0,
+      "actions": {
+        "settings_menu": false,
+        "settings_cycle_controls": false
+      }
+    },
+    {
+      "frame": 1,
+      "actions": {
+        "settings_menu": true
+      }
+    },
+    {
+      "frame": 2,
+      "actions": {
+        "settings_menu": false,
+        "settings_cycle_controls": true
+      }
+    },
+    {
+      "frame": 3,
+      "actions": {
+        "settings_cycle_controls": false,
+        "settings_menu": true
+      }
+    },
+    {
+      "frame": 4,
+      "actions": {
+        "settings_menu": false
+      }
+    }
+  ]
+}

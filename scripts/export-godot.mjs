@@ -76,6 +76,7 @@ if (result.status === 0) {
   if (output.length > 0) {
     console.log(output);
   }
+  installWebFallback(dirname(outPath));
   console.log(`[godot:export] exported ${preset} to ${outPath}`);
   process.exit(0);
 }
@@ -146,4 +147,31 @@ function cleanOutputDirectory(path) {
   }
 
   rmSync(outputDir, { recursive: true, force: true });
+}
+
+function installWebFallback(exportDir) {
+  if (preset !== 'Web') {
+    return;
+  }
+
+  const result = spawnSync('node', [
+    join(repoRoot, 'scripts', 'install-godot-web-fallback.mjs'),
+    `--export-dir=${exportDir}`,
+  ], {
+    encoding: 'utf8',
+  });
+
+  if (result.stdout?.trim()) {
+    console.log(result.stdout.trim());
+  }
+
+  if (result.status === 0) {
+    return;
+  }
+
+  if (result.stderr?.trim()) {
+    console.error(result.stderr.trim());
+  }
+  console.error('[godot:export] Failed to install Canvas 2D WebGL fallback.');
+  process.exit(result.status ?? 1);
 }

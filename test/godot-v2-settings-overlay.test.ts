@@ -21,11 +21,23 @@ describe('Godot v2 settings overlay and trace', () => {
     expect(script).toContain('class_name SettingsOverlay');
     expect(script).toContain('extends Control');
     expect(script).toContain('set_settings_state');
+    expect(script).toContain('set_menu_visible');
+    expect(script).toContain('set_focus_index');
+    expect(script).toContain('selected_setting_index');
+    expect(script).toContain('focus_prefix');
+    expect(script).toContain('post_processing_blur_enabled');
+    expect(script).toContain('canvas_fallback_blur_enabled');
+    expect(script).toContain('PostProcessBlur');
+    expect(script).toContain('BlurFallback');
+    expect(script).toContain('set_blur_active');
     expect(script).toContain('get_summary_text');
     expect(script).toContain('volume');
     expect(script).toContain('controls');
     expect(script).toContain('difficulty');
     expect(scene).toContain('SettingsOverlay.gd');
+    expect(scene).toContain('SettingsBlur.gdshader');
+    expect(scene).toContain('PostProcessBlur');
+    expect(scene).toContain('BlurFallback');
     expect(scene).toContain('VolumeLabel');
     expect(scene).toContain('ControlsLabel');
     expect(scene).toContain('DifficultyLabel');
@@ -41,12 +53,27 @@ describe('Godot v2 settings overlay and trace', () => {
     expect(session).toContain('settings_volume_up_action');
     expect(session).toContain('settings_cycle_controls_action');
     expect(session).toContain('settings_cycle_difficulty_action');
+    expect(session).toContain('@export var settings_menu_action');
+    expect(session).toContain('@export var settings_focus_next_action');
+    expect(session).toContain('@export var settings_focus_previous_action');
+    expect(session).toContain('settings_menu_open');
     expect(session).toContain('setup_settings_overlay');
+    expect(session).toContain('check_settings_menu_actions');
+    expect(session).toContain('open_settings_menu');
+    expect(session).toContain('close_settings_menu');
+    expect(session).toContain('move_settings_focus');
     expect(session).toContain('check_settings_actions');
     expect(session).toContain('sync_settings_overlay');
+    expect(session).toContain('sync_settings_menu_visibility');
     expect(session).toContain('apply_settings_update');
     expect(session).toContain('settings.updated');
+    expect(session).toContain('settings.menu.opened');
+    expect(session).toContain('settings.menu.closed');
+    expect(session).toContain('settings.focus.changed');
     expect(mainScene).toContain('settings_overlay_enabled = true');
+    expect(project).toContain('settings_menu');
+    expect(project).toContain('settings_focus_next');
+    expect(project).toContain('settings_focus_previous');
     expect(project).toContain('settings_volume_up');
     expect(project).toContain('settings_cycle_controls');
     expect(project).toContain('settings_cycle_difficulty');
@@ -63,8 +90,46 @@ describe('Godot v2 settings overlay and trace', () => {
     expect(replay).toContain('settings_volume_up');
     expect(replay).toContain('settings_cycle_controls');
     expect(replay).toContain('settings_cycle_difficulty');
+    expect(replay).toContain('settings_menu');
+    expect(replay).toContain('settings_focus_next');
     expect(traceSummary).toContain("eventType === 'settings.updated'");
     expect(docs).toContain('SettingsOverlay.gd');
     expect(docs).toContain('settings.updated');
+  });
+
+  it('adds replay coverage for opening settings from the game menu with focus and blur state', () => {
+    const replayPath = join(godotRoot, 'tests', 'replays', 'settings_menu_flow.json');
+    const pauseCloseReplayPath = join(godotRoot, 'tests', 'replays', 'settings_menu_pause_toggle_closes.json');
+    const suite = JSON.parse(readFileSync(join(godotRoot, 'tests', 'replay_suite.json'), 'utf8')) as {
+      replays?: Array<{
+        id?: string;
+        replay_path?: string;
+        expected_events?: string[];
+      }>;
+    };
+
+    expect(existsSync(replayPath)).toBe(true);
+
+    const replay = readFileSync(replayPath, 'utf8');
+    const suiteEntry = suite.replays?.find((entry) => entry.id === 'settings_menu_flow');
+    const pauseCloseEntry = suite.replays?.find((entry) => entry.id === 'settings_menu_pause_toggle_closes');
+
+    expect(replay).toContain('settings_menu');
+    expect(replay).toContain('settings_focus_next');
+    expect(replay).toContain('settings_volume_up');
+    expect(existsSync(pauseCloseReplayPath)).toBe(true);
+    expect(readFileSync(pauseCloseReplayPath, 'utf8')).toContain('pause_toggle');
+    expect(suiteEntry?.replay_path).toBe('res://tests/replays/settings_menu_flow.json');
+    expect(suiteEntry?.expected_events).toEqual(expect.arrayContaining([
+      'settings.menu.opened',
+      'settings.focus.changed',
+      'settings.updated',
+      'settings.menu.closed',
+    ]));
+    expect(pauseCloseEntry?.replay_path).toBe('res://tests/replays/settings_menu_pause_toggle_closes.json');
+    expect(pauseCloseEntry?.expected_events).toEqual(expect.arrayContaining([
+      'settings.menu.opened',
+      'settings.menu.closed',
+    ]));
   });
 });

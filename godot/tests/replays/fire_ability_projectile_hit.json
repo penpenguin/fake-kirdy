@@ -1,0 +1,27 @@
+{
+  "start_level_id": "combat_room",
+  "start_spawn_id": "default",
+  "initial_ability_type": "fire",
+  "fps": 60,
+  "max_frames": 80,
+  "frames": [
+    {
+      "frame": 0,
+      "actions": {
+        "use_ability": false
+      }
+    },
+    {
+      "frame": 5,
+      "actions": {
+        "use_ability": true
+      }
+    },
+    {
+      "frame": 6,
+      "actions": {
+        "use_ability": false
+      }
+    }
+  ]
+}

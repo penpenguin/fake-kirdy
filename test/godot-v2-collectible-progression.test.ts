@@ -109,4 +109,28 @@ describe('Godot v2 collectible progression slice', () => {
     expect(output).toContain('validated 15 canonical stage mappings');
     expect(output).toContain('validated expected_collectibles for 4 level mappings');
   });
+
+  it('gates cross-cluster door transitions behind the previous cluster keystone', () => {
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const loader = readGodotFile('scripts/level/LevelLoader.gd');
+    const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
+      replays?: Array<{ id?: string; expected_events?: string[] }>;
+    };
+    const replayPath = join(godotRoot, 'tests', 'replays', 'central_hub_ice_gate_without_keystone.json');
+
+    expect(loader).toContain('func get_level_cluster(level_id: String) -> String:');
+    expect(session).toContain('@export var cluster_keystone_progression_enabled: bool = true');
+    expect(session).toContain('const CLUSTER_KEYSTONE_REQUIREMENTS');
+    expect(session).toContain('func get_cluster_transition_lock_reason(payload: Dictionary) -> String:');
+    expect(session).toContain('var explicit_required_item_id := String(payload.get("required_keystone_item_id", ""))');
+    expect(session).toContain('missing_cluster_keystone');
+    expect(session).toContain('clear_resolved_locked_door_reason("missing_cluster_keystone", item_id)');
+    expect(readGodotFile('scripts/level/markers/DoorMarker.gd')).toContain('@export var required_keystone_item_id: String = ""');
+
+    expect(readGodotFile('levels/central_hub.tscn')).toContain('spawn_id = "ice_gate_check"');
+    expect(existsSync(replayPath)).toBe(true);
+
+    const replayEntry = suite.replays?.find((entry) => entry.id === 'central_hub_ice_gate_without_keystone');
+    expect(replayEntry?.expected_events).toContain('door.locked');
+  });
 });

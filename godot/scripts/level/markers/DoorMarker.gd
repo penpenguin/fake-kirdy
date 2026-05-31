@@ -8,10 +8,13 @@ const DoorTexture = preload("res://resources/assets/images/ui/door-marker.webp")
 @export var target_spawn_id: String = "default"
 @export var trigger_radius: float = 64.0
 @export var required_item_id: String = ""
+@export var required_keystone_item_id: String = ""
 @export var required_ability_type: String = ""
 @export var required_completed_level_id: String = ""
 @export var required_defeated_enemy_group_id: String = ""
 @export var required_boss_id: String = ""
+@export var hidden_until_discovered: bool = false
+@export var discovery_radius: float = 80.0
 
 
 func _ready() -> void:
@@ -29,6 +32,7 @@ func ensure_visual() -> void:
     visual.texture = DoorTexture
     visual.scale = Vector2(0.18, 0.18)
     visual.z_index = 2
+    visual.visible = not hidden_until_discovered
     add_child(visual)
 
 
@@ -45,9 +49,12 @@ func to_level_marker() -> Dictionary:
             "target_spawn_id": target_spawn_id,
             "trigger_radius": trigger_radius,
             "required_item_id": required_item_id,
+            "required_keystone_item_id": required_keystone_item_id,
             "required_ability_type": required_ability_type,
             "required_completed_level_id": required_completed_level_id,
             "required_defeated_enemy_group_id": required_defeated_enemy_group_id,
             "required_boss_id": required_boss_id,
+            "hidden_until_discovered": hidden_until_discovered,
+            "discovery_radius": discovery_radius,
         },
     }
