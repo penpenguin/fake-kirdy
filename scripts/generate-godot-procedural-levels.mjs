@@ -565,9 +565,11 @@ function buildRuntimeDeadEndHeals(levelId, deadEnds, tileSize) {
 
   return deadEnds.map((deadEnd) => {
     const reward = typeof deadEnd.reward === 'string' && deadEnd.reward.length > 0 ? deadEnd.reward : 'health';
+    const healId = `${levelId}_dead_end_${reward.replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '')}`;
     return {
       id: `GeneratedHealMarker${toPascalCase(reward)}`,
-      heal_id: `${levelId}_dead_end_${reward.replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '')}`,
+      heal_id: healId,
+      dead_end_id: healId,
       amount: 1,
       reward_type: reward,
       position: {

@@ -231,6 +231,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_001_dead_end_health",
+              "dead_end_id": "labyrinth_001_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -241,6 +242,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_001_dead_end_max_health",
+              "dead_end_id": "labyrinth_001_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -251,6 +253,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_001_dead_end_revive",
+              "dead_end_id": "labyrinth_001_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -490,6 +493,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_002_dead_end_health",
+              "dead_end_id": "labyrinth_002_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -500,6 +504,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_002_dead_end_max_health",
+              "dead_end_id": "labyrinth_002_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -510,6 +515,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_002_dead_end_revive",
+              "dead_end_id": "labyrinth_002_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -749,6 +755,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_003_dead_end_health",
+              "dead_end_id": "labyrinth_003_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -759,6 +766,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_003_dead_end_max_health",
+              "dead_end_id": "labyrinth_003_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -769,6 +777,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_003_dead_end_revive",
+              "dead_end_id": "labyrinth_003_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -1008,6 +1017,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_004_dead_end_health",
+              "dead_end_id": "labyrinth_004_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -1018,6 +1028,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_004_dead_end_max_health",
+              "dead_end_id": "labyrinth_004_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -1028,6 +1039,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_004_dead_end_revive",
+              "dead_end_id": "labyrinth_004_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -1258,6 +1270,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_005_dead_end_health",
+              "dead_end_id": "labyrinth_005_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -1268,6 +1281,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_005_dead_end_max_health",
+              "dead_end_id": "labyrinth_005_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -1278,6 +1292,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_005_dead_end_revive",
+              "dead_end_id": "labyrinth_005_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -1555,6 +1570,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_006_dead_end_health",
+              "dead_end_id": "labyrinth_006_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -1565,6 +1581,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_006_dead_end_max_health",
+              "dead_end_id": "labyrinth_006_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -1575,6 +1592,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_006_dead_end_revive",
+              "dead_end_id": "labyrinth_006_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -1840,6 +1858,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_007_dead_end_health",
+              "dead_end_id": "labyrinth_007_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -1850,6 +1869,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_007_dead_end_max_health",
+              "dead_end_id": "labyrinth_007_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -1860,6 +1880,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_007_dead_end_revive",
+              "dead_end_id": "labyrinth_007_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -2125,6 +2146,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_008_dead_end_health",
+              "dead_end_id": "labyrinth_008_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -2135,6 +2157,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_008_dead_end_max_health",
+              "dead_end_id": "labyrinth_008_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -2145,6 +2168,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_008_dead_end_revive",
+              "dead_end_id": "labyrinth_008_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -2410,6 +2434,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_009_dead_end_health",
+              "dead_end_id": "labyrinth_009_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -2420,6 +2445,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_009_dead_end_max_health",
+              "dead_end_id": "labyrinth_009_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -2430,6 +2456,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_009_dead_end_revive",
+              "dead_end_id": "labyrinth_009_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -2686,6 +2713,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_010_dead_end_health",
+              "dead_end_id": "labyrinth_010_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -2696,6 +2724,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_010_dead_end_max_health",
+              "dead_end_id": "labyrinth_010_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -2706,6 +2735,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_010_dead_end_revive",
+              "dead_end_id": "labyrinth_010_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -3007,6 +3037,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_011_dead_end_health",
+              "dead_end_id": "labyrinth_011_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -3017,6 +3048,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_011_dead_end_max_health",
+              "dead_end_id": "labyrinth_011_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -3027,6 +3059,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_011_dead_end_revive",
+              "dead_end_id": "labyrinth_011_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -3292,6 +3325,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_012_dead_end_health",
+              "dead_end_id": "labyrinth_012_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -3302,6 +3336,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_012_dead_end_max_health",
+              "dead_end_id": "labyrinth_012_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -3312,6 +3347,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_012_dead_end_revive",
+              "dead_end_id": "labyrinth_012_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -3577,6 +3613,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_013_dead_end_health",
+              "dead_end_id": "labyrinth_013_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -3587,6 +3624,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_013_dead_end_max_health",
+              "dead_end_id": "labyrinth_013_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -3597,6 +3635,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_013_dead_end_revive",
+              "dead_end_id": "labyrinth_013_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -3862,6 +3901,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_014_dead_end_health",
+              "dead_end_id": "labyrinth_014_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -3872,6 +3912,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_014_dead_end_max_health",
+              "dead_end_id": "labyrinth_014_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -3882,6 +3923,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_014_dead_end_revive",
+              "dead_end_id": "labyrinth_014_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -4147,6 +4189,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_015_dead_end_health",
+              "dead_end_id": "labyrinth_015_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -4157,6 +4200,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_015_dead_end_max_health",
+              "dead_end_id": "labyrinth_015_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -4167,6 +4211,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_015_dead_end_revive",
+              "dead_end_id": "labyrinth_015_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -4432,6 +4477,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_016_dead_end_health",
+              "dead_end_id": "labyrinth_016_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -4442,6 +4488,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_016_dead_end_max_health",
+              "dead_end_id": "labyrinth_016_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -4452,6 +4499,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_016_dead_end_revive",
+              "dead_end_id": "labyrinth_016_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -4717,6 +4765,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_017_dead_end_health",
+              "dead_end_id": "labyrinth_017_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -4727,6 +4776,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_017_dead_end_max_health",
+              "dead_end_id": "labyrinth_017_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -4737,6 +4787,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_017_dead_end_revive",
+              "dead_end_id": "labyrinth_017_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -5002,6 +5053,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_018_dead_end_health",
+              "dead_end_id": "labyrinth_018_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -5012,6 +5064,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_018_dead_end_max_health",
+              "dead_end_id": "labyrinth_018_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -5022,6 +5075,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_018_dead_end_revive",
+              "dead_end_id": "labyrinth_018_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -5287,6 +5341,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_019_dead_end_health",
+              "dead_end_id": "labyrinth_019_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -5297,6 +5352,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_019_dead_end_max_health",
+              "dead_end_id": "labyrinth_019_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -5307,6 +5363,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_019_dead_end_revive",
+              "dead_end_id": "labyrinth_019_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -5572,6 +5629,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_020_dead_end_health",
+              "dead_end_id": "labyrinth_020_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -5582,6 +5640,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_020_dead_end_max_health",
+              "dead_end_id": "labyrinth_020_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -5592,6 +5651,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_020_dead_end_revive",
+              "dead_end_id": "labyrinth_020_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -5857,6 +5917,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_021_dead_end_health",
+              "dead_end_id": "labyrinth_021_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -5867,6 +5928,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_021_dead_end_max_health",
+              "dead_end_id": "labyrinth_021_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -5877,6 +5939,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_021_dead_end_revive",
+              "dead_end_id": "labyrinth_021_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -6142,6 +6205,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_022_dead_end_health",
+              "dead_end_id": "labyrinth_022_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -6152,6 +6216,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_022_dead_end_max_health",
+              "dead_end_id": "labyrinth_022_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -6162,6 +6227,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_022_dead_end_revive",
+              "dead_end_id": "labyrinth_022_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -6427,6 +6493,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_023_dead_end_health",
+              "dead_end_id": "labyrinth_023_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -6437,6 +6504,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_023_dead_end_max_health",
+              "dead_end_id": "labyrinth_023_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -6447,6 +6515,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_023_dead_end_revive",
+              "dead_end_id": "labyrinth_023_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -6712,6 +6781,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_024_dead_end_health",
+              "dead_end_id": "labyrinth_024_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -6722,6 +6792,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_024_dead_end_max_health",
+              "dead_end_id": "labyrinth_024_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -6732,6 +6803,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_024_dead_end_revive",
+              "dead_end_id": "labyrinth_024_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -6997,6 +7069,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_025_dead_end_health",
+              "dead_end_id": "labyrinth_025_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -7007,6 +7080,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_025_dead_end_max_health",
+              "dead_end_id": "labyrinth_025_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -7017,6 +7091,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_025_dead_end_revive",
+              "dead_end_id": "labyrinth_025_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -7282,6 +7357,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_026_dead_end_health",
+              "dead_end_id": "labyrinth_026_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -7292,6 +7368,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_026_dead_end_max_health",
+              "dead_end_id": "labyrinth_026_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -7302,6 +7379,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_026_dead_end_revive",
+              "dead_end_id": "labyrinth_026_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -7567,6 +7645,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_027_dead_end_health",
+              "dead_end_id": "labyrinth_027_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -7577,6 +7656,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_027_dead_end_max_health",
+              "dead_end_id": "labyrinth_027_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -7587,6 +7667,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_027_dead_end_revive",
+              "dead_end_id": "labyrinth_027_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -7852,6 +7933,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_028_dead_end_health",
+              "dead_end_id": "labyrinth_028_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -7862,6 +7944,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_028_dead_end_max_health",
+              "dead_end_id": "labyrinth_028_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -7872,6 +7955,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_028_dead_end_revive",
+              "dead_end_id": "labyrinth_028_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -8137,6 +8221,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_029_dead_end_health",
+              "dead_end_id": "labyrinth_029_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -8147,6 +8232,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_029_dead_end_max_health",
+              "dead_end_id": "labyrinth_029_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -8157,6 +8243,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_029_dead_end_revive",
+              "dead_end_id": "labyrinth_029_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -8422,6 +8509,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_030_dead_end_health",
+              "dead_end_id": "labyrinth_030_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -8432,6 +8520,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_030_dead_end_max_health",
+              "dead_end_id": "labyrinth_030_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -8442,6 +8531,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_030_dead_end_revive",
+              "dead_end_id": "labyrinth_030_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -8707,6 +8797,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_031_dead_end_health",
+              "dead_end_id": "labyrinth_031_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -8717,6 +8808,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_031_dead_end_max_health",
+              "dead_end_id": "labyrinth_031_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -8727,6 +8819,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_031_dead_end_revive",
+              "dead_end_id": "labyrinth_031_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -8983,6 +9076,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_032_dead_end_health",
+              "dead_end_id": "labyrinth_032_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -8993,6 +9087,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_032_dead_end_max_health",
+              "dead_end_id": "labyrinth_032_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -9003,6 +9098,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_032_dead_end_revive",
+              "dead_end_id": "labyrinth_032_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -9278,6 +9374,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_033_dead_end_health",
+              "dead_end_id": "labyrinth_033_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -9288,6 +9385,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_033_dead_end_max_health",
+              "dead_end_id": "labyrinth_033_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -9298,6 +9396,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_033_dead_end_revive",
+              "dead_end_id": "labyrinth_033_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -9537,6 +9636,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_034_dead_end_health",
+              "dead_end_id": "labyrinth_034_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -9547,6 +9647,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_034_dead_end_max_health",
+              "dead_end_id": "labyrinth_034_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -9557,6 +9658,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_034_dead_end_revive",
+              "dead_end_id": "labyrinth_034_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -9796,6 +9898,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_035_dead_end_health",
+              "dead_end_id": "labyrinth_035_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -9806,6 +9909,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_035_dead_end_max_health",
+              "dead_end_id": "labyrinth_035_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -9816,6 +9920,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_035_dead_end_revive",
+              "dead_end_id": "labyrinth_035_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -10055,6 +10160,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_036_dead_end_health",
+              "dead_end_id": "labyrinth_036_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -10065,6 +10171,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_036_dead_end_max_health",
+              "dead_end_id": "labyrinth_036_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -10075,6 +10182,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_036_dead_end_revive",
+              "dead_end_id": "labyrinth_036_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -10314,6 +10422,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_037_dead_end_health",
+              "dead_end_id": "labyrinth_037_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -10324,6 +10433,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_037_dead_end_max_health",
+              "dead_end_id": "labyrinth_037_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -10334,6 +10444,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_037_dead_end_revive",
+              "dead_end_id": "labyrinth_037_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -10573,6 +10684,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_038_dead_end_health",
+              "dead_end_id": "labyrinth_038_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -10583,6 +10695,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_038_dead_end_max_health",
+              "dead_end_id": "labyrinth_038_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -10593,6 +10706,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_038_dead_end_revive",
+              "dead_end_id": "labyrinth_038_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -10832,6 +10946,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_039_dead_end_health",
+              "dead_end_id": "labyrinth_039_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -10842,6 +10957,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_039_dead_end_max_health",
+              "dead_end_id": "labyrinth_039_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -10852,6 +10968,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_039_dead_end_revive",
+              "dead_end_id": "labyrinth_039_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -11091,6 +11208,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_040_dead_end_health",
+              "dead_end_id": "labyrinth_040_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -11101,6 +11219,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_040_dead_end_max_health",
+              "dead_end_id": "labyrinth_040_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -11111,6 +11230,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_040_dead_end_revive",
+              "dead_end_id": "labyrinth_040_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -11350,6 +11470,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_041_dead_end_health",
+              "dead_end_id": "labyrinth_041_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -11360,6 +11481,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_041_dead_end_max_health",
+              "dead_end_id": "labyrinth_041_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -11370,6 +11492,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_041_dead_end_revive",
+              "dead_end_id": "labyrinth_041_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -11609,6 +11732,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_042_dead_end_health",
+              "dead_end_id": "labyrinth_042_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -11619,6 +11743,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_042_dead_end_max_health",
+              "dead_end_id": "labyrinth_042_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -11629,6 +11754,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_042_dead_end_revive",
+              "dead_end_id": "labyrinth_042_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -11868,6 +11994,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_043_dead_end_health",
+              "dead_end_id": "labyrinth_043_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -11878,6 +12005,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_043_dead_end_max_health",
+              "dead_end_id": "labyrinth_043_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -11888,6 +12016,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_043_dead_end_revive",
+              "dead_end_id": "labyrinth_043_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -12127,6 +12256,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_044_dead_end_health",
+              "dead_end_id": "labyrinth_044_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -12137,6 +12267,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_044_dead_end_max_health",
+              "dead_end_id": "labyrinth_044_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -12147,6 +12278,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_044_dead_end_revive",
+              "dead_end_id": "labyrinth_044_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -12386,6 +12518,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_045_dead_end_health",
+              "dead_end_id": "labyrinth_045_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -12396,6 +12529,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_045_dead_end_max_health",
+              "dead_end_id": "labyrinth_045_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -12406,6 +12540,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_045_dead_end_revive",
+              "dead_end_id": "labyrinth_045_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -12645,6 +12780,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_046_dead_end_health",
+              "dead_end_id": "labyrinth_046_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -12655,6 +12791,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_046_dead_end_max_health",
+              "dead_end_id": "labyrinth_046_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -12665,6 +12802,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_046_dead_end_revive",
+              "dead_end_id": "labyrinth_046_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -12904,6 +13042,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_047_dead_end_health",
+              "dead_end_id": "labyrinth_047_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -12914,6 +13053,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_047_dead_end_max_health",
+              "dead_end_id": "labyrinth_047_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -12924,6 +13064,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_047_dead_end_revive",
+              "dead_end_id": "labyrinth_047_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -13163,6 +13304,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_048_dead_end_health",
+              "dead_end_id": "labyrinth_048_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -13173,6 +13315,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_048_dead_end_max_health",
+              "dead_end_id": "labyrinth_048_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -13183,6 +13326,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_048_dead_end_revive",
+              "dead_end_id": "labyrinth_048_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -13422,6 +13566,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_049_dead_end_health",
+              "dead_end_id": "labyrinth_049_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -13432,6 +13577,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_049_dead_end_max_health",
+              "dead_end_id": "labyrinth_049_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -13442,6 +13588,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_049_dead_end_revive",
+              "dead_end_id": "labyrinth_049_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -13672,6 +13819,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_050_dead_end_health",
+              "dead_end_id": "labyrinth_050_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -13682,6 +13830,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_050_dead_end_max_health",
+              "dead_end_id": "labyrinth_050_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -13692,6 +13841,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_050_dead_end_revive",
+              "dead_end_id": "labyrinth_050_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -14008,6 +14158,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_051_dead_end_health",
+              "dead_end_id": "labyrinth_051_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -14018,6 +14169,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_051_dead_end_max_health",
+              "dead_end_id": "labyrinth_051_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -14028,6 +14180,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_051_dead_end_revive",
+              "dead_end_id": "labyrinth_051_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -14308,6 +14461,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_052_dead_end_health",
+              "dead_end_id": "labyrinth_052_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -14318,6 +14472,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_052_dead_end_max_health",
+              "dead_end_id": "labyrinth_052_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -14328,6 +14483,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_052_dead_end_revive",
+              "dead_end_id": "labyrinth_052_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -14608,6 +14764,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_053_dead_end_health",
+              "dead_end_id": "labyrinth_053_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -14618,6 +14775,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_053_dead_end_max_health",
+              "dead_end_id": "labyrinth_053_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -14628,6 +14786,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_053_dead_end_revive",
+              "dead_end_id": "labyrinth_053_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -14908,6 +15067,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_054_dead_end_health",
+              "dead_end_id": "labyrinth_054_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -14918,6 +15078,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_054_dead_end_max_health",
+              "dead_end_id": "labyrinth_054_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -14928,6 +15089,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_054_dead_end_revive",
+              "dead_end_id": "labyrinth_054_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -15208,6 +15370,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_055_dead_end_health",
+              "dead_end_id": "labyrinth_055_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -15218,6 +15381,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_055_dead_end_max_health",
+              "dead_end_id": "labyrinth_055_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -15228,6 +15392,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_055_dead_end_revive",
+              "dead_end_id": "labyrinth_055_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -15508,6 +15673,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_056_dead_end_health",
+              "dead_end_id": "labyrinth_056_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -15518,6 +15684,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_056_dead_end_max_health",
+              "dead_end_id": "labyrinth_056_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -15528,6 +15695,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_056_dead_end_revive",
+              "dead_end_id": "labyrinth_056_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -15808,6 +15976,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_057_dead_end_health",
+              "dead_end_id": "labyrinth_057_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -15818,6 +15987,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_057_dead_end_max_health",
+              "dead_end_id": "labyrinth_057_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -15828,6 +15998,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_057_dead_end_revive",
+              "dead_end_id": "labyrinth_057_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -16108,6 +16279,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_058_dead_end_health",
+              "dead_end_id": "labyrinth_058_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -16118,6 +16290,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_058_dead_end_max_health",
+              "dead_end_id": "labyrinth_058_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -16128,6 +16301,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_058_dead_end_revive",
+              "dead_end_id": "labyrinth_058_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -16408,6 +16582,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_059_dead_end_health",
+              "dead_end_id": "labyrinth_059_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -16418,6 +16593,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_059_dead_end_max_health",
+              "dead_end_id": "labyrinth_059_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -16428,6 +16604,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_059_dead_end_revive",
+              "dead_end_id": "labyrinth_059_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -16708,6 +16885,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_060_dead_end_health",
+              "dead_end_id": "labyrinth_060_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -16718,6 +16896,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_060_dead_end_max_health",
+              "dead_end_id": "labyrinth_060_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -16728,6 +16907,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_060_dead_end_revive",
+              "dead_end_id": "labyrinth_060_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -17008,6 +17188,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_061_dead_end_health",
+              "dead_end_id": "labyrinth_061_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -17018,6 +17199,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_061_dead_end_max_health",
+              "dead_end_id": "labyrinth_061_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -17028,6 +17210,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_061_dead_end_revive",
+              "dead_end_id": "labyrinth_061_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -17308,6 +17491,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_062_dead_end_health",
+              "dead_end_id": "labyrinth_062_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -17318,6 +17502,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_062_dead_end_max_health",
+              "dead_end_id": "labyrinth_062_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -17328,6 +17513,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_062_dead_end_revive",
+              "dead_end_id": "labyrinth_062_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -17608,6 +17794,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_063_dead_end_health",
+              "dead_end_id": "labyrinth_063_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -17618,6 +17805,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_063_dead_end_max_health",
+              "dead_end_id": "labyrinth_063_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -17628,6 +17816,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_063_dead_end_revive",
+              "dead_end_id": "labyrinth_063_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -17908,6 +18097,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_064_dead_end_health",
+              "dead_end_id": "labyrinth_064_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -17918,6 +18108,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_064_dead_end_max_health",
+              "dead_end_id": "labyrinth_064_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -17928,6 +18119,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_064_dead_end_revive",
+              "dead_end_id": "labyrinth_064_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -18208,6 +18400,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_065_dead_end_health",
+              "dead_end_id": "labyrinth_065_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -18218,6 +18411,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_065_dead_end_max_health",
+              "dead_end_id": "labyrinth_065_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -18228,6 +18422,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_065_dead_end_revive",
+              "dead_end_id": "labyrinth_065_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -18508,6 +18703,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_066_dead_end_health",
+              "dead_end_id": "labyrinth_066_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -18518,6 +18714,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_066_dead_end_max_health",
+              "dead_end_id": "labyrinth_066_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -18528,6 +18725,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_066_dead_end_revive",
+              "dead_end_id": "labyrinth_066_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -18808,6 +19006,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_067_dead_end_health",
+              "dead_end_id": "labyrinth_067_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -18818,6 +19017,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_067_dead_end_max_health",
+              "dead_end_id": "labyrinth_067_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -18828,6 +19028,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_067_dead_end_revive",
+              "dead_end_id": "labyrinth_067_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {
@@ -19132,6 +19333,7 @@
             {
               "id": "GeneratedHealMarkerHealth",
               "heal_id": "labyrinth_068_dead_end_health",
+              "dead_end_id": "labyrinth_068_dead_end_health",
               "amount": 1,
               "reward_type": "health",
               "position": {
@@ -19142,6 +19344,7 @@
             {
               "id": "GeneratedHealMarkerMaxHealth",
               "heal_id": "labyrinth_068_dead_end_max_health",
+              "dead_end_id": "labyrinth_068_dead_end_max_health",
               "amount": 1,
               "reward_type": "max-health",
               "position": {
@@ -19152,6 +19355,7 @@
             {
               "id": "GeneratedHealMarkerRevive",
               "heal_id": "labyrinth_068_dead_end_revive",
+              "dead_end_id": "labyrinth_068_dead_end_revive",
               "amount": 1,
               "reward_type": "revive",
               "position": {

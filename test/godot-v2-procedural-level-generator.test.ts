@@ -302,6 +302,7 @@ describe('Godot v2 procedural level schema generation', () => {
       {
         id: 'GeneratedHealMarkerHealth',
         heal_id: 'labyrinth_010_dead_end_health',
+        dead_end_id: 'labyrinth_010_dead_end_health',
         amount: 1,
         reward_type: 'health',
         position: { x: 112, y: 304 },
@@ -309,6 +310,7 @@ describe('Godot v2 procedural level schema generation', () => {
       {
         id: 'GeneratedHealMarkerMaxHealth',
         heal_id: 'labyrinth_010_dead_end_max_health',
+        dead_end_id: 'labyrinth_010_dead_end_max_health',
         amount: 1,
         reward_type: 'max-health',
         position: { x: 496, y: 80 },
@@ -316,6 +318,7 @@ describe('Godot v2 procedural level schema generation', () => {
       {
         id: 'GeneratedHealMarkerRevive',
         heal_id: 'labyrinth_010_dead_end_revive',
+        dead_end_id: 'labyrinth_010_dead_end_revive',
         amount: 1,
         reward_type: 'revive',
         position: { x: 304, y: 272 },
