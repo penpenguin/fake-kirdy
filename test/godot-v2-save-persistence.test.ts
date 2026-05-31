@@ -29,6 +29,7 @@ describe('Godot v2 save persistence foundation', () => {
     expect(state).toContain('var unlocked_door_ids');
     expect(state).toContain('var opened_ability_gate_ids');
     expect(state).toContain('var discovered_hidden_feature_ids');
+    expect(state).toContain('var completed_dead_end_ids');
     expect(state).toContain('var explored_tiles');
     expect(state).toContain('sanitize_explored_tiles');
     expect(state).toContain('var current_level_id');
@@ -41,8 +42,10 @@ describe('Godot v2 save persistence foundation', () => {
     expect(state).toContain('var consumed_heal_ids');
     expect(state).toContain('"consumed_heal_ids": consumed_heal_ids');
     expect(state).toContain('"discovered_hidden_feature_ids": discovered_hidden_feature_ids');
+    expect(state).toContain('"completed_dead_end_ids": completed_dead_end_ids');
     expect(state).toContain('data.get("consumed_heal_ids", [])');
     expect(state).toContain('data.get("discovered_hidden_feature_ids", [])');
+    expect(state).toContain('data.get("completed_dead_end_ids", [])');
     expect(state).toContain('to_dictionary');
     expect(state).toContain('from_dictionary');
     expect(store).toContain('class_name SaveStore');
@@ -71,6 +74,8 @@ describe('Godot v2 save persistence foundation', () => {
     expect(session).toContain('get_opened_ability_gate_ids');
     expect(session).toContain('discovered_hidden_feature_ids');
     expect(session).toContain('get_discovered_hidden_feature_ids');
+    expect(session).toContain('completed_dead_end_ids');
+    expect(session).toContain('get_completed_dead_end_ids');
     expect(session).toContain('explored_tiles');
     expect(session).toContain('mark_player_tile_explored');
     expect(session).toContain('get_explored_tiles_payload');
@@ -90,6 +95,7 @@ describe('Godot v2 save persistence foundation', () => {
     expect(session).toContain('for heal_id in state.consumed_heal_ids');
     expect(session).toContain('"consumed_heal_ids": get_consumed_heal_ids()');
     expect(session).toContain('"discovered_hidden_feature_ids": get_discovered_hidden_feature_ids()');
+    expect(session).toContain('"completed_dead_end_ids": get_completed_dead_end_ids()');
     expect(session).toContain('write_persistent_state()');
     expect(session).toContain('build_save_payload');
   });

@@ -2547,6 +2547,8 @@ func load_persistent_state() -> void:
         opened_ability_gate_ids[String(gate_id)] = true
     for feature_id in state.discovered_hidden_feature_ids:
         discovered_hidden_feature_ids[String(feature_id)] = true
+    for dead_end_id in state.completed_dead_end_ids:
+        completed_dead_end_ids[String(dead_end_id)] = true
     for level_id in state.explored_tiles.keys():
         var normalized_level_id := String(level_id)
         var level_tiles := {}
@@ -2576,6 +2578,7 @@ func load_persistent_state() -> void:
         "defeated_boss_ids": get_defeated_boss_ids(),
         "opened_ability_gate_ids": get_opened_ability_gate_ids(),
         "discovered_hidden_feature_ids": get_discovered_hidden_feature_ids(),
+        "completed_dead_end_ids": get_completed_dead_end_ids(),
         "explored_tiles": get_explored_tiles_payload(),
         "current_level_id": String(state.current_level_id),
         "player_position": get_saved_player_position_payload(),
@@ -2611,6 +2614,7 @@ func write_persistent_state() -> void:
             "defeated_boss_ids": get_defeated_boss_ids(),
             "opened_ability_gate_ids": get_opened_ability_gate_ids(),
             "discovered_hidden_feature_ids": get_discovered_hidden_feature_ids(),
+            "completed_dead_end_ids": get_completed_dead_end_ids(),
             "explored_tiles": get_explored_tiles_payload(),
             "current_level_id": current_level_id,
             "player_position": get_player_position_payload(),
@@ -2646,6 +2650,7 @@ func build_save_payload() -> Dictionary:
         "defeated_boss_ids": get_defeated_boss_ids(),
         "opened_ability_gate_ids": get_opened_ability_gate_ids(),
         "discovered_hidden_feature_ids": get_discovered_hidden_feature_ids(),
+        "completed_dead_end_ids": get_completed_dead_end_ids(),
         "explored_tiles": get_explored_tiles_payload(),
         "current_level_id": current_level_id,
         "player_position": get_player_position_payload(),
