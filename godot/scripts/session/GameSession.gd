@@ -1197,6 +1197,7 @@ func check_hidden_marker_discoveries(markers: Array, feature_type: String) -> vo
             },
         })
         sync_map_overlay("hidden.discovered", true)
+        write_persistent_state()
 
 
 func reapply_discovered_hidden_marker_visuals() -> void:
@@ -1633,6 +1634,12 @@ func get_opened_ability_gate_ids() -> Array:
     var gate_ids := opened_ability_gate_ids.keys()
     gate_ids.sort()
     return gate_ids
+
+
+func get_discovered_hidden_feature_ids() -> Array:
+    var feature_ids := discovered_hidden_feature_ids.keys()
+    feature_ids.sort()
+    return feature_ids
 
 
 func get_explored_tiles_payload() -> Dictionary:
@@ -2538,6 +2545,8 @@ func load_persistent_state() -> void:
         defeated_boss_ids[String(boss_id)] = true
     for gate_id in state.opened_ability_gate_ids:
         opened_ability_gate_ids[String(gate_id)] = true
+    for feature_id in state.discovered_hidden_feature_ids:
+        discovered_hidden_feature_ids[String(feature_id)] = true
     for level_id in state.explored_tiles.keys():
         var normalized_level_id := String(level_id)
         var level_tiles := {}
@@ -2566,6 +2575,7 @@ func load_persistent_state() -> void:
         "defeated_enemy_group_ids": get_defeated_enemy_group_ids(),
         "defeated_boss_ids": get_defeated_boss_ids(),
         "opened_ability_gate_ids": get_opened_ability_gate_ids(),
+        "discovered_hidden_feature_ids": get_discovered_hidden_feature_ids(),
         "explored_tiles": get_explored_tiles_payload(),
         "current_level_id": String(state.current_level_id),
         "player_position": get_saved_player_position_payload(),
@@ -2600,6 +2610,7 @@ func write_persistent_state() -> void:
             "defeated_enemy_group_ids": get_defeated_enemy_group_ids(),
             "defeated_boss_ids": get_defeated_boss_ids(),
             "opened_ability_gate_ids": get_opened_ability_gate_ids(),
+            "discovered_hidden_feature_ids": get_discovered_hidden_feature_ids(),
             "explored_tiles": get_explored_tiles_payload(),
             "current_level_id": current_level_id,
             "player_position": get_player_position_payload(),
@@ -2634,6 +2645,7 @@ func build_save_payload() -> Dictionary:
         "defeated_enemy_group_ids": get_defeated_enemy_group_ids(),
         "defeated_boss_ids": get_defeated_boss_ids(),
         "opened_ability_gate_ids": get_opened_ability_gate_ids(),
+        "discovered_hidden_feature_ids": get_discovered_hidden_feature_ids(),
         "explored_tiles": get_explored_tiles_payload(),
         "current_level_id": current_level_id,
         "player_position": get_player_position_payload(),
