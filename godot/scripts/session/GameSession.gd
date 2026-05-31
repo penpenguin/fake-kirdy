@@ -161,8 +161,7 @@ func _ready() -> void:
 
 func start_session(start_level_id: String, start_spawn_id: String = "default", fps: int = 60) -> bool:
     replay_fps = max(fps, 1)
-    run_frame = 0
-    run_time_ms = 0
+    reset_run_clock()
     outcome = "running"
     session_paused = false
     pause_settings_open = false
@@ -283,6 +282,13 @@ func start_session(start_level_id: String, start_spawn_id: String = "default", f
 
     set_physics_process(true)
     return true
+
+
+func reset_run_clock() -> void:
+    run_frame = 0
+    run_time_ms = 0
+    if trace_recorder != null:
+        trace_recorder.call("set_frame", run_frame)
 
 
 func _physics_process(delta: float) -> void:
@@ -2413,10 +2419,12 @@ func restart_current_run() -> void:
 
     var restart_level_id := current_level_id
     var restart_spawn_id := requested_spawn_id
+    var previous_outcome := outcome
+    reset_run_clock()
     trace_recorder.call("record_event", "run.restart.selected", {
         "level_id": restart_level_id,
         "spawn_id": restart_spawn_id,
-        "previous_outcome": outcome,
+        "previous_outcome": previous_outcome,
     })
     outcome = "running"
     session_paused = false
