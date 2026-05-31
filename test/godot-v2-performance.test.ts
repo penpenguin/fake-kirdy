@@ -81,6 +81,10 @@ describe('Godot v2 performance budget checks', () => {
     expect(script).toContain('remote-debugging-port');
     expect(script).toContain('Godot Web export artifacts are missing');
     expect(script).toContain('Browser executable was not found');
+    expect(script).toContain('await waitForBrowserExit(browser)');
+    expect(script).toContain('safeRemoveBrowserProfile(userDataDir)');
+    expect(script).toContain('function waitForBrowserExit');
+    expect(script).toContain('function safeRemoveBrowserProfile');
 
     const budget = JSON.parse(readFileSync(budgetPath, 'utf8')) as {
       version: number;

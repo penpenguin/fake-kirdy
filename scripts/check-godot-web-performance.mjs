@@ -126,8 +126,9 @@ try {
   });
 } finally {
   browser.kill('SIGTERM');
+  await waitForBrowserExit(browser);
   await closeServer(server.server);
-  rmSync(userDataDir, { recursive: true, force: true });
+  safeRemoveBrowserProfile(userDataDir);
 }
 
 process.exit(failedChecks.length > 0 ? 1 : 0);
@@ -396,6 +397,34 @@ function writeResult(result) {
 
 function closeServer(server) {
   return new Promise((resolveClose) => server.close(resolveClose));
+}
+
+function waitForBrowserExit(browserProcess, timeoutMs = 3000) {
+  if (browserProcess.exitCode !== null || browserProcess.signalCode !== null) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolveExit) => {
+    const timeout = setTimeout(() => {
+      if (browserProcess.exitCode === null && browserProcess.signalCode === null) {
+        browserProcess.kill('SIGKILL');
+      }
+      resolveExit();
+    }, timeoutMs);
+
+    browserProcess.once('exit', () => {
+      clearTimeout(timeout);
+      resolveExit();
+    });
+  });
+}
+
+function safeRemoveBrowserProfile(profilePath) {
+  try {
+    rmSync(profilePath, { recursive: true, force: true });
+  } catch (error) {
+    console.warn(`[godot:web-performance] unable to remove browser profile ${profilePath}: ${error.message}`);
+  }
 }
 
 function sleep(ms) {
