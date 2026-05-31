@@ -100,9 +100,25 @@ describe('Godot v2 export workflow', () => {
     expect(workflow).toContain('GODOT_STATUS: stable');
     expect(workflow).toContain('Godot_v${GODOT_VERSION}-${GODOT_STATUS}_linux.x86_64.zip');
     expect(workflow).toContain('Godot_v${GODOT_VERSION}-${GODOT_STATUS}_export_templates.tpz');
+    expect(workflow.match(/curl --fail --location --show-error --retry 3 --retry-delay 2 --retry-all-errors/g)).toHaveLength(2);
+    expect(workflow).toContain('unzip -t /tmp/godot/godot.zip');
+    expect(workflow).toContain('unzip -t /tmp/godot/export_templates.tpz');
     expect(workflow).toContain('npm run build:public');
     expect(workflow).toContain('path: dist');
     expect(workflow).not.toContain('build:legacy:web');
+  });
+
+  it('deploys the Godot Web export artifact built by the test job', () => {
+    const workflow = readText('.github/workflows/test.yml');
+    const installStepCount = workflow.match(/name: Install Godot export tooling/g)?.length ?? 0;
+    const buildPublicCount = workflow.match(/npm run build:public/g)?.length ?? 0;
+
+    expect(workflow).toContain('uses: actions/upload-artifact@v4');
+    expect(workflow).toContain('uses: actions/download-artifact@v4');
+    expect(workflow).toContain('name: godot-web-dist');
+    expect(workflow).toContain('if-no-files-found: error');
+    expect(installStepCount).toBe(1);
+    expect(buildPublicCount).toBe(1);
   });
 
   it('documents the default Godot Web build command and removes Phaser deployment guidance', () => {
