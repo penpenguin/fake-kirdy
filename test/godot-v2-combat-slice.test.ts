@@ -98,6 +98,15 @@ describe('Godot v2 minimal combat slice', () => {
     expect(source).toContain('ability.detached');
   });
 
+  it('sorts non-piercing projectile targets by forward distance before applying hits', () => {
+    const source = readGodotFile('scripts/session/GameSession.gd');
+
+    expect(source).toContain('sort_projectile_targets_by_forward_distance(find_enemy_targets(profile), projectile)');
+    expect(source).toContain('func sort_projectile_targets_by_forward_distance(targets: Array, projectile: Node) -> Array:');
+    expect(source).toContain('func get_projectile_forward_distance(target: Node, projectile: Node) -> float:');
+    expect(source).toContain('projectile.get("direction")');
+  });
+
   it('uses a safe fallback visual for the inhale pull effect', () => {
     const controller = readGodotFile('scripts/player/PlayerController.gd');
     const session = readGodotFile('scripts/session/GameSession.gd');

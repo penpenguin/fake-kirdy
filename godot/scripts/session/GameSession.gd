@@ -889,7 +889,7 @@ func resolve_ability_projectile_hits(projectile: Node, ability_type: String, pro
     if projectile == null or not is_instance_valid(projectile):
         return
 
-    var targets := find_enemy_targets(profile)
+    var targets := sort_projectile_targets_by_forward_distance(find_enemy_targets(profile), projectile)
     for target in targets:
         projectile.call("mark_hit", target.global_position)
         var hit_payload: Dictionary = projectile.call("get_projectile_payload")
@@ -907,6 +907,26 @@ func resolve_ability_projectile_hits(projectile: Node, ability_type: String, pro
         }, float(profile.get("knockback", 0.0)))
         if not bool(profile.get("pierce", false)):
             return
+
+
+func sort_projectile_targets_by_forward_distance(targets: Array, projectile: Node) -> Array:
+    var sorted_targets := targets.duplicate()
+    sorted_targets.sort_custom(func(left, right):
+        return get_projectile_forward_distance(left, projectile) < get_projectile_forward_distance(right, projectile)
+    )
+    return sorted_targets
+
+
+func get_projectile_forward_distance(target: Node, projectile: Node) -> float:
+    if target == null or not is_instance_valid(target) or projectile == null or not is_instance_valid(projectile):
+        return 0.0
+
+    var direction := Vector2(get_player_facing_direction(), 0.0)
+    var projectile_direction = projectile.get("direction")
+    if typeof(projectile_direction) == TYPE_VECTOR2 and projectile_direction != Vector2.ZERO:
+        direction = projectile_direction.normalized()
+
+    return (target.global_position - projectile.global_position).dot(direction)
 
 
 func retire_ability_projectile(projectile: Node) -> void:
