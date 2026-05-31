@@ -99,6 +99,7 @@ describe('Godot v2 settings overlay and trace', () => {
 
   it('adds replay coverage for opening settings from the game menu with focus and blur state', () => {
     const replayPath = join(godotRoot, 'tests', 'replays', 'settings_menu_flow.json');
+    const pauseCloseReplayPath = join(godotRoot, 'tests', 'replays', 'settings_menu_pause_toggle_closes.json');
     const suite = JSON.parse(readFileSync(join(godotRoot, 'tests', 'replay_suite.json'), 'utf8')) as {
       replays?: Array<{
         id?: string;
@@ -111,15 +112,23 @@ describe('Godot v2 settings overlay and trace', () => {
 
     const replay = readFileSync(replayPath, 'utf8');
     const suiteEntry = suite.replays?.find((entry) => entry.id === 'settings_menu_flow');
+    const pauseCloseEntry = suite.replays?.find((entry) => entry.id === 'settings_menu_pause_toggle_closes');
 
     expect(replay).toContain('settings_menu');
     expect(replay).toContain('settings_focus_next');
     expect(replay).toContain('settings_volume_up');
+    expect(existsSync(pauseCloseReplayPath)).toBe(true);
+    expect(readFileSync(pauseCloseReplayPath, 'utf8')).toContain('pause_toggle');
     expect(suiteEntry?.replay_path).toBe('res://tests/replays/settings_menu_flow.json');
     expect(suiteEntry?.expected_events).toEqual(expect.arrayContaining([
       'settings.menu.opened',
       'settings.focus.changed',
       'settings.updated',
+      'settings.menu.closed',
+    ]));
+    expect(pauseCloseEntry?.replay_path).toBe('res://tests/replays/settings_menu_pause_toggle_closes.json');
+    expect(pauseCloseEntry?.expected_events).toEqual(expect.arrayContaining([
+      'settings.menu.opened',
       'settings.menu.closed',
     ]));
   });

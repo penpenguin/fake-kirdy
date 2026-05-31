@@ -449,7 +449,10 @@ func add_generated_doors(root: Node2D, entry: Dictionary, runtime_layout: Dictio
         door.set("target_spawn_id", get_generated_target_spawn_id(direction_name))
         door.set("trigger_radius", get_layout_number(runtime_layout, "safety", "door_trigger_radius", 48.0))
         var branch_rule := get_generated_branch_exit_rule(runtime_layout, direction_name)
-        door.set("required_item_id", String(branch_rule.get("required_item_id", "")))
+        var required_item_id := String(branch_rule.get("required_item_id", ""))
+        if required_item_id == "":
+            required_item_id = String(branch_rule.get("required_keystone_item_id", ""))
+        door.set("required_item_id", required_item_id)
         root.add_child(door)
 
 

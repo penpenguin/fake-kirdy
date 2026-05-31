@@ -130,6 +130,13 @@
       "tags": ["settings", "menu", "focus", "ui", "trace"]
     },
     {
+      "id": "settings_menu_pause_toggle_closes",
+      "replay_path": "res://tests/replays/settings_menu_pause_toggle_closes.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["settings.menu.opened", "settings.menu.closed"],
+      "tags": ["settings", "menu", "pause", "input", "trace"]
+    },
+    {
       "id": "map_toggle_visibility",
       "replay_path": "res://tests/replays/map_toggle_visibility.json",
       "expected_outcome": "replay.max_frames_reached",
@@ -264,6 +271,13 @@
       "expected_outcome": "complete",
       "expected_events": ["door.entered", "goal.door.entered", "run.finished"],
       "tags": ["procedural", "sky", "door-chain", "goal"]
+    },
+    {
+      "id": "sky_generated_exit_locked_without_keystone",
+      "replay_path": "res://tests/replays/labyrinth_051_to_sky_sanctum_without_keystone.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["door.locked"],
+      "tags": ["procedural", "sky", "keystone", "door", "locked", "trace"]
     },
     {
       "id": "mirror_to_goal_sanctum_finish",

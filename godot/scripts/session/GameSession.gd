@@ -1949,7 +1949,9 @@ func toggle_map_overlay() -> void:
 
 func check_pause_actions() -> void:
     if is_session_action_just_pressed(pause_toggle_action):
-        if pause_settings_open:
+        if settings_menu_open:
+            close_settings_menu("settings.menu.closed")
+        elif pause_settings_open:
             close_pause_settings()
         else:
             toggle_pause_menu()

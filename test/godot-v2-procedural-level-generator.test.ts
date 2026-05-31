@@ -407,7 +407,9 @@ describe('Godot v2 procedural level schema generation', () => {
       },
     ]));
     expect(loader).toContain('func get_generated_branch_exit_rule(runtime_layout: Dictionary, direction: String) -> Dictionary:');
-    expect(loader).toContain('door.set("required_item_id", String(branch_rule.get("required_item_id", "")))');
+    expect(loader).toContain('var required_item_id := String(branch_rule.get("required_item_id", ""))');
+    expect(loader).toContain('door.set("required_item_id", required_item_id)');
+    expect(loader).toContain('required_keystone_item_id');
   });
 
   it('varies generated enemy encounters with multiple enemy roles and attack timing', () => {

@@ -49,6 +49,10 @@ describe('Godot v2 replay suite workflow', () => {
       score: 400,
     });
     expect(byId.get('settings_adjustment')?.expected_outcome).toBe('replay.max_frames_reached');
+    expect(byId.get('settings_menu_pause_toggle_closes')?.expected_events).toEqual(expect.arrayContaining([
+      'settings.menu.opened',
+      'settings.menu.closed',
+    ]));
     expect(byId.get('map_toggle_visibility')?.expected_events).toContain('map.toggled');
     expect(byId.get('pause_toggle_menu')?.expected_events).toContain('pause.toggled');
     expect(byId.get('pause_settings_flow')?.expected_events).toEqual(expect.arrayContaining([
@@ -175,6 +179,12 @@ describe('Godot v2 replay suite workflow', () => {
       'goal.door.entered',
       'run.finished',
     ]));
+    expect(byId.get('sky_generated_exit_locked_without_keystone')?.expected_events).toContain('door.locked');
+    expect(readReplay('labyrinth_051_to_sky_sanctum_without_keystone.json').initial_item_ids).toEqual([
+      'forest-keystone',
+      'ice-keystone',
+      'fire-keystone',
+    ]);
     expect(readReplay('labyrinth_051_to_sky_sanctum_generated_exit.json').initial_item_ids).toEqual([
       'forest-keystone',
       'ice-keystone',
@@ -201,6 +211,7 @@ describe('Godot v2 replay suite workflow', () => {
     expect(listed.replay_count).toBeGreaterThanOrEqual(13);
     expect(listed.replays?.map((replay) => replay.id)).toContain('terminal_generated_goal');
     expect(listed.replays?.map((replay) => replay.id)).toContain('settings_adjustment');
+    expect(listed.replays?.map((replay) => replay.id)).toContain('settings_menu_pause_toggle_closes');
     expect(listed.replays?.map((replay) => replay.id)).toContain('map_toggle_visibility');
     expect(listed.replays?.map((replay) => replay.id)).toContain('pause_toggle_menu');
     expect(listed.replays?.map((replay) => replay.id)).toContain('pause_settings_flow');
@@ -215,6 +226,7 @@ describe('Godot v2 replay suite workflow', () => {
     expect(listed.replays?.map((replay) => replay.id)).toContain('fire_area_ability_gate_trace');
     expect(listed.replays?.map((replay) => replay.id)).toContain('flying_spit_projectile_hit');
     expect(listed.replays?.map((replay) => replay.id)).toContain('forest_reliquary_key_unlocks_door');
+    expect(listed.replays?.map((replay) => replay.id)).toContain('sky_generated_exit_locked_without_keystone');
   });
 
   it('wires the suite into package scripts and documentation', () => {

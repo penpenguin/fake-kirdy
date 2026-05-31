@@ -1,0 +1,25 @@
+{
+  "start_level_id": "labyrinth_051",
+  "start_spawn_id": "default",
+  "initial_item_ids": ["forest-keystone", "ice-keystone", "fire-keystone"],
+  "level_id": "labyrinth_051",
+  "fps": 60,
+  "max_frames": 105,
+  "frames": [
+    {
+      "frame": 0,
+      "actions": {
+        "move_right": true,
+        "inhale": false,
+        "swallow": false,
+        "use_ability": false
+      }
+    },
+    {
+      "frame": 100,
+      "actions": {
+        "move_right": false
+      }
+    }
+  ]
+}
