@@ -100,6 +100,17 @@ describe('Godot v2 save persistence foundation', () => {
     expect(session).toContain('build_save_payload');
   });
 
+  it('persists the restarted spawn after a save-enabled game over restart', () => {
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const restartBody = session.slice(
+      session.indexOf('func restart_current_run'),
+      session.indexOf('func show_result_overlay'),
+    );
+
+    expect(restartBody).toContain('if load_level(restart_level_id, restart_spawn_id):');
+    expect(restartBody).toContain('write_persistent_state()');
+  });
+
   it('falls back to browser sessionStorage when the primary save write fails on web', () => {
     const store = readGodotFile('scripts/save/SaveStore.gd');
     const session = readGodotFile('scripts/session/GameSession.gd');

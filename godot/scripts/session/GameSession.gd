@@ -2463,14 +2463,15 @@ func restart_current_run() -> void:
     if results_scene != null and is_instance_valid(results_scene):
         results_scene.call("set_results_state", {})
 
-    load_level(restart_level_id, restart_spawn_id)
-    player_invulnerability_remaining_ms = max(int(get_difficulty_profile().get("player_invulnerability_ms", player_invulnerability_ms)), 0)
-    mark_level_visited(current_level_id)
-    mark_player_tile_explored()
-    sync_map_overlay("run.restarted", true)
-    sync_hud_overlay("run.restarted", true)
-    sync_inventory_overlay("run.restarted", true)
-    sync_virtual_controls_overlay("run.restarted", true)
+    if load_level(restart_level_id, restart_spawn_id):
+        player_invulnerability_remaining_ms = max(int(get_difficulty_profile().get("player_invulnerability_ms", player_invulnerability_ms)), 0)
+        mark_level_visited(current_level_id)
+        mark_player_tile_explored()
+        sync_map_overlay("run.restarted", true)
+        sync_hud_overlay("run.restarted", true)
+        sync_inventory_overlay("run.restarted", true)
+        sync_virtual_controls_overlay("run.restarted", true)
+        write_persistent_state()
 
 
 func show_result_overlay(reason: String = "") -> void:
