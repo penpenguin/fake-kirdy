@@ -3,6 +3,7 @@
   "target_fps": 60,
   "min_browser_raf_fps": 58,
   "max_browser_frame_ms": 50,
+  "warmup_ms": 2500,
   "sample_ms": 3000,
   "max_boot_wait_ms": 15000,
   "export_dir": "dist"

@@ -26,6 +26,7 @@ This command reads `godot/tests/web_performance_budget.json`, serves the Godot W
 
 - browser 60 FPS target through `min_browser_raf_fps`
 - worst sampled frame duration through `max_browser_frame_ms`
+- a short `warmup_ms` window before sampling so Godot Web boot and shader/resource initialization do not count as steady-state frame pacing
 - that the exported page creates a canvas
 - that the expected Godot Web export artifacts (`index.html`, JavaScript, `.wasm`, and `.pck`) are present
 

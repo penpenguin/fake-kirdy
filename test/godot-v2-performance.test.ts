@@ -78,6 +78,8 @@ describe('Godot v2 performance budget checks', () => {
     expect(script).toContain('requestAnimationFrame');
     expect(script).toContain('min_browser_raf_fps');
     expect(script).toContain('max_browser_frame_ms');
+    expect(script).toContain('warmup_ms');
+    expect(script).toContain('await sleep(budget.warmup_ms)');
     expect(script).toContain('remote-debugging-port');
     expect(script).toContain('Godot Web export artifacts are missing');
     expect(script).toContain('Browser executable was not found');
@@ -91,6 +93,7 @@ describe('Godot v2 performance budget checks', () => {
       target_fps: number;
       min_browser_raf_fps: number;
       max_browser_frame_ms: number;
+      warmup_ms: number;
       sample_ms: number;
       export_dir: string;
     };
@@ -98,6 +101,7 @@ describe('Godot v2 performance budget checks', () => {
     expect(budget.target_fps).toBe(60);
     expect(budget.min_browser_raf_fps).toBeGreaterThanOrEqual(58);
     expect(budget.max_browser_frame_ms).toBeLessThanOrEqual(50);
+    expect(budget.warmup_ms).toBeGreaterThanOrEqual(1000);
     expect(budget.sample_ms).toBeGreaterThanOrEqual(1000);
     expect(budget.export_dir).toBe('dist');
 

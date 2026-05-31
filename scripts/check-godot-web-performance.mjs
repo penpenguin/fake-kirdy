@@ -71,6 +71,7 @@ try {
   const pageTarget = await waitForPageTarget(debugPort, budget.max_boot_wait_ms);
   const cdp = await connectCdp(pageTarget.webSocketDebuggerUrl);
   await cdp.send('Runtime.enable');
+  await sleep(budget.warmup_ms);
   const browserMetrics = await sampleBrowserFrames(cdp, budget.sample_ms);
   await cdp.close();
 
@@ -105,6 +106,7 @@ try {
     export_dir: relativeToRepo(exportDir),
     browser_executable: browserExecutable,
     target_fps: budget.target_fps,
+    warmup_ms: budget.warmup_ms,
     failed_checks: failedChecks,
     metrics: browserMetrics,
   });
@@ -122,6 +124,7 @@ try {
     export_dir: relativeToRepo(exportDir),
     browser_executable: browserExecutable,
     target_fps: budget.target_fps,
+    warmup_ms: budget.warmup_ms,
     failed_checks: failedChecks,
   });
 } finally {
@@ -181,6 +184,7 @@ function readBudget(path) {
     'target_fps',
     'min_browser_raf_fps',
     'max_browser_frame_ms',
+    'warmup_ms',
     'sample_ms',
     'max_boot_wait_ms',
   ];
