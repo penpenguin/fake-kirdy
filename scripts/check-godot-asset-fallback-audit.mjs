@@ -287,7 +287,7 @@ function checkResourcePaths(sourceTexts, assetRoot, manifestAssets) {
         checks.push({
           rule: 'resource_path_in_manifest',
           severity: 'error',
-          path: source.path,
+          path: reportPath(source.path),
           asset_path: assetPath,
           message: `resource path is not listed in asset_manifest.json: ${assetPath}.`,
         });
@@ -296,7 +296,7 @@ function checkResourcePaths(sourceTexts, assetRoot, manifestAssets) {
         checks.push({
           rule: 'resource_path_exists',
           severity: 'error',
-          path: source.path,
+          path: reportPath(source.path),
           asset_path: assetPath,
           message: `resource path points to a missing file: ${assetPath}.`,
         });
@@ -324,7 +324,7 @@ function checkUiLabels(sourceTexts, contract) {
       const textMatch = block.match(/\ntext = "([^"]*)"/);
       if ((!textMatch || textMatch[1].trim() === '') && !allowlist.has(nodeName) && !allowlist.has(relative(repoRoot, source.path) + ':' + nodeName)) {
         checks.push(buildCheck(contract, 'empty_label_text', {
-          path: source.path,
+          path: reportPath(source.path),
           node_name: nodeName,
           message: `${relative(repoRoot, source.path)}:${nodeName} has empty Label text.`,
         }));
@@ -344,7 +344,7 @@ function checkFallbackEvents(sourceTexts, contract) {
       fallbackEvents.add(eventType);
       if (!allowed.has(eventType)) {
         checks.push(buildCheck(contract, 'protected_fallback_event', {
-          path: source.path,
+          path: reportPath(source.path),
           event_type: eventType,
           message: `${eventType} is still observable; keep it out of protected mainline assets.`,
         }));
@@ -370,6 +370,10 @@ function checkUnusedAssets(manifestAssets, sourceTexts, contract) {
     }));
   }
   return { count, checks };
+}
+
+function reportPath(path) {
+  return relative(repoRoot, path);
 }
 
 function countAudioAssets(contract) {

@@ -265,11 +265,12 @@ text = ""
     expect(result.status).toBe(0);
     const report = JSON.parse(result.stdout) as {
       failed_checks: unknown[];
-      warnings: unknown[];
+      warnings: { path?: string }[];
       categories: Record<string, number>;
       mainline_abilities: { id: string; texture_status: string; sfx_status: string }[];
     };
     expect(report.failed_checks).toEqual([]);
+    expect(report.warnings.every((warning) => !warning.path || !warning.path.startsWith(repoRoot))).toBe(true);
     expect(report.categories).toMatchObject({
       trace_fallbacks: expect.any(Number),
       ability_assets: expect.any(Number),

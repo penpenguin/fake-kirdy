@@ -115,7 +115,7 @@
         {
           "rule": "protected_fallback_event",
           "severity": "warning",
-          "path": "/home/user/repository/fake-kirdy/godot/scripts/player/PlayerController.gd",
+          "path": "godot/scripts/player/PlayerController.gd",
           "event_type": "player.ability_texture.fallback",
           "message": "player.ability_texture.fallback is still observable; keep it out of protected mainline assets.",
           "source_id": "asset-fallback-audit"
@@ -157,7 +157,7 @@
     {
       "rule": "protected_fallback_event",
       "severity": "warning",
-      "path": "/home/user/repository/fake-kirdy/godot/scripts/player/PlayerController.gd",
+      "path": "godot/scripts/player/PlayerController.gd",
       "event_type": "player.ability_texture.fallback",
       "message": "player.ability_texture.fallback is still observable; keep it out of protected mainline assets.",
       "source_id": "asset-fallback-audit"
