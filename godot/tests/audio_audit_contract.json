@@ -1,0 +1,184 @@
+{
+  "version": 1,
+  "source_paths": {
+    "game_session": "godot/scripts/session/GameSession.gd",
+    "asset_manifest": "godot/resources/assets/asset_manifest.json"
+  },
+  "require_asset_files": true,
+  "required_sfx_payload_keys": [
+    "sfx_id",
+    "asset_path",
+    "source_event_type",
+    "category",
+    "volume",
+    "volume_scale",
+    "audio_enabled"
+  ],
+  "required_mix_payload_keys": [
+    "setting_volume",
+    "bgm_volume",
+    "sfx_volume",
+    "ui_sfx_volume",
+    "ducking_active",
+    "audio_enabled",
+    "bgm_playing",
+    "reason"
+  ],
+  "required_sfx_categories": [
+    "attack",
+    "capture",
+    "spit",
+    "damage",
+    "defeat",
+    "acquire",
+    "door",
+    "lock",
+    "ui"
+  ],
+  "required_sfx_events": [
+    {
+      "id": "capture_inhale",
+      "category": "capture",
+      "source_event_type": "enemy.captured",
+      "stream_const": "SfxKirdyInhale",
+      "asset_path": "audio/sfx/kirdy-inhale.wav",
+      "required_source_markers": ["play_sfx(SfxKirdyInhale, -1.0, \"enemy.captured\", \"capture\")"]
+    },
+    {
+      "id": "spit_release",
+      "category": "spit",
+      "source_event_type": "enemy.released",
+      "stream_const": "SfxKirdySpit",
+      "asset_path": "audio/sfx/kirdy-spit.wav",
+      "required_source_markers": ["play_sfx(SfxKirdySpit, -1.0, \"enemy.released\", \"spit\")"]
+    },
+    {
+      "id": "ability_acquire",
+      "category": "acquire",
+      "source_event_type": "ability.acquired",
+      "stream_const": "SfxKirdySwallow",
+      "asset_path": "audio/sfx/kirdy-swallow.wav",
+      "required_source_markers": ["play_sfx(SfxKirdySwallow, -1.0, \"ability.acquired\", \"acquire\")"]
+    },
+    {
+      "id": "fire_attack",
+      "category": "attack",
+      "source_event_type": "ability.used",
+      "stream_const": "SfxAbilityFireAttack",
+      "asset_path": "audio/sfx/ability-fire-attack.wav",
+      "required_source_markers": [
+        "play_sfx(get_ability_sfx(String(player.ability_type)), -1.0, \"ability.used\", \"attack\")",
+        "return SfxAbilityFireAttack"
+      ]
+    },
+    {
+      "id": "ice_attack",
+      "category": "attack",
+      "source_event_type": "ability.used",
+      "stream_const": "SfxAbilityIceAttack",
+      "asset_path": "audio/sfx/ability-ice-attack.wav",
+      "required_source_markers": [
+        "play_sfx(get_ability_sfx(String(player.ability_type)), -1.0, \"ability.used\", \"attack\")",
+        "return SfxAbilityIceAttack"
+      ]
+    },
+    {
+      "id": "sword_attack",
+      "category": "attack",
+      "source_event_type": "ability.used",
+      "stream_const": "SfxAbilitySwordAttack",
+      "asset_path": "audio/sfx/ability-sword-attack.wav",
+      "required_source_markers": [
+        "play_sfx(get_ability_sfx(String(player.ability_type)), -1.0, \"ability.used\", \"attack\")",
+        "return SfxAbilitySwordAttack"
+      ]
+    },
+    {
+      "id": "player_damage",
+      "category": "damage",
+      "source_event_type": "player.damaged",
+      "stream_const": "SfxAbilitySwordAttack",
+      "asset_path": "audio/sfx/ability-sword-attack.wav",
+      "required_source_markers": ["play_sfx(SfxAbilitySwordAttack, -1.0, \"player.damaged\", \"damage\")"]
+    },
+    {
+      "id": "enemy_defeat",
+      "category": "defeat",
+      "source_event_type": "enemy.defeated",
+      "stream_const": "SfxKirdySwallow",
+      "asset_path": "audio/sfx/kirdy-swallow.wav",
+      "required_source_markers": ["play_sfx(SfxKirdySwallow, -1.0, \"enemy.defeated\", \"defeat\")"]
+    },
+    {
+      "id": "door_entered",
+      "category": "door",
+      "source_event_type": "door.entered",
+      "stream_const": "SfxKirdySwallow",
+      "asset_path": "audio/sfx/kirdy-swallow.wav",
+      "required_source_markers": ["play_ui_sfx(null, \"door.entered\", \"door\")"]
+    },
+    {
+      "id": "door_locked",
+      "category": "lock",
+      "source_event_type": "door.locked",
+      "stream_const": "SfxKirdySwallow",
+      "asset_path": "audio/sfx/kirdy-swallow.wav",
+      "required_source_markers": ["play_ui_sfx(null, \"door.locked\", \"lock\")"]
+    },
+    {
+      "id": "pause_ui",
+      "category": "ui",
+      "source_event_type": "pause.toggled",
+      "stream_const": "SfxKirdySwallow",
+      "asset_path": "audio/sfx/kirdy-swallow.wav",
+      "required_source_markers": ["play_ui_sfx(null, \"pause.toggled\", \"ui\")"]
+    },
+    {
+      "id": "settings_ui",
+      "category": "ui",
+      "source_event_type": "settings.menu.opened",
+      "stream_const": "SfxKirdySwallow",
+      "asset_path": "audio/sfx/kirdy-swallow.wav",
+      "required_source_markers": ["play_ui_sfx(null, reason, \"ui\")"]
+    }
+  ],
+  "required_mix_events": [
+    {
+      "id": "session_start_mix",
+      "reason": "session.started",
+      "requires_ducking": false,
+      "required_source_markers": ["update_audio_mix(\"session.started\", true)"]
+    },
+    {
+      "id": "pause_ducking_mix",
+      "reason": "pause.toggled",
+      "requires_ducking": true,
+      "required_source_markers": ["update_audio_mix(\"pause.toggled\", true)"]
+    },
+    {
+      "id": "pause_settings_ducking_mix",
+      "reason": "pause.settings.opened",
+      "requires_ducking": true,
+      "required_source_markers": ["update_audio_mix(\"pause.settings.opened\", true)"]
+    },
+    {
+      "id": "settings_menu_ducking_mix",
+      "reason": "settings.menu.opened",
+      "requires_ducking": true,
+      "required_source_markers": [
+        "func open_settings_menu(reason: String = \"settings.menu.opened\") -> void:",
+        "update_audio_mix(reason, true)"
+      ]
+    },
+    {
+      "id": "settings_volume_mix",
+      "reason": "settings.volume_up",
+      "requires_ducking": true,
+      "required_source_markers": [
+        "\"volume\": setting_volume + settings_volume_step",
+        "}, \"settings.volume_up\")",
+        "update_audio_mix(reason, true)"
+      ]
+    }
+  ]
+}

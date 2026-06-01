@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "source_paths": {
+    "simple_enemy": "godot/scripts/enemies/SimpleEnemy.gd",
+    "flying_enemy": "godot/scripts/enemies/FlyingEnemy.gd",
+    "game_session": "godot/scripts/session/GameSession.gd"
+  },
+  "arena_defaults": {
+    "delta_ms": 100,
+    "max_frames": 80,
+    "spawn_x": 0,
+    "spawn_y": 0,
+    "player_near_distance": 64,
+    "player_far_distance": 420,
+    "damage_per_hit": 1
+  },
+  "cases": [
+    {
+      "id": "spark_ground_patrol_chase_attack",
+      "enemy_type": "simple_ground",
+      "ability_type": "spark",
+      "patrol_radius": 48,
+      "expected_events": [
+        "enemy.ai.patrol",
+        "enemy.ai.detected",
+        "enemy.ai.chase",
+        "enemy.attack.started",
+        "enemy.attack.cooldown",
+        "enemy.ai.return",
+        "enemy.hurt",
+        "enemy.defeated"
+      ],
+      "movement_bounds": {
+        "max_patrol_distance": 48
+      }
+    },
+    {
+      "id": "frost_flying_hover_profile",
+      "enemy_type": "flying_enemy",
+      "ability_type": "frost",
+      "patrol_radius": 36,
+      "expected_profile": {
+        "ai_behavior": "frost_hover",
+        "hover_amplitude": 24
+      },
+      "expected_events": [
+        "enemy.ai.profile.applied",
+        "enemy.ai.hover",
+        "enemy.ai.detected",
+        "enemy.ai.chase",
+        "enemy.attack.started",
+        "enemy.attack.cooldown",
+        "enemy.ai.return",
+        "enemy.defeated"
+      ],
+      "movement_bounds": {
+        "max_patrol_distance": 36,
+        "max_hover_amplitude": 32
+      }
+    },
+    {
+      "id": "fire_ground_rush_profile",
+      "enemy_type": "simple_ground",
+      "ability_type": "fire",
+      "patrol_radius": 40,
+      "expected_profile": {
+        "ai_behavior": "fire_rush",
+        "chase_speed": 92
+      },
+      "expected_events": [
+        "enemy.ai.profile.applied",
+        "enemy.ai.patrol",
+        "enemy.ai.detected",
+        "enemy.ai.chase",
+        "enemy.attack.started",
+        "enemy.attack.cooldown",
+        "enemy.ai.return",
+        "enemy.defeated"
+      ],
+      "movement_bounds": {
+        "max_patrol_distance": 40
+      }
+    },
+    {
+      "id": "stone_sentry_return_profile",
+      "enemy_type": "simple_ground",
+      "ability_type": "stone",
+      "patrol_radius": 24,
+      "player_far_distance": 240,
+      "expected_profile": {
+        "ai_behavior": "stone_sentry",
+        "return_radius": 180
+      },
+      "expected_events": [
+        "enemy.ai.profile.applied",
+        "enemy.ai.patrol",
+        "enemy.ai.detected",
+        "enemy.ai.chase",
+        "enemy.attack.started",
+        "enemy.attack.cooldown",
+        "enemy.ai.return",
+        "enemy.defeated"
+      ],
+      "movement_bounds": {
+        "max_patrol_distance": 24
+      }
+    }
+  ],
+  "rules": {
+    "expected_events": {
+      "severity": "error"
+    },
+    "ability_profile_applied": {
+      "severity": "error"
+    },
+    "movement_bounds": {
+      "severity": "error"
+    },
+    "cooldown_after_attack": {
+      "severity": "error"
+    }
+  }
+}

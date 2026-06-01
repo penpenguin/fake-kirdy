@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "source_paths": {
+    "player_tuning": "godot/scripts/player/PlayerTuning.gd",
+    "game_session": "godot/scripts/session/GameSession.gd"
+  },
+  "simulation": {
+    "fps": 60,
+    "max_seconds": 4,
+    "target_speed_ratio": 0.95
+  },
+  "metrics": {
+    "jump_apex_frames": {
+      "min": 12,
+      "max": 32
+    },
+    "jump_height_px": {
+      "min": 50,
+      "max": 120
+    },
+    "landing_frames": {
+      "min": 24,
+      "max": 80
+    },
+    "coyote_time_frames": {
+      "min": 4,
+      "max": 10
+    },
+    "jump_buffer_frames": {
+      "min": 5,
+      "max": 12
+    },
+    "hover_max_fall_speed": {
+      "min": 40,
+      "max": 140
+    },
+    "acceleration_frames": {
+      "min": 4,
+      "max": 12
+    },
+    "stop_frames": {
+      "min": 3,
+      "max": 10
+    },
+    "turn_frames": {
+      "min": 6,
+      "max": 18
+    },
+    "attack_latency_frames": {
+      "min": 0,
+      "max": 6
+    },
+    "spark_dash_distance_px": {
+      "min": 40,
+      "max": 96
+    },
+    "damage_recovery_frames": {
+      "min": 24,
+      "max": 80
+    }
+  }
+}

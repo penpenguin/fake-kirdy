@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "snapshot_id": "pause_overlay_menu",
+  "content_hash": "22d5887f5ad2451a593e80dd544adbd95323f68b84652d2ecc5e0be080fc39ac",
+  "replay_path": "godot/tests/replays/pause_toggle_menu.json",
+  "frame": 4,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "pause_overlay"
+  ],
+  "required_scene_paths": [
+    "godot/scenes/ui/PauseOverlay.tscn",
+    "godot/scenes/ui/PauseScene.tscn"
+  ],
+  "required_resource_paths": []
+}

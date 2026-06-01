@@ -1,0 +1,161 @@
+{
+  "version": 1,
+  "source_path": "godot/scripts/session/GameSession.gd",
+  "profile_defaults": {
+    "spit": {
+      "attack_type": "projectile",
+      "cooldown_ms": 360
+    },
+    "none": {
+      "source": "contract.no_direct_attack",
+      "can_attack": false,
+      "damage": 0,
+      "range": 0,
+      "cooldown_ms": 0,
+      "attack_type": "none"
+    }
+  },
+  "abilities": [
+    {
+      "id": "fire",
+      "aliases": ["flame"],
+      "role": "ranged_projectile",
+      "expectations": {
+        "attack_type": "projectile",
+        "min_damage": 2,
+        "min_range": 200,
+        "max_cooldown_ms": 300
+      }
+    },
+    {
+      "id": "frost",
+      "aliases": ["ice"],
+      "role": "control_beam",
+      "expectations": {
+        "attack_type": "beam",
+        "status": "frozen",
+        "min_range": 160,
+        "max_cooldown_ms": 260
+      }
+    },
+    {
+      "id": "sword",
+      "role": "close_melee",
+      "expectations": {
+        "attack_type": "melee",
+        "min_damage": 2,
+        "max_range": 120,
+        "max_cooldown_ms": 220
+      }
+    },
+    {
+      "id": "spark",
+      "role": "dash_burst",
+      "expectations": {
+        "attack_type": "burst",
+        "movement_effect": "dash",
+        "min_damage": 2,
+        "min_range": 120,
+        "max_cooldown_ms": 280
+      }
+    },
+    {
+      "id": "stone",
+      "role": "heavy_short_range",
+      "expectations": {
+        "attack_type": "heavy",
+        "min_damage": 3,
+        "max_range": 100,
+        "max_cooldown_ms": 360
+      }
+    },
+    {
+      "id": "spit",
+      "role": "captured_enemy_projectile",
+      "expectations": {
+        "attack_type": "projectile",
+        "min_damage": 2,
+        "min_range": 200
+      }
+    },
+    {
+      "id": "none",
+      "role": "no_direct_attack",
+      "expectations": {
+        "can_attack": false,
+        "attack_type": "none",
+        "max_range": 0
+      }
+    }
+  ],
+  "difficulty_order": ["easy", "normal", "hard"],
+  "difficulties": {
+    "easy": {
+      "enemy_hp_multiplier": 0.75
+    },
+    "normal": {
+      "enemy_hp_multiplier": 1.0
+    },
+    "hard": {
+      "enemy_hp_multiplier": 1.5
+    }
+  },
+  "enemy_archetypes": [
+    {
+      "id": "ground",
+      "type": "ground",
+      "base_hp": 2,
+      "ttk_seconds": {
+        "min": 0,
+        "max": 4
+      }
+    },
+    {
+      "id": "flying",
+      "type": "flying",
+      "base_hp": 2,
+      "ttk_seconds": {
+        "min": 0,
+        "max": 4
+      }
+    },
+    {
+      "id": "elite",
+      "type": "elite",
+      "base_hp": 45,
+      "ttk_seconds": {
+        "min": 2.5,
+        "max": 15
+      }
+    },
+    {
+      "id": "boss",
+      "type": "boss",
+      "base_hp": 230,
+      "ttk_seconds": {
+        "min": 15,
+        "max": 90
+      },
+      "ttk_seconds_by_difficulty": {
+        "normal": {
+          "min": 20,
+          "max": 60
+        }
+      }
+    }
+  ],
+  "rules": {
+    "matrix_coverage": {
+      "severity": "error"
+    },
+    "role_expectations": {
+      "severity": "error"
+    },
+    "ttk_range": {
+      "severity": "error"
+    },
+    "difficulty_monotonicity": {
+      "severity": "error"
+    }
+  }
+}

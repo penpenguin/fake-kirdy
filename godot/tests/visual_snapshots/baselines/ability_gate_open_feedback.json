@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "snapshot_id": "ability_gate_open_feedback",
+  "content_hash": "6ed06a34bf1553ad30eefb32466b992c7bda47da0c68a213dc6be80e30f8ec6f",
+  "replay_path": "godot/tests/replays/fire_area_ability_gate_trace.json",
+  "frame": 25,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "ability_feedback",
+    "ability_gate",
+    "hud"
+  ],
+  "required_scene_paths": [
+    "godot/scenes/ui/HudOverlay.tscn"
+  ],
+  "required_resource_paths": [
+    "godot/resources/assets/images/effects/fire-attack.webp"
+  ]
+}

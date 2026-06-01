@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "trace_path": "godot/tests/trace_assertions/fixtures/combat_projectile_trace.ndjson",
+  "assertions": [
+    {
+      "id": "ability_spawns_projectile_within_20_frames",
+      "type": "event_sequence",
+      "events": [
+        "ability.used",
+        "ability.projectile.spawned"
+      ],
+      "max_frame_span": 20
+    },
+    {
+      "id": "projectile_hit_before_damage",
+      "type": "event_sequence",
+      "events": [
+        "ability.projectile.hit",
+        "enemy.damaged",
+        "enemy.defeated"
+      ],
+      "max_frame_span": 5
+    },
+    {
+      "id": "damage_payload_reduces_hp",
+      "type": "payload_conditions",
+      "event_type": "enemy.damaged",
+      "conditions": [
+        {
+          "path": "payload.damage_amount",
+          "op": ">",
+          "value": 0
+        },
+        {
+          "path": "payload.enemy_hp_after",
+          "op": "<",
+          "other_path": "payload.enemy_hp_before"
+        }
+      ]
+    },
+    {
+      "id": "no_level_load_after_finish",
+      "type": "forbidden_event",
+      "event_type": "level.loaded",
+      "after_event": "run.finished"
+    }
+  ]
+}

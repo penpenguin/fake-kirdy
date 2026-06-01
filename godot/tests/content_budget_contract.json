@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "source_paths": {
+    "catalog_source": "godot/levels/level_catalog.source.json",
+    "procedural_levels": "godot/levels/generated/procedural_levels.json"
+  },
+  "include_migration_statuses": ["representative"],
+  "generated_profile_by_shape": {
+    "branch_room": "branch",
+    "vertical_route": "branch",
+    "reliquary_gate": "reliquary",
+    "terminal_goal": "terminal"
+  },
+  "catalog_profile_by_tag": {
+    "hub": "hub",
+    "combat": "arena",
+    "reliquary": "reliquary",
+    "goal": "terminal"
+  },
+  "required_metrics": [
+    "enemy_count",
+    "enemy_density",
+    "heal_amount",
+    "key_count",
+    "ability_gate_count",
+    "hazard_count",
+    "platform_count",
+    "vertical_travel_px",
+    "hidden_count",
+    "rest_stop_count",
+    "door_preview_spacing_px",
+    "goal_distance_px"
+  ],
+  "profiles": {
+    "hub": {
+      "min": {
+        "door_count": 3,
+        "heal_amount": 1,
+        "rest_stop_count": 1,
+        "content_score": 2
+      },
+      "max": {
+        "enemy_count": 0,
+        "hazard_count": 0
+      }
+    },
+    "branch": {
+      "min": {
+        "door_count": 1,
+        "platform_count": 1,
+        "critical_path_px": 280,
+        "door_preview_spacing_px": 64,
+        "content_score": 2
+      },
+      "max": {
+        "enemy_density": 0.02
+      }
+    },
+    "arena": {
+      "min": {
+        "enemy_count": 1,
+        "content_score": 1
+      },
+      "max": {
+        "enemy_count": 6
+      }
+    },
+    "reliquary": {
+      "min": {
+        "key_count": 1,
+        "enemy_count": 1,
+        "door_count": 1,
+        "critical_path_px": 280,
+        "door_preview_spacing_px": 64,
+        "content_score": 3
+      },
+      "equals": {
+        "collectible_visibility": "critical_path"
+      }
+    },
+    "terminal": {
+      "min": {
+        "goal_count": 1,
+        "goal_distance_px": 64,
+        "door_count": 0,
+        "content_score": 1
+      },
+      "max": {
+        "enemy_count": 3
+      }
+    }
+  }
+}

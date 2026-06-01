@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "snapshot_id": "hidden_discovery_feedback",
+  "content_hash": "4a25c2efafde491b12a66f808c9b62238b1c40d40842c14a4ebe596c523b6e22",
+  "replay_path": "godot/tests/replays/hidden_discovery_path.json",
+  "frame": 25,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "hidden_discovery",
+    "hud"
+  ],
+  "required_scene_paths": [
+    "godot/scenes/ui/HudOverlay.tscn"
+  ],
+  "required_resource_paths": [
+    "godot/resources/assets/images/items/heal-orb.webp"
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "version": 1,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "required_visual_tags": [
+    "hud",
+    "ability_feedback",
+    "locked_door",
+    "map_overlay",
+    "pause_overlay",
+    "settings_overlay",
+    "result_overlay",
+    "virtual_controls"
+  ],
+  "snapshots": [
+    {
+      "id": "hud_controller_lab_jump",
+      "replay_path": "godot/tests/replays/controller_lab_jump.json",
+      "frame": 30,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/hud_controller_lab_jump.json",
+      "visual_tags": ["hud"],
+      "required_scene_paths": ["godot/scenes/ui/HudOverlay.tscn"],
+      "required_resource_paths": ["godot/resources/assets/images/characters/kirdy/kirdy-jump.webp"]
+    },
+    {
+      "id": "ability_feedback_fire_projectile",
+      "replay_path": "godot/tests/replays/fire_ability_projectile_hit.json",
+      "frame": 75,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/ability_feedback_fire_projectile.json",
+      "visual_tags": ["ability_feedback", "hud"],
+      "required_scene_paths": ["godot/scenes/combat/AbilityProjectile.tscn", "godot/scenes/ui/HudOverlay.tscn"],
+      "required_resource_paths": ["godot/resources/assets/images/effects/fire-attack.webp"]
+    },
+    {
+      "id": "enemy_hit_feedback",
+      "replay_path": "godot/tests/replays/combat_ability_damage_enemy.json",
+      "frame": 70,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/enemy_hit_feedback.json",
+      "visual_tags": ["ability_feedback"],
+      "required_scene_paths": ["godot/scenes/enemies/SimpleEnemy.tscn"],
+      "required_resource_paths": ["godot/resources/assets/images/enemies/wabble-bee.webp"]
+    },
+    {
+      "id": "locked_door_reason_hud",
+      "replay_path": "godot/tests/replays/combat_locked_door_without_ability.json",
+      "frame": 18,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/locked_door_reason_hud.json",
+      "visual_tags": ["locked_door", "hud"],
+      "required_scene_paths": ["godot/scenes/ui/HudOverlay.tscn"],
+      "required_resource_paths": ["godot/resources/assets/images/ui/locked-door.webp"]
+    },
+    {
+      "id": "map_overlay_visibility",
+      "replay_path": "godot/tests/replays/map_toggle_visibility.json",
+      "frame": 12,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/map_overlay_visibility.json",
+      "visual_tags": ["map_overlay"],
+      "required_scene_paths": ["godot/scenes/ui/MapOverlay.tscn"],
+      "required_resource_paths": ["godot/resources/assets/images/ui/door-marker.webp", "godot/resources/assets/images/ui/goal-door.webp"]
+    },
+    {
+      "id": "pause_overlay_menu",
+      "replay_path": "godot/tests/replays/pause_toggle_menu.json",
+      "frame": 4,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/pause_overlay_menu.json",
+      "visual_tags": ["pause_overlay"],
+      "required_scene_paths": ["godot/scenes/ui/PauseOverlay.tscn", "godot/scenes/ui/PauseScene.tscn"],
+      "required_resource_paths": []
+    },
+    {
+      "id": "settings_overlay_menu",
+      "replay_path": "godot/tests/replays/settings_menu_flow.json",
+      "frame": 20,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/settings_overlay_menu.json",
+      "visual_tags": ["settings_overlay"],
+      "required_scene_paths": ["godot/scenes/ui/SettingsOverlay.tscn"],
+      "required_resource_paths": ["godot/resources/shaders/SettingsBlur.gdshader"]
+    },
+    {
+      "id": "result_overlay_finish",
+      "replay_path": "godot/tests/replays/mirror_to_goal_sanctum_finish.json",
+      "frame": 200,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/result_overlay_finish.json",
+      "visual_tags": ["result_overlay"],
+      "required_scene_paths": ["godot/scenes/ui/ResultOverlay.tscn", "godot/scenes/ui/ResultsScene.tscn"],
+      "required_resource_paths": []
+    },
+    {
+      "id": "virtual_controls_touch",
+      "replay_path": "godot/tests/replays/virtual_controls_touch_mode.json",
+      "frame": 10,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/virtual_controls_touch.json",
+      "visual_tags": ["virtual_controls"],
+      "required_scene_paths": ["godot/scenes/ui/VirtualControlsOverlay.tscn"],
+      "required_resource_paths": ["godot/resources/assets/images/ui/virtual-controls.webp"]
+    },
+    {
+      "id": "hidden_discovery_feedback",
+      "replay_path": "godot/tests/replays/hidden_discovery_path.json",
+      "frame": 25,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/hidden_discovery_feedback.json",
+      "visual_tags": ["hidden_discovery", "hud"],
+      "required_scene_paths": ["godot/scenes/ui/HudOverlay.tscn"],
+      "required_resource_paths": ["godot/resources/assets/images/items/heal-orb.webp"]
+    },
+    {
+      "id": "ability_gate_open_feedback",
+      "replay_path": "godot/tests/replays/fire_area_ability_gate_trace.json",
+      "frame": 25,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/ability_gate_open_feedback.json",
+      "visual_tags": ["ability_gate", "ability_feedback", "hud"],
+      "required_scene_paths": ["godot/scenes/ui/HudOverlay.tscn"],
+      "required_resource_paths": ["godot/resources/assets/images/effects/fire-attack.webp"]
+    }
+  ]
+}

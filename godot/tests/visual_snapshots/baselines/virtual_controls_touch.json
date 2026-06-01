@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "snapshot_id": "virtual_controls_touch",
+  "content_hash": "2140d873510f2d3655b362387e4ebcbd674dece0c5ebbc08291234b1b1220875",
+  "replay_path": "godot/tests/replays/virtual_controls_touch_mode.json",
+  "frame": 10,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "virtual_controls"
+  ],
+  "required_scene_paths": [
+    "godot/scenes/ui/VirtualControlsOverlay.tscn"
+  ],
+  "required_resource_paths": [
+    "godot/resources/assets/images/ui/virtual-controls.webp"
+  ]
+}

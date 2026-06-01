@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "export_dir": "dist",
+  "required_artifacts": ["index.html", "*.js", "*.wasm", "*.pck"],
+  "required_html_markers": ["<canvas", "webgl-fallback.js"],
+  "required_headers": [
+    "Cross-Origin-Opener-Policy",
+    "Cross-Origin-Embedder-Policy"
+  ],
+  "forbidden_console_patterns": [
+    "Error",
+    "Unhandled",
+    "Failed to load",
+    "wasm streaming compile failed"
+  ],
+  "smoke_steps": [
+    {
+      "id": "document_loaded",
+      "category": "load",
+      "expression": "document.readyState === \"complete\" || document.readyState === \"interactive\"",
+      "expected": true
+    },
+    {
+      "id": "canvas_present",
+      "category": "canvas",
+      "expression": "document.querySelectorAll(\"canvas\").length >= 1",
+      "expected": true
+    },
+    {
+      "id": "keyboard_input_dispatch",
+      "category": "input",
+      "expression": "window.dispatchEvent(new KeyboardEvent(\"keydown\", { code: \"Space\", key: \" \" })) === true",
+      "expected": true
+    },
+    {
+      "id": "pause_input_dispatch",
+      "category": "pause",
+      "expression": "window.dispatchEvent(new KeyboardEvent(\"keydown\", { code: \"Escape\", key: \"Escape\" })) === true",
+      "expected": true
+    },
+    {
+      "id": "map_input_dispatch",
+      "category": "map",
+      "expression": "window.dispatchEvent(new KeyboardEvent(\"keydown\", { code: \"KeyM\", key: \"m\" })) === true",
+      "expected": true
+    },
+    {
+      "id": "console_error_guard",
+      "category": "console",
+      "expression": "window.__fakeKirdySmokeConsoleErrors.length === 0",
+      "expected": true
+    }
+  ],
+  "runtime": {
+    "warmup_ms": 1500,
+    "sample_ms": 900,
+    "max_boot_wait_ms": 12000,
+    "min_canvas_count": 1,
+    "min_fps": 20
+  },
+  "rules": {
+    "export_artifact": {
+      "severity": "error"
+    },
+    "html_marker": {
+      "severity": "error"
+    },
+    "server_header_contract": {
+      "severity": "error"
+    },
+    "smoke_step_coverage": {
+      "severity": "error"
+    },
+    "browser_missing": {
+      "severity": "error"
+    },
+    "console_error": {
+      "severity": "error"
+    },
+    "runtime_smoke_step": {
+      "severity": "error"
+    },
+    "runtime_canvas": {
+      "severity": "error"
+    },
+    "runtime_fps": {
+      "severity": "error"
+    }
+  }
+}

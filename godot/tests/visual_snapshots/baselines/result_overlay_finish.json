@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "snapshot_id": "result_overlay_finish",
+  "content_hash": "52d339165e4a8891b9ed245f74a4e611b526a84e685e7c00e2864a19b2a53bc5",
+  "replay_path": "godot/tests/replays/mirror_to_goal_sanctum_finish.json",
+  "frame": 200,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "result_overlay"
+  ],
+  "required_scene_paths": [
+    "godot/scenes/ui/ResultOverlay.tscn",
+    "godot/scenes/ui/ResultsScene.tscn"
+  ],
+  "required_resource_paths": []
+}

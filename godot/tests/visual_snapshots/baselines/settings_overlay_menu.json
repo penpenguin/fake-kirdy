@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "snapshot_id": "settings_overlay_menu",
+  "content_hash": "7029a98df7e247fb72dbbddc642a18d80132b6a46594e2cf81962b5dec09b6ab",
+  "replay_path": "godot/tests/replays/settings_menu_flow.json",
+  "frame": 20,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "settings_overlay"
+  ],
+  "required_scene_paths": [
+    "godot/scenes/ui/SettingsOverlay.tscn"
+  ],
+  "required_resource_paths": [
+    "godot/resources/shaders/SettingsBlur.gdshader"
+  ]
+}

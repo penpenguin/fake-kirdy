@@ -1,0 +1,116 @@
+{
+  "version": 1,
+  "source_paths": {
+    "player_controller": "godot/scripts/player/PlayerController.gd",
+    "game_session": "godot/scripts/session/GameSession.gd",
+    "asset_manifest": "godot/resources/assets/asset_manifest.json",
+    "source_roots": [
+      "godot/scripts",
+      "godot/scenes",
+      "godot/levels",
+      "godot/resources/assets"
+    ]
+  },
+  "mainline_abilities": [
+    {
+      "id": "fire",
+      "aliases": ["flame", "burn"],
+      "texture_var": "kirdy_fire_texture",
+      "allowed_sfx_streams": ["SfxAbilityFireAttack"]
+    },
+    {
+      "id": "frost",
+      "aliases": ["ice"],
+      "texture_var": "kirdy_ice_texture",
+      "allowed_sfx_streams": ["SfxAbilityIceAttack"]
+    },
+    {
+      "id": "sword",
+      "aliases": ["blade"],
+      "texture_var": "kirdy_sword_texture",
+      "allowed_sfx_streams": ["SfxAbilitySwordAttack"]
+    },
+    {
+      "id": "spark",
+      "texture_var": "kirdy_sword_texture",
+      "allowed_sfx_streams": ["SfxKirdySpit"]
+    },
+    {
+      "id": "leaf",
+      "texture_var": "kirdy_ice_texture",
+      "allowed_sfx_streams": ["SfxKirdyInhale"]
+    },
+    {
+      "id": "stone",
+      "texture_var": "kirdy_sword_texture",
+      "allowed_sfx_streams": ["SfxAbilitySwordAttack"]
+    }
+  ],
+  "required_asset_paths": [
+    "audio/bgm-main.wav",
+    "audio/sfx/ability-fire-attack.wav",
+    "audio/sfx/ability-ice-attack.wav",
+    "audio/sfx/ability-sword-attack.wav",
+    "audio/sfx/kirdy-inhale.wav",
+    "audio/sfx/kirdy-spit.wav",
+    "audio/sfx/kirdy-swallow.wav",
+    "images/characters/kirdy/kirdy-fire.webp",
+    "images/characters/kirdy/kirdy-ice.webp",
+    "images/characters/kirdy/kirdy-sword.webp",
+    "images/effects/fire-attack.webp",
+    "images/effects/ice-attack.webp",
+    "images/effects/sword-slash.webp",
+    "images/enemies/dronto-durt.webp",
+    "images/enemies/wabble-bee.webp",
+    "images/ui/door-marker.webp",
+    "images/ui/goal-door.webp",
+    "images/ui/locked-door.webp"
+  ],
+  "primary_enemy_assets": [
+    "images/enemies/dronto-durt.webp",
+    "images/enemies/wabble-bee.webp"
+  ],
+  "allowed_fallback_event_types": [
+    "inhale.effect.fallback",
+    "save.session_storage_fallback.written"
+  ],
+  "allowed_unused_assets": [
+    "images/fallbacks/kirdy-placeholder.webp",
+    "images/fallbacks/virtual-controls.webp"
+  ],
+  "rules": {
+    "mainline_ability_texture": {
+      "severity": "error"
+    },
+    "mainline_ability_sfx": {
+      "severity": "error"
+    },
+    "ability_sfx_default_fire_fallback": {
+      "severity": "error"
+    },
+    "missing_manifest_asset": {
+      "severity": "error"
+    },
+    "missing_asset_file": {
+      "severity": "error"
+    },
+    "missing_primary_enemy_asset": {
+      "severity": "error"
+    },
+    "resource_path_in_manifest": {
+      "severity": "error"
+    },
+    "resource_path_exists": {
+      "severity": "error"
+    },
+    "empty_label_text": {
+      "severity": "error"
+    },
+    "protected_fallback_event": {
+      "severity": "warning"
+    },
+    "unused_manifest_asset": {
+      "severity": "warning"
+    }
+  }
+}

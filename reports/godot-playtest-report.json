@@ -1,0 +1,148 @@
+{
+  "version": 1,
+  "generated_at": "1970-01-01T00:00:00.000Z",
+  "source": {
+    "trace_path": "godot/tests/playtest_sessions/manual_smoke_trace.ndjson",
+    "bookmarks_path": "godot/tests/playtest_sessions/manual_smoke_bookmarks.json"
+  },
+  "summary": {
+    "duration_ms": 4000,
+    "event_count": 6,
+    "sample_count": 5,
+    "bookmark_count": 1,
+    "generated_task_count": 0
+  },
+  "coverage": {
+    "navigation_blocker": false,
+    "combat_feedback": false,
+    "enemy_ai": false,
+    "objective_clarity": false,
+    "web_runtime": false
+  },
+  "unresolved_issue_count": 0,
+  "samples": [
+    {
+      "frame": 0,
+      "time_ms": 0,
+      "level_id": "central_hub",
+      "position": {
+        "x": 32,
+        "y": 96
+      },
+      "hp": 6,
+      "ability_type": "none",
+      "enemy_count": 0,
+      "fps": 60,
+      "screenshot_path": "reports/playtest-shots/manual-smoke-0000.png",
+      "recent_events": [
+        "player.spawned"
+      ]
+    },
+    {
+      "frame": 60,
+      "time_ms": 1000,
+      "level_id": "central_hub",
+      "position": {
+        "x": 144,
+        "y": 96
+      },
+      "hp": 6,
+      "ability_type": "fire",
+      "enemy_count": 1,
+      "fps": 59,
+      "screenshot_path": "reports/playtest-shots/manual-smoke-0001.png",
+      "recent_events": [
+        "player.spawned",
+        "playtest.sample"
+      ]
+    },
+    {
+      "frame": 120,
+      "time_ms": 2000,
+      "level_id": "central_hub",
+      "position": {
+        "x": 224,
+        "y": 96
+      },
+      "hp": 6,
+      "ability_type": "fire",
+      "enemy_count": 0,
+      "fps": 58,
+      "screenshot_path": "reports/playtest-shots/manual-smoke-0002.png",
+      "recent_events": [
+        "player.spawned",
+        "playtest.sample",
+        "ability.used",
+        "door.entered"
+      ]
+    },
+    {
+      "frame": 180,
+      "time_ms": 3000,
+      "level_id": "fire_area",
+      "position": {
+        "x": 64,
+        "y": 112
+      },
+      "hp": 6,
+      "ability_type": "fire",
+      "enemy_count": 2,
+      "fps": 58,
+      "screenshot_path": "reports/playtest-shots/manual-smoke-0003.png",
+      "recent_events": [
+        "player.spawned",
+        "playtest.sample",
+        "ability.used",
+        "door.entered",
+        "playtest.sample"
+      ]
+    },
+    {
+      "frame": 240,
+      "time_ms": 4000,
+      "level_id": "fire_area",
+      "position": {
+        "x": 160,
+        "y": 112
+      },
+      "hp": 6,
+      "ability_type": "fire",
+      "enemy_count": 1,
+      "fps": 59,
+      "screenshot_path": "reports/playtest-shots/manual-smoke-0004.png",
+      "recent_events": [
+        "playtest.sample",
+        "ability.used",
+        "door.entered",
+        "playtest.sample",
+        "run.finished"
+      ]
+    }
+  ],
+  "bookmarks": [
+    {
+      "id": "manual_smoke_navigation_clear",
+      "kind": "note",
+      "category": "objective_clarity",
+      "severity": "info",
+      "status": "resolved",
+      "note": "Manual smoke path reached the next stage and kept the objective readable.",
+      "level_id": "fire_area",
+      "frame": null,
+      "time_ms": 3000,
+      "position": {
+        "x": 64,
+        "y": 112
+      },
+      "screenshot_path": "reports/playtest-shots/manual-smoke-0003.png",
+      "recent_events": [
+        "player.spawned",
+        "playtest.sample",
+        "ability.used",
+        "door.entered",
+        "playtest.sample"
+      ]
+    }
+  ],
+  "generated_tasks": []
+}

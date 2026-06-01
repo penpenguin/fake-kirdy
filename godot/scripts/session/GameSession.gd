@@ -70,6 +70,7 @@ var discovered_hidden_feature_ids: Dictionary = {}
 var completed_dead_end_ids: Dictionary = {}
 var explored_tiles: Dictionary = {}
 var last_locked_door_reason: String = ""
+var last_locked_door_audio_key: String = ""
 var ability_cooldown_remaining_ms: int = 0
 var saved_level_id: String = ""
 var saved_player_position: Vector2 = Vector2.ZERO
@@ -193,6 +194,7 @@ func start_session(start_level_id: String, start_spawn_id: String = "default", f
     completed_dead_end_ids.clear()
     explored_tiles.clear()
     last_locked_door_reason = ""
+    last_locked_door_audio_key = ""
     ability_cooldown_remaining_ms = 0
     saved_level_id = ""
     saved_player_position = Vector2.ZERO
@@ -610,7 +612,7 @@ func capture_nearest_enemy() -> void:
     captured_enemy.call("capture", player)
     if player.has_method("show_inhale_effect_fallback"):
         player.call("show_inhale_effect_fallback", captured_enemy.global_position)
-    play_sfx(SfxKirdyInhale)
+    play_sfx(SfxKirdyInhale, -1.0, "enemy.captured", "capture")
     trace_recorder.call("record_player_event", "enemy.captured", {
         "level_id": current_level_id,
         "player": get_player_trace(),
@@ -672,7 +674,7 @@ func release_captured_enemy() -> void:
     captured_enemy = null
     hide_inhale_effect_fallback()
     released_enemy.call("release")
-    play_sfx(SfxKirdySpit)
+    play_sfx(SfxKirdySpit, -1.0, "enemy.released", "spit")
     var spit_profile := {
         "damage": 2,
         "range": 220.0,
@@ -718,7 +720,7 @@ func swallow_captured_enemy() -> void:
     swallowed_enemy.call("swallow")
     player.call("set_ability_type", swallowed_enemy.ability_type)
     clear_resolved_locked_door_reason("missing_ability", String(swallowed_enemy.ability_type))
-    play_sfx(SfxKirdySwallow)
+    play_sfx(SfxKirdySwallow, -1.0, "ability.acquired", "acquire")
     trace_recorder.call("record_player_event", "enemy.swallowed", {
         "level_id": current_level_id,
         "player": get_player_trace(),
@@ -766,7 +768,7 @@ func use_ability() -> void:
     var ability_type := String(player.ability_type)
     var profile := get_ability_profile(ability_type)
     ability_cooldown_remaining_ms = int(profile.get("cooldown_ms", 0))
-    play_sfx(get_ability_sfx(String(player.ability_type)))
+    play_sfx(get_ability_sfx(String(player.ability_type)), -1.0, "ability.used", "attack")
     apply_ability_movement(ability_type, profile)
     trace_recorder.call("record_player_event", "ability.used", {
         "level_id": current_level_id,
@@ -1035,6 +1037,7 @@ func apply_damage_to_enemy(enemy: Node, amount: int, source: Dictionary = {}, kn
     })
 
     if bool(result.get("defeated", false)):
+        play_sfx(SfxKirdySwallow, -1.0, "enemy.defeated", "defeat")
         mark_enemy_defeated(result)
         trace_recorder.call("record_player_event", "enemy.defeated", {
             "level_id": current_level_id,
@@ -1323,6 +1326,7 @@ func damage_player(amount: int, source: Dictionary = {}) -> void:
         return
 
     player_hp = max(player_hp - normalized_amount, 0)
+    play_sfx(SfxAbilitySwordAttack, -1.0, "player.damaged", "damage")
     trace_recorder.call("record_player_event", "player.damaged", {
         "level_id": current_level_id,
         "player": get_player_trace(),
@@ -1896,29 +1900,82 @@ func volume_to_db(linear_volume: float) -> float:
     return linear_to_db(clamped_volume)
 
 
-func play_sfx(stream: AudioStream, volume_scale: float = -1.0) -> void:
+func play_sfx(stream: AudioStream, volume_scale: float = -1.0, source_event_type: String = "", category: String = "sfx") -> void:
     if not audio_enabled or sfx_player == null or stream == null:
         return
 
     var resolved_volume_scale := sfx_volume_scale if volume_scale < 0.0 else volume_scale
+    var resolved_volume := clampf(setting_volume * resolved_volume_scale, 0.0, 1.0)
     sfx_player.stream = stream
-    sfx_player.volume_db = volume_to_db(clampf(setting_volume * resolved_volume_scale, 0.0, 1.0))
+    sfx_player.volume_db = volume_to_db(resolved_volume)
     sfx_player.play()
+    if trace_recorder != null:
+        trace_recorder.call("record_event", "audio.sfx.played", {
+            "sfx_id": get_sfx_id_for_stream(stream),
+            "asset_path": get_sfx_asset_path_for_stream(stream),
+            "source_event_type": source_event_type,
+            "category": category,
+            "volume": resolved_volume,
+            "volume_scale": resolved_volume_scale,
+            "audio_enabled": audio_enabled,
+        })
 
 
-func play_ui_sfx(stream: AudioStream = null) -> void:
+func play_ui_sfx(stream: AudioStream = null, source_event_type: String = "ui.sfx", category: String = "ui") -> void:
     var resolved_stream := SfxKirdySwallow if stream == null else stream
-    play_sfx(resolved_stream, ui_sfx_volume_scale)
+    play_sfx(resolved_stream, ui_sfx_volume_scale, source_event_type, category)
+
+
+func get_sfx_id_for_stream(stream: AudioStream) -> String:
+    if stream == SfxKirdyInhale:
+        return "kirdy_inhale"
+    if stream == SfxKirdySwallow:
+        return "kirdy_swallow"
+    if stream == SfxKirdySpit:
+        return "kirdy_spit"
+    if stream == SfxAbilityFireAttack:
+        return "ability_fire_attack"
+    if stream == SfxAbilityIceAttack:
+        return "ability_ice_attack"
+    if stream == SfxAbilitySwordAttack:
+        return "ability_sword_attack"
+
+    return "unknown"
+
+
+func get_sfx_asset_path_for_stream(stream: AudioStream) -> String:
+    if stream == SfxKirdyInhale:
+        return "audio/sfx/kirdy-inhale.wav"
+    if stream == SfxKirdySwallow:
+        return "audio/sfx/kirdy-swallow.wav"
+    if stream == SfxKirdySpit:
+        return "audio/sfx/kirdy-spit.wav"
+    if stream == SfxAbilityFireAttack:
+        return "audio/sfx/ability-fire-attack.wav"
+    if stream == SfxAbilityIceAttack:
+        return "audio/sfx/ability-ice-attack.wav"
+    if stream == SfxAbilitySwordAttack:
+        return "audio/sfx/ability-sword-attack.wav"
+
+    return ""
 
 
 func get_ability_sfx(current_ability_type: String) -> AudioStream:
     match current_ability_type:
+        "fire", "flame":
+            return SfxAbilityFireAttack
         "ice", "frost":
             return SfxAbilityIceAttack
         "sword":
             return SfxAbilitySwordAttack
+        "spark":
+            return SfxKirdySpit
+        "leaf":
+            return SfxKirdyInhale
+        "stone":
+            return SfxAbilitySwordAttack
         _:
-            return SfxAbilityFireAttack
+            return SfxKirdySpit
 
 
 func get_difficulty_profile() -> Dictionary:
@@ -2022,7 +2079,7 @@ func toggle_pause_menu() -> void:
     apply_actor_pause_state(session_paused)
     if not session_paused:
         pause_settings_open = false
-    play_ui_sfx()
+    play_ui_sfx(null, "pause.toggled", "ui")
     sync_settings_menu_visibility()
     sync_virtual_controls_overlay("pause.toggled")
     sync_pause_overlay("pause.toggled", true)
@@ -2064,7 +2121,7 @@ func open_pause_settings() -> void:
 
     pause_settings_open = true
     selected_setting_index = 0
-    play_ui_sfx()
+    play_ui_sfx(null, "pause.settings.opened", "ui")
     sync_settings_menu_visibility()
     sync_settings_overlay("pause.settings.opened")
     sync_virtual_controls_overlay("pause.settings.opened")
@@ -2078,7 +2135,7 @@ func close_pause_settings() -> void:
         return
 
     pause_settings_open = false
-    play_ui_sfx()
+    play_ui_sfx(null, "pause.settings.closed", "ui")
     sync_settings_menu_visibility()
     sync_settings_overlay("pause.settings.closed")
     sync_virtual_controls_overlay("pause.settings.closed")
@@ -2306,7 +2363,7 @@ func open_settings_menu(reason: String = "settings.menu.opened") -> void:
 
     settings_menu_open = true
     selected_setting_index = 0
-    play_ui_sfx()
+    play_ui_sfx(null, reason, "ui")
     sync_settings_overlay(reason)
     sync_virtual_controls_overlay(reason, true)
     update_audio_mix(reason, true)
@@ -2319,7 +2376,7 @@ func close_settings_menu(reason: String = "settings.menu.closed") -> void:
         return
 
     settings_menu_open = false
-    play_ui_sfx()
+    play_ui_sfx(null, reason, "ui")
     sync_settings_overlay(reason)
     sync_virtual_controls_overlay(reason, true)
     update_audio_mix(reason, true)
@@ -2332,7 +2389,7 @@ func move_settings_focus(direction: int) -> void:
         return
 
     selected_setting_index = wrapi(selected_setting_index + direction, 0, 3)
-    play_ui_sfx()
+    play_ui_sfx(null, "settings.focus.changed", "ui")
     sync_settings_overlay("settings.focus.changed")
     if trace_recorder != null:
         trace_recorder.call("record_event", "settings.focus.changed", build_settings_payload())
@@ -2376,7 +2433,7 @@ func check_settings_actions() -> void:
 
 func apply_settings_update(next_settings: Dictionary, reason: String = "settings.updated") -> void:
     apply_settings_payload(next_settings)
-    play_ui_sfx()
+    play_ui_sfx(null, reason, "ui")
     sync_settings_overlay(reason, true)
     sync_virtual_controls_overlay(reason, true)
     update_audio_mix(reason, true)
@@ -2599,6 +2656,7 @@ func load_persistent_state() -> void:
         "save_path": save_path,
         "storage_backend": save_store.get("last_storage_backend"),
         "items_collected": get_acquired_item_ids(),
+        "acquired_item_ids": get_acquired_item_ids(),
         "consumed_heal_ids": get_consumed_heal_ids(),
         "completed_level_ids": get_completed_level_ids(),
         "visited_level_ids": get_visited_level_ids(),
@@ -2822,6 +2880,10 @@ func check_door_transitions() -> void:
         var lock_reason := get_door_lock_reason(payload)
         if lock_reason != "":
             last_locked_door_reason = lock_reason
+            var locked_door_audio_key := "%s:%s:%s" % [source_level_id, door_id, lock_reason]
+            if last_locked_door_audio_key != locked_door_audio_key:
+                last_locked_door_audio_key = locked_door_audio_key
+                play_ui_sfx(null, "door.locked", "lock")
             trace_recorder.call("record_player_event", "door.locked", {
                 "level_id": current_level_id,
                 "player": get_player_trace(),
@@ -2836,7 +2898,9 @@ func check_door_transitions() -> void:
             return
 
         last_locked_door_reason = ""
+        last_locked_door_audio_key = ""
         unlock_door(unlocked_door_id)
+        play_ui_sfx(null, "door.entered", "door")
         trace_recorder.call("record_player_event", "door.entered", {
             "level_id": current_level_id,
             "player": get_player_trace(),

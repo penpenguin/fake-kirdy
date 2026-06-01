@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "snapshot_id": "locked_door_reason_hud",
+  "content_hash": "3183311742e231412e33d8ae9b6c9317308f49f466405638e8210661f850bfd0",
+  "replay_path": "godot/tests/replays/combat_locked_door_without_ability.json",
+  "frame": 18,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "hud",
+    "locked_door"
+  ],
+  "required_scene_paths": [
+    "godot/scenes/ui/HudOverlay.tscn"
+  ],
+  "required_resource_paths": [
+    "godot/resources/assets/images/ui/locked-door.webp"
+  ]
+}
