@@ -60,6 +60,16 @@
       }
     },
     {
+      "id": "leaf",
+      "role": "ranged_cutter",
+      "expectations": {
+        "attack_type": "cutter",
+        "min_damage": 1,
+        "min_range": 200,
+        "max_cooldown_ms": 180
+      }
+    },
+    {
       "id": "stone",
       "role": "heavy_short_range",
       "expectations": {
