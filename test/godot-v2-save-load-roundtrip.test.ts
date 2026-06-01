@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -301,5 +301,61 @@ describe('Godot save/load roundtrip audit', () => {
     expect(report.required_fields.every((field) => field.session_load_status === 'covered')).toBe(true);
     expect(report.categories.roundtrip_samples).toBeGreaterThanOrEqual(1);
     expect(report.categories.replay_coverage).toBeGreaterThanOrEqual(1);
+  });
+
+  it('uses GODOT_BIN for runtime save/load roundtrip when godot is not on PATH', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'fake-kirdy-save-roundtrip-godot-bin-'));
+    const fakeGodot = join(tempDir, 'fake-godot');
+
+    try {
+      writeFileSync(
+        fakeGodot,
+        `#!/bin/sh
+if [ "$1" = "--version" ]; then
+  echo "4.6.fake-godot-bin"
+  exit 0
+fi
+out=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --out)
+      shift
+      out="$1"
+      ;;
+  esac
+  shift
+done
+if [ -n "$out" ]; then
+  printf '{"event_type":"save.loaded"}\\n{"event_type":"save.written"}\\n{"event_type":"ability.used"}\\n' > "$out"
+fi
+exit 0
+`,
+      );
+      chmodSync(fakeGodot, 0o755);
+
+      const result = spawnSync(process.execPath, ['scripts/check-godot-save-load-roundtrip.mjs', '--runtime', '--json'], {
+        cwd: repoRoot,
+        encoding: 'utf8',
+        env: {
+          ...process.env,
+          GODOT_BIN: fakeGodot,
+          PATH: tempDir,
+        },
+      });
+
+      expect(result.status).toBe(0);
+      const report = JSON.parse(result.stdout) as {
+        runtime: { status: string; skipped: boolean; godot_version?: string };
+        failed_checks: unknown[];
+      };
+      expect(report.failed_checks).toEqual([]);
+      expect(report.runtime).toMatchObject({
+        status: 'passed',
+        skipped: false,
+        godot_version: '4.6.fake-godot-bin',
+      });
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
   });
 });

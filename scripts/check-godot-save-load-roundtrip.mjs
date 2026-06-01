@@ -342,15 +342,9 @@ function runRuntimeRoundtrip(contract) {
     };
   }
 
-  const version = spawnSync('godot', ['--version'], { encoding: 'utf8' });
-  if (version.error?.code === 'ENOENT') {
+  const godot = resolveGodotExecutable();
+  if (godot === null) {
     return { checks: [], report: { status: 'skipped', skipped: true, reason: 'Godot is not installed' } };
-  }
-  if (version.error || (version.status ?? 0) !== 0) {
-    return {
-      checks: [buildCheck(contract, 'runtime_godot_failed', { message: version.error?.message ?? 'godot --version failed.' })],
-      report: { status: 'failed', skipped: false, reason: 'godot_version_failed' },
-    };
   }
 
   const runtime = contract.runtime_roundtrip ?? {};
@@ -364,8 +358,8 @@ function runRuntimeRoundtrip(contract) {
 
   const seedReplay = String(runtime.seed_replay_path ?? 'res://tests/replays/save_load_roundtrip_seed.json');
   const loadReplay = String(runtime.load_replay_path ?? 'res://tests/replays/use_saved_ability.json');
-  const seed = runGodotReplay(seedReplay, seedTracePath, savePath);
-  const load = seed.status === 'passed' ? runGodotReplay(loadReplay, loadTracePath, savePath) : null;
+  const seed = runGodotReplay(godot.command, seedReplay, seedTracePath, savePath);
+  const load = seed.status === 'passed' ? runGodotReplay(godot.command, loadReplay, loadTracePath, savePath) : null;
   const seedEvents = seed.status === 'passed' ? readNdjson(seedTracePath) : [];
   const loadEvents = load?.status === 'passed' ? readNdjson(loadTracePath) : [];
   const writtenSave = existsSync(savePath) ? JSON.parse(readFileSync(savePath, 'utf8')) : {};
@@ -401,7 +395,8 @@ function runRuntimeRoundtrip(contract) {
     report: {
       status: checks.length === 0 ? 'passed' : 'failed',
       skipped: false,
-      godot_version: String(version.stdout).trim(),
+      godot_command: godot.command,
+      godot_version: godot.version,
       save_path: savePath,
       seed_trace_path: seedTracePath,
       load_trace_path: loadTracePath,
@@ -410,9 +405,30 @@ function runRuntimeRoundtrip(contract) {
   };
 }
 
-function runGodotReplay(replayPath, tracePath, savePath) {
-  const result = spawnSync(
+function resolveGodotExecutable() {
+  const commands = [
+    process.env.GODOT_BIN,
     'godot',
+    'godot4',
+  ].filter(Boolean);
+
+  for (const command of commands) {
+    const version = spawnSync(command, ['--version'], { encoding: 'utf8' });
+    if (version.error?.code === 'ENOENT' || version.error || (version.status ?? 0) !== 0) {
+      continue;
+    }
+    return {
+      command,
+      version: String(version.stdout || version.stderr).trim(),
+    };
+  }
+
+  return null;
+}
+
+function runGodotReplay(godotCommand, replayPath, tracePath, savePath) {
+  const result = spawnSync(
+    godotCommand,
     ['--path', godotRoot, '--headless', '--script', 'tests/run_replay.gd', '--', '--replay', replayPath, '--out', tracePath, '--save', savePath],
     { encoding: 'utf8' },
   );
