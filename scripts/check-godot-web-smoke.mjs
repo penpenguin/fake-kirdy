@@ -218,7 +218,9 @@ async function runBrowserSmoke(contract, exportDir) {
     await cdp.send('Runtime.enable');
     await cdp.send('Log.enable');
     await cdp.send('Page.enable');
+    const pageLoaded = waitForCdpEvent(cdp, 'Page.loadEventFired', numberValue(runtime.max_boot_wait_ms, 12000));
     await cdp.send('Page.navigate', { url: server.url });
+    await pageLoaded;
     await cdp.send('Runtime.evaluate', {
       expression: 'window.__fakeKirdySmokeConsoleErrors = []',
       returnByValue: true,
@@ -427,6 +429,18 @@ async function createPageTarget(debugPort, url) {
     // Keep polling /json/list; older browser startup paths may not accept target creation immediately.
   }
   return null;
+}
+
+function waitForCdpEvent(cdp, method, timeoutMs) {
+  return new Promise((resolveEvent) => {
+    const timeout = setTimeout(() => {
+      resolveEvent(null);
+    }, timeoutMs);
+    cdp.on(method, (event) => {
+      clearTimeout(timeout);
+      resolveEvent(event);
+    });
+  });
 }
 
 async function connectCdp(webSocketDebuggerUrl) {

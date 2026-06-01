@@ -176,6 +176,7 @@ describe('Godot Web smoke', () => {
     expect(source).toContain('url: server.url');
     expect(source).toContain('createPageTarget(debugPort');
     expect(source).toContain("method: 'PUT'");
+    expect(source).toContain("waitForCdpEvent(cdp, 'Page.loadEventFired'");
     expect(source.indexOf("await cdp.send('Page.navigate'")).toBeGreaterThan(source.indexOf("await cdp.send('Log.enable')"));
     expect(source.indexOf("await cdp.send('Page.navigate'")).toBeLessThan(source.indexOf('await sleep(numberValue(runtime.warmup_ms'));
   });
