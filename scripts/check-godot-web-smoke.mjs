@@ -571,7 +571,11 @@ function waitForBrowserExit(browserProcess, timeoutMs = 3000) {
 }
 
 function safeRemoveBrowserProfile(profilePath) {
-  rmSync(profilePath, { recursive: true, force: true });
+  try {
+    rmSync(profilePath, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  } catch (error) {
+    console.warn(`[godot:web-smoke] unable to remove browser profile ${profilePath}: ${error.message}`);
+  }
 }
 
 function sleep(ms) {

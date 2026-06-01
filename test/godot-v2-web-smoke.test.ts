@@ -161,6 +161,13 @@ describe('Godot Web smoke', () => {
     }
   });
 
+  it('uses retryable browser profile cleanup for CI teardown races', () => {
+    const source = readFileSync(join(repoRoot, 'scripts', 'check-godot-web-smoke.mjs'), 'utf8');
+
+    expect(source).toContain('maxRetries');
+    expect(source).toContain('retryDelay');
+  });
+
   it('validates canonical Web smoke contract and CI/full enforcement wiring', () => {
     const result = spawnSync(process.execPath, ['scripts/check-godot-web-smoke.mjs', '--json'], {
       cwd: repoRoot,
