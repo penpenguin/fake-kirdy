@@ -390,6 +390,7 @@ async function findOpenPort() {
 
 async function waitForPageTarget(debugPort, timeoutMs) {
   const deadline = Date.now() + timeoutMs;
+  let targetCreated = false;
   while (Date.now() < deadline) {
     try {
       const response = await fetch(`http://127.0.0.1:${debugPort}/json/list`);
@@ -399,6 +400,13 @@ async function waitForPageTarget(debugPort, timeoutMs) {
         if (page) {
           return page;
         }
+        if (!targetCreated) {
+          targetCreated = true;
+          const createdTarget = await createPageTarget(debugPort, 'about:blank');
+          if (createdTarget?.webSocketDebuggerUrl) {
+            return createdTarget;
+          }
+        }
       }
     } catch {
       // Browser is still starting.
@@ -406,6 +414,18 @@ async function waitForPageTarget(debugPort, timeoutMs) {
     await sleep(100);
   }
   throw new Error(`Timed out waiting for browser remote-debugging-port ${debugPort}`);
+}
+
+async function createPageTarget(debugPort, url) {
+  try {
+    const response = await fetch(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(url)}`, { method: 'PUT' });
+    if (response.ok) {
+      return await response.json();
+    }
+  } catch {
+    // Keep polling /json/list; older browser startup paths may not accept target creation immediately.
+  }
+  return null;
 }
 
 async function connectCdp(webSocketDebuggerUrl) {
