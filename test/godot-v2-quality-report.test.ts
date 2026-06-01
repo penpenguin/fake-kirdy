@@ -37,9 +37,16 @@ const writeFixtureContract = (path: string, outJson: string, outMd: string, chec
 describe('Godot quality report', () => {
   it('defines a quality report command, contract, canonical report, and static gate hook', () => {
     const scripts = readPackageScripts();
+    const contract = JSON.parse(readFileSync(join(repoRoot, 'godot', 'tests', 'quality_report_contract.json'), 'utf8')) as {
+      required_check_ids?: string[];
+      checks?: { id: string }[];
+    };
 
     expect(scripts['godot:quality-report']).toBe('node scripts/generate-godot-quality-report.mjs');
     expect(scripts['check:godot']).toContain('godot:quality-report -- --check');
+    expect(scripts['check:full']).toContain('godot:web-smoke -- --require-export --require-browser');
+    expect(contract.required_check_ids).not.toContain('web-smoke');
+    expect(contract.checks?.map((check) => check.id)).not.toContain('web-smoke');
     expect(existsSync(join(repoRoot, 'scripts', 'generate-godot-quality-report.mjs'))).toBe(true);
     expect(existsSync(join(repoRoot, 'godot', 'tests', 'quality_report_contract.json'))).toBe(true);
     expect(existsSync(join(repoRoot, 'reports', 'godot-quality-report.json'))).toBe(true);
@@ -186,8 +193,9 @@ describe('Godot quality report', () => {
     };
     expect(report.summary.failed).toBe(0);
     expect(report.sources.map((source) => source.id)).toEqual(
-      expect.arrayContaining(['scene-lint', 'level-graph', 'progression-solver', 'web-smoke', 'playtest-report']),
+      expect.arrayContaining(['scene-lint', 'level-graph', 'progression-solver', 'playtest-report']),
     );
+    expect(report.sources.map((source) => source.id)).not.toContain('web-smoke');
     expect(report.manual_playtest.unresolved_issue_count).toBe(0);
   });
 });

@@ -12,7 +12,6 @@
     "visual-snapshot",
     "content-budget",
     "asset-fallback-audit",
-    "web-smoke",
     "playtest-report"
   ],
   "checks": [
@@ -68,12 +67,6 @@
       "id": "asset-fallback-audit",
       "label": "Asset fallback audit",
       "script": "scripts/check-godot-asset-fallback-audit.mjs",
-      "args": ["--json"]
-    },
-    {
-      "id": "web-smoke",
-      "label": "Web smoke",
-      "script": "scripts/check-godot-web-smoke.mjs",
       "args": ["--json"]
     },
     {
