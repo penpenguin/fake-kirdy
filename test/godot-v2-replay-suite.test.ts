@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
@@ -230,6 +231,82 @@ describe('Godot v2 replay suite workflow', () => {
     expect(listed.replays?.map((replay) => replay.id)).toContain('flying_spit_projectile_hit');
     expect(listed.replays?.map((replay) => replay.id)).toContain('forest_reliquary_key_unlocks_door');
     expect(listed.replays?.map((replay) => replay.id)).toContain('sky_generated_exit_locked_without_keystone');
+  });
+
+  it('uses GODOT_BIN for replay suite import and replay execution when godot is not on PATH', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'fake-kirdy-replay-suite-godot-bin-'));
+    const fakeGodot = join(tempDir, 'fake-godot');
+    const fixtureSuite = join(tempDir, 'replay_suite.json');
+    const outDir = join(tempDir, 'out');
+
+    try {
+      writeFileSync(
+        fakeGodot,
+        `#!/bin/sh
+if [ "$1" = "--version" ]; then
+  echo "4.6.fake-replay-suite"
+  exit 0
+fi
+out=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --out)
+      shift
+      out="$1"
+      ;;
+  esac
+  shift
+done
+if [ -n "$out" ]; then
+  printf '{"frame":0,"time_ms":0,"event_type":"run.finished","level_id":"fixture","payload":{"outcome":"finished"}}\\n' > "$out"
+fi
+exit 0
+`,
+      );
+      chmodSync(fakeGodot, 0o755);
+      writeFileSync(
+        fixtureSuite,
+        `${JSON.stringify(
+          {
+            version: 1,
+            replays: [
+              {
+                id: 'godot_bin_replay',
+                replay_path: 'res://tests/replays/godot_bin_replay.json',
+                expected_outcome: 'finished',
+              },
+            ],
+          },
+          null,
+          2,
+        )}\n`,
+      );
+
+      const output = execFileSync('node', ['scripts/run-godot-replay-suite.mjs', '--suite', fixtureSuite, '--out-dir', outDir], {
+        cwd: repoRoot,
+        encoding: 'utf8',
+        env: {
+          ...process.env,
+          GODOT_BIN: fakeGodot,
+          PATH: dirname(process.execPath),
+        },
+      });
+      const report = JSON.parse(output) as {
+        skipped?: boolean;
+        replay_count?: number;
+        passed_replays?: number;
+        failed_replays?: number;
+      };
+
+      expect(report).toMatchObject({
+        skipped: false,
+        replay_count: 1,
+        passed_replays: 1,
+        failed_replays: 0,
+      });
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
   });
 
   it('wires the suite into package scripts and documentation', () => {

@@ -191,7 +191,7 @@ async function runBrowserSmoke(contract, exportDir) {
     '--no-sandbox',
     `--remote-debugging-port=${debugPort}`,
     `--user-data-dir=${userDataDir}`,
-    server.url,
+    'about:blank',
   ], {
     stdio: ['ignore', 'ignore', 'pipe'],
   });
@@ -217,6 +217,7 @@ async function runBrowserSmoke(contract, exportDir) {
     await cdp.send('Runtime.enable');
     await cdp.send('Log.enable');
     await cdp.send('Page.enable');
+    await cdp.send('Page.navigate', { url: server.url });
     await cdp.send('Runtime.evaluate', {
       expression: 'window.__fakeKirdySmokeConsoleErrors = []',
       returnByValue: true,

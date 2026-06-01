@@ -32,8 +32,8 @@ if (!existsSync(join(godotRoot, 'project.godot'))) {
   process.exit(1);
 }
 
-const version = spawnSync('godot', ['--version'], { encoding: 'utf8' });
-if (version.error?.code === 'ENOENT') {
+const godot = resolveGodotExecutable();
+if (godot === null) {
   writeJson({
     skipped: true,
     reason: 'Godot is not installed',
@@ -43,23 +43,20 @@ if (version.error?.code === 'ENOENT') {
   process.exit(0);
 }
 
-if (version.error) {
-  console.error(`[godot:replay-suite] ${version.error.message}`);
-  process.exit(1);
-}
-
-ensureGodotImport();
+ensureGodotImport(godot.command);
 
 const outDir = resolve(repoRoot, options.outDir ?? join(tmpdir(), `fake-kirdy-godot-replay-suite-${process.pid}`));
 mkdirSync(outDir, { recursive: true });
 
-const results = suite.replays.map((replay) => runReplay(replay, outDir));
+const results = suite.replays.map((replay) => runReplay(godot.command, replay, outDir));
 const failedReplays = results.filter((result) => result.status !== 'passed');
 
 writeJson({
   skipped: false,
   suite_path: relativeToRepo(suitePath),
   out_dir: outDir,
+  godot_command: godot.command,
+  godot_version: godot.version,
   replay_count: results.length,
   passed_replays: results.length - failedReplays.length,
   failed_replays: failedReplays.length,
@@ -177,8 +174,29 @@ function readSuite(path) {
   };
 }
 
-function ensureGodotImport() {
-  const importResult = spawnSync('godot', ['--headless', '--path', godotRoot, '--import'], {
+function resolveGodotExecutable() {
+  const commands = [
+    process.env.GODOT_BIN,
+    'godot',
+    'godot4',
+  ].filter(Boolean);
+
+  for (const command of commands) {
+    const version = spawnSync(command, ['--version'], { encoding: 'utf8' });
+    if (version.error?.code === 'ENOENT' || version.error || (version.status ?? 0) !== 0) {
+      continue;
+    }
+    return {
+      command,
+      version: String(version.stdout || version.stderr).trim(),
+    };
+  }
+
+  return null;
+}
+
+function ensureGodotImport(godotCommand) {
+  const importResult = spawnSync(godotCommand, ['--headless', '--path', godotRoot, '--import'], {
     encoding: 'utf8',
   });
 
@@ -199,10 +217,10 @@ function ensureGodotImport() {
   }
 }
 
-function runReplay(replay, outDir) {
+function runReplay(godotCommand, replay, outDir) {
   const tracePath = join(outDir, `${sanitizeFilename(replay.id)}.ndjson`);
   const replayResult = spawnSync(
-    'godot',
+    godotCommand,
     ['--path', godotRoot, '--headless', '--script', 'tests/run_replay.gd', '--', '--replay', replay.replay_path, '--out', tracePath],
     { encoding: 'utf8' },
   );

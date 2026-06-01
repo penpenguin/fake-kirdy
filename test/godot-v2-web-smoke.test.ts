@@ -168,6 +168,16 @@ describe('Godot Web smoke', () => {
     expect(source).toContain('retryDelay');
   });
 
+  it('attaches console guards before navigating the exported page', () => {
+    const source = readFileSync(join(repoRoot, 'scripts', 'check-godot-web-smoke.mjs'), 'utf8');
+
+    expect(source).toContain("'about:blank'");
+    expect(source).toContain("await cdp.send('Page.navigate'");
+    expect(source).toContain('url: server.url');
+    expect(source.indexOf("await cdp.send('Page.navigate'")).toBeGreaterThan(source.indexOf("await cdp.send('Log.enable')"));
+    expect(source.indexOf("await cdp.send('Page.navigate'")).toBeLessThan(source.indexOf('await sleep(numberValue(runtime.warmup_ms'));
+  });
+
   it('validates canonical Web smoke contract and CI/full enforcement wiring', () => {
     const result = spawnSync(process.execPath, ['scripts/check-godot-web-smoke.mjs', '--json'], {
       cwd: repoRoot,
