@@ -113,6 +113,56 @@ describe('Godot quality report', () => {
     }
   });
 
+  it('fails when a required quality source is skipped', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'fake-kirdy-quality-report-skipped-'));
+    const skippedPath = join(tempDir, 'skipped.json');
+    const contractPath = join(tempDir, 'contract.json');
+
+    try {
+      writeFileSync(
+        skippedPath,
+        `${JSON.stringify(
+          {
+            skipped: true,
+            skip_reason: 'Godot Web export artifacts are missing; run npm run build:public first',
+            failed_checks: [],
+            warnings: [],
+          },
+          null,
+          2,
+        )}\n`,
+      );
+      writeFileSync(
+        contractPath,
+        `${JSON.stringify(
+          {
+            version: 1,
+            output_json_path: join(tempDir, 'quality.json'),
+            output_markdown_path: join(tempDir, 'quality.md'),
+            required_check_ids: ['web-smoke'],
+            checks: [{ id: 'web-smoke', label: 'Web smoke', report_path: skippedPath }],
+          },
+          null,
+          2,
+        )}\n`,
+      );
+
+      const result = spawnSync(process.execPath, ['scripts/generate-godot-quality-report.mjs', '--contract', contractPath, '--json'], {
+        cwd: repoRoot,
+        encoding: 'utf8',
+      });
+
+      expect(result.status).toBe(1);
+      const commandReport = JSON.parse(result.stdout) as { failed_checks: { rule: string; source_id: string; message: string }[] };
+      expect(commandReport.failed_checks).toContainEqual(
+        expect.objectContaining({ source_id: 'web-smoke', rule: 'required_source_skipped' }),
+      );
+      expect(commandReport.failed_checks.map((check) => check.message).join('\n')).toContain('Godot Web export artifacts');
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it('validates the checked-in canonical quality report is current and failure-free', () => {
     const result = spawnSync(process.execPath, ['scripts/generate-godot-quality-report.mjs', '--check', '--json'], {
       cwd: repoRoot,

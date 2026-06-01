@@ -102,7 +102,7 @@ function runSources(checks) {
             severity: 'error',
             message: `${label} exited with status ${result.exit_status}.`,
           }];
-    return {
+    const source = {
       id,
       label,
       status: failedChecks.length === 0 && commandFailedCheck.length === 0 ? 'passed' : 'failed',
@@ -113,6 +113,11 @@ function runSources(checks) {
       warnings,
       summary: summarizeSource(result.report),
     };
+    if (result.report.skipped === true) {
+      source.skipped = true;
+      source.skip_reason = String(result.report.skip_reason ?? 'Quality source was skipped.');
+    }
+    return source;
   });
 }
 
@@ -210,12 +215,20 @@ function checkRequiredSources(contract, sources) {
   const checks = [];
   const present = new Set(sources.map((source) => source.id));
   for (const id of requireArray(contract.required_check_ids ?? [], 'required_check_ids').map(String)) {
+    const source = sources.find((entry) => entry.id === id);
     if (!present.has(id)) {
       checks.push({
         source_id: 'quality-report',
         rule: 'required_source',
         severity: 'error',
         message: `Quality report contract is missing required source ${id}.`,
+      });
+    } else if (source?.skipped === true) {
+      checks.push({
+        source_id: id,
+        rule: 'required_source_skipped',
+        severity: 'error',
+        message: `Required quality source ${id} was skipped: ${source.skip_reason}`,
       });
     }
   }
