@@ -233,6 +233,9 @@ function collectLevelRewards(state, levelsById) {
   for (const groupId of level?.enemy_groups ?? []) {
     state.defeated_enemy_groups.add(groupId);
   }
+  for (const abilityType of level?.ability_rewards ?? []) {
+    state.abilities.add(abilityType);
+  }
   return state;
 }
 

@@ -20,6 +20,7 @@ describe('Godot doctor runtime gate', () => {
     expect(scripts['godot:doctor']).toBe('node scripts/check-godot-doctor.mjs');
     expect(scripts['check:godot:runtime']).toContain('godot:doctor');
     expect(scripts['check:godot:runtime']).toContain('--require-godot');
+    expect(scripts['check:godot:runtime']).toContain('--skip-export-templates');
     expect(scripts['check:godot:runtime']).toContain('godot:replay-suite');
     expect(scripts['check:full']).toContain('check:godot');
     expect(scripts['check:full']).toContain('check:godot:runtime');

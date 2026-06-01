@@ -19,6 +19,7 @@ const sceneHeader = `[gd_scene load_steps=5 format=3]
 [ext_resource type="Script" path="res://scripts/level/markers/DoorMarker.gd" id="2_door"]
 [ext_resource type="Script" path="res://scripts/level/markers/GoalMarker.gd" id="3_goal"]
 [ext_resource type="Script" path="res://scripts/level/markers/CollectibleMarker.gd" id="4_collectible"]
+[ext_resource type="Script" path="res://scripts/level/markers/EnemySpawnMarker.gd" id="5_enemy"]
 `;
 
 describe('Godot progression solver', () => {
@@ -130,6 +131,78 @@ goal_id = "final_goal"
       expect(report.failed_checks).toEqual([]);
       expect(report.solution?.path).toEqual(['central_hub', 'branch_room', 'goal_sanctum']);
       expect(report.solution?.items).toContain('branch-key');
+    } finally {
+      rmSync(levelsDir, { recursive: true, force: true });
+    }
+  });
+
+  it('solves ability-gated scene progression from enemy ability rewards', () => {
+    const levelsDir = mkdtempSync(join(tmpdir(), 'fake-kirdy-progression-ability-'));
+    writeFileSync(
+      join(levelsDir, 'combat_room.tscn'),
+      `${sceneHeader}
+[node name="CombatRoom" type="Node2D"]
+
+[node name="PlayerSpawn" type="Node2D" parent="."]
+script = ExtResource("1_spawn")
+spawn_id = "default"
+
+[node name="SparkEnemy" type="Node2D" parent="."]
+script = ExtResource("5_enemy")
+spawn_id = "spark_enemy"
+enemy_type = "simple_ground"
+ability_type = "spark"
+enemy_group_id = "spark_group"
+
+[node name="DoorToGoal" type="Node2D" parent="."]
+script = ExtResource("2_door")
+door_id = "spark_exit"
+target_level_id = "goal_sanctum"
+target_spawn_id = "default"
+required_ability_type = "spark"
+`,
+    );
+    writeFileSync(
+      join(levelsDir, 'goal_sanctum.tscn'),
+      `${sceneHeader}
+[node name="GoalSanctum" type="Node2D"]
+
+[node name="PlayerSpawn" type="Node2D" parent="."]
+script = ExtResource("1_spawn")
+spawn_id = "default"
+
+[node name="GoalMarker" type="Node2D" parent="."]
+script = ExtResource("3_goal")
+goal_id = "final_goal"
+`,
+    );
+
+    try {
+      const result = spawnSync(
+        process.execPath,
+        [
+          'scripts/check-godot-progression-solver.mjs',
+          '--levels-dir',
+          levelsDir,
+          '--no-procedural',
+          '--start',
+          'combat_room',
+          '--final',
+          'goal_sanctum',
+          '--json',
+        ],
+        { cwd: repoRoot, encoding: 'utf8' },
+      );
+
+      expect(result.status).toBe(0);
+      const report = JSON.parse(result.stdout) as {
+        failed_checks: unknown[];
+        solution?: { path: string[]; abilities: string[]; defeated_enemy_groups: string[] };
+      };
+      expect(report.failed_checks).toEqual([]);
+      expect(report.solution?.path).toEqual(['combat_room', 'goal_sanctum']);
+      expect(report.solution?.abilities).toContain('spark');
+      expect(report.solution?.defeated_enemy_groups).toContain('spark_group');
     } finally {
       rmSync(levelsDir, { recursive: true, force: true });
     }

@@ -212,6 +212,10 @@ function parseSceneLevel(path, catalogById, stageById) {
       .filter((node) => node.marker_type === 'enemy_spawn')
       .flatMap((node) => [stringProp(node.props.enemy_group_id, ''), stringProp(node.props.boss_id, '')])
       .filter((value) => value.length > 0),
+    ability_rewards: nodes
+      .filter((node) => node.marker_type === 'enemy_spawn' || node.marker_type === 'collectible')
+      .map((node) => stringProp(node.props.ability_type, ''))
+      .filter((value) => value.length > 0),
   };
 }
 
@@ -367,6 +371,10 @@ function collectProceduralLevels(path) {
       enemy_groups: (content.enemies ?? [])
         .flatMap((enemy) => [enemy.enemy_group_id ?? '', enemy.boss_id ?? ''])
         .filter((value) => value.length > 0),
+      ability_rewards: [
+        ...(content.enemies ?? []).map((enemy) => String(enemy.ability_type ?? '')),
+        ...(content.collectibles ?? []).map((collectible) => String(collectible.ability_type ?? '')),
+      ].filter((value) => value.length > 0),
     };
   });
 }
@@ -388,6 +396,7 @@ function mergeLevels(sceneLevels, proceduralLevels) {
         collectibles: uniqueBy([...existing.collectibles, ...level.collectibles], (item) => item.item_id),
         goals: uniqueBy([...existing.goals, ...level.goals], (goal) => goal.id),
         enemy_groups: unique([...existing.enemy_groups, ...level.enemy_groups]),
+        ability_rewards: unique([...(existing.ability_rewards ?? []), ...(level.ability_rewards ?? [])]),
       });
     } else {
       byId.set(level.id, level);
@@ -594,6 +603,7 @@ function serializeLevel(level) {
     collectibles: level.collectibles,
     goals: level.goals,
     enemy_groups: level.enemy_groups,
+    ability_rewards: level.ability_rewards ?? [],
   };
 }
 
