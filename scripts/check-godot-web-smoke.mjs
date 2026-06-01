@@ -183,6 +183,7 @@ async function runBrowserSmoke(contract, exportDir) {
   const server = await startStaticServer(exportDir);
   const debugPort = await findOpenPort();
   const userDataDir = mkdtempSync(join(tmpdir(), 'fake-kirdy-web-smoke-profile-'));
+  const initialBlankUrl = 'data:text/html,<html></html>';
   const browser = spawn(browserExecutable, [
     '--headless=new',
     '--use-angle=swiftshader',
@@ -191,7 +192,7 @@ async function runBrowserSmoke(contract, exportDir) {
     '--no-sandbox',
     `--remote-debugging-port=${debugPort}`,
     `--user-data-dir=${userDataDir}`,
-    'about:blank',
+    initialBlankUrl,
   ], {
     stdio: ['ignore', 'ignore', 'pipe'],
   });
@@ -202,7 +203,7 @@ async function runBrowserSmoke(contract, exportDir) {
   });
 
   try {
-    const target = await waitForPageTarget(debugPort, numberValue(runtime.max_boot_wait_ms, 12000));
+    const target = await waitForPageTarget(debugPort, numberValue(runtime.max_boot_wait_ms, 12000), initialBlankUrl);
     const cdp = await connectCdp(target.webSocketDebuggerUrl);
     const consoleMessages = [];
     cdp.on('Runtime.consoleAPICalled', (event) => {
@@ -388,7 +389,7 @@ async function findOpenPort() {
   return port;
 }
 
-async function waitForPageTarget(debugPort, timeoutMs) {
+async function waitForPageTarget(debugPort, timeoutMs, initialBlankUrl) {
   const deadline = Date.now() + timeoutMs;
   let targetCreated = false;
   while (Date.now() < deadline) {
@@ -402,7 +403,7 @@ async function waitForPageTarget(debugPort, timeoutMs) {
         }
         if (!targetCreated) {
           targetCreated = true;
-          const createdTarget = await createPageTarget(debugPort, 'about:blank');
+          const createdTarget = await createPageTarget(debugPort, initialBlankUrl);
           if (createdTarget?.webSocketDebuggerUrl) {
             return createdTarget;
           }

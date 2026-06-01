@@ -171,7 +171,7 @@ describe('Godot Web smoke', () => {
   it('attaches console guards before navigating the exported page', () => {
     const source = readFileSync(join(repoRoot, 'scripts', 'check-godot-web-smoke.mjs'), 'utf8');
 
-    expect(source).toContain("'about:blank'");
+    expect(source).toContain("'data:text/html,<html></html>'");
     expect(source).toContain("await cdp.send('Page.navigate'");
     expect(source).toContain('url: server.url');
     expect(source).toContain('createPageTarget(debugPort');
