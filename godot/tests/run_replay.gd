@@ -97,6 +97,8 @@ func run_session_replay(input_source: Node, output_path: String, args: Dictionar
     for item_id in input_source.get("initial_item_ids"):
         session.call("acquire_item", String(item_id), "replay_initial_item")
 
+    apply_initial_player_health(input_source, session)
+
     await process_frame
 
     for frame in range(input_source.get("max_frames")):
@@ -116,6 +118,23 @@ func run_session_replay(input_source: Node, output_path: String, args: Dictionar
 
     session.trace_recorder.call("write_to_path", output_path)
     quit(0)
+
+
+func apply_initial_player_health(input_source: Node, session: Node) -> void:
+    var initial_player_max_hp := int(input_source.get("initial_player_max_hp"))
+    var initial_player_hp := int(input_source.get("initial_player_hp"))
+    if initial_player_max_hp <= 0 and initial_player_hp <= 0:
+        return
+
+    if initial_player_max_hp > 0:
+        session.player_max_hp = max(initial_player_max_hp, 1)
+    if initial_player_hp > 0:
+        session.player_max_hp = max(session.player_max_hp, initial_player_hp)
+        session.player_hp = min(initial_player_hp, session.player_max_hp)
+    else:
+        session.player_hp = max(session.player_max_hp, 1)
+
+    session.call("sync_hud_overlay", "replay.initial_player_health", true)
 
 
 func apply_session_replay_hooks(input_source: Node, session: Node) -> void:

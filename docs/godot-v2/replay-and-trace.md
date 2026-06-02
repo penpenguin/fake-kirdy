@@ -62,6 +62,8 @@ Sample replay: `godot/tests/replays/controller_lab_jump.json`.
 
 Frames are sparse keyframes. Action state persists until a later frame changes it, so short replays can describe long holds without repeating every frame.
 
+Session replays can seed state before the first frame with `start_level_id`, `start_spawn_id`, `initial_ability_type`, `initial_item_ids`, `initial_player_max_hp`, and `initial_player_hp`. Use those fields only for focused route, lock, combat, or save fixtures where replaying the full prerequisite path would make the check noisy.
+
 ## Trace Schema
 
 `TraceRecorder.gd` writes JSON or NDJSON. Use `.ndjson` output for streaming-friendly traces and `.json` output for a single JSON array.

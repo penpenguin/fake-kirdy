@@ -7,6 +7,8 @@ var scene_path: String = ""
 var start_level_id: String = ""
 var start_spawn_id: String = "default"
 var initial_ability_type: String = ""
+var initial_player_hp: int = 0
+var initial_player_max_hp: int = 0
 var initial_item_ids: Array[String] = []
 var setting_difficulty: String = ""
 var level_id: String = "controller_lab"
@@ -36,6 +38,8 @@ func load_replay(path: String) -> bool:
     start_level_id = String(parsed.get("start_level_id", ""))
     start_spawn_id = String(parsed.get("start_spawn_id", "default"))
     initial_ability_type = String(parsed.get("initial_ability_type", ""))
+    initial_player_hp = int(parsed.get("initial_player_hp", 0))
+    initial_player_max_hp = int(parsed.get("initial_player_max_hp", 0))
     initial_item_ids = parse_string_array(parsed.get("initial_item_ids", []))
     setting_difficulty = String(parsed.get("setting_difficulty", ""))
     level_id = String(parsed.get("level_id", level_id))

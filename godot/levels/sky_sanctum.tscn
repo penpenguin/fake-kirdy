@@ -17,7 +17,7 @@ script = ExtResource("1_spawn")
 spawn_id = "default"
 
 [node name="PlayerSpawnNorth" type="Node2D" parent="."]
-position = Vector2(96, 368)
+position = Vector2(744, 368)
 script = ExtResource("1_spawn")
 spawn_id = "north"
 

@@ -10,6 +10,23 @@ const godotRoot = join(repoRoot, 'godot');
 const readGodotFile = (relativePath: string): string =>
   readFileSync(join(godotRoot, relativePath), 'utf8');
 
+const findSceneNodeBlock = (scene: string, nodeName: string): string => {
+  const match = scene.match(new RegExp(`\\[node name="${nodeName}"[^\\n]*\\]\\n([\\s\\S]*?)(?=\\n\\[node |$)`));
+  if (match === null) {
+    throw new Error(`Missing scene node ${nodeName}`);
+  }
+  return match[1];
+};
+
+const readNodePosition = (scene: string, nodeName: string): { x: number; y: number } => {
+  const nodeBlock = findSceneNodeBlock(scene, nodeName);
+  const match = nodeBlock.match(/position = Vector2\(([-0-9.]+), ([-0-9.]+)\)/);
+  if (match === null) {
+    throw new Error(`Missing position for scene node ${nodeName}`);
+  }
+  return { x: Number(match[1]), y: Number(match[2]) };
+};
+
 describe('Godot v2 procedural runtime loading', () => {
   it('loads generated procedural schema as a LevelLoader fallback, not as hand-authored scenes', () => {
     const source = readGodotFile('scripts/level/LevelLoader.gd');
@@ -168,6 +185,21 @@ describe('Godot v2 procedural runtime loading', () => {
     expect(replay.start_level_id).toBe('labyrinth_051');
     expect(replay.max_frames).toBeGreaterThanOrEqual(180);
     expect(replay.frames?.[0]?.actions?.move_right).toBe(true);
+  });
+
+  it('places the generated sky-expanse return spawn next to its sky_sanctum door', () => {
+    const generated = JSON.parse(readGodotFile('levels/generated/procedural_levels.json')) as {
+      levels?: Array<{ id?: string; neighbors?: Record<string, string> }>;
+    };
+    const skySanctum = readGodotFile('levels/sky_sanctum.tscn');
+    const skyRoute = generated.levels?.find((level) => level.id === 'labyrinth_051');
+    const returnSpawn = readNodePosition(skySanctum, 'PlayerSpawnNorth');
+    const skyExpanseDoor = readNodePosition(skySanctum, 'DoorToSkyExpanse');
+
+    expect(skyRoute?.neighbors?.south).toBe('sky_sanctum');
+    expect(returnSpawn.x).toBeGreaterThanOrEqual(skyExpanseDoor.x - 96);
+    expect(returnSpawn.x).toBeLessThan(skyExpanseDoor.x);
+    expect(Math.abs(returnSpawn.y - skyExpanseDoor.y)).toBeLessThanOrEqual(8);
   });
 
   it('adds a headless replay fixture that exercises generated enemy, heal, and collectible markers', () => {

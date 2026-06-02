@@ -179,7 +179,7 @@ function calculateSceneMetrics(markers, subResourceSizes, pacing, room) {
     vertical_travel_px: calculateVerticalTravel(positions),
     hidden_count: [...collectibles, ...doors].filter((marker) => booleanValue(marker.props.hidden_until_discovered)).length,
     rest_stop_count: numberValue(pacing?.props?.rest_stop_count, 0),
-    door_preview_spacing_px: numberValue(pacing?.props?.door_preview_spacing_px, calculateNearestDistance(spawns, doors)),
+    door_preview_spacing_px: numberValue(pacing?.props?.door_preview_spacing_px, calculateDoorPreviewSpacing(spawns, doors)),
     critical_path_px: numberValue(pacing?.props?.critical_path_px, estimateCriticalPath(spawns, doors, goals)),
     safe_spawn_radius: numberValue(pacing?.props?.safe_spawn_radius, 0),
     encounter_budget: numberValue(pacing?.props?.encounter_budget, 0),
@@ -536,7 +536,18 @@ function calculateFarthestDistance(fromMarkers, toMarkers) {
 }
 
 function calculateDoorPreviewSpacing(spawns, doors) {
-  return calculateNearestDistance(spawns.map((position) => ({ position })), doors.map((position) => ({ position })));
+  const doorPositions = doors.map((door) => door.position ?? door).filter(Boolean);
+  if (doorPositions.length > 1) {
+    let nearest = Number.POSITIVE_INFINITY;
+    for (let leftIndex = 0; leftIndex < doorPositions.length; leftIndex += 1) {
+      for (let rightIndex = leftIndex + 1; rightIndex < doorPositions.length; rightIndex += 1) {
+        nearest = Math.min(nearest, distance(doorPositions[leftIndex], doorPositions[rightIndex]));
+      }
+    }
+    return Number.isFinite(nearest) ? nearest : 0;
+  }
+
+  return calculateNearestDistance(spawns, doors);
 }
 
 function estimateCriticalPath(spawns, doors, goals) {
