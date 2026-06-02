@@ -135,6 +135,8 @@ func apply_initial_player_health(input_source: Node, session: Node) -> void:
         session.player_hp = max(session.player_max_hp, 1)
 
     session.call("sync_hud_overlay", "replay.initial_player_health", true)
+    if session.save_enabled:
+        session.call("write_persistent_state")
 
 
 func apply_session_replay_hooks(input_source: Node, session: Node) -> void:
