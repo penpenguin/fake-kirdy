@@ -59,6 +59,9 @@ jobs:
       - name: Build project
         run: npm run build:public
 
+      - name: Run Web smoke gate
+        run: npm run godot:web-smoke -- --require-export --require-browser
+
       - name: Run browser performance gate
         run: npm run godot:web-performance
 

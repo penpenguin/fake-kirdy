@@ -1,10 +1,12 @@
 {
   "start_level_id": "labyrinth_051",
   "start_spawn_id": "default",
+  "initial_player_max_hp": 6,
+  "initial_player_hp": 6,
   "initial_item_ids": ["forest-keystone", "ice-keystone", "fire-keystone", "cave-keystone"],
   "level_id": "labyrinth_051",
   "fps": 60,
-  "max_frames": 220,
+  "max_frames": 360,
   "frames": [
     {
       "frame": 0,
@@ -16,9 +18,17 @@
       }
     },
     {
-      "frame": 170,
+      "frame": 80,
       "actions": {
-        "move_right": false
+        "move_right": false,
+        "move_left": true
+      }
+    },
+    {
+      "frame": 240,
+      "actions": {
+        "move_left": false,
+        "move_right": true
       }
     }
   ]

@@ -1,0 +1,241 @@
+{
+  "version": 1,
+  "source_paths": {
+    "save_state": "godot/scripts/save/SaveState.gd",
+    "game_session": "godot/scripts/session/GameSession.gd",
+    "run_replay": "godot/tests/run_replay.gd",
+    "replay_suite": "godot/tests/replay_suite.json"
+  },
+  "required_roundtrip_fields": [
+    {
+      "key": "acquired_item_ids",
+      "state_var": "acquired_item_ids",
+      "kind": "array"
+    },
+    {
+      "key": "completed_level_ids",
+      "state_var": "completed_level_ids",
+      "kind": "array"
+    },
+    {
+      "key": "visited_level_ids",
+      "state_var": "visited_level_ids",
+      "kind": "array"
+    },
+    {
+      "key": "unlocked_door_ids",
+      "state_var": "unlocked_door_ids",
+      "kind": "array"
+    },
+    {
+      "key": "defeated_enemy_group_ids",
+      "state_var": "defeated_enemy_group_ids",
+      "kind": "array"
+    },
+    {
+      "key": "defeated_boss_ids",
+      "state_var": "defeated_boss_ids",
+      "kind": "array"
+    },
+    {
+      "key": "opened_ability_gate_ids",
+      "state_var": "opened_ability_gate_ids",
+      "kind": "array"
+    },
+    {
+      "key": "discovered_hidden_feature_ids",
+      "state_var": "discovered_hidden_feature_ids",
+      "kind": "array"
+    },
+    {
+      "key": "completed_dead_end_ids",
+      "state_var": "completed_dead_end_ids",
+      "kind": "array"
+    },
+    {
+      "key": "explored_tiles",
+      "state_var": "explored_tiles",
+      "kind": "dictionary"
+    },
+    {
+      "key": "current_level_id",
+      "state_var": "current_level_id",
+      "kind": "scalar"
+    },
+    {
+      "key": "player_position",
+      "state_var": "player_position",
+      "kind": "dictionary"
+    },
+    {
+      "key": "ability_type",
+      "state_var": "ability_type",
+      "kind": "scalar"
+    },
+    {
+      "key": "consumed_heal_ids",
+      "state_var": "consumed_heal_ids",
+      "kind": "array"
+    },
+    {
+      "key": "settings",
+      "state_var": "settings",
+      "kind": "dictionary"
+    },
+    {
+      "key": "player_hp",
+      "state_var": "player_hp",
+      "kind": "scalar"
+    },
+    {
+      "key": "player_max_hp",
+      "state_var": "player_max_hp",
+      "kind": "scalar"
+    },
+    {
+      "key": "player_revive_count",
+      "state_var": "player_revive_count",
+      "kind": "scalar"
+    }
+  ],
+  "representative_replays": [
+    {
+      "id": "use_saved_ability",
+      "replay_path": "res://tests/replays/use_saved_ability.json",
+      "required_events": ["save.loaded", "ability.used"]
+    },
+    {
+      "id": "save_load_roundtrip_seed",
+      "replay_path": "res://tests/replays/save_load_roundtrip_seed.json",
+      "required_events": ["save.loaded", "save.written"]
+    }
+  ],
+  "roundtrip_samples": [
+    {
+      "id": "canonical_progression_state",
+      "input": {
+        "acquired_item_ids": ["ice-keystone", "forest-keystone", "forest-keystone", ""],
+        "completed_level_ids": ["forest_reliquary"],
+        "visited_level_ids": ["central_hub", "forest_area"],
+        "unlocked_door_ids": ["central_hub:forest_entry"],
+        "defeated_enemy_group_ids": ["forest_guard"],
+        "defeated_boss_ids": ["forest_boss"],
+        "opened_ability_gate_ids": ["fire_area_ice_block"],
+        "discovered_hidden_feature_ids": ["hidden:forest_cache"],
+        "completed_dead_end_ids": ["forest_dead_end_max_health"],
+        "explored_tiles": {
+          "central_hub": ["3,2", "3,2", "-1,0", "bad"],
+          "forest_area": ["4,2"]
+        },
+        "current_level_id": "flat_room",
+        "player_position": { "x": 128.5, "y": 368 },
+        "ability_type": "spark",
+        "consumed_heal_ids": ["heal-a", "heal-a", ""],
+        "settings": { "volume": 1.4, "controls": "touch", "difficulty": "hard" },
+        "player_hp": 2,
+        "player_max_hp": 4,
+        "player_revive_count": 1
+      },
+      "expected": {
+        "acquired_item_ids": ["forest-keystone", "ice-keystone"],
+        "completed_level_ids": ["forest_reliquary"],
+        "visited_level_ids": ["central_hub", "forest_area"],
+        "unlocked_door_ids": ["central_hub:forest_entry"],
+        "defeated_enemy_group_ids": ["forest_guard"],
+        "defeated_boss_ids": ["forest_boss"],
+        "opened_ability_gate_ids": ["fire_area_ice_block"],
+        "discovered_hidden_feature_ids": ["hidden:forest_cache"],
+        "completed_dead_end_ids": ["forest_dead_end_max_health"],
+        "explored_tiles": {
+          "central_hub": ["3,2"],
+          "forest_area": ["4,2"]
+        },
+        "current_level_id": "flat_room",
+        "player_position": { "x": 128.5, "y": 368 },
+        "ability_type": "spark",
+        "consumed_heal_ids": ["heal-a"],
+        "settings": { "volume": 1, "controls": "touch", "difficulty": "hard" },
+        "player_hp": 2,
+        "player_max_hp": 4,
+        "player_revive_count": 1
+      }
+    }
+  ],
+  "runtime_roundtrip": {
+    "seed_replay_path": "res://tests/replays/save_load_roundtrip_seed.json",
+    "load_replay_path": "res://tests/replays/use_saved_ability.json",
+    "initial_save": {
+      "acquired_item_ids": ["forest-keystone"],
+      "completed_level_ids": ["forest_reliquary"],
+      "visited_level_ids": ["central_hub"],
+      "unlocked_door_ids": ["central_hub:forest_entry"],
+      "defeated_enemy_group_ids": ["forest_guard"],
+      "defeated_boss_ids": [],
+      "opened_ability_gate_ids": ["fire_area_ice_block"],
+      "discovered_hidden_feature_ids": ["hidden:forest_cache"],
+      "completed_dead_end_ids": ["forest_dead_end_max_health"],
+      "explored_tiles": {
+        "flat_room": ["3,2"]
+      },
+      "current_level_id": "flat_room",
+      "player_position": { "x": 96, "y": 368 },
+      "ability_type": "spark",
+      "consumed_heal_ids": ["heal-a"],
+      "settings": { "volume": 0.7, "controls": "touch", "difficulty": "hard" },
+      "player_hp": 2,
+      "player_max_hp": 3,
+      "player_revive_count": 1
+    },
+    "required_saved_fields": [
+      "acquired_item_ids",
+      "completed_level_ids",
+      "visited_level_ids",
+      "unlocked_door_ids",
+      "defeated_enemy_group_ids",
+      "opened_ability_gate_ids",
+      "discovered_hidden_feature_ids",
+      "completed_dead_end_ids",
+      "explored_tiles",
+      "current_level_id",
+      "player_position",
+      "ability_type",
+      "settings",
+      "player_hp",
+      "player_max_hp",
+      "player_revive_count"
+    ],
+    "required_load_events": ["save.loaded", "save.written", "ability.used"]
+  },
+  "rules": {
+    "save_state_field_roundtrip": {
+      "severity": "error"
+    },
+    "session_save_payload_field": {
+      "severity": "error"
+    },
+    "session_load_payload_field": {
+      "severity": "error"
+    },
+    "replay_save_path_support": {
+      "severity": "error"
+    },
+    "representative_replay_exists": {
+      "severity": "error"
+    },
+    "sample_roundtrip": {
+      "severity": "error"
+    },
+    "runtime_seed_replay_failed": {
+      "severity": "error"
+    },
+    "runtime_load_replay_failed": {
+      "severity": "error"
+    },
+    "runtime_saved_field_missing": {
+      "severity": "error"
+    },
+    "runtime_event_missing": {
+      "severity": "error"
+    }
+  }
+}

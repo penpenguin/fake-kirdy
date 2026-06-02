@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "snapshot_id": "hud_controller_lab_jump",
+  "content_hash": "a80e9a541a22c22a5fbde7bd133ceed2bbe5952114fa1b03423632e30c502ffc",
+  "replay_path": "godot/tests/replays/controller_lab_jump.json",
+  "frame": 30,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "hud"
+  ],
+  "required_scene_paths": [
+    "godot/scenes/ui/HudOverlay.tscn"
+  ],
+  "required_resource_paths": [
+    "godot/resources/assets/images/characters/kirdy/kirdy-jump.webp"
+  ]
+}

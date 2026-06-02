@@ -25,7 +25,7 @@
       "id": "spark_ability_dash_movement",
       "replay_path": "res://tests/replays/spark_ability_dash_movement.json",
       "expected_outcome": "replay.max_frames_reached",
-      "expected_events": ["ability.used", "ability.movement.applied", "player.ability_texture.fallback"],
+      "expected_events": ["ability.used", "ability.movement.applied"],
       "tags": ["combat", "ability", "movement", "trace"]
     },
     {

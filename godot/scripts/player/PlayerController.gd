@@ -208,10 +208,16 @@ func get_ability_texture(next_ability_type: String) -> Texture2D:
     match next_ability_type:
         "fire", "burn":
             return kirdy_fire_texture
+        "flame":
+            return kirdy_fire_texture
         "ice", "frost":
             return kirdy_ice_texture
         "sword", "blade":
             return kirdy_sword_texture
+        "spark", "stone":
+            return kirdy_sword_texture
+        "leaf":
+            return kirdy_ice_texture
         _:
             return null
 

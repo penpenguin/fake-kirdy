@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "snapshot_id": "enemy_hit_feedback",
+  "content_hash": "f770147ccdd308bb2fa8a07f707632465812c214798e9184cc8c1c1b9a4678c8",
+  "replay_path": "godot/tests/replays/combat_ability_damage_enemy.json",
+  "frame": 70,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "ability_feedback"
+  ],
+  "required_scene_paths": [
+    "godot/scenes/enemies/SimpleEnemy.tscn"
+  ],
+  "required_resource_paths": [
+    "godot/resources/assets/images/enemies/wabble-bee.webp"
+  ]
+}

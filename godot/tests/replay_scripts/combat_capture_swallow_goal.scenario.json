@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "id": "combat_capture_swallow_goal",
+  "output_path": "godot/tests/replays/combat_capture_swallow_goal.json",
+  "start_level_id": "combat_room",
+  "start_spawn_id": "default",
+  "level_id": "combat_room",
+  "fps": 60,
+  "max_frames": 720,
+  "initial_actions": {
+    "move_right": false,
+    "inhale": false,
+    "swallow": false,
+    "use_ability": false
+  },
+  "steps": [
+    {
+      "at": 0,
+      "do": "move",
+      "direction": "right",
+      "active": true
+    },
+    {
+      "at": 0,
+      "do": "hold",
+      "action": "inhale"
+    },
+    {
+      "at": 30,
+      "do": "tap",
+      "action": "swallow"
+    },
+    {
+      "at": 31,
+      "do": "release",
+      "action": "inhale"
+    },
+    {
+      "at": 45,
+      "do": "tap",
+      "action": "use_ability"
+    },
+    {
+      "at": 680,
+      "do": "move",
+      "direction": "right",
+      "active": false
+    }
+  ]
+}

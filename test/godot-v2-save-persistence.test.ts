@@ -171,6 +171,16 @@ describe('Godot v2 save persistence foundation', () => {
     expect(replay.frames.some((frame) => frame.actions?.use_ability)).toBe(true);
   });
 
+  it('persists replay-seeded health when a deterministic save path is enabled', () => {
+    const runner = readGodotFile('tests/run_replay.gd');
+    const helper = runner.match(/func apply_initial_player_health[\s\S]*?(?=\n\nfunc )/)?.[0] ?? '';
+
+    expect(helper).toContain('initial_player_hp');
+    expect(helper).toContain('initial_player_max_hp');
+    expect(helper).toContain('save_enabled');
+    expect(helper).toContain('write_persistent_state');
+  });
+
   it('documents Godot save persistence semantics', () => {
     const docsPath = join(repoRoot, 'docs', 'godot-v2', 'save-persistence.md');
 

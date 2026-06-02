@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "snapshot_id": "ability_feedback_fire_projectile",
+  "content_hash": "98bef484ea6d53a1a145199c82481cfe751565ba75c65fdf38a07b52fe695906",
+  "replay_path": "godot/tests/replays/fire_ability_projectile_hit.json",
+  "frame": 75,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "ability_feedback",
+    "hud"
+  ],
+  "required_scene_paths": [
+    "godot/scenes/combat/AbilityProjectile.tscn",
+    "godot/scenes/ui/HudOverlay.tscn"
+  ],
+  "required_resource_paths": [
+    "godot/resources/assets/images/effects/fire-attack.webp"
+  ]
+}

@@ -34,6 +34,8 @@ describe('Godot v2 replay and trace foundation', () => {
     expect(source).toContain('is_action_just_pressed');
     expect(source).toContain('is_action_just_released');
     expect(source).toContain('get_axis');
+    expect(source).toContain('initial_player_hp');
+    expect(source).toContain('initial_player_max_hp');
   });
 
   it('records trace events as JSON or NDJSON with terminal events', () => {
@@ -78,6 +80,7 @@ describe('Godot v2 replay and trace foundation', () => {
     expect(source).toContain('write_to_path');
     expect(source).toContain('record_run_finished');
     expect(source).toContain('record_replay_error');
+    expect(source).toContain('apply_initial_player_health');
   });
 
   it('allows selected session replays to continue after a finished state for result menu input', () => {

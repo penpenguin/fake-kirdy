@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "start_level_id": "central_hub",
+  "final_level_id": "labyrinth_132",
+  "level_graph_contract_path": "godot/tests/level_graph_contract.json",
+  "cluster_unlocks": {
+    "ice": "forest-keystone",
+    "fire": "ice-keystone",
+    "ruins": "fire-keystone",
+    "sky": "cave-keystone"
+  },
+  "required_final_items": [
+    "forest-keystone",
+    "ice-keystone",
+    "fire-keystone",
+    "cave-keystone"
+  ],
+  "rules": {
+    "level_graph_valid": {
+      "severity": "error"
+    },
+    "final_state_reachable": {
+      "severity": "error"
+    },
+    "required_final_item_collected": {
+      "severity": "error"
+    }
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "output_json_path": "reports/godot-quality-report.json",
+  "output_markdown_path": "reports/godot-quality-report.md",
+  "required_check_ids": [
+    "scene-lint",
+    "level-graph",
+    "progression-solver",
+    "combat-matrix",
+    "enemy-ai-arena",
+    "trace-assert",
+    "visual-snapshot",
+    "content-budget",
+    "asset-fallback-audit",
+    "playtest-report"
+  ],
+  "checks": [
+    {
+      "id": "scene-lint",
+      "label": "Scene lint",
+      "script": "scripts/check-godot-scene-lint.mjs",
+      "args": ["--json"]
+    },
+    {
+      "id": "level-graph",
+      "label": "Level graph",
+      "script": "scripts/check-godot-level-graph.mjs",
+      "args": ["--json"]
+    },
+    {
+      "id": "progression-solver",
+      "label": "Progression solver",
+      "script": "scripts/check-godot-progression-solver.mjs",
+      "args": ["--json"]
+    },
+    {
+      "id": "combat-matrix",
+      "label": "Combat matrix",
+      "script": "scripts/check-godot-combat-matrix.mjs",
+      "args": ["--json"]
+    },
+    {
+      "id": "enemy-ai-arena",
+      "label": "Enemy AI arena",
+      "script": "scripts/check-godot-enemy-ai-arena.mjs",
+      "args": ["--json"]
+    },
+    {
+      "id": "trace-assert",
+      "label": "Trace assertions",
+      "script": "scripts/assert-godot-trace.mjs",
+      "args": ["--json"]
+    },
+    {
+      "id": "visual-snapshot",
+      "label": "Visual snapshots",
+      "script": "scripts/check-godot-visual-snapshot.mjs",
+      "args": ["--json"]
+    },
+    {
+      "id": "content-budget",
+      "label": "Content budget",
+      "script": "scripts/check-godot-content-budget.mjs",
+      "args": ["--json"]
+    },
+    {
+      "id": "asset-fallback-audit",
+      "label": "Asset fallback audit",
+      "script": "scripts/check-godot-asset-fallback-audit.mjs",
+      "args": ["--json"]
+    },
+    {
+      "id": "playtest-report",
+      "label": "Manual playtest report",
+      "script": "scripts/generate-godot-playtest-report.mjs",
+      "args": ["--check", "--json"]
+    }
+  ]
+}

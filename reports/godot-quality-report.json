@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "generated_at": "1970-01-01T00:00:00.000Z",
+  "summary": {
+    "total": 10,
+    "passed": 10,
+    "failed": 0,
+    "failed_check_count": 0,
+    "warning_count": 1
+  },
+  "manual_playtest": {
+    "unresolved_issue_count": 0,
+    "generated_task_count": 0
+  },
+  "sources": [
+    {
+      "id": "scene-lint",
+      "label": "Scene lint",
+      "status": "passed",
+      "exit_status": 0,
+      "failed_check_count": 0,
+      "warning_count": 0,
+      "failed_checks": [],
+      "warnings": [],
+      "summary": {}
+    },
+    {
+      "id": "level-graph",
+      "label": "Level graph",
+      "status": "passed",
+      "exit_status": 0,
+      "failed_check_count": 0,
+      "warning_count": 0,
+      "failed_checks": [],
+      "warnings": [],
+      "summary": {}
+    },
+    {
+      "id": "progression-solver",
+      "label": "Progression solver",
+      "status": "passed",
+      "exit_status": 0,
+      "failed_check_count": 0,
+      "warning_count": 0,
+      "failed_checks": [],
+      "warnings": [],
+      "summary": {}
+    },
+    {
+      "id": "combat-matrix",
+      "label": "Combat matrix",
+      "status": "passed",
+      "exit_status": 0,
+      "failed_check_count": 0,
+      "warning_count": 0,
+      "failed_checks": [],
+      "warnings": [],
+      "summary": {}
+    },
+    {
+      "id": "enemy-ai-arena",
+      "label": "Enemy AI arena",
+      "status": "passed",
+      "exit_status": 0,
+      "failed_check_count": 0,
+      "warning_count": 0,
+      "failed_checks": [],
+      "warnings": [],
+      "summary": {}
+    },
+    {
+      "id": "trace-assert",
+      "label": "Trace assertions",
+      "status": "passed",
+      "exit_status": 0,
+      "failed_check_count": 0,
+      "warning_count": 0,
+      "failed_checks": [],
+      "warnings": [],
+      "summary": {
+        "assertion_count": 4
+      }
+    },
+    {
+      "id": "visual-snapshot",
+      "label": "Visual snapshots",
+      "status": "passed",
+      "exit_status": 0,
+      "failed_check_count": 0,
+      "warning_count": 0,
+      "failed_checks": [],
+      "warnings": [],
+      "summary": {}
+    },
+    {
+      "id": "content-budget",
+      "label": "Content budget",
+      "status": "passed",
+      "exit_status": 0,
+      "failed_check_count": 0,
+      "warning_count": 0,
+      "failed_checks": [],
+      "warnings": [],
+      "summary": {}
+    },
+    {
+      "id": "asset-fallback-audit",
+      "label": "Asset fallback audit",
+      "status": "passed",
+      "exit_status": 0,
+      "failed_check_count": 0,
+      "warning_count": 1,
+      "failed_checks": [],
+      "warnings": [
+        {
+          "rule": "protected_fallback_event",
+          "severity": "warning",
+          "path": "godot/scripts/player/PlayerController.gd",
+          "event_type": "player.ability_texture.fallback",
+          "message": "player.ability_texture.fallback is still observable; keep it out of protected mainline assets.",
+          "source_id": "asset-fallback-audit"
+        }
+      ],
+      "summary": {}
+    },
+    {
+      "id": "playtest-report",
+      "label": "Manual playtest report",
+      "status": "passed",
+      "exit_status": 0,
+      "failed_check_count": 0,
+      "warning_count": 0,
+      "failed_checks": [],
+      "warnings": [],
+      "summary": {
+        "sample_count": 5,
+        "generated_task_count": 0,
+        "unresolved_issue_count": 0
+      }
+    }
+  ],
+  "failed_checks": [],
+  "warnings": [
+    {
+      "rule": "protected_fallback_event",
+      "severity": "warning",
+      "path": "godot/scripts/player/PlayerController.gd",
+      "event_type": "player.ability_texture.fallback",
+      "message": "player.ability_texture.fallback is still observable; keep it out of protected mainline assets.",
+      "source_id": "asset-fallback-audit"
+    }
+  ]
+}

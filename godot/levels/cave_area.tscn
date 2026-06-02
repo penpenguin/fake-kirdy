@@ -26,6 +26,11 @@ position = Vector2(96, 368)
 script = ExtResource("1_spawn")
 spawn_id = "default"
 
+[node name="PlayerSpawnNorth" type="Node2D" parent="."]
+position = Vector2(380, 368)
+script = ExtResource("1_spawn")
+spawn_id = "north"
+
 [node name="DoorToCentralHub" type="Node2D" parent="."]
 position = Vector2(620, 368)
 script = ExtResource("2_door")

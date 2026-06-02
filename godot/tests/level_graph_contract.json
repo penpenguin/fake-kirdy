@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "levels_dir": "godot/levels",
+  "procedural_levels_path": "godot/levels/generated/procedural_levels.json",
+  "level_catalog_path": "godot/levels/level_catalog.json",
+  "stage_manifest_path": "godot/levels/stage_manifest.json",
+  "start_level_id": "central_hub",
+  "final_level_id": "goal_sanctum",
+  "required_reachable_level_ids": [
+    "goal_sanctum",
+    "forest_reliquary",
+    "ice_reliquary",
+    "fire_reliquary",
+    "ruins_reliquary",
+    "sky_sanctum",
+    "labyrinth_132"
+  ],
+  "branch_return_target_id": "central_hub",
+  "branch_level_ids": [
+    "forest_area",
+    "ice_area",
+    "fire_area",
+    "cave_area",
+    "mirror_corridor"
+  ],
+  "cluster_keystone_order": [
+    {
+      "cluster": "forest",
+      "item_id": "forest-keystone",
+      "unlocks_cluster": "ice"
+    },
+    {
+      "cluster": "ice",
+      "item_id": "ice-keystone",
+      "unlocks_cluster": "fire"
+    },
+    {
+      "cluster": "fire",
+      "item_id": "fire-keystone",
+      "unlocks_cluster": "ruins"
+    },
+    {
+      "cluster": "ruins",
+      "item_id": "cave-keystone",
+      "unlocks_cluster": "sky"
+    }
+  ],
+  "rules": {
+    "door_target_exists": {
+      "severity": "error"
+    },
+    "door_target_spawn_exists": {
+      "severity": "error"
+    },
+    "final_level_reachable": {
+      "severity": "error"
+    },
+    "required_level_reachable": {
+      "severity": "error"
+    },
+    "branch_returns_to_hub": {
+      "severity": "error"
+    },
+    "keystone_source_exists": {
+      "severity": "error"
+    },
+    "keystone_requirement_exists": {
+      "severity": "error"
+    }
+  }
+}

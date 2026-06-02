@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "levels_dir": "godot/levels",
+  "procedural_levels_path": "godot/levels/generated/procedural_levels.json",
+  "rules": {
+    "door_target_exists": {
+      "severity": "error"
+    },
+    "door_target_spawn_exists": {
+      "severity": "error"
+    },
+    "ability_gate_requires_ability": {
+      "severity": "error"
+    },
+    "hidden_discovery_radius": {
+      "severity": "error",
+      "min_radius_px": 1
+    },
+    "door_goal_overlap": {
+      "severity": "warning"
+    },
+    "hazard_spawn_overlap": {
+      "severity": "warning",
+      "safe_spawn_radius_px": 24
+    },
+    "enemy_spawn_distance": {
+      "severity": "warning",
+      "min_distance_px": 48
+    }
+  }
+}

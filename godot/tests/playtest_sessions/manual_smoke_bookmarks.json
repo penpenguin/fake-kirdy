@@ -1,0 +1,17 @@
+[
+  {
+    "id": "manual_smoke_navigation_clear",
+    "kind": "note",
+    "category": "objective_clarity",
+    "severity": "info",
+    "status": "resolved",
+    "note": "Manual smoke path reached the next stage and kept the objective readable.",
+    "level_id": "fire_area",
+    "time_ms": 3000,
+    "position": {
+      "x": 64,
+      "y": 112
+    },
+    "screenshot_path": "reports/playtest-shots/manual-smoke-0003.png"
+  }
+]

@@ -86,8 +86,8 @@ describe('Godot v2 asset migration', () => {
     expect(controller).toContain('"sword", "blade"');
     expect(controller).toContain('player.ability_texture.fallback');
     expect(controller).toContain('last_ability_texture_fallback_key');
-    expect(suite.replays?.find((entry) => entry.id === 'spark_ability_dash_movement')?.expected_events).toEqual(
-      expect.arrayContaining(['player.ability_texture.fallback']),
+    expect(suite.replays?.find((entry) => entry.id === 'spark_ability_dash_movement')?.expected_events).not.toContain(
+      'player.ability_texture.fallback',
     );
   });
 

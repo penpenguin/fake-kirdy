@@ -1,0 +1,6 @@
+{"frame":10,"time_ms":167,"event_type":"ability.used","level_id":"combat_room","payload":{"ability_type":"fire"},"player":{"position":{"x":96,"y":368},"velocity":{"x":0,"y":0}}}
+{"frame":18,"time_ms":300,"event_type":"ability.projectile.spawned","level_id":"combat_room","payload":{"ability_type":"fire","projectile_id":"fire_001"},"player":{"position":{"x":96,"y":368},"velocity":{"x":0,"y":0}}}
+{"frame":24,"time_ms":400,"event_type":"ability.projectile.hit","level_id":"combat_room","payload":{"ability_type":"fire","projectile_id":"fire_001","enemy_id":"dummy","distance_px":18},"player":{"position":{"x":96,"y":368},"velocity":{"x":0,"y":0}}}
+{"frame":24,"time_ms":400,"event_type":"enemy.damaged","level_id":"combat_room","payload":{"ability_type":"fire","enemy_id":"dummy","damage_amount":2,"enemy_hp_before":2,"enemy_hp_after":0},"player":{"position":{"x":96,"y":368},"velocity":{"x":0,"y":0}}}
+{"frame":25,"time_ms":417,"event_type":"enemy.defeated","level_id":"combat_room","payload":{"enemy_id":"dummy","enemy_hp_after":0},"player":{"position":{"x":96,"y":368},"velocity":{"x":0,"y":0}}}
+{"frame":40,"time_ms":667,"event_type":"run.finished","level_id":"combat_room","payload":{"outcome":"complete"},"player":{"position":{"x":96,"y":368},"velocity":{"x":0,"y":0}}}

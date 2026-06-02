@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "snapshot_id": "map_overlay_visibility",
+  "content_hash": "30ffa11efd0e06856d1cf988af7d7139691be20d407f2fcc9e3d57925c95e8ab",
+  "replay_path": "godot/tests/replays/map_toggle_visibility.json",
+  "frame": 12,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "map_overlay"
+  ],
+  "required_scene_paths": [
+    "godot/scenes/ui/MapOverlay.tscn"
+  ],
+  "required_resource_paths": [
+    "godot/resources/assets/images/ui/door-marker.webp",
+    "godot/resources/assets/images/ui/goal-door.webp"
+  ]
+}

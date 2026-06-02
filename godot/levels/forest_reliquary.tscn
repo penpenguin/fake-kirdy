@@ -32,6 +32,11 @@ position = Vector2(560, 368)
 script = ExtResource("1_spawn")
 spawn_id = "door_check"
 
+[node name="PlayerSpawnWest" type="Node2D" parent="."]
+position = Vector2(560, 368)
+script = ExtResource("1_spawn")
+spawn_id = "west"
+
 [node name="ForestKeystone" type="Node2D" parent="."]
 position = Vector2(220, 368)
 script = ExtResource("4_collectible")

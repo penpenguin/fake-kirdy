@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "trace_path": "godot/tests/playtest_sessions/manual_smoke_trace.ndjson",
+  "bookmarks_path": "godot/tests/playtest_sessions/manual_smoke_bookmarks.json",
+  "output_json_path": "reports/godot-playtest-report.json",
+  "output_markdown_path": "reports/godot-playtest-report.md",
+  "sample_interval_ms": 1000,
+  "recent_event_limit": 5,
+  "required_sample_fields": [
+    "level_id",
+    "position",
+    "hp",
+    "ability_type",
+    "enemy_count",
+    "fps",
+    "recent_events",
+    "screenshot_path"
+  ],
+  "required_bookmark_fields": [
+    "id",
+    "kind",
+    "category",
+    "note",
+    "level_id",
+    "position"
+  ],
+  "issue_bookmark_kinds": [
+    "issue"
+  ],
+  "issue_categories": [
+    "navigation_blocker",
+    "combat_feedback",
+    "enemy_ai",
+    "objective_clarity",
+    "web_runtime"
+  ]
+}
