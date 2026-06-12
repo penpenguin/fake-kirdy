@@ -1,17 +1,62 @@
 [
   {
-    "id": "manual_smoke_navigation_clear",
+    "id": "golden_fire_objective_readable",
     "kind": "note",
     "category": "objective_clarity",
     "severity": "info",
     "status": "resolved",
-    "note": "Manual smoke path reached the next stage and kept the objective readable.",
+    "note": "The route objective moved from finding the fire enemy to melting the ice gate and entering the Fire Expanse.",
     "level_id": "fire_area",
-    "time_ms": 3000,
+    "time_ms": 35000,
     "position": {
-      "x": 64,
-      "y": 112
+      "x": 340,
+      "y": 368
     },
-    "screenshot_path": "reports/playtest-shots/manual-smoke-0003.png"
+    "screenshot_path": "reports/playtest-shots/golden-fire-0035.png"
+  },
+  {
+    "id": "golden_fire_gate_blocks_navigation",
+    "kind": "note",
+    "category": "navigation_blocker",
+    "severity": "info",
+    "status": "resolved",
+    "note": "The ice gate visibly blocked the door approach before the fire ability opened it.",
+    "level_id": "fire_area",
+    "time_ms": 41000,
+    "position": {
+      "x": 452,
+      "y": 368
+    },
+    "screenshot_path": "reports/playtest-shots/golden-fire-0041.png"
+  },
+  {
+    "id": "golden_fire_feedback_readable",
+    "kind": "note",
+    "category": "combat_feedback",
+    "severity": "info",
+    "status": "resolved",
+    "note": "Capturing the fire enemy and using the ability produced readable combat and gate feedback.",
+    "level_id": "fire_area",
+    "time_ms": 30000,
+    "position": {
+      "x": 310,
+      "y": 368
+    },
+    "screenshot_path": "reports/playtest-shots/golden-fire-0030.png"
+  },
+  {
+    "id": "golden_fire_enemy_ai_pressure",
+    "kind": "note",
+    "category": "enemy_ai",
+    "severity": "info",
+    "status": "resolved",
+    "note": "The fire enemy created pressure near the branch route without preventing the player from acquiring fire.",
+    "level_id": "fire_area",
+    "time_ms": 26000,
+    "position": {
+      "x": 286,
+      "y": 368
+    },
+    "screenshot_path": "reports/playtest-shots/golden-fire-0026.png"
   }
 ]

@@ -11,18 +11,21 @@ try {
   const contractDir = dirname(contractPath);
   const playerControllerPath = resolvePath(requireString(contract.source_paths?.player_controller, 'source_paths.player_controller'), contractDir);
   const gameSessionPath = resolvePath(requireString(contract.source_paths?.game_session, 'source_paths.game_session'), contractDir);
+  const levelVisualAssetsPath = resolvePath(requireString(contract.source_paths?.level_visual_assets, 'source_paths.level_visual_assets'), contractDir);
   const assetManifestPath = resolvePath(requireString(contract.source_paths?.asset_manifest, 'source_paths.asset_manifest'), contractDir);
   const sourceRoots = requireArray(contract.source_paths?.source_roots, 'source_paths.source_roots').map((sourceRoot) =>
     resolvePath(String(sourceRoot), contractDir),
   );
   const playerController = readFileSync(playerControllerPath, 'utf8');
   const gameSession = readFileSync(gameSessionPath, 'utf8');
+  const levelVisualAssets = readFileSync(levelVisualAssetsPath, 'utf8');
   const assetManifest = loadJson(assetManifestPath, 'asset manifest');
   const assetRoot = resolvePath(requireString(assetManifest.canonical_asset_root, 'asset_manifest.canonical_asset_root'), dirname(assetManifestPath));
   const manifestAssets = new Set(requireArray(assetManifest.assets, 'asset_manifest.assets').map(String));
   const sourceFiles = collectSourceFiles(sourceRoots);
   const sourceTexts = sourceFiles.map((path) => ({ path, text: readFileSync(path, 'utf8') }));
   const mainlineAbilities = checkMainlineAbilities(contract, playerController, gameSession);
+  const levelVisualChecks = checkLevelVisualAssets(contract, levelVisualAssets, assetRoot, manifestAssets);
   const resourcePathChecks = checkResourcePaths(sourceTexts, assetRoot, manifestAssets);
   const requiredAssetChecks = checkRequiredAssets(contract, assetRoot, manifestAssets);
   const labelChecks = checkUiLabels(sourceTexts, contract);
@@ -30,6 +33,7 @@ try {
   const unusedAssetChecks = checkUnusedAssets(manifestAssets, sourceTexts, contract);
   const checks = [
     ...mainlineAbilities.checks,
+    ...levelVisualChecks.checks,
     ...requiredAssetChecks,
     ...resourcePathChecks.checks,
     ...labelChecks.checks,
@@ -43,6 +47,7 @@ try {
     source_paths: {
       player_controller: playerControllerPath,
       game_session: gameSessionPath,
+      level_visual_assets: levelVisualAssetsPath,
       asset_manifest: assetManifestPath,
     },
     source_file_count: sourceFiles.length,
@@ -50,12 +55,17 @@ try {
     categories: {
       trace_fallbacks: fallbackChecks.count,
       ability_assets: mainlineAbilities.abilities.length,
+      level_visual_assets: levelVisualChecks.textureAssets.length,
       audio_assets: countAudioAssets(contract),
       ui_labels: labelChecks.count,
       resource_paths: resourcePathChecks.count,
       unused_assets: unusedAssetChecks.count,
     },
     warnings,
+    level_visuals: {
+      polygon_terms: levelVisualChecks.polygonTerms,
+      texture_assets: levelVisualChecks.textureAssets,
+    },
     failed_checks: failedChecks,
   };
 
@@ -80,6 +90,7 @@ try {
     categories: {
       trace_fallbacks: 0,
       ability_assets: 0,
+      level_visual_assets: 0,
       audio_assets: 0,
       ui_labels: 0,
       resource_paths: 0,
@@ -274,6 +285,70 @@ function checkRequiredAssets(contract, assetRoot, manifestAssets) {
     }
   }
   return checks;
+}
+
+function checkLevelVisualAssets(contract, levelVisualAssets, assetRoot, manifestAssets) {
+  const checks = [];
+  const texturePreloads = parseTexturePreloads(levelVisualAssets);
+  const textureFunctionBody = extractFunctionBody(levelVisualAssets, 'get_texture_for_level');
+  const polygonFunctionBody = extractFunctionBody(levelVisualAssets, 'should_texture_polygon');
+  const polygonTerms = [];
+  const textureAssets = [];
+
+  for (const term of requireOptionalArray(contract.level_visuals?.required_polygon_name_terms, 'level_visuals.required_polygon_name_terms').map(String)) {
+    const termPattern = new RegExp(`\\.contains\\("${escapeRegExp(term)}"\\)`);
+    if (termPattern.test(polygonFunctionBody)) {
+      polygonTerms.push(term);
+    } else {
+      checks.push(buildCheck(contract, 'missing_level_visual_polygon_term', {
+        polygon_term: term,
+        message: `LevelVisualAssets.should_texture_polygon must include ${term} polygons so terrain textures cover visible level geometry.`,
+      }));
+    }
+  }
+
+  for (const textureAsset of requireOptionalArray(contract.level_visuals?.required_texture_assets, 'level_visuals.required_texture_assets')) {
+    const textureConst = requireString(textureAsset.texture_const, 'level_visuals.required_texture_assets.texture_const');
+    const assetPath = requireString(textureAsset.asset_path, `${textureConst}.asset_path`);
+    const actualAssetPath = texturePreloads.get(textureConst) ?? '';
+    const assetStatus = actualAssetPath === assetPath && manifestAssets.has(assetPath) && existsSync(join(assetRoot, assetPath)) ? 'present' : 'missing';
+    const mappingStatus = textureFunctionBody.includes(`return ${textureConst}`) ? 'used' : 'missing';
+
+    textureAssets.push({
+      texture_const: textureConst,
+      expected_asset_path: assetPath,
+      actual_asset_path: actualAssetPath,
+      asset_status: assetStatus,
+      mapping_status: mappingStatus,
+    });
+
+    if (assetStatus !== 'present') {
+      checks.push(buildCheck(contract, 'missing_level_texture_asset', {
+        texture_const: textureConst,
+        expected_asset_path: assetPath,
+        actual_asset_path: actualAssetPath,
+        message: `${textureConst} must preload an existing manifest world texture asset: ${assetPath}.`,
+      }));
+    }
+
+    if (mappingStatus !== 'used') {
+      checks.push(buildCheck(contract, 'missing_level_texture_mapping', {
+        texture_const: textureConst,
+        expected_asset_path: assetPath,
+        message: `LevelVisualAssets.get_texture_for_level must return ${textureConst} for at least one level family.`,
+      }));
+    }
+  }
+
+  return { polygonTerms, textureAssets, checks };
+}
+
+function parseTexturePreloads(sourceText) {
+  const result = new Map();
+  for (const match of sourceText.matchAll(/const\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*preload\("res:\/\/resources\/assets\/([^"]+)"\)/g)) {
+    result.set(match[1], match[2]);
+  }
+  return result;
 }
 
 function checkResourcePaths(sourceTexts, assetRoot, manifestAssets) {

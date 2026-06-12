@@ -3068,7 +3068,18 @@
               }
             }
           ],
-          "collectibles": [],
+          "collectibles": [
+            {
+              "id": "GeneratedCollectibleMarkerFireRouteCache",
+              "collectible_id": "fire_route_cache",
+              "item_id": "fire-route-cache",
+              "trigger_radius": 48,
+              "position": {
+                "x": 380,
+                "y": 320
+              }
+            }
+          ],
           "hazards": [
             {
               "id": "GeneratedHazardMarker",

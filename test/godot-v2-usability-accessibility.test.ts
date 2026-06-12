@@ -31,8 +31,10 @@ describe('Godot v2 usability and accessibility checks', () => {
     expect(script).toContain('required_ui_scenes');
     expect(script).toContain('required_visual_feedback_tokens');
     expect(script).toContain('required_color_roles');
+    expect(script).toContain('tutorial_size_ratio_checks');
     expect(script).toContain('parseInputActions');
     expect(script).toContain('assertMinimumColorDistance');
+    expect(script).toContain('assertTutorialSizeRatios');
 
     const contract = JSON.parse(readFileSync(contractPath, 'utf8')) as {
       version: number;
@@ -41,6 +43,13 @@ describe('Godot v2 usability and accessibility checks', () => {
       required_ui_scenes: string[];
       required_visual_feedback_tokens: Array<{ file: string; token: string }>;
       required_color_roles: string[];
+      tutorial_size_ratio_checks: Array<{
+        id: string;
+        subject_scene: string;
+        reference_scene: string;
+        min_ratio: number;
+        max_ratio: number;
+      }>;
       min_color_distance: number;
     };
     expect(contract.version).toBe(1);
@@ -62,6 +71,17 @@ describe('Godot v2 usability and accessibility checks', () => {
     expect(contract.required_color_roles).toEqual(
       expect.arrayContaining(['discovered_feature_color', 'undiscovered_feature_color', 'dead_end_completed_color']),
     );
+    expect(contract.tutorial_size_ratio_checks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'tutorial_enemy_to_player_collision',
+          subject_scene: 'godot/scenes/enemies/SimpleEnemy.tscn',
+          reference_scene: 'godot/scenes/player/Player.tscn',
+          min_ratio: 0.6,
+          max_ratio: 1,
+        }),
+      ]),
+    );
     expect(contract.min_color_distance).toBeGreaterThan(0);
 
     const docs = readFileSync(docsPath, 'utf8');
@@ -71,5 +91,6 @@ describe('Godot v2 usability and accessibility checks', () => {
     expect(docs).toContain('visual feedback');
     expect(docs).toContain('difficulty');
     expect(docs).toContain('color roles');
+    expect(docs).toContain('tutorial size ratios');
   });
 });

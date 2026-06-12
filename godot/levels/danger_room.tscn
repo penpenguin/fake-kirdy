@@ -11,12 +11,12 @@ size = Vector2(640, 32)
 [node name="DangerRoom" type="Node2D"]
 
 [node name="PlayerSpawn" type="Node2D" parent="."]
-position = Vector2(96, 368)
+position = Vector2(48, 368)
 script = ExtResource("1_spawn")
 spawn_id = "default"
 
 [node name="EnemySpawnMarker" type="Node2D" parent="."]
-position = Vector2(118, 400)
+position = Vector2(320, 400)
 script = ExtResource("2_enemy")
 spawn_id = "danger_contact"
 enemy_type = "simple_ground"

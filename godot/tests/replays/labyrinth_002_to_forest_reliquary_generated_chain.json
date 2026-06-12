@@ -20,5 +20,7 @@
         "move_right": false
       }
     }
-  ]
+  ],
+  "initial_player_max_hp": 24,
+  "initial_player_hp": 24
 }

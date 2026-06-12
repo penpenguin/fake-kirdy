@@ -19,5 +19,5 @@ hover_speed = 2.4
 shape = SubResource("CircleShape2D_enemy")
 
 [node name="Body" type="Sprite2D" parent="."]
-scale = Vector2(0.16, 0.16)
+scale = Vector2(0.72, 0.72)
 texture = ExtResource("2_texture")

@@ -49,6 +49,11 @@ position = Vector2(690, 300)
 script = ExtResource("1_spawn")
 spawn_id = "ice_gate_check"
 
+[node name="PlayerSpawnTutorialFireRoute" type="Node2D" parent="."]
+position = Vector2(540, 330)
+script = ExtResource("1_spawn")
+spawn_id = "tutorial_fire_route"
+
 [node name="DoorToHealRoom" type="Node2D" parent="."]
 position = Vector2(220, 368)
 script = ExtResource("2_door")
@@ -96,6 +101,20 @@ door_id = "hub_to_fire_area"
 target_level_id = "fire_area"
 target_spawn_id = "default"
 trigger_radius = 40.0
+
+[node name="TutorialFireRouteLabel" type="Label" parent="."]
+position = Vector2(412, 282)
+size = Vector2(188, 28)
+text = "First stage: Fire Area"
+
+[node name="DoorToTutorialFireArea" type="Node2D" parent="."]
+position = Vector2(540, 330)
+script = ExtResource("2_door")
+door_id = "hub_tutorial_to_fire_area"
+target_level_id = "fire_area"
+target_spawn_id = "default"
+trigger_radius = 40.0
+bypass_cluster_lock = true
 
 [node name="DoorToForestArea" type="Node2D" parent="."]
 position = Vector2(250, 330)

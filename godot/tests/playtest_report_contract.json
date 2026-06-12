@@ -6,6 +6,18 @@
   "output_markdown_path": "reports/godot-playtest-report.md",
   "sample_interval_ms": 1000,
   "recent_event_limit": 5,
+  "min_duration_ms": 60000,
+  "required_route_level_ids": [
+    "central_hub",
+    "fire_area",
+    "labyrinth_011"
+  ],
+  "required_observation_categories": [
+    "navigation_blocker",
+    "combat_feedback",
+    "enemy_ai",
+    "objective_clarity"
+  ],
   "required_sample_fields": [
     "level_id",
     "position",

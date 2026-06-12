@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "enemy_hit_feedback",
-  "content_hash": "f770147ccdd308bb2fa8a07f707632465812c214798e9184cc8c1c1b9a4678c8",
+  "content_hash": "17a2250f3895f7a6fd35a1bc9793b6b524445ee375b4c05e5dcdf8ea40e11408",
   "replay_path": "godot/tests/replays/combat_ability_damage_enemy.json",
   "frame": 70,
   "viewport": {

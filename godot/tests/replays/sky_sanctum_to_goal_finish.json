@@ -20,5 +20,10 @@
         "move_right": false
       }
     }
+  ],
+  "initial_player_max_hp": 6,
+  "initial_player_hp": 6,
+  "initial_item_ids": [
+    "fire-keystone"
   ]
 }

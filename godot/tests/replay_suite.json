@@ -210,6 +210,64 @@
       "tags": ["ability", "ability-gate", "fire", "terrain", "trace"]
     },
     {
+      "id": "golden_fire_path",
+      "replay_path": "res://tests/replays/golden_fire_path.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["enemy.captured", "ability.acquired", "ability.used", "ability_gate.opened", "door.entered", "collectible.collected", "run.finished"],
+      "expected_event_sequence": [
+        { "event_type": "enemy.captured" },
+        { "event_type": "ability.acquired", "payload": { "ability_type": "fire" } },
+        { "event_type": "ability.used", "payload": { "ability_type": "fire" } },
+        { "event_type": "ability_gate.opened", "payload": { "gate_id": "fire_area_ice_block" } },
+        { "event_type": "door.entered", "payload": { "door_id": "fire_area_to_fire_expanse" } },
+        { "event_type": "collectible.collected" },
+        { "event_type": "run.finished" }
+      ],
+      "tags": ["golden-path", "fire", "ability-gate", "route", "trace"]
+    },
+    {
+      "id": "tutorial_no_death_path",
+      "replay_path": "res://tests/replays/tutorial_no_death_path.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["enemy.captured", "ability.acquired", "ability_gate.opened", "door.entered"],
+      "forbidden_events": ["game.over", "player.defeated", "replay.error", "goal.door.entered", "result.overlay.shown"],
+      "forbidden_event_payloads": [
+        { "event_type": "run.finished", "payload": { "result_label": "complete" } },
+        { "event_type": "run.finished", "payload": { "outcome": "completed" } }
+      ],
+      "tags": ["tutorial", "onboarding", "safety", "trace"]
+    },
+    {
+      "id": "tutorial_no_edge_fall_path",
+      "replay_path": "res://tests/replays/tutorial_no_edge_fall_path.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["player.spawned"],
+      "forbidden_events": ["game.over", "player.defeated", "replay.error", "goal.door.entered", "result.overlay.shown"],
+      "forbidden_event_payloads": [
+        { "event_type": "run.finished", "payload": { "result_label": "complete" } },
+        { "event_type": "run.finished", "payload": { "outcome": "completed" } }
+      ],
+      "tags": ["tutorial", "onboarding", "edge-guard", "trace"]
+    },
+    {
+      "id": "tutorial_to_real_stage_path",
+      "replay_path": "res://tests/replays/tutorial_to_real_stage_path.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["enemy.captured", "ability.acquired", "ability_gate.opened", "door.entered", "level.loaded"],
+      "forbidden_events": ["game.over", "player.defeated", "replay.error", "goal.door.entered", "result.overlay.shown"],
+      "forbidden_event_payloads": [
+        { "event_type": "run.finished", "payload": { "result_label": "complete" } },
+        { "event_type": "run.finished", "payload": { "outcome": "completed" } }
+      ],
+      "expected_event_sequence": [
+        { "event_type": "door.entered", "payload": { "target_level_id": "central_hub" } },
+        { "event_type": "level.loaded", "payload": { "level_id": "central_hub" } },
+        { "event_type": "door.entered", "payload": { "target_level_id": "fire_area" } },
+        { "event_type": "level.loaded", "payload": { "level_id": "fire_area" } }
+      ],
+      "tags": ["tutorial", "onboarding", "real-stage-route", "trace"]
+    },
+    {
       "id": "hard_enemy_attack_trace",
       "replay_path": "res://tests/replays/hard_enemy_attack_trace.json",
       "expected_outcome": "game_over",
@@ -267,7 +325,7 @@
     },
     {
       "id": "sky_generated_goal_path",
-      "replay_path": "res://tests/replays/labyrinth_051_to_sky_sanctum_generated_exit.json",
+      "replay_path": "res://tests/replays/sky_sanctum_to_goal_finish.json",
       "expected_outcome": "complete",
       "expected_events": ["door.entered", "goal.door.entered", "run.finished"],
       "tags": ["procedural", "sky", "door-chain", "goal"]

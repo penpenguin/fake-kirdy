@@ -131,7 +131,7 @@ describe('Godot visual snapshots', () => {
     }
   });
 
-  it('validates canonical HUD, feedback, overlay, and control snapshot targets', () => {
+  it('validates canonical HUD, feedback, terrain, overlay, and control snapshot targets', () => {
     const result = spawnSync(process.execPath, ['scripts/check-godot-visual-snapshot.mjs', '--json'], {
       cwd: repoRoot,
       encoding: 'utf8',
@@ -154,6 +154,15 @@ describe('Godot visual snapshots', () => {
       settings_overlay: expect.any(Number),
       result_overlay: expect.any(Number),
       virtual_controls: expect.any(Number),
+      level_terrain: expect.any(Number),
     });
+    expect(report.coverage.level_terrain).toBeGreaterThanOrEqual(4);
+  });
+
+  it('tiles terrain textures across multi-cell floor polygons instead of stretching one tile', () => {
+    const levelVisualAssets = readFileSync(join(repoRoot, 'godot', 'scripts', 'level', 'LevelVisualAssets.gd'), 'utf8');
+
+    expect(levelVisualAssets).toContain('polygon.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED');
+    expect(levelVisualAssets).toContain('polygon.texture_scale = Vector2(1.0, 1.0)');
   });
 });

@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "snapshot_id": "level_terrain_goal_sanctum",
+  "content_hash": "67bab31981bda4e4eb90c5eeb38d20bac1f56171cad565da6410666401ced2b9",
+  "replay_path": "godot/tests/replays/mirror_to_goal_sanctum_finish.json",
+  "frame": 180,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "level_terrain"
+  ],
+  "required_scene_paths": [
+    "godot/levels/goal_sanctum.tscn",
+    "godot/scripts/level/LevelVisualAssets.gd"
+  ],
+  "required_resource_paths": [
+    "godot/resources/assets/images/world/royal-tile.webp",
+    "godot/resources/assets/images/world/wall-texture.webp"
+  ]
+}

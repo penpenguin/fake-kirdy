@@ -2,6 +2,16 @@
   "version": 1,
   "levels": [
     {
+      "id": "tutorial_room",
+      "scene_path": "res://levels/tutorial_room.tscn",
+      "tags": [
+        "tutorial",
+        "player_facing",
+        "representative"
+      ],
+      "source_ref": "docs/godot-v2/usability-accessibility-testing.md"
+    },
+    {
       "id": "central_hub",
       "scene_path": "res://levels/central_hub.tscn",
       "tags": [

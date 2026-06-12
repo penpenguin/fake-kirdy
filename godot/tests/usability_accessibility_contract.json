@@ -49,5 +49,38 @@
     "undiscovered_feature_color",
     "dead_end_completed_color"
   ],
+  "tutorial_size_ratio_checks": [
+    {
+      "id": "tutorial_enemy_to_player_collision",
+      "subject_scene": "godot/scenes/enemies/SimpleEnemy.tscn",
+      "reference_scene": "godot/scenes/player/Player.tscn",
+      "min_ratio": 0.6,
+      "max_ratio": 1
+    },
+    {
+      "id": "tutorial_collectible_marker_scale",
+      "subject_file": "godot/scripts/level/markers/CollectibleMarker.gd",
+      "min_scale": 0.14,
+      "max_scale": 0.22
+    },
+    {
+      "id": "tutorial_heal_marker_scale",
+      "subject_file": "godot/scripts/level/markers/HealMarker.gd",
+      "min_scale": 0.14,
+      "max_scale": 0.22
+    },
+    {
+      "id": "tutorial_door_marker_scale",
+      "subject_file": "godot/scripts/level/markers/DoorMarker.gd",
+      "min_scale": 0.14,
+      "max_scale": 0.24
+    },
+    {
+      "id": "tutorial_goal_marker_scale",
+      "subject_file": "godot/scripts/level/markers/GoalMarker.gd",
+      "min_scale": 0.14,
+      "max_scale": 0.24
+    }
+  ],
   "min_color_distance": 0.18
 }

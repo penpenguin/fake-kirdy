@@ -144,8 +144,10 @@ required_ability_type = ""
     const report = JSON.parse(result.stdout) as {
       level_count: number;
       failed_checks: unknown[];
+      issues: { severity?: string }[];
     };
     expect(report.level_count).toBeGreaterThan(10);
     expect(report.failed_checks).toEqual([]);
+    expect(report.issues.filter((issue) => issue.severity === 'warning')).toEqual([]);
   });
 });

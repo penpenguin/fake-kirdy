@@ -24,6 +24,8 @@ const writeFixtureManifest = (path: string): void => {
           'images/characters/kirdy/kirdy-fire.webp',
           'images/characters/kirdy/kirdy-ice.webp',
           'images/enemies/wabble-bee.webp',
+          'images/world/wall-texture.webp',
+          'images/world/brick-tile.webp',
           'audio/sfx/ability-fire-attack.wav',
           'audio/sfx/ability-ice-attack.wav',
           'audio/sfx/kirdy-spit.wav',
@@ -44,6 +46,7 @@ const writeFixtureContract = (path: string, tempDir: string): void => {
         source_paths: {
           player_controller: join(tempDir, 'PlayerController.gd'),
           game_session: join(tempDir, 'GameSession.gd'),
+          level_visual_assets: join(tempDir, 'LevelVisualAssets.gd'),
           asset_manifest: join(tempDir, 'asset_manifest.json'),
           source_roots: [join(tempDir, 'scenes'), join(tempDir, 'scripts')],
         },
@@ -74,6 +77,19 @@ const writeFixtureContract = (path: string, tempDir: string): void => {
           'audio/sfx/ability-ice-attack.wav',
           'audio/sfx/kirdy-spit.wav',
         ],
+        level_visuals: {
+          required_polygon_name_terms: ['floor', 'platform', 'step', 'wall'],
+          required_texture_assets: [
+            {
+              texture_const: 'WallTexture',
+              asset_path: 'images/world/wall-texture.webp',
+            },
+            {
+              texture_const: 'BrickTileTexture',
+              asset_path: 'images/world/brick-tile.webp',
+            },
+          ],
+        },
         primary_enemy_assets: ['images/enemies/wabble-bee.webp'],
         allowed_fallback_event_types: ['inhale.effect.fallback'],
         rules: {
@@ -82,6 +98,9 @@ const writeFixtureContract = (path: string, tempDir: string): void => {
           ability_sfx_default_fire_fallback: { severity: 'error' },
           missing_asset_file: { severity: 'error' },
           resource_path_exists: { severity: 'error' },
+          missing_level_texture_asset: { severity: 'error' },
+          missing_level_texture_mapping: { severity: 'error' },
+          missing_level_visual_polygon_term: { severity: 'error' },
           empty_label_text: { severity: 'error' },
           protected_fallback_event: { severity: 'warning' },
           unused_manifest_asset: { severity: 'warning' },
@@ -114,7 +133,9 @@ describe('Godot asset fallback audit', () => {
       writeFileSync(join(tempDir, 'asset_manifest.json'), '');
       spawnSync('mkdir', ['-p', join(assetsRoot, 'images', 'characters', 'kirdy')]);
       spawnSync('mkdir', ['-p', join(assetsRoot, 'images', 'enemies')]);
+      spawnSync('mkdir', ['-p', join(assetsRoot, 'images', 'world')]);
       spawnSync('mkdir', ['-p', join(assetsRoot, 'audio', 'sfx')]);
+      spawnSync('mkdir', ['-p', join(assetsRoot, 'images', 'world')]);
       spawnSync('mkdir', ['-p', scenesDir]);
       spawnSync('mkdir', ['-p', scriptsDir]);
       for (const asset of [
@@ -124,6 +145,8 @@ describe('Godot asset fallback audit', () => {
         'audio/sfx/ability-fire-attack.wav',
         'audio/sfx/ability-ice-attack.wav',
         'audio/sfx/kirdy-spit.wav',
+        'images/world/wall-texture.webp',
+        'images/world/brick-tile.webp',
       ]) {
         writeFileSync(join(assetsRoot, asset), 'fixture');
       }
@@ -157,6 +180,21 @@ describe('Godot asset fallback audit', () => {
 `,
       );
       writeFileSync(
+        join(tempDir, 'LevelVisualAssets.gd'),
+        `const WallTexture = preload("res://resources/assets/images/world/wall-texture.webp")
+const BrickTileTexture = preload("res://resources/assets/images/world/brick-tile.webp")
+
+func get_texture_for_level(level_id: String) -> Texture2D:
+    if level_id.contains("hub") or level_id.contains("room"):
+        return BrickTileTexture
+    return WallTexture
+
+func should_texture_polygon(polygon: Polygon2D) -> bool:
+    var polygon_name := polygon.name.to_lower()
+    return polygon_name.contains("floor") or polygon_name.contains("platform") or polygon_name.contains("step") or polygon_name.contains("wall")
+`,
+      );
+      writeFileSync(
         join(scenesDir, 'HudOverlay.tscn'),
         `[gd_scene format=3]
 [ext_resource type="Texture2D" path="res://resources/assets/images/enemies/wabble-bee.webp" id="1_enemy"]
@@ -176,6 +214,10 @@ text = "Ready"
       const report = JSON.parse(result.stdout) as {
         failed_checks: unknown[];
         categories: Record<string, number>;
+        level_visuals: {
+          polygon_terms: string[];
+          texture_assets: { texture_const: string; asset_status: string; mapping_status: string }[];
+        };
       };
       expect(report.failed_checks).toEqual([]);
       expect(report.categories).toMatchObject({
@@ -183,7 +225,15 @@ text = "Ready"
         audio_assets: expect.any(Number),
         resource_paths: expect.any(Number),
         ui_labels: expect.any(Number),
+        level_visual_assets: expect.any(Number),
       });
+      expect(report.level_visuals.polygon_terms).toEqual(expect.arrayContaining(['floor', 'platform', 'step', 'wall']));
+      expect(report.level_visuals.texture_assets).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ texture_const: 'WallTexture', asset_status: 'present', mapping_status: 'used' }),
+          expect.objectContaining({ texture_const: 'BrickTileTexture', asset_status: 'present', mapping_status: 'used' }),
+        ]),
+      );
     } finally {
       rmSync(tempDir, { recursive: true, force: true });
     }
@@ -198,11 +248,14 @@ text = "Ready"
     try {
       spawnSync('mkdir', ['-p', join(assetsRoot, 'images', 'characters', 'kirdy')]);
       spawnSync('mkdir', ['-p', join(assetsRoot, 'images', 'enemies')]);
+      spawnSync('mkdir', ['-p', join(assetsRoot, 'images', 'world')]);
       spawnSync('mkdir', ['-p', join(assetsRoot, 'audio', 'sfx')]);
       spawnSync('mkdir', ['-p', scenesDir]);
       writeFileSync(join(assetsRoot, 'images', 'characters', 'kirdy', 'kirdy-fire.webp'), 'fixture');
       writeFileSync(join(assetsRoot, 'images', 'characters', 'kirdy', 'kirdy-ice.webp'), 'fixture');
       writeFileSync(join(assetsRoot, 'images', 'enemies', 'wabble-bee.webp'), 'fixture');
+      writeFileSync(join(assetsRoot, 'images', 'world', 'wall-texture.webp'), 'fixture');
+      writeFileSync(join(assetsRoot, 'images', 'world', 'brick-tile.webp'), 'fixture');
       writeFileSync(join(assetsRoot, 'audio', 'sfx', 'ability-fire-attack.wav'), 'fixture');
       writeFileSync(join(assetsRoot, 'audio', 'sfx', 'ability-ice-attack.wav'), 'fixture');
       writeFileSync(join(assetsRoot, 'audio', 'sfx', 'kirdy-spit.wav'), 'fixture');
@@ -225,6 +278,21 @@ text = "Ready"
             return SfxAbilityIceAttack
         _:
             return SfxAbilityFireAttack
+`,
+      );
+      writeFileSync(
+        join(tempDir, 'LevelVisualAssets.gd'),
+        `const WallTexture = preload("res://resources/assets/images/world/wall-texture.webp")
+const BrickTileTexture = preload("res://resources/assets/images/world/brick-tile.webp")
+
+func get_texture_for_level(level_id: String) -> Texture2D:
+    if level_id.contains("hub") or level_id.contains("room"):
+        return BrickTileTexture
+    return WallTexture
+
+func should_texture_polygon(polygon: Polygon2D) -> bool:
+    var polygon_name := polygon.name.to_lower()
+    return polygon_name.contains("floor") or polygon_name.contains("platform") or polygon_name.contains("step") or polygon_name.contains("wall")
 `,
       );
       writeFileSync(
@@ -256,6 +324,87 @@ text = ""
     }
   });
 
+  it('fails when level wall polygons are excluded from terrain texturing', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'fake-kirdy-level-visual-audit-broken-'));
+    const assetsRoot = join(tempDir, 'assets');
+    const contractPath = join(tempDir, 'asset_fallback_audit_contract.json');
+
+    try {
+      spawnSync('mkdir', ['-p', join(assetsRoot, 'images', 'characters', 'kirdy')]);
+      spawnSync('mkdir', ['-p', join(assetsRoot, 'images', 'enemies')]);
+      spawnSync('mkdir', ['-p', join(assetsRoot, 'images', 'world')]);
+      spawnSync('mkdir', ['-p', join(assetsRoot, 'audio', 'sfx')]);
+      for (const asset of [
+        'images/characters/kirdy/kirdy-fire.webp',
+        'images/characters/kirdy/kirdy-ice.webp',
+        'images/enemies/wabble-bee.webp',
+        'audio/sfx/ability-fire-attack.wav',
+        'audio/sfx/ability-ice-attack.wav',
+        'audio/sfx/kirdy-spit.wav',
+        'images/world/wall-texture.webp',
+        'images/world/brick-tile.webp',
+      ]) {
+        writeFileSync(join(assetsRoot, asset), 'fixture');
+      }
+      writeFixtureManifest(join(tempDir, 'asset_manifest.json'));
+      writeFileSync(
+        join(tempDir, 'PlayerController.gd'),
+        `func get_ability_texture(next_ability_type: String) -> Texture2D:
+    match next_ability_type:
+        "fire", "flame":
+            return kirdy_fire_texture
+        "ice", "frost", "spark":
+            return kirdy_ice_texture
+        _:
+            return null
+`,
+      );
+      writeFileSync(
+        join(tempDir, 'GameSession.gd'),
+        `func get_ability_sfx(current_ability_type: String) -> AudioStream:
+    match current_ability_type:
+        "fire", "flame":
+            return SfxAbilityFireAttack
+        "ice", "frost":
+            return SfxAbilityIceAttack
+        "spark":
+            return SfxKirdySpit
+        _:
+            return SfxKirdySpit
+`,
+      );
+      writeFileSync(
+        join(tempDir, 'LevelVisualAssets.gd'),
+        `const WallTexture = preload("res://resources/assets/images/world/wall-texture.webp")
+const BrickTileTexture = preload("res://resources/assets/images/world/brick-tile.webp")
+
+func get_texture_for_level(level_id: String) -> Texture2D:
+    return WallTexture
+
+func should_texture_polygon(polygon: Polygon2D) -> bool:
+    var polygon_name := polygon.name.to_lower()
+    return polygon_name.contains("floor") or polygon_name.contains("platform") or polygon_name.contains("step")
+`,
+      );
+      writeFixtureContract(contractPath, tempDir);
+
+      const result = spawnSync(process.execPath, ['scripts/check-godot-asset-fallback-audit.mjs', '--contract', contractPath, '--json'], {
+        cwd: repoRoot,
+        encoding: 'utf8',
+      });
+
+      expect(result.status).toBe(1);
+      const report = JSON.parse(result.stdout) as {
+        failed_checks: { rule: string; polygon_term?: string; texture_const?: string }[];
+      };
+      expect(report.failed_checks).toContainEqual(
+        expect.objectContaining({ rule: 'missing_level_visual_polygon_term', polygon_term: 'wall' }),
+      );
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it('validates canonical fallback, ability asset, audio, UI label, resource path, and unused asset coverage', () => {
     const result = spawnSync(process.execPath, ['scripts/check-godot-asset-fallback-audit.mjs', '--json'], {
       cwd: repoRoot,
@@ -267,6 +416,10 @@ text = ""
       failed_checks: unknown[];
       warnings: { path?: string }[];
       categories: Record<string, number>;
+      level_visuals: {
+        polygon_terms: string[];
+        texture_assets: { texture_const: string; asset_status: string; mapping_status: string }[];
+      };
       mainline_abilities: { id: string; texture_status: string; sfx_status: string }[];
     };
     expect(report.failed_checks).toEqual([]);
@@ -278,7 +431,20 @@ text = ""
       ui_labels: expect.any(Number),
       resource_paths: expect.any(Number),
       unused_assets: expect.any(Number),
+      level_visual_assets: expect.any(Number),
     });
+    expect(report.level_visuals.polygon_terms).toEqual(expect.arrayContaining(['floor', 'platform', 'step', 'wall']));
+    expect(report.level_visuals.texture_assets).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ texture_const: 'WallTexture', asset_status: 'present', mapping_status: 'used' }),
+        expect.objectContaining({ texture_const: 'BrickTileTexture', asset_status: 'present', mapping_status: 'used' }),
+        expect.objectContaining({ texture_const: 'ForestTileTexture', asset_status: 'present', mapping_status: 'used' }),
+        expect.objectContaining({ texture_const: 'FireTileTexture', asset_status: 'present', mapping_status: 'used' }),
+        expect.objectContaining({ texture_const: 'IceTileTexture', asset_status: 'present', mapping_status: 'used' }),
+        expect.objectContaining({ texture_const: 'StoneTileTexture', asset_status: 'present', mapping_status: 'used' }),
+        expect.objectContaining({ texture_const: 'RoyalTileTexture', asset_status: 'present', mapping_status: 'used' }),
+      ]),
+    );
     expect(report.mainline_abilities.map((ability) => ability.id)).toEqual(
       expect.arrayContaining(['fire', 'frost', 'sword', 'spark', 'leaf', 'stone']),
     );

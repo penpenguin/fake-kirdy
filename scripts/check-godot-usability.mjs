@@ -73,6 +73,7 @@ for (const role of contract.required_color_roles) {
   colorRoles.set(role, color);
 }
 failures.push(...assertMinimumColorDistance(colorRoles, contract.min_color_distance));
+failures.push(...assertTutorialSizeRatios(contract.tutorial_size_ratio_checks));
 
 const result = {
   contract_path: relativeToRepo(contractPath),
@@ -81,6 +82,7 @@ const result = {
   checked_replay_ids: contract.required_replay_ids.length,
   checked_ui_scenes: contract.required_ui_scenes.length,
   checked_color_roles: colorRoles.size,
+  checked_tutorial_size_ratios: contract.tutorial_size_ratio_checks.length,
   failed_checks: failures,
   status: failures.length === 0 ? 'passed' : 'failed',
 };
@@ -98,6 +100,95 @@ function parseInputActions(projectText) {
     match = actionRegex.exec(inputSection);
   }
   return actionMap;
+}
+
+function assertTutorialSizeRatios(checks) {
+  const ratioFailures = [];
+
+  for (const check of checks) {
+    if (check.subject_scene !== undefined && check.reference_scene !== undefined) {
+      const subjectPath = resolve(repoRoot, check.subject_scene);
+      const referencePath = resolve(repoRoot, check.reference_scene);
+      if (!existsSync(subjectPath)) {
+        ratioFailures.push(`missing tutorial ratio subject scene: ${check.subject_scene}`);
+        continue;
+      }
+      if (!existsSync(referencePath)) {
+        ratioFailures.push(`missing tutorial ratio reference scene: ${check.reference_scene}`);
+        continue;
+      }
+
+      const subjectArea = parseFirstRectangleShapeArea(readText(subjectPath));
+      const referenceArea = parseFirstRectangleShapeArea(readText(referencePath));
+      if (subjectArea === null) {
+        ratioFailures.push(`missing rectangle collision size in ${check.subject_scene}`);
+        continue;
+      }
+      if (referenceArea === null) {
+        ratioFailures.push(`missing rectangle collision size in ${check.reference_scene}`);
+        continue;
+      }
+
+      const ratio = Math.sqrt(subjectArea / referenceArea);
+      if (ratio < check.min_ratio || ratio > check.max_ratio) {
+        ratioFailures.push(
+          `tutorial size ratio ${check.id} ${ratio.toFixed(3)} outside ${check.min_ratio}-${check.max_ratio}`,
+        );
+      }
+      continue;
+    }
+
+    if (check.subject_file !== undefined) {
+      const subjectPath = resolve(repoRoot, check.subject_file);
+      if (!existsSync(subjectPath)) {
+        ratioFailures.push(`missing tutorial scale file: ${check.subject_file}`);
+        continue;
+      }
+      const scale = parseVector2UniformScale(readText(subjectPath));
+      if (scale === null) {
+        ratioFailures.push(`missing Vector2 visual scale in ${check.subject_file}`);
+        continue;
+      }
+      if (scale < check.min_scale || scale > check.max_scale) {
+        ratioFailures.push(
+          `tutorial visual scale ${check.id} ${scale.toFixed(3)} outside ${check.min_scale}-${check.max_scale}`,
+        );
+      }
+      continue;
+    }
+
+    ratioFailures.push(`tutorial size ratio check ${check.id} has no subject`);
+  }
+
+  return ratioFailures;
+}
+
+function parseFirstRectangleShapeArea(source) {
+  const match = source.match(/size = Vector2\(([-0-9.]+), ([-0-9.]+)\)/);
+  if (match === null) {
+    return null;
+  }
+
+  const width = Number(match[1]);
+  const height = Number(match[2]);
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+    return null;
+  }
+  return width * height;
+}
+
+function parseVector2UniformScale(source) {
+  const match = source.match(/\.scale = Vector2\(([-0-9.]+), ([-0-9.]+)\)/);
+  if (match === null) {
+    return null;
+  }
+
+  const x = Number(match[1]);
+  const y = Number(match[2]);
+  if (!Number.isFinite(x) || !Number.isFinite(y) || x <= 0 || y <= 0 || Math.abs(x - y) > 0.001) {
+    return null;
+  }
+  return x;
 }
 
 function parseExportedColor(source, role) {
@@ -154,6 +245,7 @@ function readContract(path) {
     'required_ui_scenes',
     'required_visual_feedback_tokens',
     'required_color_roles',
+    'tutorial_size_ratio_checks',
   ]) {
     if (!Array.isArray(parsed[key]) || parsed[key].length === 0) {
       throw new Error(`Usability/accessibility contract has invalid ${key}`);

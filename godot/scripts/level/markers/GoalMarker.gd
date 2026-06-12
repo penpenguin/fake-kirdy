@@ -21,7 +21,8 @@ func ensure_visual() -> void:
     var visual := Sprite2D.new()
     visual.name = "Visual"
     visual.texture = GoalTexture
-    visual.scale = Vector2(0.18, 0.18)
+    visual.centered = true
+    visual.scale = Vector2(1.0, 1.0)
     visual.z_index = 2
     add_child(visual)
 

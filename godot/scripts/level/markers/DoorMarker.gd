@@ -13,8 +13,10 @@ const DoorTexture = preload("res://resources/assets/images/ui/door-marker.webp")
 @export var required_completed_level_id: String = ""
 @export var required_defeated_enemy_group_id: String = ""
 @export var required_boss_id: String = ""
+@export var bypass_cluster_lock: bool = false
 @export var hidden_until_discovered: bool = false
 @export var discovery_radius: float = 80.0
+@export var requires_interact: bool = true
 
 
 func _ready() -> void:
@@ -54,7 +56,9 @@ func to_level_marker() -> Dictionary:
             "required_completed_level_id": required_completed_level_id,
             "required_defeated_enemy_group_id": required_defeated_enemy_group_id,
             "required_boss_id": required_boss_id,
+            "bypass_cluster_lock": bypass_cluster_lock,
             "hidden_until_discovered": hidden_until_discovered,
             "discovery_radius": discovery_radius,
+            "requires_interact": requires_interact,
         },
     }

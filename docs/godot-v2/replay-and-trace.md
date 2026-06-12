@@ -36,7 +36,7 @@ Use an explicit output directory when comparing traces across tuning changes:
 npm run godot:replay-suite -- --out-dir /tmp/fake-kirdy-replay-suite
 ```
 
-The command skips gracefully when Godot is not installed. When Godot is available, it runs each replay headlessly, summarizes each trace with `npm run trace:summary`, checks the expected outcome, and prints one aggregate JSON result. The suite includes `controller_lab_jump` so controller tuning changes always have movement trace coverage alongside combat, door, content, and outcome coverage.
+The command skips gracefully when Godot is not installed. When Godot is available, it runs each replay headlessly, summarizes each trace with `npm run trace:summary`, checks the expected outcome, required `expected_events`, blocked `forbidden_events`, ordered `expected_event_sequence`, and prints one aggregate JSON result. The suite includes `controller_lab_jump` so controller tuning changes always have movement trace coverage alongside combat, door, content, and outcome coverage.
 
 ## Replay Schema
 

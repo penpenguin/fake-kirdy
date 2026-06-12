@@ -13,6 +13,36 @@ const readGodotFile = (relativePath: string): string =>
 const readRepoFile = (relativePath: string): string =>
   readFileSync(join(repoRoot, relativePath), 'utf8');
 
+const readWebpDimensions = (relativePath: string): { width: number; height: number } => {
+  const buffer = readFileSync(join(repoRoot, relativePath));
+  const chunkType = buffer.toString('ascii', 12, 16);
+
+  if (chunkType === 'VP8X') {
+    return {
+      width: 1 + buffer.readUIntLE(24, 3),
+      height: 1 + buffer.readUIntLE(27, 3),
+    };
+  }
+
+  if (chunkType === 'VP8L') {
+    const bits = buffer.readUInt32LE(21);
+    return {
+      width: (bits & 0x3fff) + 1,
+      height: ((bits >> 14) & 0x3fff) + 1,
+    };
+  }
+
+  const startCode = buffer.indexOf(Buffer.from([0x9d, 0x01, 0x2a]));
+  if (startCode < 0) {
+    throw new Error(`Unsupported WebP header for ${relativePath}`);
+  }
+
+  return {
+    width: buffer.readUInt16LE(startCode + 3) & 0x3fff,
+    height: buffer.readUInt16LE(startCode + 5) & 0x3fff,
+  };
+};
+
 const extractNodePositionX = (source: string, nodeName: string): number => {
   const match = source.match(
     new RegExp(`\\[node name="${nodeName}"[^\\]]*\\][\\s\\S]*?position = Vector2\\(([-0-9.]+),`),
@@ -24,13 +54,176 @@ const extractNodePositionX = (source: string, nodeName: string): number => {
   return Number(match[1]);
 };
 
+const extractNodePosition = (source: string, nodeName: string): { x: number; y: number } => {
+  const match = source.match(
+    new RegExp(`\\[node name="${nodeName}"[^\\]]*\\][\\s\\S]*?position = Vector2\\(([-0-9.]+), ([-0-9.]+)\\)`),
+  );
+  if (!match) {
+    throw new Error(`Missing position for ${nodeName}`);
+  }
+
+  return { x: Number(match[1]), y: Number(match[2]) };
+};
+
+const extractNodeBlock = (source: string, nodeName: string): string => {
+  const match = source.match(new RegExp(`\\[node name="${nodeName}"[^\\]]*\\][\\s\\S]*?(?=\\n\\[node |$)`));
+  if (!match) {
+    throw new Error(`Missing node block for ${nodeName}`);
+  }
+
+  return match[0];
+};
+
+const extractNodeScale = (source: string, nodeName: string): { x: number; y: number } => {
+  const block = extractNodeBlock(source, nodeName);
+  const match = block.match(/scale = Vector2\(([-0-9.]+), ([-0-9.]+)\)/);
+  if (!match) {
+    return { x: 1, y: 1 };
+  }
+
+  return { x: Number(match[1]), y: Number(match[2]) };
+};
+
 describe('Godot v2 gameplay completion backlog', () => {
-  it('starts the mainline game from the central hub instead of the combat test room', () => {
+  it('starts the player-facing game from a tutorial room instead of validation or hub scenes', () => {
     const scene = readGodotFile('scenes/Main.tscn');
     const session = readGodotFile('scripts/session/GameSession.gd');
 
-    expect(scene).toContain('initial_level_id = "central_hub"');
-    expect(session).toContain('@export var initial_level_id: String = "central_hub"');
+    expect(scene).toContain('initial_level_id = "tutorial_room"');
+    expect(session).toContain('@export var initial_level_id: String = "tutorial_room"');
+  });
+
+  it('keeps debug-style overlays hidden on the initial player-facing screen', () => {
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const mainScene = readGodotFile('scenes/Main.tscn');
+
+    expect(session).toContain('ControlGuideOverlayScene');
+    expect(session).toContain('setup_control_guide_overlay');
+    expect(session).toContain('map_overlay.visible = false');
+    expect(session).toContain('@export var inventory_debug_overlay_enabled: bool = false');
+    expect(session).toContain('inventory_overlay.visible = inventory_debug_overlay_enabled');
+    expect(mainScene).toContain('inventory_debug_overlay_enabled = false');
+  });
+
+  it('adds a player-facing control guide with the tutorial actions', () => {
+    const script = readGodotFile('scripts/ui/ControlGuideOverlay.gd');
+    const scene = readGodotFile('scenes/ui/ControlGuideOverlay.tscn');
+
+    expect(script).toContain('class_name ControlGuideOverlay');
+    expect(scene).toContain('Move: A/D or arrows');
+    expect(scene).toContain('Jump: Space');
+    expect(scene).toContain('Inhale: C');
+    expect(scene).toContain('Swallow: X');
+    expect(scene).toContain('Ability: Z');
+  });
+
+  it('uses an explicit interact action for player-facing door transitions', () => {
+    const project = readGodotFile('project.godot');
+    const doorMarker = readGodotFile('scripts/level/markers/DoorMarker.gd');
+    const session = readGodotFile('scripts/session/GameSession.gd');
+
+    expect(project).toContain('interact={');
+    expect(doorMarker).toContain('@export var requires_interact: bool = true');
+    expect(doorMarker).toContain('"requires_interact": requires_interact');
+    expect(session).toContain('@export var door_interact_action: StringName = &"interact"');
+    expect(session).toContain('is_door_interaction_confirmed(payload)');
+    expect(session).toContain('door.prompted');
+  });
+
+  it('provides a first playable tutorial loop before any goal can finish the run', () => {
+    const tutorial = readGodotFile('levels/tutorial_room.tscn');
+    const catalog = readGodotFile('levels/level_catalog.json');
+
+    expect(catalog).toContain('"tutorial_room"');
+    expect(tutorial).toContain('EnemySpawnMarker.gd');
+    expect(tutorial).toContain('ability_type = "spark"');
+    expect(tutorial).toContain('AbilityGateMarker.gd');
+    expect(tutorial).toContain('required_ability_type = "spark"');
+    expect(tutorial).not.toContain('GoalMarker.gd');
+    expect(tutorial).not.toContain('[node name="GoalMarker"');
+
+    const spawnX = extractNodePositionX(tutorial, 'PlayerSpawn');
+    const enemyX = extractNodePositionX(tutorial, 'EnemySpawnMarker');
+    const gateX = extractNodePositionX(tutorial, 'TutorialSparkGate');
+    const doorX = extractNodePositionX(tutorial, 'DoorToCentralHub');
+    const spawn = extractNodePosition(tutorial, 'PlayerSpawn');
+    const enemy = extractNodePosition(tutorial, 'EnemySpawnMarker');
+    const captureDistance = Math.hypot(enemy.x - spawn.x, enemy.y - spawn.y);
+
+    expect(enemyX).toBeGreaterThan(spawnX + 64);
+    expect(enemyX).toBeLessThan(spawnX + 220);
+    expect(captureDistance).toBeLessThanOrEqual(120);
+    expect(gateX).toBeGreaterThan(enemyX + 120);
+    expect(doorX).toBeGreaterThan(gateX + 120);
+  });
+
+  it('renders primary enemies large enough to read against Kirdy', () => {
+    const playerScene = readGodotFile('scenes/player/Player.tscn');
+    const simpleEnemyScene = readGodotFile('scenes/enemies/SimpleEnemy.tscn');
+    const flyingEnemyScene = readGodotFile('scenes/enemies/FlyingEnemy.tscn');
+    const playerScale = extractNodeScale(playerScene, 'Body');
+    const simpleScale = extractNodeScale(simpleEnemyScene, 'Body');
+    const flyingScale = extractNodeScale(flyingEnemyScene, 'Body');
+    const playerTexture = readWebpDimensions('godot/resources/assets/images/characters/kirdy/kirdy-idle.webp');
+    const simpleEnemyTexture = readWebpDimensions('godot/resources/assets/images/enemies/wabble-bee.webp');
+    const flyingEnemyTexture = readWebpDimensions('godot/resources/assets/images/enemies/dronto-durt.webp');
+    const playerVisibleHeight = playerTexture.height * playerScale.y;
+
+    expect(simpleEnemyTexture.height * simpleScale.y).toBeGreaterThanOrEqual(playerVisibleHeight * 0.7);
+    expect(flyingEnemyTexture.height * flyingScale.y).toBeGreaterThanOrEqual(playerVisibleHeight * 0.7);
+  });
+
+  it('keeps the goal door visual readable and centered on its completion trigger', () => {
+    const goalMarker = readGodotFile('scripts/level/markers/GoalMarker.gd');
+    const goalSanctum = readGodotFile('levels/goal_sanctum.tscn');
+    const goalPosition = extractNodePosition(goalSanctum, 'GoalMarker');
+
+    expect(goalMarker).toContain('visual.scale = Vector2(1.0, 1.0)');
+    expect(goalMarker).toContain('visual.centered = true');
+    expect(goalSanctum).toContain('GoalDoorController.gd');
+    expect(goalPosition.x).toBeGreaterThan(0);
+    expect(goalPosition.y).toBeGreaterThan(0);
+  });
+
+  it('makes tutorial enemies nonlethal while the player is learning capture and swallow', () => {
+    const tutorial = readGodotFile('levels/tutorial_room.tscn');
+
+    expect(tutorial).toContain('contact_damage = 0');
+    expect(tutorial).toContain('attack_damage = 0');
+    expect(tutorial).toContain('attack_radius = 72.0');
+  });
+
+  it('blocks tutorial edge falls with visible guard rails inside the camera bounds', () => {
+    const tutorial = readGodotFile('levels/tutorial_room.tscn');
+    const leftGuard = extractNodePosition(tutorial, 'LeftEdgeGuard');
+    const rightGuard = extractNodePosition(tutorial, 'RightEdgeGuard');
+
+    expect(tutorial).toContain('[node name="LeftEdgeGuard" type="StaticBody2D" parent="."]');
+    expect(tutorial).toContain('[node name="RightEdgeGuard" type="StaticBody2D" parent="."]');
+    expect(tutorial).toContain('[node name="LeftEdgeGuardVisual" type="Polygon2D" parent="LeftEdgeGuard"]');
+    expect(tutorial).toContain('[node name="RightEdgeGuardVisual" type="Polygon2D" parent="RightEdgeGuard"]');
+    expect(leftGuard.x).toBeGreaterThanOrEqual(0);
+    expect(rightGuard.x).toBeLessThanOrEqual(920);
+  });
+
+  it('explains the blue ability wall in-world and routes the tutorial exit toward a real stage', () => {
+    const tutorial = readGodotFile('levels/tutorial_room.tscn');
+    const hub = readGodotFile('levels/central_hub.tscn');
+
+    expect(tutorial).toContain('hint_text = "Spark opens blue walls. Inhale the spark enemy, swallow, then press Z."');
+    expect(tutorial).toContain('[node name="BlueWallHintLabel" type="Label" parent="."]');
+    expect(tutorial).toContain('text = "Blue wall: get Spark, press Z"');
+    expect(tutorial).toContain('[node name="HubExitLabel" type="Label" parent="."]');
+    expect(tutorial).toContain('text = "Hub -> first real stage"');
+    expect(tutorial).toContain('target_spawn_id = "tutorial_fire_route"');
+    expect(hub).toContain('spawn_id = "tutorial_fire_route"');
+    expect(hub).toContain('[node name="TutorialFireRouteLabel" type="Label" parent="."]');
+    expect(hub).toContain('text = "First stage: Fire Area"');
+    expect(hub).toContain('door_id = "hub_tutorial_to_fire_area"');
+    expect(hub).toContain('target_level_id = "fire_area"');
+    expect(hub).toContain('bypass_cluster_lock = true');
+    expect(readGodotFile('scripts/level/markers/DoorMarker.gd')).toContain('@export var bypass_cluster_lock: bool = false');
+    expect(readGodotFile('scripts/session/GameSession.gd')).toContain('payload.get("bypass_cluster_lock", false)');
   });
 
   it('keeps the combat room door reachable before any local completion goal can finish the run', () => {
@@ -386,14 +579,22 @@ describe('Godot v2 gameplay completion backlog', () => {
     expect(marker).toContain('class_name AbilityGateMarker');
     expect(marker).toContain('@export var required_ability_type');
     expect(marker).toContain('@export var gate_effect');
+    expect(marker).toContain('@export var opened: bool = false');
+    expect(marker).toContain('func open_gate');
+    expect(marker).toContain('CollisionShape2D');
+    expect(marker).toContain('Visual');
     expect(definition).toContain('var ability_gates');
     expect(definition).toContain('"ability_gate"');
     expect(loader).toContain('AbilityGateMarkerScript');
     expect(session).toContain('check_ability_gate_interactions');
+    expect(session).toContain('open_ability_gate_scene_node');
     expect(session).toContain('ability_gate.opened');
     expect(session).toContain('opened_ability_gate_ids');
     expect(fireArea).toContain('gate_effect = "melt_ice"');
     expect(fireArea).toContain('required_ability_type = "fire"');
+    expect(fireArea).toContain('[node name="Visual" type="Polygon2D" parent="IceBlockGate"]');
+    expect(fireArea).toContain('[node name="CollisionBody" type="StaticBody2D" parent="IceBlockGate"]');
+    expect(fireArea).toContain('[node name="CollisionShape2D" type="CollisionShape2D" parent="IceBlockGate/CollisionBody"]');
     expect(iceArea).toContain('gate_effect = "freeze_water"');
     expect(iceArea).toContain('required_ability_type = "ice"');
     expect(forestArea).toContain('gate_effect = "cut_vines"');

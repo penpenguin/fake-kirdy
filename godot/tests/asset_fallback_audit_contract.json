@@ -3,6 +3,7 @@
   "source_paths": {
     "player_controller": "godot/scripts/player/PlayerController.gd",
     "game_session": "godot/scripts/session/GameSession.gd",
+    "level_visual_assets": "godot/scripts/level/LevelVisualAssets.gd",
     "asset_manifest": "godot/resources/assets/asset_manifest.json",
     "source_roots": [
       "godot/scripts",
@@ -64,8 +65,48 @@
     "images/enemies/wabble-bee.webp",
     "images/ui/door-marker.webp",
     "images/ui/goal-door.webp",
-    "images/ui/locked-door.webp"
+    "images/ui/locked-door.webp",
+    "images/world/wall-texture.webp",
+    "images/world/brick-tile.webp",
+    "images/world/forest-tile.webp",
+    "images/world/fire-tile.webp",
+    "images/world/ice-tile.webp",
+    "images/world/stone-tile.webp",
+    "images/world/royal-tile.webp"
   ],
+  "level_visuals": {
+    "required_polygon_name_terms": ["floor", "platform", "step", "wall"],
+    "required_texture_assets": [
+      {
+        "texture_const": "WallTexture",
+        "asset_path": "images/world/wall-texture.webp"
+      },
+      {
+        "texture_const": "BrickTileTexture",
+        "asset_path": "images/world/brick-tile.webp"
+      },
+      {
+        "texture_const": "ForestTileTexture",
+        "asset_path": "images/world/forest-tile.webp"
+      },
+      {
+        "texture_const": "FireTileTexture",
+        "asset_path": "images/world/fire-tile.webp"
+      },
+      {
+        "texture_const": "IceTileTexture",
+        "asset_path": "images/world/ice-tile.webp"
+      },
+      {
+        "texture_const": "StoneTileTexture",
+        "asset_path": "images/world/stone-tile.webp"
+      },
+      {
+        "texture_const": "RoyalTileTexture",
+        "asset_path": "images/world/royal-tile.webp"
+      }
+    ]
+  },
   "primary_enemy_assets": [
     "images/enemies/dronto-durt.webp",
     "images/enemies/wabble-bee.webp"
@@ -95,6 +136,15 @@
       "severity": "error"
     },
     "missing_primary_enemy_asset": {
+      "severity": "error"
+    },
+    "missing_level_texture_asset": {
+      "severity": "error"
+    },
+    "missing_level_texture_mapping": {
+      "severity": "error"
+    },
+    "missing_level_visual_polygon_term": {
       "severity": "error"
     },
     "resource_path_in_manifest": {

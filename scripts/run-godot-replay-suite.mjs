@@ -15,11 +15,14 @@ if (options.list) {
   writeJson({
     version: suite.version,
     replay_count: suite.replays.length,
-    replays: suite.replays.map(({ id, replay_path, expected_outcome, expected_events, expected_last_hud, tags }) => ({
+    replays: suite.replays.map(({ id, replay_path, expected_outcome, expected_events, forbidden_events, forbidden_event_payloads, expected_event_sequence, expected_last_hud, tags }) => ({
       id,
       replay_path,
       expected_outcome,
       expected_events,
+      forbidden_events,
+      forbidden_event_payloads,
+      expected_event_sequence,
       expected_last_hud,
       tags,
     })),
@@ -146,6 +149,18 @@ function readSuite(path) {
       throw new Error(`Replay suite entry ${replay.id} has invalid expected_events`);
     }
 
+    if (replay.forbidden_events !== undefined && !Array.isArray(replay.forbidden_events)) {
+      throw new Error(`Replay suite entry ${replay.id} has invalid forbidden_events`);
+    }
+
+    if (replay.forbidden_event_payloads !== undefined && !Array.isArray(replay.forbidden_event_payloads)) {
+      throw new Error(`Replay suite entry ${replay.id} has invalid forbidden_event_payloads`);
+    }
+
+    if (replay.expected_event_sequence !== undefined && !Array.isArray(replay.expected_event_sequence)) {
+      throw new Error(`Replay suite entry ${replay.id} has invalid expected_event_sequence`);
+    }
+
     if (
       replay.expected_last_hud !== undefined &&
       (typeof replay.expected_last_hud !== 'object' || replay.expected_last_hud === null || Array.isArray(replay.expected_last_hud))
@@ -163,6 +178,18 @@ function readSuite(path) {
         }
         return eventType;
       }),
+      forbidden_events: (replay.forbidden_events ?? []).map((eventType) => {
+        if (typeof eventType !== 'string' || eventType.length === 0) {
+          throw new Error(`Replay suite entry ${replay.id} has invalid forbidden_events item`);
+        }
+        return eventType;
+      }),
+      forbidden_event_payloads: (replay.forbidden_event_payloads ?? []).map((expected, payloadIndex) =>
+        normalizeExpectedEventPayloadItem(replay.id, expected, payloadIndex, 'forbidden_event_payloads'),
+      ),
+      expected_event_sequence: (replay.expected_event_sequence ?? []).map((expected, sequenceIndex) =>
+        normalizeExpectedSequenceItem(replay.id, expected, sequenceIndex),
+      ),
       expected_last_hud: replay.expected_last_hud ?? {},
       tags: replay.tags ?? [],
     };
@@ -251,11 +278,21 @@ function runReplay(godotCommand, replay, outDir) {
   }
 
   const summary = JSON.parse(summaryResult.stdout);
+  const events = readTrace(tracePath);
   const outcomeMatches =
     replay.expected_outcome === null || summary.outcome === replay.expected_outcome;
   const missingEvents = replay.expected_events.filter((eventType) => Number(summary.counts_by_type?.[eventType] ?? 0) <= 0);
+  const forbiddenEvents = replay.forbidden_events.filter((eventType) => Number(summary.counts_by_type?.[eventType] ?? 0) > 0);
+  const forbiddenEventPayloads = matchForbiddenEventPayloads(replay.forbidden_event_payloads, events);
+  const sequenceFailure = matchExpectedEventSequence(replay.expected_event_sequence, events);
   const lastHudMismatches = getObjectSubsetMismatches(replay.expected_last_hud, summary.last_hud ?? {});
-  const passed = outcomeMatches && missingEvents.length === 0 && lastHudMismatches.length === 0;
+  const passed =
+    outcomeMatches &&
+    missingEvents.length === 0 &&
+    forbiddenEvents.length === 0 &&
+    forbiddenEventPayloads.length === 0 &&
+    sequenceFailure === null &&
+    lastHudMismatches.length === 0;
 
   return {
     id: replay.id,
@@ -263,10 +300,13 @@ function runReplay(godotCommand, replay, outDir) {
     trace_path: tracePath,
     expected_outcome: replay.expected_outcome,
     expected_events: replay.expected_events,
+    forbidden_events: replay.forbidden_events,
+    forbidden_event_payloads: replay.forbidden_event_payloads,
+    expected_event_sequence: replay.expected_event_sequence,
     expected_last_hud: replay.expected_last_hud,
     outcome: summary.outcome,
     status: passed ? 'passed' : 'failed',
-    failure: passed ? null : buildReplayFailure(replay, summary, missingEvents, lastHudMismatches),
+    failure: passed ? null : buildReplayFailure(replay, summary, missingEvents, forbiddenEvents, forbiddenEventPayloads, sequenceFailure, lastHudMismatches),
     event_count: summary.event_count,
     levels: summary.levels,
     counts_by_type: summary.counts_by_type,
@@ -282,7 +322,7 @@ function runReplay(godotCommand, replay, outDir) {
   };
 }
 
-function buildReplayFailure(replay, summary, missingEvents, lastHudMismatches) {
+function buildReplayFailure(replay, summary, missingEvents, forbiddenEvents, forbiddenEventPayloads, sequenceFailure, lastHudMismatches) {
   const failures = [];
   if (replay.expected_outcome !== null && summary.outcome !== replay.expected_outcome) {
     failures.push(`expected outcome ${replay.expected_outcome}, got ${summary.outcome}`);
@@ -290,10 +330,98 @@ function buildReplayFailure(replay, summary, missingEvents, lastHudMismatches) {
   if (missingEvents.length > 0) {
     failures.push(`missing expected events: ${missingEvents.join(', ')}`);
   }
+  if (forbiddenEvents.length > 0) {
+    failures.push(`forbidden event appeared: ${forbiddenEvents.join(', ')}`);
+  }
+  if (forbiddenEventPayloads.length > 0) {
+    failures.push(`forbidden event payload appeared: ${forbiddenEventPayloads.join(', ')}`);
+  }
+  if (sequenceFailure !== null) {
+    failures.push(`expected event sequence failed: ${sequenceFailure}`);
+  }
   if (lastHudMismatches.length > 0) {
     failures.push(`last_hud mismatches: ${lastHudMismatches.join(', ')}`);
   }
   return failures.join('; ');
+}
+
+function normalizeExpectedSequenceItem(replayId, expected, sequenceIndex) {
+  return normalizeExpectedEventPayloadItem(replayId, expected, sequenceIndex, 'expected_event_sequence');
+}
+
+function normalizeExpectedEventPayloadItem(replayId, expected, itemIndex, fieldName) {
+  if (typeof expected === 'string') {
+    if (expected.length === 0) {
+      throw new Error(`Replay suite entry ${replayId} has empty ${fieldName} item ${itemIndex}`);
+    }
+    return { event_type: expected, payload: {} };
+  }
+  if (typeof expected !== 'object' || expected === null || Array.isArray(expected)) {
+    throw new Error(`Replay suite entry ${replayId} has invalid ${fieldName} item ${itemIndex}`);
+  }
+  if (typeof expected.event_type !== 'string' || expected.event_type.length === 0) {
+    throw new Error(`Replay suite entry ${replayId} ${fieldName} item ${itemIndex} is missing event_type`);
+  }
+  return {
+    event_type: expected.event_type,
+    payload: objectOrEmpty(expected.payload),
+  };
+}
+
+function readTrace(path) {
+  const raw = readFileSync(path, 'utf8').trim();
+  if (raw.length === 0) {
+    return [];
+  }
+  if (raw.startsWith('[')) {
+    return JSON.parse(raw).map(normalizeTraceEvent);
+  }
+  return raw.split(/\r?\n/).filter(Boolean).map((line) => normalizeTraceEvent(JSON.parse(line)));
+}
+
+function normalizeTraceEvent(event) {
+  return {
+    ...event,
+    event_type: String(event.event_type ?? 'unknown'),
+    payload: objectOrEmpty(event.payload),
+  };
+}
+
+function matchExpectedEventSequence(sequence, events) {
+  if (sequence.length === 0) {
+    return null;
+  }
+
+  let searchStart = 0;
+  for (const [sequenceIndex, expected] of sequence.entries()) {
+    const foundIndex = events.findIndex((event, eventIndex) => {
+      if (eventIndex < searchStart || event.event_type !== expected.event_type) {
+        return false;
+      }
+      return getObjectSubsetMismatches(expected.payload, event.payload).length === 0;
+    });
+    if (foundIndex < 0) {
+      return `missing ${expected.event_type} at sequence index ${sequenceIndex}`;
+    }
+    searchStart = foundIndex + 1;
+  }
+
+  return null;
+}
+
+function matchForbiddenEventPayloads(forbiddenPayloads, events) {
+  return forbiddenPayloads.flatMap((expected) => {
+    const matched = events.some((event) => {
+      if (event.event_type !== expected.event_type) {
+        return false;
+      }
+      return getObjectSubsetMismatches(expected.payload, event.payload).length === 0;
+    });
+    if (!matched) {
+      return [];
+    }
+    return [`${expected.event_type} ${JSON.stringify(expected.payload)}`];
+  });
 }
 
 function getObjectSubsetMismatches(expected, actual) {
@@ -306,6 +434,10 @@ function getObjectSubsetMismatches(expected, actual) {
   });
 }
 
+function objectOrEmpty(value) {
+  return typeof value === 'object' && value !== null && !Array.isArray(value) ? value : {};
+}
+
 function failureResult(replay, tracePath, failure, result = null) {
   return {
     id: replay.id,
@@ -313,6 +445,9 @@ function failureResult(replay, tracePath, failure, result = null) {
     trace_path: tracePath,
     expected_outcome: replay.expected_outcome,
     expected_events: replay.expected_events ?? [],
+    forbidden_events: replay.forbidden_events ?? [],
+    forbidden_event_payloads: replay.forbidden_event_payloads ?? [],
+    expected_event_sequence: replay.expected_event_sequence ?? [],
     expected_last_hud: replay.expected_last_hud ?? {},
     outcome: null,
     status: 'failed',

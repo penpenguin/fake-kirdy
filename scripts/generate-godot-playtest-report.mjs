@@ -165,9 +165,47 @@ function validateReport(contract, report) {
   const checks = [];
   const requiredSampleFields = requireArray(contract.required_sample_fields, 'required_sample_fields').map(String);
   const requiredBookmarkFields = requireArray(contract.required_bookmark_fields, 'required_bookmark_fields').map(String);
+  const minDurationMs = optionalNonNegativeNumber(contract.min_duration_ms, 'min_duration_ms');
+  const requiredRouteLevelIds = optionalStringArray(contract.required_route_level_ids, 'required_route_level_ids');
+  const requiredObservationCategories = optionalStringArray(
+    contract.required_observation_categories,
+    'required_observation_categories',
+  );
 
   if (report.samples.length === 0) {
     checks.push({ rule: 'sample_count', severity: 'error', message: 'Playtest report must contain at least one sample.' });
+  }
+
+  if (minDurationMs !== null && report.summary.duration_ms < minDurationMs) {
+    checks.push({
+      rule: 'duration',
+      severity: 'error',
+      message: `Playtest report duration ${report.summary.duration_ms}ms is shorter than required ${minDurationMs}ms.`,
+    });
+  }
+
+  const sampledLevelIds = new Set(report.samples.map((sample) => sample.level_id).filter(Boolean));
+  for (const levelId of requiredRouteLevelIds) {
+    if (!sampledLevelIds.has(levelId)) {
+      checks.push({
+        rule: 'route_coverage',
+        severity: 'error',
+        level_id: levelId,
+        message: `Playtest report must include a sample from ${levelId}.`,
+      });
+    }
+  }
+
+  const observedCategories = new Set(report.bookmarks.map((bookmark) => bookmark.category).filter(Boolean));
+  for (const category of requiredObservationCategories) {
+    if (!observedCategories.has(category)) {
+      checks.push({
+        rule: 'observation_category',
+        severity: 'error',
+        category,
+        message: `Playtest report must include a bookmark for ${category}.`,
+      });
+    }
   }
 
   for (const [index, sample] of report.samples.entries()) {
@@ -361,6 +399,24 @@ function requirePositiveInteger(value, label) {
     throw new Error(`${label} must be an integer.`);
   }
   return parsed;
+}
+
+function optionalNonNegativeNumber(value, label) {
+  if (value === undefined) {
+    return null;
+  }
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    throw new Error(`${label} must be a non-negative number.`);
+  }
+  return parsed;
+}
+
+function optionalStringArray(value, label) {
+  if (value === undefined) {
+    return [];
+  }
+  return requireArray(value, label).map(String).filter((entry) => entry.length > 0);
 }
 
 function eventTime(event) {

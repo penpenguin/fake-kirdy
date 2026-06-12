@@ -42,6 +42,8 @@ func apply_texture_to_polygons(node: Node, texture: Texture2D) -> void:
         var polygon := node as Polygon2D
         if should_texture_polygon(polygon):
             polygon.texture = texture
+            polygon.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+            polygon.texture_scale = Vector2(1.0, 1.0)
 
     for child in node.get_children():
         apply_texture_to_polygons(child, texture)
@@ -49,4 +51,4 @@ func apply_texture_to_polygons(node: Node, texture: Texture2D) -> void:
 
 func should_texture_polygon(polygon: Polygon2D) -> bool:
     var polygon_name := polygon.name.to_lower()
-    return polygon_name.contains("floor") or polygon_name.contains("platform") or polygon_name.contains("step")
+    return polygon_name.contains("floor") or polygon_name.contains("platform") or polygon_name.contains("step") or polygon_name.contains("wall")

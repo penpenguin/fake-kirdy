@@ -1,0 +1,69 @@
+{
+  "start_level_id": "fire_area",
+  "start_spawn_id": "default",
+  "level_id": "fire_area",
+  "initial_player_max_hp": 6,
+  "initial_player_hp": 6,
+  "fps": 60,
+  "max_frames": 520,
+  "frames": [
+    {
+      "frame": 0,
+      "actions": {
+        "move_right": true,
+        "inhale": false,
+        "swallow": false,
+        "use_ability": false
+      }
+    },
+    {
+      "frame": 45,
+      "actions": {
+        "inhale": true
+      }
+    },
+    {
+      "frame": 80,
+      "actions": {
+        "swallow": true
+      }
+    },
+    {
+      "frame": 82,
+      "actions": {
+        "inhale": false,
+        "swallow": false
+      }
+    },
+    {
+      "frame": 115,
+      "actions": {
+        "use_ability": true
+      }
+    },
+    {
+      "frame": 117,
+      "actions": {
+        "use_ability": false
+      }
+    },
+    {
+      "frame": 300,
+      "actions": {
+        "move_right": false
+      }
+    },
+    {
+      "frame": 310,
+      "actions": {
+        "move_right": true
+      }
+    },
+    {
+      "frame": 510,
+      "actions": {
+        "move_right": false
+      }
+    }
+  ]
+}

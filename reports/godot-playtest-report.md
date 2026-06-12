@@ -1,9 +1,9 @@
 # Godot Playtest Report
 
-- Samples: 5
-- Bookmarks: 1
+- Samples: 14
+- Bookmarks: 4
 - Unresolved issues: 0
-- Duration: 4000ms
+- Duration: 70000ms
 
 ## Coverage
 
@@ -15,11 +15,11 @@
 
 ## Recent Samples
 
-- 0ms central_hub hp=6 ability=none fps=60
-- 1000ms central_hub hp=6 ability=fire fps=59
-- 2000ms central_hub hp=6 ability=fire fps=58
-- 3000ms fire_area hp=6 ability=fire fps=58
-- 4000ms fire_area hp=6 ability=fire fps=59
+- 50000ms fire_area hp=6 ability=fire fps=58
+- 55000ms labyrinth_011 hp=6 ability=fire fps=57
+- 60000ms labyrinth_011 hp=6 ability=fire fps=57
+- 65000ms labyrinth_011 hp=6 ability=fire fps=58
+- 70000ms labyrinth_011 hp=6 ability=fire fps=58
 
 ## Generated Tasks
 

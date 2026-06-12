@@ -12,7 +12,9 @@
     "pause_overlay",
     "settings_overlay",
     "result_overlay",
-    "virtual_controls"
+    "virtual_controls",
+    "level_terrain",
+    "tutorial_onboarding"
   ],
   "snapshots": [
     {
@@ -113,6 +115,88 @@
       "visual_tags": ["ability_gate", "ability_feedback", "hud"],
       "required_scene_paths": ["godot/scenes/ui/HudOverlay.tscn"],
       "required_resource_paths": ["godot/resources/assets/images/effects/fire-attack.webp"]
+    },
+    {
+      "id": "tutorial_blue_wall_affordance",
+      "replay_path": "godot/tests/replays/tutorial_to_real_stage_path.json",
+      "frame": 110,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/tutorial_blue_wall_affordance.json",
+      "visual_tags": ["tutorial_onboarding", "ability_gate", "hud"],
+      "required_scene_paths": [
+        "godot/levels/tutorial_room.tscn",
+        "godot/scripts/level/markers/AbilityGateMarker.gd",
+        "godot/scenes/ui/HudOverlay.tscn"
+      ],
+      "required_resource_paths": [
+        "godot/resources/assets/images/characters/kirdy/kirdy-idle.webp",
+        "godot/resources/assets/images/enemies/wabble-bee.webp"
+      ]
+    },
+    {
+      "id": "tutorial_real_stage_cue",
+      "replay_path": "godot/tests/replays/tutorial_to_real_stage_path.json",
+      "frame": 188,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/tutorial_real_stage_cue.json",
+      "visual_tags": ["tutorial_onboarding", "level_terrain", "hud"],
+      "required_scene_paths": [
+        "godot/levels/tutorial_room.tscn",
+        "godot/levels/central_hub.tscn",
+        "godot/scripts/level/markers/DoorMarker.gd",
+        "godot/scenes/ui/HudOverlay.tscn"
+      ],
+      "required_resource_paths": [
+        "godot/resources/assets/images/ui/door-marker.webp",
+        "godot/resources/assets/images/world/brick-tile.webp",
+        "godot/resources/assets/images/world/wall-texture.webp"
+      ]
+    },
+    {
+      "id": "level_terrain_central_hub",
+      "replay_path": "godot/tests/replays/central_hub_to_heal_goal.json",
+      "frame": 20,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/level_terrain_central_hub.json",
+      "visual_tags": ["level_terrain"],
+      "required_scene_paths": ["godot/levels/central_hub.tscn", "godot/scripts/level/LevelVisualAssets.gd"],
+      "required_resource_paths": [
+        "godot/resources/assets/images/world/brick-tile.webp",
+        "godot/resources/assets/images/world/wall-texture.webp"
+      ]
+    },
+    {
+      "id": "level_terrain_fire_branch",
+      "replay_path": "godot/tests/replays/fire_area_ability_gate_trace.json",
+      "frame": 20,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/level_terrain_fire_branch.json",
+      "visual_tags": ["level_terrain"],
+      "required_scene_paths": ["godot/levels/fire_area.tscn", "godot/scripts/level/LevelVisualAssets.gd"],
+      "required_resource_paths": [
+        "godot/resources/assets/images/world/fire-tile.webp",
+        "godot/resources/assets/images/world/wall-texture.webp"
+      ]
+    },
+    {
+      "id": "level_terrain_combat_room",
+      "replay_path": "godot/tests/replays/combat_ability_damage_enemy.json",
+      "frame": 30,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/level_terrain_combat_room.json",
+      "visual_tags": ["level_terrain"],
+      "required_scene_paths": ["godot/levels/combat_room.tscn", "godot/scripts/level/LevelVisualAssets.gd"],
+      "required_resource_paths": [
+        "godot/resources/assets/images/world/brick-tile.webp",
+        "godot/resources/assets/images/world/wall-texture.webp"
+      ]
+    },
+    {
+      "id": "level_terrain_goal_sanctum",
+      "replay_path": "godot/tests/replays/mirror_to_goal_sanctum_finish.json",
+      "frame": 180,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/level_terrain_goal_sanctum.json",
+      "visual_tags": ["level_terrain"],
+      "required_scene_paths": ["godot/levels/goal_sanctum.tscn", "godot/scripts/level/LevelVisualAssets.gd"],
+      "required_resource_paths": [
+        "godot/resources/assets/images/world/royal-tile.webp",
+        "godot/resources/assets/images/world/wall-texture.webp"
+      ]
     }
   ]
 }

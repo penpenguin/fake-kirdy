@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=3 uid="uid://controlguideoverlay01"]
+
+[ext_resource type="Script" path="res://scripts/ui/ControlGuideOverlay.gd" id="1_control_guide"]
+
+[node name="ControlGuideOverlay" type="Control"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 260.0
+offset_bottom = 150.0
+mouse_filter = 2
+script = ExtResource("1_control_guide")
+
+[node name="ControlsLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 244.0
+offset_bottom = 120.0
+text = "Move: A/D or arrows
+Jump: Space
+Inhale: C
+Swallow: X
+Ability: Z
+Map: M"

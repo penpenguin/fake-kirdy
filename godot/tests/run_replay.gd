@@ -97,6 +97,7 @@ func run_session_replay(input_source: Node, output_path: String, args: Dictionar
     for item_id in input_source.get("initial_item_ids"):
         session.call("acquire_item", String(item_id), "replay_initial_item")
 
+    apply_initial_progression_state(input_source, session)
     apply_initial_player_health(input_source, session)
 
     await process_frame
@@ -137,6 +138,34 @@ func apply_initial_player_health(input_source: Node, session: Node) -> void:
     session.call("sync_hud_overlay", "replay.initial_player_health", true)
     if session.save_enabled:
         session.call("write_persistent_state")
+
+
+func apply_initial_progression_state(input_source: Node, session: Node) -> void:
+    var completed_level_ids: Dictionary = session.get("completed_level_ids")
+    for level_id in input_source.get("initial_completed_level_ids"):
+        completed_level_ids[String(level_id)] = true
+    session.set("completed_level_ids", completed_level_ids)
+
+    var defeated_enemy_group_ids: Dictionary = session.get("defeated_enemy_group_ids")
+    for group_id in input_source.get("initial_defeated_enemy_group_ids"):
+        defeated_enemy_group_ids[String(group_id)] = true
+    session.set("defeated_enemy_group_ids", defeated_enemy_group_ids)
+
+    var defeated_boss_ids: Dictionary = session.get("defeated_boss_ids")
+    for boss_id in input_source.get("initial_defeated_boss_ids"):
+        defeated_boss_ids[String(boss_id)] = true
+    session.set("defeated_boss_ids", defeated_boss_ids)
+
+
+    if (
+        input_source.get("initial_completed_level_ids").size() > 0
+        or input_source.get("initial_defeated_enemy_group_ids").size() > 0
+        or input_source.get("initial_defeated_boss_ids").size() > 0
+    ):
+        session.call("sync_hud_overlay", "replay.initial_progression", true)
+        session.call("sync_inventory_overlay", "replay.initial_progression", true)
+        if session.save_enabled:
+            session.call("write_persistent_state")
 
 
 func apply_session_replay_hooks(input_source: Node, session: Node) -> void:

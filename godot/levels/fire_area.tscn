@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://firearealevel01"]
+[gd_scene load_steps=10 format=3 uid="uid://firearealevel01"]
 
 [ext_resource type="Script" path="res://scripts/level/markers/PlayerSpawn.gd" id="1_spawn"]
 [ext_resource type="Script" path="res://scripts/level/markers/DoorMarker.gd" id="2_door"]
@@ -9,6 +9,9 @@
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(760, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gate"]
+size = Vector2(64, 128)
 
 [node name="FireArea" type="Node2D"]
 
@@ -37,7 +40,7 @@ script = ExtResource("1_spawn")
 spawn_id = "north"
 
 [node name="DoorToCentralHub" type="Node2D" parent="."]
-position = Vector2(620, 368)
+position = Vector2(700, 368)
 script = ExtResource("2_door")
 door_id = "fire_area_to_central_hub"
 target_level_id = "central_hub"
@@ -45,7 +48,7 @@ target_spawn_id = "default"
 trigger_radius = 48.0
 
 [node name="DoorToFireExpanse" type="Node2D" parent="."]
-position = Vector2(380, 368)
+position = Vector2(560, 368)
 script = ExtResource("2_door")
 door_id = "fire_area_to_fire_expanse"
 target_level_id = "labyrinth_011"
@@ -68,6 +71,16 @@ gate_id = "fire_area_ice_block"
 required_ability_type = "fire"
 gate_effect = "melt_ice"
 trigger_radius = 96.0
+
+[node name="Visual" type="Polygon2D" parent="IceBlockGate"]
+color = Color(0.46, 0.82, 1, 0.86)
+polygon = PackedVector2Array(-32, -128, 32, -128, 32, 48, -32, 48)
+
+[node name="CollisionBody" type="StaticBody2D" parent="IceBlockGate"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="IceBlockGate/CollisionBody"]
+position = Vector2(0, -16)
+shape = SubResource("RectangleShape2D_gate")
 
 [node name="CameraBoundsMarker" type="Node2D" parent="."]
 position = Vector2(380, 270)

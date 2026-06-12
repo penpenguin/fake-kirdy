@@ -23,7 +23,7 @@ target_level_id = "flat_room"
 target_spawn_id = "default"
 
 [node name="GoalMarker" type="Node2D" parent="."]
-position = Vector2(580, 368)
+position = Vector2(660, 368)
 script = ExtResource("3_goal")
 goal_id = "door_room_goal"
 

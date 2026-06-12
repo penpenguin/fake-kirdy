@@ -6,10 +6,10 @@
     "bookmarks_path": "godot/tests/playtest_sessions/manual_smoke_bookmarks.json"
   },
   "summary": {
-    "duration_ms": 4000,
-    "event_count": 6,
-    "sample_count": 5,
-    "bookmark_count": 1,
+    "duration_ms": 70000,
+    "event_count": 14,
+    "sample_count": 14,
+    "bookmark_count": 4,
     "generated_task_count": 0
   },
   "coverage": {
@@ -33,87 +33,274 @@
       "ability_type": "none",
       "enemy_count": 0,
       "fps": 60,
-      "screenshot_path": "reports/playtest-shots/manual-smoke-0000.png",
+      "screenshot_path": "reports/playtest-shots/golden-fire-0000.png",
       "recent_events": [
         "player.spawned"
       ]
     },
     {
-      "frame": 60,
-      "time_ms": 1000,
+      "frame": 600,
+      "time_ms": 10000,
       "level_id": "central_hub",
       "position": {
-        "x": 144,
+        "x": 180,
         "y": 96
       },
       "hp": 6,
-      "ability_type": "fire",
-      "enemy_count": 1,
-      "fps": 59,
-      "screenshot_path": "reports/playtest-shots/manual-smoke-0001.png",
+      "ability_type": "none",
+      "enemy_count": 0,
+      "fps": 60,
+      "screenshot_path": "reports/playtest-shots/golden-fire-0010.png",
       "recent_events": [
         "player.spawned",
         "playtest.sample"
       ]
     },
     {
-      "frame": 120,
-      "time_ms": 2000,
+      "frame": 900,
+      "time_ms": 15000,
       "level_id": "central_hub",
       "position": {
-        "x": 224,
+        "x": 240,
         "y": 96
+      },
+      "hp": 6,
+      "ability_type": "none",
+      "enemy_count": 0,
+      "fps": 59,
+      "screenshot_path": "reports/playtest-shots/golden-fire-0015.png",
+      "recent_events": [
+        "player.spawned",
+        "playtest.sample",
+        "door.entered"
+      ]
+    },
+    {
+      "frame": 1200,
+      "time_ms": 20000,
+      "level_id": "fire_area",
+      "position": {
+        "x": 96,
+        "y": 368
+      },
+      "hp": 6,
+      "ability_type": "none",
+      "enemy_count": 1,
+      "fps": 59,
+      "screenshot_path": "reports/playtest-shots/golden-fire-0020.png",
+      "recent_events": [
+        "player.spawned",
+        "playtest.sample",
+        "door.entered",
+        "playtest.sample"
+      ]
+    },
+    {
+      "frame": 1560,
+      "time_ms": 26000,
+      "level_id": "fire_area",
+      "position": {
+        "x": 286,
+        "y": 368
+      },
+      "hp": 6,
+      "ability_type": "fire",
+      "enemy_count": 1,
+      "fps": 58,
+      "screenshot_path": "reports/playtest-shots/golden-fire-0026.png",
+      "recent_events": [
+        "player.spawned",
+        "playtest.sample",
+        "door.entered",
+        "playtest.sample",
+        "enemy.captured"
+      ]
+    },
+    {
+      "frame": 1800,
+      "time_ms": 30000,
+      "level_id": "fire_area",
+      "position": {
+        "x": 310,
+        "y": 368
       },
       "hp": 6,
       "ability_type": "fire",
       "enemy_count": 0,
       "fps": 58,
-      "screenshot_path": "reports/playtest-shots/manual-smoke-0002.png",
+      "screenshot_path": "reports/playtest-shots/golden-fire-0030.png",
       "recent_events": [
-        "player.spawned",
+        "playtest.sample",
+        "door.entered",
+        "playtest.sample",
+        "enemy.captured",
+        "ability.acquired"
+      ]
+    },
+    {
+      "frame": 2100,
+      "time_ms": 35000,
+      "level_id": "fire_area",
+      "position": {
+        "x": 340,
+        "y": 368
+      },
+      "hp": 6,
+      "ability_type": "fire",
+      "enemy_count": 0,
+      "fps": 58,
+      "screenshot_path": "reports/playtest-shots/golden-fire-0035.png",
+      "recent_events": [
+        "door.entered",
+        "playtest.sample",
+        "enemy.captured",
+        "ability.acquired",
+        "playtest.sample"
+      ]
+    },
+    {
+      "frame": 2400,
+      "time_ms": 40000,
+      "level_id": "fire_area",
+      "position": {
+        "x": 424,
+        "y": 368
+      },
+      "hp": 6,
+      "ability_type": "fire",
+      "enemy_count": 0,
+      "fps": 58,
+      "screenshot_path": "reports/playtest-shots/golden-fire-0040.png",
+      "recent_events": [
+        "playtest.sample",
+        "enemy.captured",
+        "ability.acquired",
+        "playtest.sample",
+        "ability.used"
+      ]
+    },
+    {
+      "frame": 2460,
+      "time_ms": 41000,
+      "level_id": "fire_area",
+      "position": {
+        "x": 452,
+        "y": 368
+      },
+      "hp": 6,
+      "ability_type": "fire",
+      "enemy_count": 0,
+      "fps": 58,
+      "screenshot_path": "reports/playtest-shots/golden-fire-0041.png",
+      "recent_events": [
+        "enemy.captured",
+        "ability.acquired",
         "playtest.sample",
         "ability.used",
+        "ability_gate.opened"
+      ]
+    },
+    {
+      "frame": 3000,
+      "time_ms": 50000,
+      "level_id": "fire_area",
+      "position": {
+        "x": 560,
+        "y": 368
+      },
+      "hp": 6,
+      "ability_type": "fire",
+      "enemy_count": 0,
+      "fps": 58,
+      "screenshot_path": "reports/playtest-shots/golden-fire-0050.png",
+      "recent_events": [
+        "ability.acquired",
+        "playtest.sample",
+        "ability.used",
+        "ability_gate.opened",
         "door.entered"
       ]
     },
     {
-      "frame": 180,
-      "time_ms": 3000,
-      "level_id": "fire_area",
+      "frame": 3300,
+      "time_ms": 55000,
+      "level_id": "labyrinth_011",
       "position": {
-        "x": 64,
-        "y": 112
+        "x": 96,
+        "y": 368
       },
       "hp": 6,
       "ability_type": "fire",
       "enemy_count": 2,
-      "fps": 58,
-      "screenshot_path": "reports/playtest-shots/manual-smoke-0003.png",
+      "fps": 57,
+      "screenshot_path": "reports/playtest-shots/golden-fire-0055.png",
       "recent_events": [
-        "player.spawned",
         "playtest.sample",
         "ability.used",
+        "ability_gate.opened",
         "door.entered",
         "playtest.sample"
       ]
     },
     {
-      "frame": 240,
-      "time_ms": 4000,
-      "level_id": "fire_area",
+      "frame": 3600,
+      "time_ms": 60000,
+      "level_id": "labyrinth_011",
       "position": {
-        "x": 160,
-        "y": 112
+        "x": 180,
+        "y": 368
       },
       "hp": 6,
       "ability_type": "fire",
       "enemy_count": 1,
-      "fps": 59,
-      "screenshot_path": "reports/playtest-shots/manual-smoke-0004.png",
+      "fps": 57,
+      "screenshot_path": "reports/playtest-shots/golden-fire-0060.png",
       "recent_events": [
-        "playtest.sample",
         "ability.used",
+        "ability_gate.opened",
         "door.entered",
+        "playtest.sample",
+        "collectible.collected"
+      ]
+    },
+    {
+      "frame": 3900,
+      "time_ms": 65000,
+      "level_id": "labyrinth_011",
+      "position": {
+        "x": 240,
+        "y": 368
+      },
+      "hp": 6,
+      "ability_type": "fire",
+      "enemy_count": 1,
+      "fps": 58,
+      "screenshot_path": "reports/playtest-shots/golden-fire-0065.png",
+      "recent_events": [
+        "ability_gate.opened",
+        "door.entered",
+        "playtest.sample",
+        "collectible.collected",
+        "playtest.sample"
+      ]
+    },
+    {
+      "frame": 4200,
+      "time_ms": 70000,
+      "level_id": "labyrinth_011",
+      "position": {
+        "x": 300,
+        "y": 368
+      },
+      "hp": 6,
+      "ability_type": "fire",
+      "enemy_count": 0,
+      "fps": 58,
+      "screenshot_path": "reports/playtest-shots/golden-fire-0070.png",
+      "recent_events": [
+        "door.entered",
+        "playtest.sample",
+        "collectible.collected",
         "playtest.sample",
         "run.finished"
       ]
@@ -121,26 +308,95 @@
   ],
   "bookmarks": [
     {
-      "id": "manual_smoke_navigation_clear",
+      "id": "golden_fire_objective_readable",
       "kind": "note",
       "category": "objective_clarity",
       "severity": "info",
       "status": "resolved",
-      "note": "Manual smoke path reached the next stage and kept the objective readable.",
+      "note": "The route objective moved from finding the fire enemy to melting the ice gate and entering the Fire Expanse.",
       "level_id": "fire_area",
       "frame": null,
-      "time_ms": 3000,
+      "time_ms": 35000,
       "position": {
-        "x": 64,
-        "y": 112
+        "x": 340,
+        "y": 368
       },
-      "screenshot_path": "reports/playtest-shots/manual-smoke-0003.png",
+      "screenshot_path": "reports/playtest-shots/golden-fire-0035.png",
+      "recent_events": [
+        "door.entered",
+        "playtest.sample",
+        "enemy.captured",
+        "ability.acquired",
+        "playtest.sample"
+      ]
+    },
+    {
+      "id": "golden_fire_gate_blocks_navigation",
+      "kind": "note",
+      "category": "navigation_blocker",
+      "severity": "info",
+      "status": "resolved",
+      "note": "The ice gate visibly blocked the door approach before the fire ability opened it.",
+      "level_id": "fire_area",
+      "frame": null,
+      "time_ms": 41000,
+      "position": {
+        "x": 452,
+        "y": 368
+      },
+      "screenshot_path": "reports/playtest-shots/golden-fire-0041.png",
+      "recent_events": [
+        "enemy.captured",
+        "ability.acquired",
+        "playtest.sample",
+        "ability.used",
+        "ability_gate.opened"
+      ]
+    },
+    {
+      "id": "golden_fire_feedback_readable",
+      "kind": "note",
+      "category": "combat_feedback",
+      "severity": "info",
+      "status": "resolved",
+      "note": "Capturing the fire enemy and using the ability produced readable combat and gate feedback.",
+      "level_id": "fire_area",
+      "frame": null,
+      "time_ms": 30000,
+      "position": {
+        "x": 310,
+        "y": 368
+      },
+      "screenshot_path": "reports/playtest-shots/golden-fire-0030.png",
+      "recent_events": [
+        "playtest.sample",
+        "door.entered",
+        "playtest.sample",
+        "enemy.captured",
+        "ability.acquired"
+      ]
+    },
+    {
+      "id": "golden_fire_enemy_ai_pressure",
+      "kind": "note",
+      "category": "enemy_ai",
+      "severity": "info",
+      "status": "resolved",
+      "note": "The fire enemy created pressure near the branch route without preventing the player from acquiring fire.",
+      "level_id": "fire_area",
+      "frame": null,
+      "time_ms": 26000,
+      "position": {
+        "x": 286,
+        "y": 368
+      },
+      "screenshot_path": "reports/playtest-shots/golden-fire-0026.png",
       "recent_events": [
         "player.spawned",
         "playtest.sample",
-        "ability.used",
         "door.entered",
-        "playtest.sample"
+        "playtest.sample",
+        "enemy.captured"
       ]
     }
   ],

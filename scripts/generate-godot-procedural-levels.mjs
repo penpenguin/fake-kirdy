@@ -399,17 +399,7 @@ function buildRuntimeContent(levelId, cluster, difficulty, neighbors, deadEnds, 
     objective: buildRuntimeObjective(levelId, cluster, difficulty, neighbors),
     enemies: buildRuntimeEnemies(levelId, cluster, difficulty),
     heals: difficulty >= 2 ? buildRuntimeHeals(levelId, deadEnds, tileSize) : [],
-    collectibles: shouldAddGeneratedCollectible(neighbors)
-      ? [
-          {
-            id: 'GeneratedCollectibleMarker',
-            collectible_id: `${levelId}_generated_shard`,
-            item_id: `${cluster}-generated-shard`,
-            trigger_radius: 48,
-            position: { x: 592, y: 368 },
-          },
-        ]
-      : [],
+    collectibles: buildRuntimeCollectibles(levelId, cluster, neighbors),
     hazards: buildRuntimeHazards(levelId, cluster, difficulty),
     ability_gates: buildRuntimeAbilityGates(levelId, cluster, difficulty),
     goals: shouldAddGeneratedGoal(cluster, neighbors)
@@ -424,6 +414,31 @@ function buildRuntimeContent(levelId, cluster, difficulty, neighbors, deadEnds, 
         ]
       : [],
   };
+}
+
+function buildRuntimeCollectibles(levelId, cluster, neighbors) {
+  const collectibles = [];
+  if (shouldAddGeneratedCollectible(neighbors)) {
+    collectibles.push({
+      id: 'GeneratedCollectibleMarker',
+      collectible_id: `${levelId}_generated_shard`,
+      item_id: `${cluster}-generated-shard`,
+      trigger_radius: 48,
+      position: { x: 592, y: 368 },
+    });
+  }
+
+  if (levelId === 'labyrinth_011') {
+    collectibles.push({
+      id: 'GeneratedCollectibleMarkerFireRouteCache',
+      collectible_id: 'fire_route_cache',
+      item_id: 'fire-route-cache',
+      trigger_radius: 48,
+      position: { x: 380, y: 320 },
+    });
+  }
+
+  return collectibles;
 }
 
 function buildRuntimeEnemies(levelId, cluster, difficulty) {

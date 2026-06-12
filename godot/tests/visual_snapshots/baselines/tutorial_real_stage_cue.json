@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "snapshot_id": "tutorial_real_stage_cue",
+  "content_hash": "838068d8f4b5f595c1a58c914689b0739f31584d0f60e2bfc87ffb96d71deca2",
+  "replay_path": "godot/tests/replays/tutorial_to_real_stage_path.json",
+  "frame": 188,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "hud",
+    "level_terrain",
+    "tutorial_onboarding"
+  ],
+  "required_scene_paths": [
+    "godot/levels/central_hub.tscn",
+    "godot/levels/tutorial_room.tscn",
+    "godot/scenes/ui/HudOverlay.tscn",
+    "godot/scripts/level/markers/DoorMarker.gd"
+  ],
+  "required_resource_paths": [
+    "godot/resources/assets/images/ui/door-marker.webp",
+    "godot/resources/assets/images/world/brick-tile.webp",
+    "godot/resources/assets/images/world/wall-texture.webp"
+  ]
+}

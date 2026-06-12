@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "snapshot_id": "tutorial_blue_wall_affordance",
+  "content_hash": "6abeed16fb73fbb544b9c1a2aa85e3b1db615ceb4cb61e0a9857b678f2c2b9df",
+  "replay_path": "godot/tests/replays/tutorial_to_real_stage_path.json",
+  "frame": 110,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "ability_gate",
+    "hud",
+    "tutorial_onboarding"
+  ],
+  "required_scene_paths": [
+    "godot/levels/tutorial_room.tscn",
+    "godot/scenes/ui/HudOverlay.tscn",
+    "godot/scripts/level/markers/AbilityGateMarker.gd"
+  ],
+  "required_resource_paths": [
+    "godot/resources/assets/images/characters/kirdy/kirdy-idle.webp",
+    "godot/resources/assets/images/enemies/wabble-bee.webp"
+  ]
+}

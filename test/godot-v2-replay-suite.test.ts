@@ -1,4 +1,4 @@
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -21,6 +21,23 @@ const readReplay = (filename: string): {
   frames?: Array<{ frame?: number; actions?: Record<string, boolean> }>;
 } => JSON.parse(readFileSync(join(replayRoot, filename), 'utf8'));
 
+type ExpectedEventSequenceItem = {
+  event_type: string;
+  payload?: Record<string, string | number | boolean>;
+};
+
+const tutorialForbiddenEvents = [
+  'game.over',
+  'player.defeated',
+  'replay.error',
+  'goal.door.entered',
+  'result.overlay.shown',
+];
+const tutorialForbiddenEventPayloads = [
+  { event_type: 'run.finished', payload: { result_label: 'complete' } },
+  { event_type: 'run.finished', payload: { outcome: 'completed' } },
+];
+
 describe('Godot v2 replay suite workflow', () => {
   it('defines a canonical representative replay suite', () => {
     expect(existsSync(suitePath)).toBe(true);
@@ -32,6 +49,8 @@ describe('Godot v2 replay suite workflow', () => {
         replay_path?: string;
         expected_outcome?: string;
         expected_events?: string[];
+        forbidden_events?: string[];
+        expected_event_sequence?: ExpectedEventSequenceItem[];
         expected_last_hud?: Record<string, string | number | boolean>;
         tags?: string[];
       }>;
@@ -97,6 +116,8 @@ describe('Godot v2 replay suite workflow', () => {
         replay_path?: string;
         expected_outcome?: string;
         expected_events?: string[];
+        forbidden_events?: string[];
+        expected_event_sequence?: ExpectedEventSequenceItem[];
         expected_last_hud?: Record<string, string | number | boolean>;
         tags?: string[];
       }>;
@@ -147,6 +168,20 @@ describe('Godot v2 replay suite workflow', () => {
       'ability_gate.opened',
     ]));
     expect(readReplay('fire_area_ability_gate_trace.json').initial_ability_type).toBe('fire');
+
+    const goldenFirePath = byId.get('golden_fire_path');
+    expect(goldenFirePath?.replay_path).toBe('res://tests/replays/golden_fire_path.json');
+    expect(goldenFirePath?.expected_outcome).toBe('replay.max_frames_reached');
+    expect(goldenFirePath?.expected_event_sequence).toEqual([
+      { event_type: 'enemy.captured' },
+      { event_type: 'ability.acquired', payload: { ability_type: 'fire' } },
+      { event_type: 'ability.used', payload: { ability_type: 'fire' } },
+      { event_type: 'ability_gate.opened', payload: { gate_id: 'fire_area_ice_block' } },
+      { event_type: 'door.entered', payload: { door_id: 'fire_area_to_fire_expanse' } },
+      { event_type: 'collectible.collected' },
+      { event_type: 'run.finished' },
+    ]);
+    expect(readReplay('golden_fire_path.json').initial_ability_type).toBeUndefined();
 
     expect(byId.get('hard_enemy_attack_trace')?.expected_events).toEqual(expect.arrayContaining([
       'enemy.attack.started',
@@ -202,6 +237,54 @@ describe('Godot v2 replay suite workflow', () => {
     expect(readReplay('results_scene_continue.json').frames?.some((frame) => frame.actions?.result_continue)).toBe(true);
   });
 
+  it('adds tutorial onboarding replay fixtures that forbid death and prove the real-stage route', () => {
+    const suite = JSON.parse(readFileSync(suitePath, 'utf8')) as {
+      replays?: Array<{
+        id?: string;
+        replay_path?: string;
+        expected_outcome?: string;
+        expected_events?: string[];
+        forbidden_events?: string[];
+        forbidden_event_payloads?: ExpectedEventSequenceItem[];
+        expected_event_sequence?: ExpectedEventSequenceItem[];
+        tags?: string[];
+      }>;
+    };
+    const byId = new Map(suite.replays?.map((replay) => [replay.id, replay]));
+
+    expect(byId.get('tutorial_no_death_path')).toMatchObject({
+      replay_path: 'res://tests/replays/tutorial_no_death_path.json',
+      expected_outcome: 'replay.max_frames_reached',
+      forbidden_events: tutorialForbiddenEvents,
+      forbidden_event_payloads: tutorialForbiddenEventPayloads,
+    });
+    expect(byId.get('tutorial_no_death_path')?.expected_events).toEqual(expect.arrayContaining([
+      'enemy.captured',
+      'ability.acquired',
+      'ability_gate.opened',
+      'door.entered',
+    ]));
+    expect(readReplay('tutorial_no_death_path.json').start_level_id).toBe('tutorial_room');
+
+    expect(byId.get('tutorial_no_edge_fall_path')).toMatchObject({
+      replay_path: 'res://tests/replays/tutorial_no_edge_fall_path.json',
+      expected_outcome: 'replay.max_frames_reached',
+      forbidden_events: tutorialForbiddenEvents,
+      forbidden_event_payloads: tutorialForbiddenEventPayloads,
+    });
+    expect(readReplay('tutorial_no_edge_fall_path.json').frames?.some((frame) => frame.actions?.move_left)).toBe(true);
+
+    expect(byId.get('tutorial_to_real_stage_path')?.expected_event_sequence).toEqual([
+      { event_type: 'door.entered', payload: { target_level_id: 'central_hub' } },
+      { event_type: 'level.loaded', payload: { level_id: 'central_hub' } },
+      { event_type: 'door.entered', payload: { target_level_id: 'fire_area' } },
+      { event_type: 'level.loaded', payload: { level_id: 'fire_area' } },
+    ]);
+    expect(byId.get('tutorial_to_real_stage_path')?.forbidden_events).toEqual(tutorialForbiddenEvents);
+    expect(byId.get('tutorial_to_real_stage_path')?.forbidden_event_payloads).toEqual(tutorialForbiddenEventPayloads);
+    expect(readReplay('tutorial_to_real_stage_path.json').start_level_id).toBe('tutorial_room');
+  });
+
   it('provides a replay suite runner that can list the configured suite without Godot', () => {
     const output = execFileSync('node', ['scripts/run-godot-replay-suite.mjs', '--list'], {
       cwd: repoRoot,
@@ -228,9 +311,232 @@ describe('Godot v2 replay suite workflow', () => {
     expect(listed.replays?.map((replay) => replay.id)).toContain('combat_detach_ability');
     expect(listed.replays?.map((replay) => replay.id)).toContain('capture_defeated_enemy_auto_clear');
     expect(listed.replays?.map((replay) => replay.id)).toContain('fire_area_ability_gate_trace');
+    expect(listed.replays?.map((replay) => replay.id)).toContain('golden_fire_path');
     expect(listed.replays?.map((replay) => replay.id)).toContain('flying_spit_projectile_hit');
     expect(listed.replays?.map((replay) => replay.id)).toContain('forest_reliquary_key_unlocks_door');
     expect(listed.replays?.map((replay) => replay.id)).toContain('sky_generated_exit_locked_without_keystone');
+  });
+
+  it('fails a replay when expected_event_sequence is present but the trace is out of order', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'fake-kirdy-replay-suite-sequence-'));
+    const fakeGodot = join(tempDir, 'fake-godot');
+    const fixtureSuite = join(tempDir, 'replay_suite.json');
+    const outDir = join(tempDir, 'out');
+
+    try {
+      writeFileSync(
+        fakeGodot,
+        `#!/bin/sh
+if [ "$1" = "--version" ]; then
+  echo "4.6.fake-replay-suite"
+  exit 0
+fi
+out=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --out)
+      shift
+      out="$1"
+      ;;
+  esac
+  shift
+done
+if [ -n "$out" ]; then
+  {
+    printf '{"frame":0,"time_ms":0,"event_type":"ability_gate.opened","level_id":"fire_area","payload":{"gate_id":"fire_area_ice_block"}}\\n'
+    printf '{"frame":1,"time_ms":16,"event_type":"ability.acquired","level_id":"fire_area","payload":{"ability_type":"fire"}}\\n'
+    printf '{"frame":2,"time_ms":32,"event_type":"run.finished","level_id":"fire_area","payload":{"outcome":"finished"}}\\n'
+  } > "$out"
+fi
+exit 0
+`,
+      );
+      chmodSync(fakeGodot, 0o755);
+      writeFileSync(
+        fixtureSuite,
+        `${JSON.stringify(
+          {
+            version: 1,
+            replays: [
+              {
+                id: 'bad_sequence',
+                replay_path: 'res://tests/replays/bad_sequence.json',
+                expected_outcome: 'finished',
+                expected_event_sequence: [
+                  { event_type: 'ability.acquired', payload: { ability_type: 'fire' } },
+                  { event_type: 'ability_gate.opened', payload: { gate_id: 'fire_area_ice_block' } },
+                ],
+              },
+            ],
+          },
+          null,
+          2,
+        )}\n`,
+      );
+
+      const result = spawnSync(process.execPath, ['scripts/run-godot-replay-suite.mjs', '--suite', fixtureSuite, '--out-dir', outDir], {
+        cwd: repoRoot,
+        encoding: 'utf8',
+        env: {
+          ...process.env,
+          GODOT_BIN: fakeGodot,
+          PATH: dirname(process.execPath),
+        },
+      });
+      expect(result.status).toBe(1);
+      const report = JSON.parse(result.stdout) as {
+        failed_replays?: number;
+        results?: { failure?: string | null }[];
+      };
+
+      expect(report.failed_replays).toBe(1);
+      expect(report.results?.[0]?.failure).toContain('expected event sequence');
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('fails a replay when a forbidden event appears in the trace', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'fake-kirdy-replay-suite-forbidden-'));
+    const fakeGodot = join(tempDir, 'fake-godot');
+    const fixtureSuite = join(tempDir, 'replay_suite.json');
+    const outDir = join(tempDir, 'out');
+
+    try {
+      writeFileSync(
+        fakeGodot,
+        `#!/bin/sh
+if [ "$1" = "--version" ]; then
+  echo "4.6.fake-replay-suite"
+  exit 0
+fi
+out=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --out)
+      shift
+      out="$1"
+      ;;
+  esac
+  shift
+done
+if [ -n "$out" ]; then
+  {
+    printf '{"frame":0,"time_ms":0,"event_type":"player.spawned","level_id":"tutorial_room"}\\n'
+    printf '{"frame":1,"time_ms":16,"event_type":"game.over","level_id":"tutorial_room","payload":{"outcome":"game_over"}}\\n'
+  } > "$out"
+fi
+exit 0
+`,
+      );
+      chmodSync(fakeGodot, 0o755);
+      writeFileSync(
+        fixtureSuite,
+        `${JSON.stringify(
+          {
+            version: 1,
+            replays: [
+              {
+                id: 'forbidden_death',
+                replay_path: 'res://tests/replays/forbidden_death.json',
+                expected_outcome: 'game_over',
+                forbidden_events: ['game.over'],
+              },
+            ],
+          },
+          null,
+          2,
+        )}\n`,
+      );
+
+      const result = spawnSync(process.execPath, ['scripts/run-godot-replay-suite.mjs', '--suite', fixtureSuite, '--out-dir', outDir], {
+        cwd: repoRoot,
+        encoding: 'utf8',
+        env: {
+          ...process.env,
+          GODOT_BIN: fakeGodot,
+          PATH: dirname(process.execPath),
+        },
+      });
+      expect(result.status).toBe(1);
+      const report = JSON.parse(result.stdout) as {
+        failed_replays?: number;
+        results?: { failure?: string | null }[];
+      };
+
+      expect(report.failed_replays).toBe(1);
+      expect(report.results?.[0]?.failure).toContain('forbidden event appeared: game.over');
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('fails a replay when a forbidden event payload appears in the trace', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'fake-kirdy-replay-suite-forbidden-payload-'));
+    const godotBin = join(tempDir, 'godot');
+    const suitePath = join(tempDir, 'suite.json');
+    const replayPath = join(tempDir, 'fixture_replay.json');
+    const outDir = join(tempDir, 'out');
+
+    try {
+      writeFileSync(replayPath, JSON.stringify({ max_frames: 1 }));
+      writeFileSync(
+        suitePath,
+        JSON.stringify(
+          {
+            version: 1,
+            replays: [
+              {
+                id: 'fixture_forbidden_payload',
+                replay_path: 'res://tests/replays/fixture_replay.json',
+                expected_outcome: 'finished',
+                forbidden_event_payloads: [{ event_type: 'run.finished', payload: { result_label: 'complete' } }],
+              },
+            ],
+          },
+          null,
+          2,
+        ),
+      );
+      writeFileSync(
+        godotBin,
+        `#!/usr/bin/env node
+const fs = require('fs');
+const args = process.argv.slice(2);
+if (args.includes('--version')) {
+  console.log('fixture-godot');
+  process.exit(0);
+}
+const traceIndex = args.indexOf('--out');
+if (traceIndex >= 0) {
+  fs.writeFileSync(args[traceIndex + 1], [
+    JSON.stringify({ event_type: 'run.finished', payload: { result_label: 'complete' } }),
+  ].join('\\n') + '\\n');
+}
+`,
+      );
+      chmodSync(godotBin, 0o755);
+
+      const result = spawnSync(
+        process.execPath,
+        ['scripts/run-godot-replay-suite.mjs', '--suite', suitePath, '--out-dir', outDir],
+        {
+          cwd: repoRoot,
+          encoding: 'utf8',
+          env: { ...process.env, GODOT_BIN: godotBin },
+        },
+      );
+
+      expect(result.status).toBe(1);
+      const report = JSON.parse(result.stdout) as {
+        failed_replays?: number;
+        results?: Array<{ failure?: string }>;
+      };
+      expect(report.failed_replays).toBe(1);
+      expect(report.results?.[0]?.failure).toContain('forbidden event payload appeared');
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
   });
 
   it('uses GODOT_BIN for replay suite import and replay execution when godot is not on PATH', () => {
@@ -318,6 +624,9 @@ exit 0
 
     expect(packageJson.scripts?.['godot:replay-suite']).toContain('scripts/run-godot-replay-suite.mjs');
     expect(runner).toContain('expected_events');
+    expect(runner).toContain('forbidden_events');
+    expect(runner).toContain('forbidden_event_payloads');
+    expect(runner).toContain('expected_event_sequence');
     expect(runner).toContain('expected_last_hud');
     expect(runner).toContain('last_hud: summary.last_hud');
     expect(runner).toContain('last_result_overlay: summary.last_result_overlay');

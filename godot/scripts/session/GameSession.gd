@@ -19,6 +19,7 @@ const PauseSceneScene = preload("res://scenes/ui/PauseScene.tscn")
 const SettingsOverlayScene = preload("res://scenes/ui/SettingsOverlay.tscn")
 const VirtualControlsOverlayScene = preload("res://scenes/ui/VirtualControlsOverlay.tscn")
 const InventoryOverlayScene = preload("res://scenes/ui/InventoryOverlay.tscn")
+const ControlGuideOverlayScene = preload("res://scenes/ui/ControlGuideOverlay.tscn")
 const BgmMain = preload("res://resources/assets/audio/bgm-main.wav")
 const SfxKirdyInhale = preload("res://resources/assets/audio/sfx/kirdy-inhale.wav")
 const SfxKirdySwallow = preload("res://resources/assets/audio/sfx/kirdy-swallow.wav")
@@ -86,6 +87,7 @@ var pause_overlay: Control = null
 var settings_overlay: Control = null
 var virtual_controls_overlay: Control = null
 var inventory_overlay: Control = null
+var control_guide_overlay: Control = null
 var bgm_player: AudioStreamPlayer = null
 var sfx_player: AudioStreamPlayer = null
 
@@ -107,7 +109,7 @@ var error_retry_spawn_id: String = "default"
 var error_retry_fps: int = 60
 
 @export var auto_start: bool = true
-@export var initial_level_id: String = "central_hub"
+@export var initial_level_id: String = "tutorial_room"
 @export var initial_spawn_id: String = "default"
 @export var save_enabled: bool = false
 @export var save_path: String = "user://fake_kirdy_save.json"
@@ -132,6 +134,7 @@ var error_retry_fps: int = 60
 @export var exploration_tile_size: int = 32
 @export var map_overlay_enabled: bool = true
 @export var map_toggle_action: StringName = &"map_toggle"
+@export var door_interact_action: StringName = &"interact"
 @export var hud_overlay_enabled: bool = true
 @export var result_overlay_enabled: bool = true
 @export var result_restart_action: StringName = &"result_restart"
@@ -147,6 +150,8 @@ var error_retry_fps: int = 60
 @export var settings_overlay_enabled: bool = true
 @export var virtual_controls_enabled: bool = true
 @export var inventory_overlay_enabled: bool = true
+@export var inventory_debug_overlay_enabled: bool = false
+@export var control_guide_overlay_enabled: bool = true
 @export var audio_enabled: bool = true
 @export var bgm_volume_scale: float = 0.65
 @export var sfx_volume_scale: float = 1.0
@@ -227,6 +232,9 @@ func start_session(start_level_id: String, start_spawn_id: String = "default", f
     if inventory_overlay != null and is_instance_valid(inventory_overlay):
         inventory_overlay.queue_free()
     inventory_overlay = null
+    if control_guide_overlay != null and is_instance_valid(control_guide_overlay):
+        control_guide_overlay.queue_free()
+    control_guide_overlay = null
     if bgm_player != null and is_instance_valid(bgm_player):
         bgm_player.queue_free()
     bgm_player = null
@@ -249,6 +257,7 @@ func start_session(start_level_id: String, start_spawn_id: String = "default", f
     setup_settings_overlay()
     setup_virtual_controls_overlay()
     setup_inventory_overlay()
+    setup_control_guide_overlay()
     setup_audio_players()
     trace_recorder.call("configure", start_level_id, replay_fps)
     load_persistent_state()
@@ -358,6 +367,7 @@ func load_level(level_id: String, spawn_id: String = "default") -> bool:
     add_child(current_level)
     level_visual_assets.call("apply_to_level", current_level, current_level_id)
     current_definition = level_loader.call("build_level_definition", current_level, level_id)
+    reapply_opened_ability_gate_scene_nodes()
     spawn_player(spawn_id)
     spawn_enemies()
     reapply_discovered_hidden_marker_visuals()
@@ -1074,6 +1084,7 @@ func check_ability_gate_interactions(ability_type: String, profile: Dictionary) 
 
         opened_ability_gate_ids[gate_id] = true
         var grants_item_id := String(payload.get("grants_item_id", ""))
+        var scene_state := open_ability_gate_scene_node(gate_id, payload)
         trace_recorder.call("record_player_event", "ability_gate.opened", {
             "level_id": current_level_id,
             "player": get_player_trace(),
@@ -1082,8 +1093,12 @@ func check_ability_gate_interactions(ability_type: String, profile: Dictionary) 
                 "required_ability_type": required_ability_type,
                 "ability_type": ability_type,
                 "gate_effect": String(payload.get("gate_effect", "open")),
+                "hint_text": String(payload.get("hint_text", "")),
                 "opened_ability_gate_ids": get_opened_ability_gate_ids(),
                 "grants_item_id": grants_item_id,
+                "scene_opened": bool(scene_state.get("opened", false)),
+                "visual_changed": bool(scene_state.get("visual_changed", false)),
+                "collision_disabled": bool(scene_state.get("collision_disabled", false)),
             },
         })
         if grants_item_id != "":
@@ -1092,6 +1107,35 @@ func check_ability_gate_interactions(ability_type: String, profile: Dictionary) 
         sync_inventory_overlay("ability_gate.opened", true)
         write_persistent_state()
         return
+
+
+func reapply_opened_ability_gate_scene_nodes() -> void:
+    for gate_id in opened_ability_gate_ids:
+        open_ability_gate_scene_node(String(gate_id), {})
+
+
+func open_ability_gate_scene_node(gate_id: String, payload: Dictionary = {}) -> Dictionary:
+    if current_level == null or gate_id == "":
+        return {}
+
+    for gate_node in get_tree().get_nodes_in_group("ability_gate_marker"):
+        if gate_node == null or not is_instance_valid(gate_node):
+            continue
+        if gate_node != current_level and not current_level.is_ancestor_of(gate_node):
+            continue
+        if String(gate_node.get("gate_id")) != gate_id:
+            continue
+
+        if gate_node.has_method("open_gate"):
+            gate_node.call("open_gate", payload)
+        if gate_node.has_method("get_gate_state"):
+            return gate_node.call("get_gate_state")
+        return {
+            "gate_id": gate_id,
+            "opened": bool(gate_node.get("opened")),
+        }
+
+    return {}
 
 
 func ability_matches_requirement(ability_type: String, required_ability_type: String) -> bool:
@@ -1768,7 +1812,7 @@ func setup_map_overlay() -> void:
         return
 
     map_overlay = MapOverlayScene.instantiate()
-    map_overlay.visible = true
+    map_overlay.visible = false
     add_child(map_overlay)
 
 
@@ -1840,7 +1884,16 @@ func setup_inventory_overlay() -> void:
         return
 
     inventory_overlay = InventoryOverlayScene.instantiate()
+    inventory_overlay.visible = inventory_debug_overlay_enabled
     add_child(inventory_overlay)
+
+
+func setup_control_guide_overlay() -> void:
+    if not control_guide_overlay_enabled:
+        return
+
+    control_guide_overlay = ControlGuideOverlayScene.instantiate()
+    add_child(control_guide_overlay)
 
 
 func setup_audio_players() -> void:
@@ -2873,6 +2926,18 @@ func check_door_transitions() -> void:
         if player.global_position.distance_to(door_position) > radius:
             continue
 
+        if not is_door_interaction_confirmed(payload):
+            trace_recorder.call("record_player_event", "door.prompted", {
+                "level_id": current_level_id,
+                "player": get_player_trace(),
+                "payload": {
+                    "door_id": door_id,
+                    "interact_action": String(door_interact_action),
+                },
+            })
+            sync_hud_overlay("door.prompted", true)
+            return
+
         var source_level_id := current_level_id
         var target_level_id := String(payload.get("target_level_id", ""))
         var target_spawn_id := String(payload.get("target_spawn_id", "default"))
@@ -2921,6 +2986,16 @@ func check_door_transitions() -> void:
         return
 
 
+func is_door_interaction_confirmed(payload: Dictionary) -> bool:
+    if not bool(payload.get("requires_interact", true)):
+        return true
+
+    if input_source != null:
+        return true
+
+    return is_session_action_just_pressed(door_interact_action)
+
+
 func get_door_lock_reason(payload: Dictionary) -> String:
     var required_item_id := String(payload.get("required_item_id", ""))
     if required_item_id != "" and not acquired_item_ids.has(required_item_id):
@@ -2951,6 +3026,9 @@ func get_door_lock_reason(payload: Dictionary) -> String:
 
 func get_cluster_transition_lock_reason(payload: Dictionary) -> String:
     if not cluster_keystone_progression_enabled:
+        return ""
+
+    if bool(payload.get("bypass_cluster_lock", false)):
         return ""
 
     var explicit_required_item_id := String(payload.get("required_keystone_item_id", ""))
