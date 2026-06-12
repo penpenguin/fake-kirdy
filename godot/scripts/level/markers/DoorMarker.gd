@@ -17,12 +17,14 @@ const DoorTexture = preload("res://resources/assets/images/ui/door-marker.webp")
 @export var hidden_until_discovered: bool = false
 @export var discovery_radius: float = 80.0
 @export var requires_interact: bool = true
+@export var visual_target_size: Vector2 = Vector2(56.0, 72.0)
 
 
 func _ready() -> void:
     add_to_group("level_marker")
     add_to_group("door_marker")
     ensure_visual()
+    fit_visual_to_target_size($Visual)
 
 
 func ensure_visual() -> void:
@@ -32,10 +34,21 @@ func ensure_visual() -> void:
     var visual := Sprite2D.new()
     visual.name = "Visual"
     visual.texture = DoorTexture
-    visual.scale = Vector2(0.34, 0.34)
     visual.z_index = 2
     visual.visible = not hidden_until_discovered
     add_child(visual)
+
+
+func fit_visual_to_target_size(visual: Sprite2D) -> void:
+    if visual == null or visual.texture == null:
+        return
+
+    var texture_size := visual.texture.get_size()
+    if texture_size.x <= 0.0 or texture_size.y <= 0.0:
+        return
+
+    var scale_factor: float = minf(visual_target_size.x / texture_size.x, visual_target_size.y / texture_size.y)
+    visual.scale = Vector2(scale_factor, scale_factor)
 
 
 func to_level_marker() -> Dictionary:

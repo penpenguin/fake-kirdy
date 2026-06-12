@@ -14,6 +14,7 @@
     "result_overlay",
     "virtual_controls",
     "level_terrain",
+    "door_scale",
     "tutorial_onboarding"
   ],
   "snapshots": [
@@ -52,6 +53,15 @@
       "visual_tags": ["locked_door", "hud"],
       "required_scene_paths": ["godot/scenes/ui/HudOverlay.tscn"],
       "required_resource_paths": ["godot/resources/assets/images/ui/locked-door.webp"]
+    },
+    {
+      "id": "door_room_scaled_door",
+      "replay_path": "godot/tests/replays/door_to_goal.json",
+      "frame": 10,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/door_room_scaled_door.json",
+      "visual_tags": ["door_scale", "hud"],
+      "required_scene_paths": ["godot/levels/door_room.tscn", "godot/scripts/level/markers/DoorMarker.gd", "godot/scenes/ui/HudOverlay.tscn"],
+      "required_resource_paths": ["godot/resources/assets/images/ui/door-marker.webp"]
     },
     {
       "id": "map_overlay_visibility",

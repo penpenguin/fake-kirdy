@@ -60,6 +60,9 @@ describe('Godot v2 collectible progression slice', () => {
     expect(session).toContain('check_collectible_pickups');
     expect(session).toContain('collectible.collected');
     expect(session).toContain('item.acquired');
+    expect(session).toContain('remove_collected_collectible_visual');
+    expect(session).toContain('collectible.pickup.ignored');
+    expect(session).toContain('sync_inventory_overlay("collectible.collected"');
   });
 
   it('maps Phaser reliquary collectibles into playable Godot levels', () => {
@@ -132,5 +135,34 @@ describe('Godot v2 collectible progression slice', () => {
 
     const replayEntry = suite.replays?.find((entry) => entry.id === 'central_hub_ice_gate_without_keystone');
     expect(replayEntry?.expected_events).toContain('door.locked');
+  });
+
+  it('records collectible pickup once in replay and summary-facing contracts', () => {
+    const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
+      replays?: Array<{
+        id?: string;
+        expected_events?: string[];
+        forbidden_events?: string[];
+        expected_last_hud?: Record<string, unknown>;
+        tags?: string[];
+      }>;
+    };
+    const traceSummary = readFileSync(join(repoRoot, 'scripts', 'trace-summary.mjs'), 'utf8');
+    const replayEntry = suite.replays?.find((entry) => entry.id === 'forest_reliquary_key_unlocks_door');
+
+    expect(replayEntry?.expected_events).toEqual(expect.arrayContaining([
+      'collectible.collected',
+      'item.acquired',
+      'inventory.updated',
+      'hud.updated',
+    ]));
+    expect(replayEntry?.forbidden_events).toContain('collectible.pickup.ignored');
+    expect(replayEntry?.expected_last_hud).toMatchObject({
+      items_collected: ['forest-keystone'],
+    });
+    expect(traceSummary).toContain('collectibles_collected');
+    expect(traceSummary).toContain('items_collected');
+    expect(traceSummary).toContain('last_inventory');
+    expect(traceSummary).toContain('last_hud');
   });
 });

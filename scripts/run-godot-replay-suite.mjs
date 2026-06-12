@@ -427,11 +427,24 @@ function matchForbiddenEventPayloads(forbiddenPayloads, events) {
 function getObjectSubsetMismatches(expected, actual) {
   return Object.entries(expected).flatMap(([key, expectedValue]) => {
     const actualValue = actual?.[key];
-    if (actualValue === expectedValue) {
+    if (isExpectedValueMatched(expectedValue, actualValue)) {
       return [];
     }
     return [`${key} expected ${JSON.stringify(expectedValue)}, got ${JSON.stringify(actualValue)}`];
   });
+}
+
+function isExpectedValueMatched(expectedValue, actualValue) {
+  if (actualValue === expectedValue) {
+    return true;
+  }
+  if (typeof expectedValue !== typeof actualValue) {
+    return false;
+  }
+  if (typeof expectedValue !== 'object' || expectedValue === null || actualValue === null) {
+    return false;
+  }
+  return JSON.stringify(expectedValue) === JSON.stringify(actualValue);
 }
 
 function objectOrEmpty(value) {

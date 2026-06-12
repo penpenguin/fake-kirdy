@@ -10,6 +10,7 @@ class_name PlayerTuning
 @export var gravity_up: float = 1250.0
 @export var gravity_down: float = 1700.0
 @export var jump_cut_multiplier: float = 0.45
+@export var max_air_jumps: int = 1
 @export var coyote_time_ms: float = 90.0
 @export var jump_buffer_ms: float = 120.0
 @export var hover_gravity_scale: float = 0.35

@@ -8,6 +8,19 @@
       "tags": ["controller", "movement", "jump", "hover", "metrics"]
     },
     {
+      "id": "controller_lab_double_jump",
+      "replay_path": "res://tests/replays/controller_lab_double_jump.json",
+      "expected_outcome": "finished",
+      "expected_events": ["player.jump.started", "player.jump.rejected", "player.landed"],
+      "expected_event_sequence": [
+        { "event_type": "player.jump.started", "payload": { "jump_kind": "ground" } },
+        { "event_type": "player.jump.started", "payload": { "jump_kind": "air" } },
+        { "event_type": "player.jump.rejected", "payload": { "reason": "air_jump_exhausted" } },
+        { "event_type": "player.landed" }
+      ],
+      "tags": ["controller", "movement", "double-jump", "trace"]
+    },
+    {
       "id": "combat_capture_swallow_goal",
       "replay_path": "res://tests/replays/combat_capture_swallow_goal.json",
       "expected_outcome": "complete",
@@ -241,7 +254,7 @@
       "id": "tutorial_no_edge_fall_path",
       "replay_path": "res://tests/replays/tutorial_no_edge_fall_path.json",
       "expected_outcome": "replay.max_frames_reached",
-      "expected_events": ["player.spawned"],
+      "expected_events": ["player.boundary.clamped"],
       "forbidden_events": ["game.over", "player.defeated", "replay.error", "goal.door.entered", "result.overlay.shown"],
       "forbidden_event_payloads": [
         { "event_type": "run.finished", "payload": { "result_label": "complete" } },
@@ -316,7 +329,11 @@
       "id": "forest_reliquary_key_unlocks_door",
       "replay_path": "res://tests/replays/forest_reliquary_key_unlocks_door.json",
       "expected_outcome": "replay.max_frames_reached",
-      "expected_events": ["collectible.collected", "item.acquired", "door.entered"],
+      "expected_events": ["collectible.collected", "item.acquired", "inventory.updated", "hud.updated", "door.entered"],
+      "forbidden_events": ["collectible.pickup.ignored"],
+      "expected_last_hud": {
+        "items_collected": ["forest-keystone"]
+      },
       "tags": ["progression", "item", "collectible", "door", "trace"]
     },
     {

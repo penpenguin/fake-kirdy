@@ -155,8 +155,10 @@ describe('Godot visual snapshots', () => {
       result_overlay: expect.any(Number),
       virtual_controls: expect.any(Number),
       level_terrain: expect.any(Number),
+      door_scale: expect.any(Number),
     });
     expect(report.coverage.level_terrain).toBeGreaterThanOrEqual(4);
+    expect(report.coverage.door_scale).toBeGreaterThanOrEqual(1);
   });
 
   it('tiles terrain textures across multi-cell floor polygons instead of stretching one tile', () => {

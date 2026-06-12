@@ -29,6 +29,7 @@ signal trace_event(event_type: String, payload: Dictionary)
 var ability_type: String = ""
 var coyote_time: float = 0.0
 var jump_buffer: float = 0.0
+var air_jumps_remaining: int = 0
 var was_on_floor: bool = false
 var is_hovering: bool = false
 var has_jump_cut: bool = false
@@ -41,6 +42,7 @@ var inhale_effect_fallback_line: Line2D = null
 
 
 func _ready() -> void:
+    reset_air_jumps()
     update_visual_state(0.0, false)
     emit_trace("player.spawned")
 
@@ -266,6 +268,7 @@ func fit_body_sprite() -> void:
 func update_coyote_time(on_floor_before_move: bool, delta: float) -> void:
     if on_floor_before_move:
         coyote_time = tuning.coyote_time_ms / 1000.0
+        reset_air_jumps()
         has_jump_cut = false
     else:
         coyote_time = maxf(coyote_time - delta, 0.0)
@@ -279,15 +282,43 @@ func update_jump_buffer(jump_pressed: bool, delta: float) -> void:
 
 
 func apply_jump() -> void:
-    if jump_buffer <= 0.0 or coyote_time <= 0.0:
+    if jump_buffer <= 0.0:
         return
 
+    if coyote_time > 0.0:
+        perform_jump("ground")
+        coyote_time = 0.0
+        return
+
+    if can_consume_air_jump():
+        air_jumps_remaining -= 1
+        perform_jump("air")
+        return
+
+    jump_buffer = 0.0
+    emit_trace("player.jump.rejected", {
+        "reason": "air_jump_exhausted",
+        "air_jumps_remaining": air_jumps_remaining,
+    })
+
+
+func perform_jump(jump_kind: String) -> void:
     velocity.y = -tuning.jump_velocity
     jump_buffer = 0.0
-    coyote_time = 0.0
     has_jump_cut = false
     stop_hover()
-    emit_trace("player.jump.started")
+    emit_trace("player.jump.started", {
+        "jump_kind": jump_kind,
+        "air_jumps_remaining": air_jumps_remaining,
+    })
+
+
+func reset_air_jumps() -> void:
+    air_jumps_remaining = max(int(tuning.max_air_jumps), 0)
+
+
+func can_consume_air_jump() -> bool:
+    return not is_on_floor() and air_jumps_remaining > 0
 
 
 func apply_jump_cut(jump_released: bool) -> void:
@@ -337,6 +368,7 @@ func update_landing_trace() -> void:
 
     if on_floor_after_move and not was_on_floor:
         stop_hover()
+        reset_air_jumps()
         emit_trace("player.landed")
 
     was_on_floor = on_floor_after_move

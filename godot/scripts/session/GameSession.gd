@@ -33,6 +33,7 @@ const SCORE_PER_DEFEATED_GROUP := 300
 const SCORE_PER_DEFEATED_BOSS := 1000
 const SCORE_PER_REMAINING_HP := 100
 const SCORE_PER_REVIVE := 500
+const COLLECTIBLE_PICKUP_IGNORED_EVENT := "collectible.pickup.ignored"
 const CLUSTER_KEYSTONE_REQUIREMENTS := {
     "ice": "forest-keystone",
     "fire": "ice-keystone",
@@ -133,6 +134,7 @@ var error_retry_fps: int = 60
 @export var settings_cycle_difficulty_action: StringName = &"settings_cycle_difficulty"
 @export var exploration_tile_size: int = 32
 @export var player_boundary_padding: float = 36.0
+@export var player_boundary_snap_epsilon: float = 1.5
 @export var map_overlay_enabled: bool = true
 @export var map_toggle_action: StringName = &"map_toggle"
 @export var door_interact_action: StringName = &"interact"
@@ -319,8 +321,8 @@ func constrain_player_to_camera_bounds() -> void:
     var max_position := center + bounds_size * 0.5 - Vector2(player_boundary_padding, player_boundary_padding)
     var previous_position: Vector2 = player.global_position
     var clamped_position := Vector2(
-        clampf(previous_position.x, min_position.x, max_position.x),
-        clampf(previous_position.y, min_position.y, max_position.y)
+        clamp_with_boundary_snap(previous_position.x, min_position.x, max_position.x),
+        clamp_with_boundary_snap(previous_position.y, min_position.y, max_position.y)
     )
     if clamped_position == previous_position:
         return
@@ -354,6 +356,16 @@ func constrain_player_to_camera_bounds() -> void:
             },
         },
     })
+
+
+func clamp_with_boundary_snap(value: float, minimum: float, maximum: float) -> float:
+    var clamped_value := clampf(value, minimum, maximum)
+    if clamped_value <= minimum + player_boundary_snap_epsilon:
+        return minimum
+    if clamped_value >= maximum - player_boundary_snap_epsilon:
+        return maximum
+
+    return clamped_value
 
 
 func _physics_process(delta: float) -> void:
@@ -426,6 +438,7 @@ func load_level(level_id: String, spawn_id: String = "default") -> bool:
     spawn_player(spawn_id)
     spawn_enemies()
     reapply_discovered_hidden_marker_visuals()
+    reapply_collected_collectible_visuals()
     trace_recorder.call("configure", current_level_id, replay_fps)
     trace_recorder.call("record_event", "level.loaded", {
         "level_id": current_level_id,
@@ -1723,6 +1736,7 @@ func check_collectible_pickups() -> void:
 
         var item_id := String(payload.get("item_id", collectible_id))
         collected_collectible_ids[collectible_id] = true
+        remove_collected_collectible_visual(collectible_id)
         trace_recorder.call("record_player_event", "collectible.collected", {
             "level_id": current_level_id,
             "player": get_player_trace(),
@@ -1731,7 +1745,30 @@ func check_collectible_pickups() -> void:
                 "item_id": item_id,
             },
         })
+        sync_inventory_overlay("collectible.collected", true)
+        sync_hud_overlay("collectible.collected", true)
         acquire_item(item_id, collectible_id)
+        return
+
+
+func reapply_collected_collectible_visuals() -> void:
+    for collectible_id in collected_collectible_ids.keys():
+        remove_collected_collectible_visual(String(collectible_id))
+
+
+func remove_collected_collectible_visual(collectible_id: String) -> void:
+    if current_level == null or collectible_id == "":
+        return
+
+    for marker in current_level.get_tree().get_nodes_in_group("collectible_marker"):
+        if not current_level.is_ancestor_of(marker):
+            continue
+        if String(marker.get("collectible_id")) != collectible_id:
+            continue
+
+        marker.visible = false
+        if marker.has_node("Visual"):
+            marker.get_node("Visual").visible = false
         return
 
 

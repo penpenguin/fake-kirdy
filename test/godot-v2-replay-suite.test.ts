@@ -269,6 +269,7 @@ describe('Godot v2 replay suite workflow', () => {
     expect(byId.get('tutorial_no_edge_fall_path')).toMatchObject({
       replay_path: 'res://tests/replays/tutorial_no_edge_fall_path.json',
       expected_outcome: 'replay.max_frames_reached',
+      expected_events: ['player.boundary.clamped'],
       forbidden_events: tutorialForbiddenEvents,
       forbidden_event_payloads: tutorialForbiddenEventPayloads,
     });
@@ -318,6 +319,35 @@ describe('Godot v2 replay suite workflow', () => {
     expect(readReplay('sword_z_wall_collision.json').frames?.some((frame) => frame.actions?.use_ability)).toBe(true);
   });
 
+  it('adds a controller lab double-jump replay that proves third jump rejection', () => {
+    const suite = JSON.parse(readFileSync(suitePath, 'utf8')) as {
+      replays?: Array<{
+        id?: string;
+        replay_path?: string;
+        expected_outcome?: string;
+        expected_events?: string[];
+        expected_event_sequence?: ExpectedEventSequenceItem[];
+        tags?: string[];
+      }>;
+    };
+    const byId = new Map(suite.replays?.map((replay) => [replay.id, replay]));
+
+    expect(byId.get('controller_lab_double_jump')).toMatchObject({
+      replay_path: 'res://tests/replays/controller_lab_double_jump.json',
+      expected_outcome: 'finished',
+      expected_events: ['player.jump.started', 'player.jump.rejected', 'player.landed'],
+      expected_event_sequence: [
+        { event_type: 'player.jump.started', payload: { jump_kind: 'ground' } },
+        { event_type: 'player.jump.started', payload: { jump_kind: 'air' } },
+        { event_type: 'player.jump.rejected', payload: { reason: 'air_jump_exhausted' } },
+        { event_type: 'player.landed' },
+      ],
+      tags: expect.arrayContaining(['controller', 'movement', 'double-jump', 'trace']),
+    });
+    const replay = readReplay('controller_lab_double_jump.json');
+    expect(replay.frames?.filter((frame) => frame.actions?.jump === true).map((frame) => frame.frame)).toEqual([12, 42, 72]);
+  });
+
   it('provides a replay suite runner that can list the configured suite without Godot', () => {
     const output = execFileSync('node', ['scripts/run-godot-replay-suite.mjs', '--list'], {
       cwd: repoRoot,
@@ -337,6 +367,7 @@ describe('Godot v2 replay suite workflow', () => {
     expect(listed.replays?.map((replay) => replay.id)).toContain('pause_settings_flow');
     expect(listed.replays?.map((replay) => replay.id)).toContain('virtual_controls_touch_mode');
     expect(listed.replays?.map((replay) => replay.id)).toContain('controller_lab_jump');
+    expect(listed.replays?.map((replay) => replay.id)).toContain('controller_lab_double_jump');
     expect(listed.replays?.map((replay) => replay.id)).toContain('revive_room_revive_then_game_over');
     expect(listed.replays?.map((replay) => replay.id)).toContain('game_over_restart_option');
     expect(listed.replays?.map((replay) => replay.id)).toContain('results_scene_continue');

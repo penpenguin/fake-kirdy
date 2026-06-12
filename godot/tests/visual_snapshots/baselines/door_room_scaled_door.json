@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "snapshot_id": "door_room_scaled_door",
+  "content_hash": "1b2b251d310df415505bb4faa3848792b73683199401658df500ef3b9d015f00",
+  "replay_path": "godot/tests/replays/door_to_goal.json",
+  "frame": 10,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "door_scale",
+    "hud"
+  ],
+  "required_scene_paths": [
+    "godot/levels/door_room.tscn",
+    "godot/scenes/ui/HudOverlay.tscn",
+    "godot/scripts/level/markers/DoorMarker.gd"
+  ],
+  "required_resource_paths": [
+    "godot/resources/assets/images/ui/door-marker.webp"
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "scene_path": "res://levels/controller_lab.tscn",
+  "level_id": "controller_lab",
+  "fps": 60,
+  "max_frames": 180,
+  "frames": [
+    {
+      "frame": 0,
+      "actions": {
+        "move_right": true,
+        "jump": false
+      }
+    },
+    {
+      "frame": 12,
+      "actions": {
+        "jump": true
+      }
+    },
+    {
+      "frame": 24,
+      "actions": {
+        "jump": false
+      }
+    },
+    {
+      "frame": 42,
+      "actions": {
+        "jump": true
+      }
+    },
+    {
+      "frame": 54,
+      "actions": {
+        "jump": false
+      }
+    },
+    {
+      "frame": 72,
+      "actions": {
+        "jump": true
+      }
+    },
+    {
+      "frame": 78,
+      "actions": {
+        "jump": false
+      }
+    },
+    {
+      "frame": 132,
+      "actions": {
+        "move_right": false
+      }
+    }
+  ]
+}

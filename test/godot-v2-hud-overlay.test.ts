@@ -11,7 +11,7 @@ const readGodotFile = (relativePath: string): string =>
   readFileSync(join(godotRoot, relativePath), 'utf8');
 
 describe('Godot v2 HUD overlay', () => {
-  it('adds a minimal mainline HUD for HP, ability, items, score, level, and outcome', () => {
+  it('adds a polished in-run HUD for HP, ability, items, score, level, and outcome', () => {
     const scriptPath = join(godotRoot, 'scripts', 'ui', 'HudOverlay.gd');
     const scenePath = join(godotRoot, 'scenes', 'ui', 'HudOverlay.tscn');
 
@@ -33,8 +33,24 @@ describe('Godot v2 HUD overlay', () => {
     expect(script).toContain('ObjectiveLabel');
     expect(script).toContain('CooldownLabel');
     expect(script).toContain('StatusLabel');
+    expect(script).toContain('HpBar');
+    expect(script).toContain('AbilityChip');
+    expect(script).toContain('ItemsChip');
+    expect(script).toContain('ScoreChip');
+    expect(script).toContain('OutcomeBadge');
+    expect(script).toContain('format_item_progress');
+    expect(script).toContain('get_hp_ratio');
+    expect(script).toContain('apply_hud_theme');
     expect(script).toContain('get_readable_outcome_label');
-    expect(scene).toContain('custom_minimum_size = Vector2(360, 188)');
+    expect(scene).toContain('custom_minimum_size = Vector2(520, 132)');
+    expect(scene).toContain('theme_override_styles/panel');
+    expect(scene).toContain('TopRow');
+    expect(scene).toContain('BottomRow');
+    expect(scene).toContain('HpBar');
+    expect(scene).toContain('AbilityChip');
+    expect(scene).toContain('ItemsChip');
+    expect(scene).toContain('ScoreChip');
+    expect(scene).toContain('OutcomeBadge');
     expect(scene).toContain('ObjectiveLabel');
     expect(scene).toContain('CooldownLabel');
     expect(scene).toContain('StatusLabel');
@@ -44,6 +60,17 @@ describe('Godot v2 HUD overlay', () => {
     expect(scene).toContain('ItemsLabel');
     expect(scene).toContain('ScoreLabel');
     expect(scene).toContain('OutcomeLabel');
+  });
+
+  it('documents the upgraded HUD visual contract', () => {
+    const docsPath = join(repoRoot, 'docs', 'godot-v2', 'hud-overlay.md');
+    const docs = readFileSync(docsPath, 'utf8');
+
+    expect(docs).toContain('polished in-run HUD');
+    expect(docs).toContain('HP bar');
+    expect(docs).toContain('ability chip');
+    expect(docs).toContain('item progress');
+    expect(docs).toContain('visual snapshot');
   });
 
   it('syncs GameSession state into the HUD and trace stream', () => {

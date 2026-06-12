@@ -54,7 +54,30 @@ describe('Godot v2 player controller slice', () => {
     expect(source).toContain('jump_cut_multiplier');
     expect(source).toContain('hover_gravity_scale');
     expect(source).toContain('hover_max_fall_speed');
+    expect(source).toContain('max_air_jumps');
+    expect(source).toContain('air_jumps_remaining');
+    expect(source).toContain('can_consume_air_jump');
+    expect(source).toContain('player.jump.rejected');
     expect(source).toContain('trace_event');
+  });
+
+  it('defines a focused replay fixture for double jump and third-jump rejection', () => {
+    const replayPath = join(godotRoot, 'tests', 'replays', 'controller_lab_double_jump.json');
+
+    expect(existsSync(replayPath)).toBe(true);
+
+    const replay = JSON.parse(readFileSync(replayPath, 'utf8')) as {
+      scene_path?: string;
+      level_id?: string;
+      max_frames?: number;
+      frames?: Array<{ frame?: number; actions?: Record<string, boolean> }>;
+    };
+    const jumpPressFrames = replay.frames?.filter((frame) => frame.actions?.jump === true).map((frame) => frame.frame) ?? [];
+
+    expect(replay.scene_path).toBe('res://levels/controller_lab.tscn');
+    expect(replay.level_id).toBe('controller_lab');
+    expect(replay.max_frames).toBeGreaterThanOrEqual(150);
+    expect(jumpPressFrames).toEqual([12, 42, 72]);
   });
 
   it('adds player and controller lab scenes without RigidBody2D', () => {
