@@ -196,6 +196,6 @@ The inhale pull effect also has a runtime fallback. `PlayerController.show_inhal
 
 `central_hub_dead_end_max_health` now also validates dead-end exploration completion. `HealMarker.dead_end_id` marks a heal reward as a dead-end completion target, `GameSession.complete_dead_end()` records `dead_end.completed`, and `MapOverlay.gd` renders completed dead-end map features with a dedicated square marker color.
 
-`mirror_to_goal_sanctum_finish` now validates the canonical goal-door completion controller. `goal_sanctum.tscn` uses `GoalDoorController.gd`, which preserves `GoalMarker` semantics while emitting `goal.door.entered`; that trace and `run.finished` both carry time, frame, score, and remaining-life bonus metrics.
+`sky_generated_goal_path` now validates the canonical goal-door completion controller through the migrated sky hub, while `mirror_to_goal_sanctum_locked_without_keystone` proves the old direct mirror shortcut is locked until the cave Keystone is collected. `goal_sanctum.tscn` uses `GoalDoorController.gd`, which preserves `GoalMarker` semantics while emitting `goal.door.entered`; that trace and `run.finished` both carry time, frame, score, and remaining-life bonus metrics.
 
 The focused replay suite now includes `flying_spit_projectile_hit`, `forest_reliquary_locked_without_key`, and `forest_reliquary_key_unlocks_door`. `flying_combat_room.tscn` has a second target enemy for spit projectile validation, and `forest_reliquary.tscn` has a `door_check` spawn so the item lock can be tested before collecting `forest-keystone`.

@@ -1,8 +1,8 @@
 {
   "version": 1,
   "snapshot_id": "level_terrain_goal_sanctum",
-  "content_hash": "67bab31981bda4e4eb90c5eeb38d20bac1f56171cad565da6410666401ced2b9",
-  "replay_path": "godot/tests/replays/mirror_to_goal_sanctum_finish.json",
+  "content_hash": "e3fa9021d6ceae5695fb4b6079ed0b0fc13d8650f462249fdb6b8ee830529b6f",
+  "replay_path": "godot/tests/replays/sky_sanctum_to_goal_finish.json",
   "frame": 180,
   "viewport": {
     "width": 1280,

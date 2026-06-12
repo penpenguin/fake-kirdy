@@ -33,6 +33,12 @@ describe('Godot v2 HUD overlay', () => {
     expect(script).toContain('ObjectiveLabel');
     expect(script).toContain('CooldownLabel');
     expect(script).toContain('StatusLabel');
+    expect(script).toContain('layout_top_bar');
+    expect(script).toContain('HpIcon');
+    expect(script).toContain('AbilityIcon');
+    expect(script).toContain('ItemsIcon');
+    expect(script).toContain('ScoreIcon');
+    expect(script).toContain('StatusIcon');
     expect(script).toContain('HpBar');
     expect(script).toContain('AbilityChip');
     expect(script).toContain('ItemsChip');
@@ -42,10 +48,16 @@ describe('Godot v2 HUD overlay', () => {
     expect(script).toContain('get_hp_ratio');
     expect(script).toContain('apply_hud_theme');
     expect(script).toContain('get_readable_outcome_label');
-    expect(scene).toContain('custom_minimum_size = Vector2(520, 132)');
+    expect(scene).toContain('anchor_right = 1.0');
+    expect(scene).toContain('offset_bottom = 64.0');
+    expect(scene).toContain('custom_minimum_size = Vector2(960, 64)');
     expect(scene).toContain('theme_override_styles/panel');
-    expect(scene).toContain('TopRow');
-    expect(scene).toContain('BottomRow');
+    expect(scene).toContain('TopBarRow');
+    expect(scene).toContain('HpIcon');
+    expect(scene).toContain('AbilityIcon');
+    expect(scene).toContain('ItemsIcon');
+    expect(scene).toContain('ScoreIcon');
+    expect(scene).toContain('StatusIcon');
     expect(scene).toContain('HpBar');
     expect(scene).toContain('AbilityChip');
     expect(scene).toContain('ItemsChip');
@@ -66,7 +78,8 @@ describe('Godot v2 HUD overlay', () => {
     const docsPath = join(repoRoot, 'docs', 'godot-v2', 'hud-overlay.md');
     const docs = readFileSync(docsPath, 'utf8');
 
-    expect(docs).toContain('polished in-run HUD');
+    expect(docs).toContain('thin full-width top bar');
+    expect(docs).toContain('icon-like cues');
     expect(docs).toContain('HP bar');
     expect(docs).toContain('ability chip');
     expect(docs).toContain('item progress');

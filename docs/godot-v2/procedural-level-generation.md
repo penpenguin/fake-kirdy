@@ -14,6 +14,20 @@ npm run godot:procedural-levels -- --check
 
 `npm run check:godot` runs the `--check` form, so stale generated schema fails validation before Godot-specific checks run.
 
+## Stage authoring workflow
+
+Use the repository-owned data and validation loop when adding or changing playable stages. The goal is to make stage production reviewable from text files before relying on a manual Godot editor pass.
+
+### Add an authored stage
+
+1. Add or update the authored `.tscn` under `godot/levels/` using marker nodes for `PlayerSpawn`, `DoorMarker`, `EnemySpawn`, `HealMarker`, `CollectibleMarker`, `GoalMarker`, and `CameraBoundsMarker`.
+2. Give every visible representative-route `DoorMarker` a `door_role` such as `progress`, `return`, `locked_gate`, `shortcut`, `secret`, `goal`, or `side_room`, plus a `door_label` unless it is a plain return door.
+3. Register the stage in `godot/levels/level_catalog.source.json` and the canonical topology in `godot/levels/stage_manifest.json` when it belongs to the mainline graph.
+4. Regenerate or check derived data with `npm run godot:stage-manifest -- --check`, `npm run godot:catalog -- --check`, and `npm run godot:scene-lint`.
+5. Add a focused replay or static test when the stage changes progression, door locking, collectibles, hazards, enemies, or final route pacing.
+
+Generated procedural stages follow the same review principle: update manifest/schema data first, run `npm run godot:procedural-levels -- --check`, then prove runtime behavior with a replay fixture when the generated room behavior changes.
+
 ## Schema
 
 Each generated level entry contains:

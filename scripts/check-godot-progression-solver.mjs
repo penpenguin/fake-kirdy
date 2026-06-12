@@ -163,6 +163,7 @@ function solveProgression(graph, contract, startLevelId, finalLevelId, canonical
     abilities: new Set(),
     completed_levels: new Set(),
     defeated_enemy_groups: new Set(),
+    gameplay_beats: new Set(),
     path: [startLevelId],
   }, levelsById);
   const queue = [initialState];
@@ -201,8 +202,12 @@ function solveProgression(graph, contract, startLevelId, finalLevelId, canonical
         abilities: new Set(state.abilities),
         completed_levels: new Set(state.completed_levels),
         defeated_enemy_groups: new Set(state.defeated_enemy_groups),
+        gameplay_beats: new Set(state.gameplay_beats),
         path: [...state.path, targetLevel.id],
       }, levelsById);
+      if (hasExplicitDoorRequirements(door) || clusterRequirement(level, targetLevel, contract) !== null) {
+        nextState.gameplay_beats.add('locked_gate');
+      }
       const key = stateKey(nextState);
       if (!seen.has(key)) {
         seen.add(key);
@@ -220,9 +225,13 @@ function solveProgression(graph, contract, startLevelId, finalLevelId, canonical
 
 function collectLevelRewards(state, levelsById) {
   const level = levelsById.get(state.level_id);
+  if (String(level?.source ?? '').includes('procedural')) {
+    state.gameplay_beats.add('generated_route');
+  }
   for (const collectible of level?.collectibles ?? []) {
     if (collectible.item_id) {
       state.items.add(collectible.item_id);
+      state.gameplay_beats.add('collectible');
     }
   }
   for (const goal of level?.goals ?? []) {
@@ -232,11 +241,17 @@ function collectLevelRewards(state, levelsById) {
   }
   for (const groupId of level?.enemy_groups ?? []) {
     state.defeated_enemy_groups.add(groupId);
+    state.gameplay_beats.add('enemy');
   }
   for (const abilityType of level?.ability_rewards ?? []) {
     state.abilities.add(abilityType);
+    state.gameplay_beats.add('ability_reward');
   }
   return state;
+}
+
+function hasExplicitDoorRequirements(door) {
+  return Object.values(door.requirements ?? {}).some((value) => typeof value === 'string' && value.length > 0);
 }
 
 function missingDoorRequirements(state, fromLevel, targetLevel, door, contract, canonicalContractChecks) {
@@ -288,9 +303,29 @@ function validateProgression(graph, solverResult, contract, startLevelId, finalL
     return issues;
   }
   if (canonicalContractChecks) {
+    const transitionCount = Math.max((solverResult.solution.path?.length ?? 1) - 1, 0);
+    if (transitionCount < (contract.minimum_solution_transitions ?? 0)) {
+      addIssue(
+        issues,
+        contract,
+        'minimum_solution_transitions',
+        finalLevelId,
+        `Final solution has ${transitionCount} transition(s), expected at least ${contract.minimum_solution_transitions}.`,
+      );
+    }
     for (const itemId of contract.required_final_items ?? []) {
       if (!solverResult.solution.items.includes(itemId)) {
         addIssue(issues, contract, 'required_final_item_collected', finalLevelId, `Final solution did not collect ${itemId}.`);
+      }
+    }
+    for (const levelId of contract.required_solution_level_ids ?? []) {
+      if (!solverResult.solution.path.includes(levelId)) {
+        addIssue(issues, contract, 'required_solution_level_present', levelId, `Final solution did not visit ${levelId}.`);
+      }
+    }
+    for (const beat of contract.required_gameplay_beats ?? []) {
+      if (!solverResult.solution.gameplay_beats.includes(beat)) {
+        addIssue(issues, contract, 'required_gameplay_beat_present', finalLevelId, `Final solution is missing gameplay beat ${beat}.`);
       }
     }
   }
@@ -318,6 +353,7 @@ function serializeState(state) {
     abilities: [...state.abilities].sort(),
     completed_levels: [...state.completed_levels].sort(),
     defeated_enemy_groups: [...state.defeated_enemy_groups].sort(),
+    gameplay_beats: [...state.gameplay_beats].sort(),
   };
 }
 
@@ -328,6 +364,7 @@ function stateKey(state) {
     [...state.abilities].sort().join(','),
     [...state.completed_levels].sort().join(','),
     [...state.defeated_enemy_groups].sort().join(','),
+    [...state.gameplay_beats].sort().join(','),
   ].join('|');
 }
 

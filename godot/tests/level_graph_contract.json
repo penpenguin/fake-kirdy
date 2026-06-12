@@ -45,6 +45,13 @@
       "unlocks_cluster": "sky"
     }
   ],
+  "forbidden_goal_shortcuts": [
+    {
+      "from_level_id": "mirror_corridor",
+      "door_id": "mirror_corridor_to_goal_sanctum",
+      "required_keystone_item_id": "cave-keystone"
+    }
+  ],
   "rules": {
     "door_target_exists": {
       "severity": "error"
@@ -65,6 +72,9 @@
       "severity": "error"
     },
     "keystone_requirement_exists": {
+      "severity": "error"
+    },
+    "forbidden_goal_shortcut_locked": {
       "severity": "error"
     }
   }

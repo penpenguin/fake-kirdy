@@ -1,8 +1,8 @@
 {
   "version": 1,
   "snapshot_id": "result_overlay_finish",
-  "content_hash": "52d339165e4a8891b9ed245f74a4e611b526a84e685e7c00e2864a19b2a53bc5",
-  "replay_path": "godot/tests/replays/mirror_to_goal_sanctum_finish.json",
+  "content_hash": "d11f053c9c130ec460f69b0668198b07b123efb9bf3de889caa7f50956e7d538",
+  "replay_path": "godot/tests/replays/sky_sanctum_to_goal_finish.json",
   "frame": 200,
   "viewport": {
     "width": 1280,

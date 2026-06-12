@@ -39,16 +39,28 @@ describe('Godot progression solver', () => {
       final_level_id?: string;
       cluster_unlocks?: Record<string, string>;
       required_final_items?: string[];
+      minimum_solution_transitions?: number;
+      required_solution_level_ids?: string[];
+      required_gameplay_beats?: string[];
       rules?: Record<string, { severity?: string }>;
     };
     expect(contract.version).toBe(1);
     expect(contract.start_level_id).toBe('central_hub');
     expect(contract.final_level_id).toBe('labyrinth_132');
+    expect(contract.minimum_solution_transitions).toBeGreaterThanOrEqual(5);
+    expect(contract.required_solution_level_ids).toEqual(
+      expect.arrayContaining(['forest_reliquary', 'ice_reliquary', 'fire_reliquary', 'ruins_reliquary', 'labyrinth_132']),
+    );
+    expect(contract.required_gameplay_beats).toEqual(
+      expect.arrayContaining(['collectible', 'enemy', 'ability_reward', 'locked_gate', 'generated_route']),
+    );
     expect(contract.cluster_unlocks?.ice).toBe('forest-keystone');
     expect(contract.required_final_items).toEqual(
       expect.arrayContaining(['forest-keystone', 'ice-keystone', 'fire-keystone', 'cave-keystone']),
     );
     expect(contract.rules?.final_state_reachable?.severity).toBe('error');
+    expect(contract.rules?.minimum_solution_transitions?.severity).toBe('error');
+    expect(contract.rules?.required_gameplay_beat_present?.severity).toBe('error');
   });
 
   it('solves item-gated scene progression in order', () => {
@@ -276,11 +288,12 @@ spawn_id = "default"
     expect(result.status).toBe(0);
     const report = JSON.parse(result.stdout) as {
       failed_checks: unknown[];
-      solution?: { path: string[]; items: string[]; completed_levels: string[] };
+      solution?: { path: string[]; items: string[]; completed_levels: string[]; gameplay_beats: string[] };
       explored_state_count: number;
     };
     expect(report.failed_checks).toEqual([]);
     expect(report.explored_state_count).toBeGreaterThan(10);
+    expect((report.solution?.path.length ?? 0) - 1).toBeGreaterThanOrEqual(5);
     expect(report.solution?.path).toEqual(
       expect.arrayContaining(['central_hub', 'forest_reliquary', 'ice_reliquary', 'fire_reliquary', 'ruins_reliquary', 'labyrinth_132']),
     );
@@ -288,5 +301,8 @@ spawn_id = "default"
       expect.arrayContaining(['forest-keystone', 'ice-keystone', 'fire-keystone', 'cave-keystone']),
     );
     expect(report.solution?.completed_levels).toContain('labyrinth_132');
+    expect(report.solution?.gameplay_beats).toEqual(
+      expect.arrayContaining(['collectible', 'enemy', 'ability_reward', 'locked_gate', 'generated_route']),
+    );
   });
 });

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "hidden_discovery_feedback",
-  "content_hash": "0310be0006dbcbb5828b2e3038c459d53fc2e7f709a7e16b71a1a8fba7e6538e",
+  "content_hash": "f02d18ec04af375c75ae720604c6961ad8c3042a47b91d4a49186e0eef193a13",
   "replay_path": "godot/tests/replays/hidden_discovery_path.json",
   "frame": 25,
   "viewport": {

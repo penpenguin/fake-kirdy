@@ -445,6 +445,8 @@ func add_generated_doors(root: Node2D, entry: Dictionary, runtime_layout: Dictio
         door.position = get_generated_door_position(direction_name, runtime_layout)
         door.set_script(DoorMarkerScript)
         door.set("door_id", "%s_to_%s" % [String(entry.get("id", root.name)), target_level_id])
+        door.set("door_role", get_generated_door_role(direction_name, runtime_layout))
+        door.set("door_label", get_generated_door_label(target_level_id))
         door.set("target_level_id", target_level_id)
         door.set("target_spawn_id", get_generated_target_spawn_id(direction_name))
         door.set("trigger_radius", get_layout_number(runtime_layout, "safety", "door_trigger_radius", 48.0))
@@ -453,6 +455,20 @@ func add_generated_doors(root: Node2D, entry: Dictionary, runtime_layout: Dictio
         door.set("required_item_id", required_item_id)
         door.set("required_keystone_item_id", String(branch_rule.get("required_keystone_item_id", "")))
         root.add_child(door)
+
+
+func get_generated_door_role(direction: String, runtime_layout: Dictionary) -> String:
+    var branch_rule := get_generated_branch_exit_rule(runtime_layout, direction)
+    if String(branch_rule.get("required_item_id", "")) != "" or String(branch_rule.get("required_keystone_item_id", "")) != "":
+        return "locked_gate"
+    if direction == "west" or direction == "south":
+        return "return"
+
+    return "progress"
+
+
+func get_generated_door_label(target_level_id: String) -> String:
+    return String(target_level_id).replace("_", " ").to_pascal_case()
 
 
 func get_generated_branch_exit_rule(runtime_layout: Dictionary, direction: String) -> Dictionary:

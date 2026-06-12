@@ -4,6 +4,8 @@ class_name DoorMarker
 const DoorTexture = preload("res://resources/assets/images/ui/door-marker.webp")
 
 @export var door_id: String = "door"
+@export var door_role: String = "progress"
+@export var door_label: String = ""
 @export var target_level_id: String = ""
 @export var target_spawn_id: String = "default"
 @export var trigger_radius: float = 64.0
@@ -60,6 +62,8 @@ func to_level_marker() -> Dictionary:
             "y": global_position.y,
         },
         "payload": {
+            "door_role": door_role,
+            "door_label": door_label,
             "target_level_id": target_level_id,
             "target_spawn_id": target_spawn_id,
             "trigger_radius": trigger_radius,

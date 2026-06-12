@@ -168,9 +168,15 @@ describe('Godot v2 canonical stage manifest', () => {
       scripts?: Record<string, string>;
     };
     const catalogGenerator = readFileSync(join(repoRoot, 'scripts', 'generate-godot-level-catalog.mjs'), 'utf8');
+    const docs = readFileSync(join(repoRoot, 'docs', 'godot-v2', 'procedural-level-generation.md'), 'utf8');
 
     expect(packageJson.scripts?.['godot:stage-manifest']).toContain('scripts/check-godot-stage-manifest.mjs');
     expect(packageJson.scripts?.['check:godot']).toContain('godot:stage-manifest');
     expect(catalogGenerator).toContain('stage_manifest.json');
+    expect(docs).toContain('Stage authoring workflow');
+    expect(docs).toContain('Add an authored stage');
+    expect(docs).toContain('npm run godot:stage-manifest -- --check');
+    expect(docs).toContain('npm run godot:catalog -- --check');
+    expect(docs).toContain('npm run godot:scene-lint');
   });
 });

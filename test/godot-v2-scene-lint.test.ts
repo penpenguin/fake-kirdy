@@ -41,6 +41,7 @@ describe('Godot scene lint', () => {
     expect(contract.version).toBe(1);
     expect(contract.rules?.door_target_exists?.severity).toBe('error');
     expect(contract.rules?.door_target_spawn_exists?.severity).toBe('error');
+    expect(contract.rules?.door_role_required?.severity).toBe('error');
     expect(contract.rules?.ability_gate_requires_ability?.severity).toBe('error');
     expect(contract.rules?.door_goal_overlap?.severity).toBe('warning');
   });
@@ -119,6 +120,7 @@ required_ability_type = ""
         expect.arrayContaining([
           expect.objectContaining({ rule: 'door_target_exists' }),
           expect.objectContaining({ rule: 'door_target_spawn_exists' }),
+          expect.objectContaining({ rule: 'door_role_required' }),
           expect.objectContaining({ rule: 'ability_gate_requires_ability' }),
         ]),
       );
@@ -128,6 +130,64 @@ required_ability_type = ""
           expect.objectContaining({ rule: 'hazard_spawn_overlap', severity: 'warning' }),
           expect.objectContaining({ rule: 'enemy_spawn_distance', severity: 'warning' }),
         ]),
+      );
+    } finally {
+      rmSync(levelsDir, { recursive: true, force: true });
+    }
+  });
+
+  it('fails visible representative-route doors that do not explain their role', () => {
+    const levelsDir = mkdtempSync(join(tmpdir(), 'fake-kirdy-door-role-lint-'));
+    writeFileSync(
+      join(levelsDir, 'central_hub.tscn'),
+      `${sceneHeader}
+[node name="CentralHub" type="Node2D"]
+
+[node name="PlayerSpawn" type="Node2D" parent="."]
+position = Vector2(96, 368)
+script = ExtResource("1_spawn")
+spawn_id = "default"
+
+[node name="MysteryDoor" type="Node2D" parent="."]
+position = Vector2(260, 368)
+script = ExtResource("2_door")
+door_id = "hub_to_branch"
+target_level_id = "branch_room"
+target_spawn_id = "default"
+`,
+    );
+    writeFileSync(
+      join(levelsDir, 'branch_room.tscn'),
+      `${sceneHeader}
+[node name="BranchRoom" type="Node2D"]
+
+[node name="PlayerSpawn" type="Node2D" parent="."]
+position = Vector2(96, 368)
+script = ExtResource("1_spawn")
+spawn_id = "default"
+`,
+    );
+
+    try {
+      const result = spawnSync(
+        process.execPath,
+        ['scripts/check-godot-scene-lint.mjs', '--levels-dir', levelsDir, '--json'],
+        {
+          cwd: repoRoot,
+          encoding: 'utf8',
+        },
+      );
+
+      expect(result.status).toBe(1);
+      const report = JSON.parse(result.stdout) as {
+        failed_checks: { rule: string; level_id?: string; marker_id?: string }[];
+      };
+      expect(report.failed_checks).toContainEqual(
+        expect.objectContaining({
+          rule: 'door_role_required',
+          level_id: 'central_hub',
+          marker_id: 'hub_to_branch',
+        }),
       );
     } finally {
       rmSync(levelsDir, { recursive: true, force: true });

@@ -38,6 +38,7 @@ describe('Godot level graph', () => {
       final_level_id?: string;
       required_reachable_level_ids?: string[];
       cluster_keystone_order?: { item_id: string }[];
+      forbidden_goal_shortcuts?: Array<{ from_level_id: string; door_id: string; required_keystone_item_id: string }>;
       rules?: Record<string, { severity?: string }>;
     };
     expect(contract.version).toBe(1);
@@ -50,8 +51,14 @@ describe('Godot level graph', () => {
       'fire-keystone',
       'cave-keystone',
     ]);
+    expect(contract.forbidden_goal_shortcuts).toContainEqual({
+      from_level_id: 'mirror_corridor',
+      door_id: 'mirror_corridor_to_goal_sanctum',
+      required_keystone_item_id: 'cave-keystone',
+    });
     expect(contract.rules?.final_level_reachable?.severity).toBe('error');
     expect(contract.rules?.door_target_spawn_exists?.severity).toBe('error');
+    expect(contract.rules?.forbidden_goal_shortcut_locked?.severity).toBe('error');
   });
 
   it('extracts graph edges, requirements, collectibles, and final-level paths from scenes', () => {
@@ -233,6 +240,7 @@ spawn_id = "default"
       reachable_level_ids: string[];
       item_sources: Record<string, string[]>;
       requirement_index: Record<string, string[]>;
+      levels: Array<{ id: string; doors: Array<{ id: string; requirements: Record<string, string> }> }>;
     };
     expect(report.level_count).toBeGreaterThanOrEqual(150);
     expect(report.edge_count).toBeGreaterThanOrEqual(150);
@@ -243,5 +251,11 @@ spawn_id = "default"
     expect(report.reachable_level_ids).toEqual(expect.arrayContaining(['labyrinth_132', 'forest_reliquary']));
     expect(report.item_sources['forest-keystone']).toContain('forest_reliquary');
     expect(report.requirement_index['required_keystone_item_id:forest-keystone']).toContain('labyrinth_006');
+    expect(report.levels.find((level) => level.id === 'mirror_corridor')?.doors).toContainEqual(
+      expect.objectContaining({
+        id: 'mirror_corridor_to_goal_sanctum',
+        requirements: expect.objectContaining({ required_keystone_item_id: 'cave-keystone' }),
+      }),
+    );
   });
 });

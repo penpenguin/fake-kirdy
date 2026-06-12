@@ -368,6 +368,7 @@ function lintSceneLevels(levels, levelIndex, rules) {
   const issues = [];
   for (const level of levels) {
     lintDoors(level, levelIndex, rules, issues);
+    lintDoorRoles(level, rules, issues);
     lintAbilityGates(level, rules, issues);
     lintHiddenDiscovery(level, rules, issues);
     lintDoorGoalOverlap(level, rules, issues);
@@ -395,6 +396,32 @@ function lintDoors(level, levelIndex, rules, issues) {
         door,
         `Door targets spawn '${targetSpawnId}' missing from level '${targetLevelId}'.`,
       );
+    }
+  }
+}
+
+function lintDoorRoles(level, rules, issues) {
+  const rule = rules.door_role_required;
+  if (rule?.severity === 'off') {
+    return;
+  }
+  const representativeLevelIds = new Set(rule?.representative_level_ids ?? []);
+  if (representativeLevelIds.size > 0 && !representativeLevelIds.has(level.id) && options.levelsDir === null) {
+    return;
+  }
+  const allowedRoles = new Set(rule?.allowed_roles ?? []);
+  for (const door of level.marker_groups.door) {
+    if (door.props.hidden_until_discovered === true) {
+      continue;
+    }
+    const role = stringProp(door.props.door_role, '');
+    const label = stringProp(door.props.door_label, '');
+    if (role.length === 0 || (allowedRoles.size > 0 && !allowedRoles.has(role))) {
+      addIssue(issues, rules, 'door_role_required', level, door, 'Visible door must declare a valid door_role.');
+      continue;
+    }
+    if (label.length === 0 && role !== 'return') {
+      addIssue(issues, rules, 'door_role_required', level, door, 'Visible non-return door must declare a readable door_label.');
     }
   }
 }

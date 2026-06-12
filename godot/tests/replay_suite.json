@@ -364,7 +364,7 @@
       "id": "sky_generated_goal_path",
       "replay_path": "res://tests/replays/sky_sanctum_to_goal_finish.json",
       "expected_outcome": "complete",
-      "expected_events": ["door.entered", "goal.door.entered", "run.finished"],
+      "expected_events": ["door.entered", "goal.door.entered", "run.finished", "result.overlay.shown"],
       "tags": ["procedural", "sky", "door-chain", "goal"]
     },
     {
@@ -378,11 +378,14 @@
       "tags": ["procedural", "sky", "keystone", "door", "locked", "trace"]
     },
     {
-      "id": "mirror_to_goal_sanctum_finish",
-      "replay_path": "res://tests/replays/mirror_to_goal_sanctum_finish.json",
-      "expected_outcome": "complete",
-      "expected_events": ["goal.door.entered", "run.finished", "result.overlay.shown"],
-      "tags": ["goal-door", "result", "metrics", "trace"]
+      "id": "mirror_to_goal_sanctum_locked_without_keystone",
+      "replay_path": "res://tests/replays/mirror_to_goal_sanctum_locked_without_keystone.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["door.locked", "hud.updated"],
+      "expected_last_hud": {
+        "locked_door_reason": "missing_cluster_keystone:cave-keystone"
+      },
+      "tags": ["goal-door", "keystone", "locked", "trace"]
     },
     {
       "id": "terminal_generated_goal",

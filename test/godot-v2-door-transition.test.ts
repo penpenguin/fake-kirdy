@@ -15,11 +15,15 @@ describe('Godot v2 door transition and run outcome', () => {
     const source = readGodotFile('scripts/level/markers/DoorMarker.gd');
 
     expect(source).toContain('@export var door_id');
+    expect(source).toContain('@export var door_role');
+    expect(source).toContain('@export var door_label');
     expect(source).toContain('@export var target_level_id');
     expect(source).toContain('@export var target_spawn_id');
     expect(source).toContain('trigger_radius');
     expect(source).toContain('visual_target_size');
     expect(source).toContain('fit_visual_to_target_size');
+    expect(source).toContain('"door_role"');
+    expect(source).toContain('"door_label"');
     expect(source).not.toContain('visual.scale = Vector2(0.34, 0.34)');
   });
 

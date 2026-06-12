@@ -455,7 +455,7 @@ describe('Godot v2 gameplay completion backlog', () => {
     expect(session).toContain('goal.door.entered');
     expect(session).toContain('"score": calculate_total_score()');
     expect(session).toContain('"remaining_life_bonus": calculate_remaining_life_bonus()');
-    expect(suite.replays?.find((entry) => entry.id === 'mirror_to_goal_sanctum_finish')?.expected_events).toEqual(
+    expect(suite.replays?.find((entry) => entry.id === 'sky_generated_goal_path')?.expected_events).toEqual(
       expect.arrayContaining(['goal.door.entered', 'run.finished', 'result.overlay.shown']),
     );
   });

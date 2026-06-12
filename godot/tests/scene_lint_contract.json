@@ -9,6 +9,24 @@
     "door_target_spawn_exists": {
       "severity": "error"
     },
+    "door_role_required": {
+      "severity": "error",
+      "representative_level_ids": [
+        "central_hub",
+        "mirror_corridor",
+        "goal_sanctum",
+        "sky_sanctum"
+      ],
+      "allowed_roles": [
+        "progress",
+        "return",
+        "locked_gate",
+        "shortcut",
+        "secret",
+        "goal",
+        "side_room"
+      ]
+    },
     "ability_gate_requires_ability": {
       "severity": "error"
     },

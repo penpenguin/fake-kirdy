@@ -15,6 +15,21 @@
     "fire-keystone",
     "cave-keystone"
   ],
+  "minimum_solution_transitions": 5,
+  "required_solution_level_ids": [
+    "forest_reliquary",
+    "ice_reliquary",
+    "fire_reliquary",
+    "ruins_reliquary",
+    "labyrinth_132"
+  ],
+  "required_gameplay_beats": [
+    "collectible",
+    "enemy",
+    "ability_reward",
+    "locked_gate",
+    "generated_route"
+  ],
   "rules": {
     "level_graph_valid": {
       "severity": "error"
@@ -23,6 +38,15 @@
       "severity": "error"
     },
     "required_final_item_collected": {
+      "severity": "error"
+    },
+    "minimum_solution_transitions": {
+      "severity": "error"
+    },
+    "required_solution_level_present": {
+      "severity": "error"
+    },
+    "required_gameplay_beat_present": {
       "severity": "error"
     }
   }

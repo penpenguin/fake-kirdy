@@ -508,6 +508,7 @@ function validateGraph(input) {
   validateReachability(input, issues);
   validateBranchReturns(input, issues);
   validateKeystones(input, issues);
+  validateForbiddenGoalShortcuts(input, issues);
   return issues;
 }
 
@@ -574,6 +575,38 @@ function validateKeystones({ itemSources, requirementIndex, contract, canonicalC
     const requirementKey = `required_keystone_item_id:${entry.item_id}`;
     if (!Array.isArray(requirementIndex[requirementKey]) || requirementIndex[requirementKey].length === 0) {
       addIssue(issues, contract, 'keystone_requirement_exists', entry.cluster, null, `Missing requirement for ${entry.item_id}.`);
+    }
+  }
+}
+
+function validateForbiddenGoalShortcuts({ graph, contract, canonicalContractChecks }, issues) {
+  if (!canonicalContractChecks) {
+    return;
+  }
+  for (const shortcut of contract.forbidden_goal_shortcuts ?? []) {
+    const level = graph.levels_by_id.get(shortcut.from_level_id);
+    const door = level?.doors.find((candidate) => candidate.id === shortcut.door_id);
+    if (door === undefined) {
+      addIssue(
+        issues,
+        contract,
+        'forbidden_goal_shortcut_locked',
+        shortcut.from_level_id,
+        shortcut.door_id,
+        `Expected goal shortcut door '${shortcut.door_id}' to exist for lock validation.`,
+      );
+      continue;
+    }
+    const requiredKeystone = String(shortcut.required_keystone_item_id ?? '');
+    if (requiredKeystone !== '' && door.requirements?.required_keystone_item_id !== requiredKeystone) {
+      addIssue(
+        issues,
+        contract,
+        'forbidden_goal_shortcut_locked',
+        shortcut.from_level_id,
+        shortcut.door_id,
+        `Goal shortcut '${shortcut.door_id}' must require ${requiredKeystone}.`,
+      );
     }
   }
 }

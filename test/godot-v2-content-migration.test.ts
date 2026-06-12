@@ -153,8 +153,8 @@ describe('Godot v2 representative content migration', () => {
     expect(replay.frames?.some((frame) => frame.actions?.move_right)).toBe(true);
   });
 
-  it('adds a replay that reaches the migrated goal sanctum and finishes the run', () => {
-    const replayPath = join(godotRoot, 'tests', 'replays', 'mirror_to_goal_sanctum_finish.json');
+  it('adds a replay that proves the migrated goal shortcut is locked without the cave keystone', () => {
+    const replayPath = join(godotRoot, 'tests', 'replays', 'mirror_to_goal_sanctum_locked_without_keystone.json');
 
     expect(existsSync(replayPath)).toBe(true);
 
@@ -165,7 +165,7 @@ describe('Godot v2 representative content migration', () => {
     };
 
     expect(replay.start_level_id).toBe('mirror_corridor');
-    expect(replay.max_frames).toBeGreaterThanOrEqual(180);
+    expect(replay.max_frames).toBeGreaterThanOrEqual(90);
     expect(replay.frames?.some((frame) => frame.actions?.move_right)).toBe(true);
   });
 
@@ -217,7 +217,7 @@ describe('Godot v2 representative content migration', () => {
     expect(docs).toContain('heal_room');
     expect(docs).toContain('central_hub_to_heal_goal.json');
     expect(docs).toContain('ice_area_return_hub.json');
-    expect(docs).toContain('mirror_to_goal_sanctum_finish.json');
+    expect(docs).toContain('mirror_to_goal_sanctum_locked_without_keystone.json');
     expect(docs).toContain('sky_sanctum_to_goal_finish.json');
     expect(docs).toContain('labyrinth_001_return_forest.json');
     expect(docs).toContain('Phaser');

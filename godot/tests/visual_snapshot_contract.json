@@ -92,7 +92,7 @@
     },
     {
       "id": "result_overlay_finish",
-      "replay_path": "godot/tests/replays/mirror_to_goal_sanctum_finish.json",
+      "replay_path": "godot/tests/replays/sky_sanctum_to_goal_finish.json",
       "frame": 200,
       "baseline_path": "godot/tests/visual_snapshots/baselines/result_overlay_finish.json",
       "visual_tags": ["result_overlay"],
@@ -198,7 +198,7 @@
     },
     {
       "id": "level_terrain_goal_sanctum",
-      "replay_path": "godot/tests/replays/mirror_to_goal_sanctum_finish.json",
+      "replay_path": "godot/tests/replays/sky_sanctum_to_goal_finish.json",
       "frame": 180,
       "baseline_path": "godot/tests/visual_snapshots/baselines/level_terrain_goal_sanctum.json",
       "visual_tags": ["level_terrain"],

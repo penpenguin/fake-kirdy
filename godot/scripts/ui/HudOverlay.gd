@@ -2,29 +2,47 @@ extends Control
 class_name HudOverlay
 
 @onready var panel: Panel = $Panel
-@onready var level_label: Label = $Panel/TopRow/LevelLabel
-@onready var outcome_badge: Panel = $Panel/TopRow/OutcomeBadge
-@onready var outcome_label: Label = $Panel/TopRow/OutcomeBadge/OutcomeLabel
-@onready var hp_bar: ProgressBar = $Panel/MeterRow/HpBar
-@onready var hp_label: Label = $Panel/MeterRow/HpBar/HpLabel
-@onready var ability_chip: Panel = $Panel/BottomRow/AbilityChip
-@onready var ability_label: Label = $Panel/BottomRow/AbilityChip/AbilityLabel
-@onready var items_chip: Panel = $Panel/BottomRow/ItemsChip
-@onready var items_label: Label = $Panel/BottomRow/ItemsChip/ItemsLabel
-@onready var score_chip: Panel = $Panel/BottomRow/ScoreChip
-@onready var score_label: Label = $Panel/BottomRow/ScoreChip/ScoreLabel
-@onready var objective_label: Label = $Panel/ObjectiveLabel
-@onready var cooldown_label: Label = $Panel/StatusRow/CooldownLabel
-@onready var status_label: Label = $Panel/StatusRow/StatusLabel
+@onready var top_bar_row: HBoxContainer = $Panel/TopBarRow
+@onready var level_label: Label = $Panel/TopBarRow/LevelLabel
+@onready var hp_icon: ColorRect = $Panel/TopBarRow/HealthCluster/HpIcon
+@onready var hp_bar: ProgressBar = $Panel/TopBarRow/HealthCluster/HpBar
+@onready var hp_label: Label = $Panel/TopBarRow/HealthCluster/HpBar/HpLabel
+@onready var ability_chip: Panel = $Panel/TopBarRow/AbilityChip
+@onready var ability_icon: ColorRect = $Panel/TopBarRow/AbilityChip/AbilityIcon
+@onready var ability_label: Label = $Panel/TopBarRow/AbilityChip/AbilityLabel
+@onready var items_chip: Panel = $Panel/TopBarRow/ItemsChip
+@onready var items_icon: ColorRect = $Panel/TopBarRow/ItemsChip/ItemsIcon
+@onready var items_label: Label = $Panel/TopBarRow/ItemsChip/ItemsLabel
+@onready var score_chip: Panel = $Panel/TopBarRow/ScoreChip
+@onready var score_icon: ColorRect = $Panel/TopBarRow/ScoreChip/ScoreIcon
+@onready var score_label: Label = $Panel/TopBarRow/ScoreChip/ScoreLabel
+@onready var objective_label: Label = $Panel/TopBarRow/ObjectiveLabel
+@onready var cooldown_label: Label = $Panel/TopBarRow/CooldownLabel
+@onready var outcome_badge: Panel = $Panel/TopBarRow/OutcomeBadge
+@onready var status_icon: ColorRect = $Panel/TopBarRow/OutcomeBadge/StatusIcon
+@onready var outcome_label: Label = $Panel/TopBarRow/OutcomeBadge/OutcomeLabel
+@onready var status_label: Label = $Panel/TopBarRow/StatusLabel
 
 var hud_state: Dictionary = {}
 
 
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_IGNORE
-    custom_minimum_size = Vector2(520.0, 132.0)
+    layout_top_bar()
     apply_hud_theme()
     set_hud_state(hud_state)
+
+
+func layout_top_bar() -> void:
+    anchor_left = 0.0
+    anchor_top = 0.0
+    anchor_right = 1.0
+    anchor_bottom = 0.0
+    offset_left = 0.0
+    offset_top = 0.0
+    offset_right = 0.0
+    offset_bottom = 64.0
+    custom_minimum_size = Vector2(960.0, 64.0)
 
 
 func set_hud_state(next_state: Dictionary) -> void:
@@ -32,13 +50,13 @@ func set_hud_state(next_state: Dictionary) -> void:
     if not is_inside_tree():
         return
 
-    level_label.text = "LEVEL  %s" % String(hud_state.get("level_id", ""))
+    level_label.text = "LV  %s" % String(hud_state.get("level_id", ""))
     hp_bar.max_value = max(int(hud_state.get("max_hp", 0)), 1)
     hp_bar.value = clampi(int(hud_state.get("hp", 0)), 0, int(hp_bar.max_value))
     hp_label.text = "HP  %d / %d" % [int(hud_state.get("hp", 0)), int(hud_state.get("max_hp", 0))]
-    ability_label.text = "ABILITY  %s" % get_ability_label().to_upper()
-    items_label.text = "ITEMS  %s" % format_item_progress()
-    score_label.text = "SCORE  %d" % int(hud_state.get("score", 0))
+    ability_label.text = get_ability_label().to_upper()
+    items_label.text = format_item_progress()
+    score_label.text = "%d" % int(hud_state.get("score", 0))
     outcome_label.text = get_readable_outcome_label().to_upper()
     objective_label.text = String(hud_state.get("objective_text", "Reach the goal"))
     cooldown_label.text = "Z  %s" % get_cooldown_label()
@@ -51,6 +69,16 @@ func apply_hud_theme() -> void:
         outcome_badge.modulate = get_outcome_badge_color()
     if ability_chip != null:
         ability_chip.modulate = Color(0.94, 1.0, 1.0, 1.0) if get_ability_label() == "none" else Color(1.0, 0.93, 0.74, 1.0)
+    if hp_icon != null:
+        hp_icon.color = Color(0.95, 0.18, 0.28, 1.0)
+    if ability_icon != null:
+        ability_icon.color = Color(0.2, 0.62, 1.0, 1.0) if get_ability_label() == "none" else Color(1.0, 0.76, 0.18, 1.0)
+    if items_icon != null:
+        items_icon.color = Color(0.5, 0.95, 0.62, 1.0)
+    if score_icon != null:
+        score_icon.color = Color(1.0, 0.86, 0.25, 1.0)
+    if status_icon != null:
+        status_icon.color = get_outcome_badge_color()
 
 
 func get_summary_text() -> String:
