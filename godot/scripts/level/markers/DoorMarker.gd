@@ -32,7 +32,7 @@ func ensure_visual() -> void:
     var visual := Sprite2D.new()
     visual.name = "Visual"
     visual.texture = DoorTexture
-    visual.scale = Vector2(0.18, 0.18)
+    visual.scale = Vector2(0.34, 0.34)
     visual.z_index = 2
     visual.visible = not hidden_until_discovered
     add_child(visual)

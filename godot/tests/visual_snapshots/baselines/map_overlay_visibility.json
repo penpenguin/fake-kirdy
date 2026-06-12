@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "map_overlay_visibility",
-  "content_hash": "30ffa11efd0e06856d1cf988af7d7139691be20d407f2fcc9e3d57925c95e8ab",
+  "content_hash": "bfbbc7b8e73a41f147147a4d34f8b690a60815434fed00448aac988f18efd91a",
   "replay_path": "godot/tests/replays/map_toggle_visibility.json",
   "frame": 12,
   "viewport": {

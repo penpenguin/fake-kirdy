@@ -274,6 +274,15 @@ describe('Godot v2 replay suite workflow', () => {
     });
     expect(readReplay('tutorial_no_edge_fall_path.json').frames?.some((frame) => frame.actions?.move_left)).toBe(true);
 
+    expect(byId.get('tutorial_right_edge_recovery_path')).toMatchObject({
+      replay_path: 'res://tests/replays/tutorial_right_edge_recovery_path.json',
+      expected_outcome: 'replay.max_frames_reached',
+      expected_events: ['player.boundary.clamped'],
+      forbidden_events: tutorialForbiddenEvents,
+      forbidden_event_payloads: tutorialForbiddenEventPayloads,
+    });
+    expect(readReplay('tutorial_right_edge_recovery_path.json').frames?.some((frame) => frame.actions?.move_right)).toBe(true);
+
     expect(byId.get('tutorial_to_real_stage_path')?.expected_event_sequence).toEqual([
       { event_type: 'door.entered', payload: { target_level_id: 'central_hub' } },
       { event_type: 'level.loaded', payload: { level_id: 'central_hub' } },
@@ -283,6 +292,30 @@ describe('Godot v2 replay suite workflow', () => {
     expect(byId.get('tutorial_to_real_stage_path')?.forbidden_events).toEqual(tutorialForbiddenEvents);
     expect(byId.get('tutorial_to_real_stage_path')?.forbidden_event_payloads).toEqual(tutorialForbiddenEventPayloads);
     expect(readReplay('tutorial_to_real_stage_path.json').start_level_id).toBe('tutorial_room');
+  });
+
+  it('adds a focused Sword Z wall collision replay fixture', () => {
+    const suite = JSON.parse(readFileSync(suitePath, 'utf8')) as {
+      replays?: Array<{
+        id?: string;
+        replay_path?: string;
+        expected_outcome?: string;
+        expected_events?: string[];
+        forbidden_events?: string[];
+        tags?: string[];
+      }>;
+    };
+    const byId = new Map(suite.replays?.map((replay) => [replay.id, replay]));
+
+    expect(byId.get('sword_z_wall_collision')).toMatchObject({
+      replay_path: 'res://tests/replays/sword_z_wall_collision.json',
+      expected_outcome: 'replay.max_frames_reached',
+      expected_events: ['ability.used', 'ability.movement.blocked_by_wall'],
+      forbidden_events: ['replay.error', 'goal.door.entered', 'result.overlay.shown'],
+      tags: expect.arrayContaining(['combat', 'ability', 'sword', 'collision', 'wall']),
+    });
+    expect(readReplay('sword_z_wall_collision.json').initial_ability_type).toBe('sword');
+    expect(readReplay('sword_z_wall_collision.json').frames?.some((frame) => frame.actions?.use_ability)).toBe(true);
   });
 
   it('provides a replay suite runner that can list the configured suite without Godot', () => {

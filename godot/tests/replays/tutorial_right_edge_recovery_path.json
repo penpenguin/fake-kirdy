@@ -1,0 +1,21 @@
+{
+  "start_level_id": "tutorial_room",
+  "start_spawn_id": "right_edge_check",
+  "fps": 60,
+  "max_frames": 90,
+  "frames": [
+    {
+      "frame": 0,
+      "actions": {
+        "move_right": true,
+        "use_ability": false
+      }
+    },
+    {
+      "frame": 70,
+      "actions": {
+        "move_right": false
+      }
+    }
+  ]
+}

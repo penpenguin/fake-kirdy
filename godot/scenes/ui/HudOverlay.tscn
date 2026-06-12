@@ -5,49 +5,71 @@
 [node name="HudOverlay" type="Control"]
 offset_left = 640.0
 offset_top = 16.0
-offset_right = 944.0
-offset_bottom = 158.0
+offset_right = 1000.0
+offset_bottom = 204.0
+custom_minimum_size = Vector2(360, 188)
 mouse_filter = 2
 script = ExtResource("1_hud")
 
 [node name="LevelLabel" type="Label" parent="."]
 offset_left = 0.0
 offset_top = 0.0
-offset_right = 288.0
+offset_right = 360.0
 offset_bottom = 20.0
 text = "Level"
 
 [node name="HpLabel" type="Label" parent="."]
 offset_left = 0.0
 offset_top = 22.0
-offset_right = 288.0
+offset_right = 360.0
 offset_bottom = 42.0
 text = "HP"
 
 [node name="AbilityLabel" type="Label" parent="."]
 offset_left = 0.0
 offset_top = 44.0
-offset_right = 288.0
+offset_right = 360.0
 offset_bottom = 64.0
 text = "Ability"
 
 [node name="ItemsLabel" type="Label" parent="."]
 offset_left = 0.0
 offset_top = 66.0
-offset_right = 288.0
+offset_right = 360.0
 offset_bottom = 86.0
 text = "Items"
-
-[node name="OutcomeLabel" type="Label" parent="."]
-offset_left = 0.0
-offset_top = 110.0
-offset_right = 288.0
-offset_bottom = 130.0
-text = "Run"
 
 [node name="ScoreLabel" type="Label" parent="."]
 offset_left = 0.0
 offset_top = 88.0
-offset_right = 288.0
+offset_right = 360.0
 offset_bottom = 108.0
 text = "Score"
+
+[node name="OutcomeLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 110.0
+offset_right = 360.0
+offset_bottom = 130.0
+text = "Run"
+
+[node name="ObjectiveLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 132.0
+offset_right = 360.0
+offset_bottom = 152.0
+text = "Objective"
+
+[node name="CooldownLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 154.0
+offset_right = 180.0
+offset_bottom = 174.0
+text = "Z Cooldown"
+
+[node name="StatusLabel" type="Label" parent="."]
+offset_left = 184.0
+offset_top = 154.0
+offset_right = 360.0
+offset_bottom = 174.0
+text = "Status"

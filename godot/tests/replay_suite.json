@@ -250,6 +250,18 @@
       "tags": ["tutorial", "onboarding", "edge-guard", "trace"]
     },
     {
+      "id": "tutorial_right_edge_recovery_path",
+      "replay_path": "res://tests/replays/tutorial_right_edge_recovery_path.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["player.boundary.clamped"],
+      "forbidden_events": ["game.over", "player.defeated", "replay.error", "goal.door.entered", "result.overlay.shown"],
+      "forbidden_event_payloads": [
+        { "event_type": "run.finished", "payload": { "result_label": "complete" } },
+        { "event_type": "run.finished", "payload": { "outcome": "completed" } }
+      ],
+      "tags": ["tutorial", "onboarding", "edge-guard", "boundary", "trace"]
+    },
+    {
       "id": "tutorial_to_real_stage_path",
       "replay_path": "res://tests/replays/tutorial_to_real_stage_path.json",
       "expected_outcome": "replay.max_frames_reached",
@@ -277,6 +289,14 @@
         "target_enemy_hp": 3
       },
       "tags": ["combat", "enemy-attack", "difficulty", "hard", "trace"]
+    },
+    {
+      "id": "sword_z_wall_collision",
+      "replay_path": "res://tests/replays/sword_z_wall_collision.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["ability.used", "ability.movement.blocked_by_wall"],
+      "forbidden_events": ["replay.error", "goal.door.entered", "result.overlay.shown"],
+      "tags": ["combat", "ability", "sword", "collision", "wall", "trace"]
     },
     {
       "id": "central_hub_ice_gate_without_keystone",

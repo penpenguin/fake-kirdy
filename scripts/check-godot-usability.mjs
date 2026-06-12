@@ -74,6 +74,7 @@ for (const role of contract.required_color_roles) {
 }
 failures.push(...assertMinimumColorDistance(colorRoles, contract.min_color_distance));
 failures.push(...assertTutorialSizeRatios(contract.tutorial_size_ratio_checks));
+failures.push(...assertObjectVisibilityChecks(contract.object_visibility_checks));
 
 const result = {
   contract_path: relativeToRepo(contractPath),
@@ -83,6 +84,7 @@ const result = {
   checked_ui_scenes: contract.required_ui_scenes.length,
   checked_color_roles: colorRoles.size,
   checked_tutorial_size_ratios: contract.tutorial_size_ratio_checks.length,
+  checked_object_visibility: contract.object_visibility_checks.length,
   failed_checks: failures,
   status: failures.length === 0 ? 'passed' : 'failed',
 };
@@ -161,6 +163,83 @@ function assertTutorialSizeRatios(checks) {
   }
 
   return ratioFailures;
+}
+
+function assertObjectVisibilityChecks(checks) {
+  const visibilityFailures = [];
+
+  for (const check of checks) {
+    const source = check.subject_file === undefined ? null : readVisibilitySource(check.subject_file, visibilityFailures);
+    if (check.token !== undefined && (source === null || !source.includes(check.token))) {
+      visibilityFailures.push(`missing object visibility token ${check.token} in ${check.subject_file}`);
+    }
+
+    if (Number.isFinite(check.min_marker_size) && source !== null) {
+      const markerSize = parseNamedNumber(source, ['MIN_MARKER_SIZE', 'HAZARD_VISUAL_SIZE', 'FEATURE_MARKER_SIZE']);
+      if (markerSize === null || markerSize < check.min_marker_size) {
+        visibilityFailures.push(
+          `object visibility ${check.id} marker size ${formatNullableNumber(markerSize)} < ${check.min_marker_size}`,
+        );
+      }
+    }
+
+    if (Number.isFinite(check.min_label_size) && source !== null) {
+      const labelSize = parseNamedNumber(source, ['legend_label_font_size', 'MIN_LEGEND_LABEL_SIZE']);
+      if (labelSize === null || labelSize < check.min_label_size) {
+        visibilityFailures.push(
+          `object visibility ${check.id} label size ${formatNullableNumber(labelSize)} < ${check.min_label_size}`,
+        );
+      }
+    }
+
+    if (Array.isArray(check.required_feature_types)) {
+      const mapSource = source ?? readVisibilitySource('godot/scripts/ui/MapOverlay.gd', visibilityFailures);
+      if (mapSource === null) {
+        continue;
+      }
+      for (const featureType of check.required_feature_types) {
+        if (!mapSource.includes(`"${featureType}"`)) {
+          visibilityFailures.push(`object visibility ${check.id} missing feature marker type: ${featureType}`);
+        }
+      }
+    }
+  }
+
+  return visibilityFailures;
+}
+
+function readVisibilitySource(relativePath, failures) {
+  const filePath = resolve(repoRoot, relativePath);
+  if (!existsSync(filePath)) {
+    failures.push(`missing object visibility file: ${relativePath}`);
+    return null;
+  }
+  return readText(filePath);
+}
+
+function parseNamedNumber(source, names) {
+  for (const name of names) {
+    const escapedName = escapeRegExp(name);
+    const regexes = [
+      new RegExp(`(?:const\\s+)?${escapedName}\\s*:?\\s*(?:float|int)?\\s*=\\s*([-0-9.]+)`),
+      new RegExp(`@export\\s+var\\s+${escapedName}\\s*:?\\s*(?:float|int)?\\s*=\\s*([-0-9.]+)`),
+    ];
+    for (const regex of regexes) {
+      const match = source.match(regex);
+      if (match === null) {
+        continue;
+      }
+      const value = Number(match[1]);
+      if (Number.isFinite(value)) {
+        return value;
+      }
+    }
+  }
+  return null;
+}
+
+function formatNullableNumber(value) {
+  return value === null ? 'missing' : value.toFixed(3);
 }
 
 function parseFirstRectangleShapeArea(source) {
@@ -245,6 +324,7 @@ function readContract(path) {
     'required_ui_scenes',
     'required_visual_feedback_tokens',
     'required_color_roles',
+    'object_visibility_checks',
     'tutorial_size_ratio_checks',
   ]) {
     if (!Array.isArray(parsed[key]) || parsed[key].length === 0) {

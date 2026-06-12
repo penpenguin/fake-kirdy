@@ -30,6 +30,14 @@ describe('Godot v2 HUD overlay', () => {
     expect(script).toContain('items_collected');
     expect(script).toContain('score');
     expect(script).toContain('outcome');
+    expect(script).toContain('ObjectiveLabel');
+    expect(script).toContain('CooldownLabel');
+    expect(script).toContain('StatusLabel');
+    expect(script).toContain('get_readable_outcome_label');
+    expect(scene).toContain('custom_minimum_size = Vector2(360, 188)');
+    expect(scene).toContain('ObjectiveLabel');
+    expect(scene).toContain('CooldownLabel');
+    expect(scene).toContain('StatusLabel');
     expect(scene).toContain('HudOverlay.gd');
     expect(scene).toContain('HpLabel');
     expect(scene).toContain('AbilityLabel');

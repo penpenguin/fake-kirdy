@@ -26,7 +26,7 @@ func ensure_visual() -> void:
     var visual := Sprite2D.new()
     visual.name = "Visual"
     visual.texture = get_artifact_texture()
-    visual.scale = Vector2(0.16, 0.16)
+    visual.scale = Vector2(0.30, 0.30)
     visual.z_index = 2
     visual.visible = not hidden_until_discovered
     add_child(visual)

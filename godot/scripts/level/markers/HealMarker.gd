@@ -22,7 +22,7 @@ func ensure_visual() -> void:
     var visual := Sprite2D.new()
     visual.name = "Visual"
     visual.texture = HealTexture
-    visual.scale = Vector2(0.16, 0.16)
+    visual.scale = Vector2(0.30, 0.30)
     visual.z_index = 2
     add_child(visual)
 

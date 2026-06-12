@@ -132,6 +132,7 @@ var error_retry_fps: int = 60
 @export var settings_cycle_controls_action: StringName = &"settings_cycle_controls"
 @export var settings_cycle_difficulty_action: StringName = &"settings_cycle_difficulty"
 @export var exploration_tile_size: int = 32
+@export var player_boundary_padding: float = 36.0
 @export var map_overlay_enabled: bool = true
 @export var map_toggle_action: StringName = &"map_toggle"
 @export var door_interact_action: StringName = &"interact"
@@ -302,6 +303,59 @@ func reset_run_clock() -> void:
         trace_recorder.call("set_frame", run_frame)
 
 
+func constrain_player_to_camera_bounds() -> void:
+    if player == null or current_definition == null or current_definition.camera_bounds.is_empty():
+        return
+
+    var bounds: Dictionary = current_definition.camera_bounds[0]
+    var payload: Dictionary = bounds.get("payload", {})
+    var size_payload: Dictionary = payload.get("size", {})
+    var bounds_size := Vector2(float(size_payload.get("x", 0.0)), float(size_payload.get("y", 0.0)))
+    if bounds_size.x <= 0.0 or bounds_size.y <= 0.0:
+        return
+
+    var center := dictionary_to_vector2(bounds.get("position", {}))
+    var min_position := center - bounds_size * 0.5 + Vector2(player_boundary_padding, player_boundary_padding)
+    var max_position := center + bounds_size * 0.5 - Vector2(player_boundary_padding, player_boundary_padding)
+    var previous_position: Vector2 = player.global_position
+    var clamped_position := Vector2(
+        clampf(previous_position.x, min_position.x, max_position.x),
+        clampf(previous_position.y, min_position.y, max_position.y)
+    )
+    if clamped_position == previous_position:
+        return
+
+    player.global_position = clamped_position
+    if not is_equal_approx(clamped_position.x, previous_position.x):
+        player.velocity.x = 0.0
+    if not is_equal_approx(clamped_position.y, previous_position.y):
+        player.velocity.y = 0.0
+
+    trace_recorder.call("record_player_event", "player.boundary.clamped", {
+        "level_id": current_level_id,
+        "player": get_player_trace(),
+        "payload": {
+            "bounds_id": String(bounds.get("id", "")),
+            "from": {
+                "x": previous_position.x,
+                "y": previous_position.y,
+            },
+            "to": {
+                "x": clamped_position.x,
+                "y": clamped_position.y,
+            },
+            "min": {
+                "x": min_position.x,
+                "y": min_position.y,
+            },
+            "max": {
+                "x": max_position.x,
+                "y": max_position.y,
+            },
+        },
+    })
+
+
 func _physics_process(delta: float) -> void:
     if outcome == "error":
         check_error_actions()
@@ -322,6 +376,7 @@ func _physics_process(delta: float) -> void:
     run_frame += 1
     run_time_ms = int(round(float(run_frame) * 1000.0 / float(replay_fps)))
     trace_recorder.call("set_frame", run_frame)
+    constrain_player_to_camera_bounds()
     if mark_player_tile_explored():
         sync_map_overlay("player.moved", true)
         write_persistent_state()
@@ -833,6 +888,8 @@ func get_ability_profile(ability_type: String) -> Dictionary:
                 "half_height": 52.0,
                 "cooldown_ms": 180,
                 "knockback": 18.0,
+                "movement_effect": "lunge",
+                "movement_impulse": 40.0,
                 "attack_type": "melee",
             }
         "spark":
@@ -965,6 +1022,11 @@ func apply_ability_movement(ability_type: String, profile: Dictionary) -> void:
             var facing := get_player_facing_direction()
             player.global_position += Vector2(facing * impulse, 0.0)
             player.velocity.x = facing * max(abs(player.velocity.x), impulse * 6.0)
+        "lunge":
+            var facing := get_player_facing_direction()
+            if not attempt_ability_motion(ability_type, movement_effect, Vector2(facing * impulse, 0.0), start_position):
+                return
+            player.velocity.x = facing * max(abs(player.velocity.x), impulse * 4.0)
         _:
             return
 
@@ -985,6 +1047,38 @@ func apply_ability_movement(ability_type: String, profile: Dictionary) -> void:
             },
         },
     })
+
+
+func attempt_ability_motion(ability_type: String, movement_effect: String, motion: Vector2, start_position: Vector2) -> bool:
+    if motion == Vector2.ZERO:
+        return true
+
+    if player.has_method("test_move") and player.test_move(player.global_transform, motion):
+        trace_recorder.call("record_player_event", "ability.movement.blocked_by_wall", {
+            "level_id": current_level_id,
+            "player": get_player_trace(),
+            "payload": {
+                "ability_type": ability_type,
+                "movement_effect": movement_effect,
+                "attempted_motion": {
+                    "x": motion.x,
+                    "y": motion.y,
+                },
+                "from": {
+                    "x": start_position.x,
+                    "y": start_position.y,
+                },
+                "to": {
+                    "x": player.global_position.x,
+                    "y": player.global_position.y,
+                },
+                "reason": "solid_collision",
+            },
+        })
+        return false
+
+    player.global_position += motion
+    return true
 
 
 func find_enemy_targets(profile: Dictionary, ignored_enemy: Node = null) -> Array:

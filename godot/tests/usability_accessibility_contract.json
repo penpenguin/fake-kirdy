@@ -49,6 +49,27 @@
     "undiscovered_feature_color",
     "dead_end_completed_color"
   ],
+  "object_visibility_checks": [
+    {
+      "id": "world_hazard_marker_visual",
+      "subject_file": "godot/scripts/level/markers/HazardMarker.gd",
+      "token": "HazardVisual",
+      "min_marker_size": 24
+    },
+    {
+      "id": "map_feature_marker_types_are_distinct",
+      "subject_file": "godot/scripts/ui/MapOverlay.gd",
+      "token": "FEATURE_MARKER_STYLES",
+      "required_feature_types": ["door", "goal", "collectible", "heal", "hazard", "ability_gate", "dead_end"],
+      "min_marker_size": 6
+    },
+    {
+      "id": "map_overlay_legend_labels",
+      "subject_file": "godot/scripts/ui/MapOverlay.gd",
+      "token": "draw_feature_legend",
+      "min_label_size": 11
+    }
+  ],
   "tutorial_size_ratio_checks": [
     {
       "id": "tutorial_enemy_to_player_collision",
@@ -60,26 +81,26 @@
     {
       "id": "tutorial_collectible_marker_scale",
       "subject_file": "godot/scripts/level/markers/CollectibleMarker.gd",
-      "min_scale": 0.14,
-      "max_scale": 0.22
+      "min_scale": 0.26,
+      "max_scale": 0.4
     },
     {
       "id": "tutorial_heal_marker_scale",
       "subject_file": "godot/scripts/level/markers/HealMarker.gd",
-      "min_scale": 0.14,
-      "max_scale": 0.22
+      "min_scale": 0.26,
+      "max_scale": 0.4
     },
     {
       "id": "tutorial_door_marker_scale",
       "subject_file": "godot/scripts/level/markers/DoorMarker.gd",
-      "min_scale": 0.14,
-      "max_scale": 0.24
+      "min_scale": 0.3,
+      "max_scale": 0.45
     },
     {
       "id": "tutorial_goal_marker_scale",
       "subject_file": "godot/scripts/level/markers/GoalMarker.gd",
-      "min_scale": 0.14,
-      "max_scale": 0.24
+      "min_scale": 0.75,
+      "max_scale": 1.2
     }
   ],
   "min_color_distance": 0.18

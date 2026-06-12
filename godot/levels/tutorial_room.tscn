@@ -30,6 +30,17 @@ position = Vector2(96, 368)
 script = ExtResource("1_spawn")
 spawn_id = "default"
 
+[node name="PlayerSpawnRightEdgeCheck" type="Node2D" parent="."]
+position = Vector2(910, 368)
+script = ExtResource("1_spawn")
+spawn_id = "right_edge_check"
+
+[node name="PlayerSpawnSwordWallCheck" type="Node2D" parent="."]
+position = Vector2(468, 368)
+script = ExtResource("1_spawn")
+spawn_id = "sword_wall_check"
+facing = 1
+
 [node name="EnemySpawnMarker" type="Node2D" parent="."]
 position = Vector2(200, 400)
 script = ExtResource("2_enemy")
