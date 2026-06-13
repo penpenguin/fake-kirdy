@@ -162,15 +162,15 @@ const writeFixtureContract = (path: string, tracePath: string, bookmarksPath: st
 };
 
 describe('Godot playtest report', () => {
-  it('defines a playtest report command, contract, generated artifact policy, and static gate hook', () => {
+  it('defines a playtest report command, contract, ignored artifact policy, and static gate hook', () => {
     const scripts = readPackageScripts();
+    const gitignore = readFileSync(join(repoRoot, '.gitignore'), 'utf8');
 
     expect(scripts['godot:playtest-report']).toBe('node scripts/generate-godot-playtest-report.mjs');
     expect(scripts['check:godot']).toContain('godot:playtest-report -- --check');
     expect(existsSync(join(repoRoot, 'scripts', 'generate-godot-playtest-report.mjs'))).toBe(true);
     expect(existsSync(join(repoRoot, 'godot', 'tests', 'playtest_report_contract.json'))).toBe(true);
-    expect(existsSync(join(repoRoot, 'reports', 'godot-playtest-report.json'))).toBe(false);
-    expect(existsSync(join(repoRoot, 'reports', 'godot-playtest-report.md'))).toBe(false);
+    expect(gitignore.split(/\r?\n/)).toContain('reports/');
   });
 
   it('turns a manual trace and issue bookmark into JSON, Markdown, and generated task text', () => {

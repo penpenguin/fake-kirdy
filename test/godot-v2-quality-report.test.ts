@@ -35,12 +35,13 @@ const writeFixtureContract = (path: string, outJson: string, outMd: string, chec
 };
 
 describe('Godot quality report', () => {
-  it('defines a quality report command, contract, generated artifact policy, and static gate hook', () => {
+  it('defines a quality report command, contract, ignored artifact policy, and static gate hook', () => {
     const scripts = readPackageScripts();
     const contract = JSON.parse(readFileSync(join(repoRoot, 'godot', 'tests', 'quality_report_contract.json'), 'utf8')) as {
       required_check_ids?: string[];
       checks?: { id: string }[];
     };
+    const gitignore = readFileSync(join(repoRoot, '.gitignore'), 'utf8');
 
     expect(scripts['godot:quality-report']).toBe('node scripts/generate-godot-quality-report.mjs');
     expect(scripts['check:godot']).toContain('godot:quality-report -- --check');
@@ -49,8 +50,7 @@ describe('Godot quality report', () => {
     expect(contract.checks?.map((check) => check.id)).not.toContain('web-smoke');
     expect(existsSync(join(repoRoot, 'scripts', 'generate-godot-quality-report.mjs'))).toBe(true);
     expect(existsSync(join(repoRoot, 'godot', 'tests', 'quality_report_contract.json'))).toBe(true);
-    expect(existsSync(join(repoRoot, 'reports', 'godot-quality-report.json'))).toBe(false);
-    expect(existsSync(join(repoRoot, 'reports', 'godot-quality-report.md'))).toBe(false);
+    expect(gitignore.split(/\r?\n/)).toContain('reports/');
   });
 
   it('merges source reports into a single failed check list and Markdown summary', () => {
