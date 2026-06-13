@@ -1,7 +1,7 @@
 extends Control
 class_name HudOverlay
 
-const HUD_SEMANTIC_LABELS := ["HEALTH", "ABILITY", "ITEMS", "SCORE", "OBJECTIVE", "ATTACK", "STATUS"]
+const HUD_SEMANTIC_LABELS := ["HEALTH", "ABILITY", "ITEMS", "SCORE", "OBJECTIVE", "ATTACK", "ORBS"]
 
 @onready var panel: Panel = $Panel
 @onready var top_bar_row: HBoxContainer = $Panel/TopBarRow
@@ -23,17 +23,17 @@ const HUD_SEMANTIC_LABELS := ["HEALTH", "ABILITY", "ITEMS", "SCORE", "OBJECTIVE"
 @onready var score_icon: ColorRect = $Panel/TopBarRow/ScoreChip/ScoreIcon
 @onready var score_caption: Label = $Panel/TopBarRow/ScoreChip/ScoreCaption
 @onready var score_label: Label = $Panel/TopBarRow/ScoreChip/ScoreLabel
+@onready var orb_caption: Label = $Panel/TopBarRow/OrbChip/OrbCaption
+@onready var orb_label: Label = $Panel/TopBarRow/OrbChip/OrbLabel
+@onready var orb_slots: HBoxContainer = $Panel/TopBarRow/OrbChip/OrbSlots
 @onready var objective_caption: Label = $Panel/TopBarRow/ObjectiveChip/ObjectiveCaption
 @onready var objective_label: Label = $Panel/TopBarRow/ObjectiveChip/ObjectiveLabel
 @onready var attack_caption: Label = $Panel/TopBarRow/AttackChip/AttackCaption
 @onready var cooldown_label: Label = $Panel/TopBarRow/AttackChip/CooldownLabel
-@onready var outcome_badge: Panel = $Panel/TopBarRow/OutcomeBadge
-@onready var status_icon: ColorRect = $Panel/TopBarRow/OutcomeBadge/StatusIcon
-@onready var outcome_label: Label = $Panel/TopBarRow/OutcomeBadge/OutcomeLabel
-@onready var status_caption: Label = $Panel/TopBarRow/StatusChip/StatusCaption
-@onready var status_label: Label = $Panel/TopBarRow/StatusChip/StatusLabel
 
 var hud_state: Dictionary = {}
+var acquired_orb_color: Color = Color(0.6, 0.92, 1.0, 1.0)
+var missing_orb_silhouette_color: Color = Color(0.25, 0.32, 0.38, 0.72)
 
 
 func _ready() -> void:
@@ -67,10 +67,10 @@ func set_hud_state(next_state: Dictionary) -> void:
     set_caption_value(ability_caption, ability_label, "ABILITY", get_ability_label().to_upper())
     set_caption_value(items_caption, items_label, "ITEMS", format_item_progress())
     set_caption_value(score_caption, score_label, "SCORE", "%d" % int(hud_state.get("score", 0)))
-    outcome_label.text = get_readable_outcome_label().to_upper()
+    set_caption_value(orb_caption, orb_label, "ORBS", format_orb_progress())
+    build_orb_slots()
     set_caption_value(objective_caption, objective_label, "OBJECTIVE", String(hud_state.get("objective_text", "Reach the goal")))
     set_caption_value(attack_caption, cooldown_label, "ATTACK", get_cooldown_label())
-    set_caption_value(status_caption, status_label, "STATUS", get_status_label())
     apply_hud_theme()
 
 
@@ -82,8 +82,6 @@ func set_caption_value(caption_label: Label, value_label: Label, caption_text: S
 
 
 func apply_hud_theme() -> void:
-    if outcome_badge != null:
-        outcome_badge.modulate = get_outcome_badge_color()
     if ability_chip != null:
         ability_chip.modulate = Color(0.94, 1.0, 1.0, 1.0) if get_ability_label() == "none" else Color(1.0, 0.93, 0.74, 1.0)
     if hp_icon != null:
@@ -94,19 +92,17 @@ func apply_hud_theme() -> void:
         items_icon.color = Color(0.5, 0.95, 0.62, 1.0)
     if score_icon != null:
         score_icon.color = Color(1.0, 0.86, 0.25, 1.0)
-    if status_icon != null:
-        status_icon.color = get_outcome_badge_color()
 
 
 func get_summary_text() -> String:
-    return "%s | HP %d/%d | Ability %s | Items %s | Score %d | %s | %s" % [
+    return "%s | HP %d/%d | Ability %s | Items %s | Orbs %s | Score %d | %s" % [
         String(hud_state.get("level_id", "")),
         int(hud_state.get("hp", 0)),
         int(hud_state.get("max_hp", 0)),
         get_ability_label(),
         format_item_progress(),
+        format_orb_progress(),
         int(hud_state.get("score", 0)),
-        get_readable_outcome_label(),
         String(hud_state.get("objective_text", "Reach the goal")),
     ]
 
@@ -123,6 +119,8 @@ func normalize_hud_state(source: Dictionary) -> Dictionary:
         "revive_count": max(int(source.get("revive_count", 0)), 0),
         "ability_type": String(source.get("ability_type", "")),
         "items_collected": normalize_items(source.get("items_collected", [])),
+        "orb_item_ids": normalize_items(source.get("orb_item_ids", [])),
+        "acquired_orb_ids": normalize_items(source.get("acquired_orb_ids", [])),
         "score": max(int(source.get("score", 0)), 0),
         "remaining_life_bonus": max(int(source.get("remaining_life_bonus", 0)), 0),
         "objective_text": String(source.get("objective_text", "Reach the goal")),
@@ -159,6 +157,45 @@ func format_item_progress() -> String:
     return "%d collected" % items.size()
 
 
+func get_orb_item_ids() -> Array:
+    return hud_state.get("orb_item_ids", [])
+
+
+func get_acquired_orb_ids() -> Array:
+    return hud_state.get("acquired_orb_ids", [])
+
+
+func format_orb_progress() -> String:
+    var orb_ids: Array = get_orb_item_ids()
+    if orb_ids.is_empty():
+        return "0/0"
+
+    return "%d/%d" % [get_acquired_orb_ids().size(), orb_ids.size()]
+
+
+func build_orb_slots() -> void:
+    if orb_slots == null:
+        return
+
+    for child in orb_slots.get_children():
+        child.queue_free()
+
+    var acquired_orb_lookup := {}
+    for orb_id in get_acquired_orb_ids():
+        acquired_orb_lookup[String(orb_id)] = true
+
+    var slot_index := 0
+    for orb_id in get_orb_item_ids():
+        var slot := ColorRect.new()
+        slot.name = "OrbSlot%d" % slot_index
+        slot.custom_minimum_size = Vector2(12.0, 12.0)
+        slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+        slot.tooltip_text = String(orb_id)
+        slot.color = acquired_orb_color if acquired_orb_lookup.has(String(orb_id)) else missing_orb_silhouette_color
+        orb_slots.add_child(slot)
+        slot_index += 1
+
+
 func format_level_value(level_id: String) -> String:
     var readable := level_id.replace("_", " ").strip_edges()
     if readable == "":
@@ -184,38 +221,3 @@ func get_cooldown_label() -> String:
 
     return "%d ms" % cooldown_ms
 
-
-func get_status_label() -> String:
-    var locked_reason := String(hud_state.get("locked_door_reason", ""))
-    if locked_reason != "":
-        return "LOCKED  %s" % locked_reason
-
-    var target_hp := int(hud_state.get("target_enemy_hp", 0))
-    if target_hp > 0:
-        return "ENEMY HP  %d" % target_hp
-
-    return "CLEAR"
-
-
-func get_outcome_badge_color() -> Color:
-    var current_outcome := String(hud_state.get("outcome", "running"))
-    if current_outcome == "completed":
-        return Color(0.72, 1.0, 0.68, 1.0)
-    if current_outcome == "game_over":
-        return Color(1.0, 0.58, 0.58, 1.0)
-    if current_outcome == "error":
-        return Color(1.0, 0.75, 0.48, 1.0)
-
-    return Color(0.76, 0.9, 1.0, 1.0)
-
-
-func get_readable_outcome_label() -> String:
-    var current_outcome := String(hud_state.get("outcome", "running"))
-    if current_outcome == "completed":
-        return "goal reached"
-    if current_outcome == "game_over":
-        return "game over"
-    if current_outcome == "error":
-        return "error"
-
-    return "running"

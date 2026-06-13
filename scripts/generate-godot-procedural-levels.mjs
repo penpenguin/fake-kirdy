@@ -9,6 +9,8 @@ const checkOnly = process.argv.includes('--check');
 const doorTriggerRadius = 48;
 const minSpawnDoorDistance = 64;
 const doorSafeRadius = 96;
+const minPlatformClearancePx = 36;
+const maxBottomFloorGapPx = 0;
 const verticalSpawnClearanceRadius = 72;
 const verticalMaxSpawnDropDistance = 96;
 const branchDensityMinimum = 0.2;
@@ -157,7 +159,7 @@ function buildRuntimeLayout(layout, metadata, stageId, neighbors, deadEnds) {
       shape_profile: shapeProfile,
     },
     camera_bounds: {
-      position: { x: 380, y: 270 },
+      position: { x: 380, y: 178 },
       size: { x: 840, y: 540 },
     },
     spawns: {
@@ -177,6 +179,8 @@ function buildRuntimeLayout(layout, metadata, stageId, neighbors, deadEnds) {
       door_trigger_radius: doorTriggerRadius,
       min_spawn_door_distance: minSpawnDoorDistance,
       door_safe_radius: doorSafeRadius,
+      min_platform_clearance_px: minPlatformClearancePx,
+      max_bottom_floor_gap_px: maxBottomFloorGapPx,
       ...(roomVariant === 'vertical_route'
         ? {
             vertical_transition: {
@@ -386,7 +390,7 @@ function buildRuntimePlatforms(difficulty, roomVariant) {
     });
     platforms.push({
       id: 'GeneratedPlatformVerticalStep',
-      position: { x: 380, y: 304 },
+      position: { x: 380, y: 284 },
       size: { x: 120, y: 24 },
     });
   }
@@ -442,12 +446,13 @@ function buildRuntimeCollectibles(levelId, cluster, neighbors) {
 }
 
 function buildRuntimeEnemies(levelId, cluster, difficulty) {
+  const enemyType = getGeneratedEnemyType(cluster);
   if (levelId === 'labyrinth_132') {
     return [
       {
         id: 'GeneratedFinalBossSpawn',
         spawn_id: 'labyrinth_132_final_boss',
-        enemy_type: 'generated_flying',
+        enemy_type: enemyType,
         ability_type: 'spark',
         enemy_group_id: 'labyrinth_132_final_guard',
         boss_id: 'labyrinth_132_final_boss',
@@ -470,7 +475,7 @@ function buildRuntimeEnemies(levelId, cluster, difficulty) {
     {
       id: 'GeneratedEnemySpawn',
       spawn_id: `${levelId}_generated_enemy`,
-      enemy_type: 'generated_ground',
+      enemy_type: enemyType,
       ability_type: abilityType,
       contact_damage: 1,
       attack_damage: 1,
@@ -485,7 +490,7 @@ function buildRuntimeEnemies(levelId, cluster, difficulty) {
     enemies.push({
       id: 'GeneratedFlyingEnemySpawn',
       spawn_id: `${levelId}_generated_flying`,
-      enemy_type: 'generated_flying',
+      enemy_type: enemyType,
       ability_type: abilityType,
       contact_damage: 1,
       attack_damage: 1,
@@ -500,7 +505,7 @@ function buildRuntimeEnemies(levelId, cluster, difficulty) {
     enemies.push({
       id: 'GeneratedEliteEnemySpawn',
       spawn_id: `${levelId}_generated_elite`,
-      enemy_type: 'generated_flying',
+      enemy_type: enemyType,
       ability_type: abilityType,
       contact_damage: 1,
       attack_damage: 1,
@@ -641,6 +646,23 @@ function getGeneratedAbilityType(cluster) {
       return 'stone';
     default:
       return 'spark';
+  }
+}
+
+function getGeneratedEnemyType(cluster) {
+  switch (cluster) {
+    case 'forest':
+      return 'leaf_sprite';
+    case 'ice':
+      return 'frost_flyer';
+    case 'fire':
+      return 'fire_imp';
+    case 'ruins':
+      return 'stone_sentry';
+    case 'sky':
+      return 'spark_wisp';
+    default:
+      return 'spark_wisp';
   }
 }
 

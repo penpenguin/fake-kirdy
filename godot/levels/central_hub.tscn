@@ -160,7 +160,7 @@ target_spawn_id = "default"
 trigger_radius = 40.0
 
 [node name="CameraBoundsMarker" type="Node2D" parent="."]
-position = Vector2(420, 270)
+position = Vector2(420, 178)
 script = ExtResource("3_camera_bounds")
 size = Vector2(920, 540)
 
@@ -179,11 +179,6 @@ heal_id = "central_hub_dead_end_max_health"
 amount = 1
 reward_type = "max-health"
 dead_end_id = "central_hub_dead_end_max_health"
-
-[node name="CathedralNave" type="Polygon2D" parent="."]
-position = Vector2(420, 352)
-color = Color(0.20, 0.23, 0.28, 1)
-polygon = PackedVector2Array(-170, -92, 170, -92, 220, 80, -220, 80)
 
 [node name="Floor" type="StaticBody2D" parent="."]
 position = Vector2(420, 432)

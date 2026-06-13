@@ -160,7 +160,7 @@ function simulateArenaCase(testCase, arenaDefaults, enemyDefaults, abilityProfil
     record(events, 'enemy.ai.profile.applied', enemy, { profile: appliedProfile });
   }
 
-  if (enemyType.includes('flying')) {
+  if (isHoveringEnemy(enemyType, appliedProfile)) {
     record(events, 'enemy.ai.hover', enemy, {
       hover_amplitude: Number(testCase.hover_amplitude ?? appliedProfile.hover_amplitude ?? 18),
       hover_speed: Number(testCase.hover_speed ?? appliedProfile.hover_speed ?? 2.4),
@@ -249,6 +249,10 @@ function simulateArenaCase(testCase, arenaDefaults, enemyDefaults, abilityProfil
     final_position: enemy.position,
     events,
   };
+}
+
+function isHoveringEnemy(enemyType, appliedProfile) {
+  return enemyType.includes('flying') || enemyType.includes('flyer') || String(appliedProfile.ai_behavior ?? '').includes('hover');
 }
 
 function buildEnemyState(testCase, arenaDefaults, enemyDefaults, appliedProfile) {

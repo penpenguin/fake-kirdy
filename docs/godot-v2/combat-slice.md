@@ -2,9 +2,15 @@
 
 The Combat Slice adds the smallest Kirdy-like loop: inhale an enemy, optionally release it, swallow it, acquire its ability type, use that ability once, and finish the room.
 
-This is not a full enemy roster. It has `SimpleEnemy`, a small `FlyingEnemy` variant, and lightweight early-route archetype profiles selected by `EnemySpawnMarker.enemy_type`. `spark_wisp` uses the simple enemy scene with a bright electric tint and faster chase profile, `flying` uses `FlyingEnemy`, and `sentry` uses a heavier simple enemy profile with slower movement and higher HP.
+This is not a full enemy roster. It has `SimpleEnemy`, a small `FlyingEnemy` variant, and lightweight early-route archetype profiles selected by `EnemySpawnMarker.enemy_type`. Enemy identity is intentionally tied to copy ability and visible sprite:
 
-Spawned enemies also receive a lightweight ability AI profile. `frost`, `fire`, and `stone` tune chase speed, detection, attack cadence, or hover behavior, and emit `enemy.ai.profile.applied` when the profile is applied.
+- `spark_wisp` and legacy `simple_ground` grant `spark` and use `images/enemies/wabble-bee.webp`.
+- `fire_imp` grants `fire` and uses `images/enemies/blaze-imp.webp`.
+- `frost_flyer` grants `frost` and uses `images/enemies/frost-flutter.webp`.
+- `leaf_sprite` grants `leaf` and uses `images/enemies/leaf-sprout.webp`.
+- `stone_sentry` and legacy `sentry` grant `stone` and use `images/enemies/dronto-durt.webp`.
+
+Spawned enemies also receive a lightweight ability AI profile. `spark`, `frost`, `fire`, `leaf`, and `stone` tune chase speed, detection, attack cadence, drift, sentry behavior, or hover behavior, and emit `enemy.ai.profile.applied` when the profile is applied.
 
 ## Controls
 
@@ -66,6 +72,8 @@ The detach replay starts with `spark`, presses `swallow` without a captured enem
 The fire projectile replay starts with `fire`, presses `use_ability`, spawns `AbilityProjectile`, emits `ability.projectile.spawned` and `ability.projectile.hit`, then damages the target enemy from a projectile source.
 
 Spark is explicitly not mapped to the sword texture, spit texture, or sword/iai presentation. `PlayerController.gd` exposes `kirdy_spark_texture`, the player scene maps it to `images/characters/kirdy/kirdy-spark.webp`, and `GameSession.get_ability_profile("spark")` reports `attack_type: burst` plus `visual_effect: electric_burst`. The Spark texture is a 64x64 transparent WebP generated for this ability and covered by the asset fallback audit.
+
+Leaf is explicitly not mapped to the frost/ice Kirdy texture or the generic star bullet. `PlayerController.gd` exposes `kirdy_leaf_texture`, the player scene maps it to `images/characters/kirdy/kirdy-leaf.webp`, and `GameSession.get_ability_profile("leaf")` reports `attack_type: spread` plus `images/effects/leaf-attack.webp`. The leaf Kirdy, leaf attack, and new enemy identity sprites are 64x64 transparent WebP assets and are covered by the asset fallback audit.
 
 Basic small enemies default to 1 HP. Higher HP must be explicit through marker metadata, generated boss metadata, or a midboss/boss archetype such as `sentry`, `elite`, or final boss. `godot:combat-matrix` enforces that `basic` enemy archetypes stay at 1 base HP and that HP exceptions are marked as `midboss` or `boss`.
 

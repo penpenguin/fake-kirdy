@@ -60,6 +60,20 @@ describe('Godot v2 map overlay', () => {
     expect(project).toContain('keycode":77');
   });
 
+  it('carries readable door target labels through map feature payloads', () => {
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const script = readGodotFile('scripts/ui/MapOverlay.gd');
+
+    expect(session).toContain('append_door_map_features(features, current_definition.doors)');
+    expect(session).toContain('"door_label": get_door_label(payload, target_level_id)');
+    expect(session).toContain('"target_level_id": target_level_id');
+    expect(session).toContain('"target_level_display_name": get_level_display_name(target_level_id)');
+
+    expect(script).toContain('"door_label": String(feature.get("door_label", ""))');
+    expect(script).toContain('"target_level_id": String(feature.get("target_level_id", ""))');
+    expect(script).toContain('"target_level_display_name": String(feature.get("target_level_display_name", ""))');
+  });
+
   it('adds replay coverage for map visibility toggling', () => {
     const replayPath = join(godotRoot, 'tests', 'replays', 'map_toggle_visibility.json');
     const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {

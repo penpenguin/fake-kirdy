@@ -25,6 +25,9 @@ coverage
 # Generated local reports
 reports/
 
+# Local scratch files
+tmp/
+
 # nyc test coverage
 .nyc_output
 

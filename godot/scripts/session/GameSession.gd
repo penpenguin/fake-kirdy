@@ -27,6 +27,11 @@ const SfxKirdySpit = preload("res://resources/assets/audio/sfx/kirdy-spit.wav")
 const SfxAbilityFireAttack = preload("res://resources/assets/audio/sfx/ability-fire-attack.wav")
 const SfxAbilityIceAttack = preload("res://resources/assets/audio/sfx/ability-ice-attack.wav")
 const SfxAbilitySwordAttack = preload("res://resources/assets/audio/sfx/ability-sword-attack.wav")
+const EnemyTextureSpark = preload("res://resources/assets/images/enemies/wabble-bee.webp")
+const EnemyTextureFire = preload("res://resources/assets/images/enemies/blaze-imp.webp")
+const EnemyTextureFrost = preload("res://resources/assets/images/enemies/frost-flutter.webp")
+const EnemyTextureLeaf = preload("res://resources/assets/images/enemies/leaf-sprout.webp")
+const EnemyTextureStone = preload("res://resources/assets/images/enemies/dronto-durt.webp")
 const SCORE_PER_ITEM := 1000
 const SCORE_PER_COMPLETED_LEVEL := 500
 const SCORE_PER_DEFEATED_GROUP := 300
@@ -40,6 +45,13 @@ const CLUSTER_KEYSTONE_REQUIREMENTS := {
     "ruins": "fire-keystone",
     "sky": "cave-keystone",
 }
+const HUD_ORB_ITEM_IDS := [
+    "forest-orb",
+    "ice-orb",
+    "fire-orb",
+    "cave-orb",
+    "sky-orb",
+]
 
 var current_level_id: String = ""
 var current_level = null
@@ -102,6 +114,7 @@ var pause_scene_visible_traced: bool = false
 var paused_actor_physics_states: Dictionary = {}
 var settings_menu_open: bool = false
 var selected_setting_index: int = 0
+var ignore_next_settings_activate: bool = false
 var result_elapsed_ms: int = 0
 var results_scene_shown: bool = false
 var runtime_error_message: String = ""
@@ -183,6 +196,7 @@ func start_session(start_level_id: String, start_spawn_id: String = "default", f
     paused_actor_physics_states.clear()
     settings_menu_open = false
     selected_setting_index = 0
+    ignore_next_settings_activate = false
     result_elapsed_ms = 0
     results_scene_shown = false
     runtime_error_message = ""
@@ -336,17 +350,31 @@ func constrain_player_to_camera_bounds() -> void:
     if clamped_position == previous_position:
         return
 
+    var previous_velocity: Vector2 = player.velocity
+    var x_clamped := not is_equal_approx(clamped_position.x, previous_position.x)
+    var y_clamped := not is_equal_approx(clamped_position.y, previous_position.y)
     player.global_position = clamped_position
-    if not is_equal_approx(clamped_position.x, previous_position.x):
+    if x_clamped:
         player.velocity.x = 0.0
-    if not is_equal_approx(clamped_position.y, previous_position.y):
+    if y_clamped:
         player.velocity.y = 0.0
+    var clamped_axis := "both" if x_clamped and y_clamped else ("x" if x_clamped else "y")
 
     trace_recorder.call("record_player_event", "player.boundary.clamped", {
         "level_id": current_level_id,
         "player": get_player_trace(),
         "payload": {
             "bounds_id": String(bounds.get("id", "")),
+            "blocked_axis": clamped_axis,
+            "recovery_mode": "stop_velocity",
+            "velocity_before": {
+                "x": previous_velocity.x,
+                "y": previous_velocity.y,
+            },
+            "velocity_after": {
+                "x": player.velocity.x,
+                "y": player.velocity.y,
+            },
             "from": {
                 "x": previous_position.x,
                 "y": previous_position.y,
@@ -488,6 +516,7 @@ func load_level(level_id: String, spawn_id: String = "default") -> bool:
     trace_recorder.call("configure", current_level_id, replay_fps)
     trace_recorder.call("record_event", "level.loaded", {
         "level_id": current_level_id,
+        "level_display_name": get_level_display_name(current_level_id),
         "spawn_id": spawn_id,
         "level_path": level_loader.call("get_level_path", current_level_id),
     })
@@ -565,14 +594,17 @@ func spawn_enemies() -> void:
         var enemy_type := String(payload.get("enemy_type", "simple_ground"))
         var enemy = instantiate_enemy(enemy_type)
         apply_enemy_type_profile(enemy, enemy_type)
+        apply_enemy_identity_profile(enemy, enemy_type)
         enemy.enemy_id = String(enemy_marker.get("id", "enemy"))
-        enemy.ability_type = String(payload.get("ability_type", "spark"))
+        enemy.enemy_type = enemy_type
+        enemy.ability_type = resolve_enemy_ability_type(enemy_type, payload)
         enemy.contact_damage = int(payload.get("contact_damage", 1))
         enemy.attack_damage = int(payload.get("attack_damage", enemy.contact_damage))
         enemy.attack_radius = float(payload.get("attack_radius", 120.0))
         enemy.attack_cooldown_ms = int(payload.get("attack_cooldown_ms", 1200))
         enemy.enemy_group_id = String(payload.get("enemy_group_id", ""))
         enemy.boss_id = String(payload.get("boss_id", ""))
+        enemy.orb_reward_item_id = String(payload.get("orb_reward_item_id", ""))
         enemy.max_hp = resolve_enemy_max_hp(enemy_type, marker_payload)
         enemy.global_position = dictionary_to_vector2(enemy_marker.get("position", {}))
         apply_difficulty_to_enemy(enemy)
@@ -584,10 +616,64 @@ func spawn_enemies() -> void:
 
 func instantiate_enemy(enemy_type: String) -> Node:
     match enemy_type:
-        "flying", "flying_enemy", "generated_flying":
+        "flying", "flying_enemy", "generated_flying", "frost_flyer":
             return FlyingEnemyScene.instantiate()
         _:
             return SimpleEnemyScene.instantiate()
+
+
+func get_enemy_identity_profile(enemy_type: String) -> Dictionary:
+    match enemy_type:
+        "spark_wisp", "simple_ground", "generated_flying":
+            return {
+                "ability_type": "spark",
+                "texture": EnemyTextureSpark,
+                "texture_path": "res://resources/assets/images/enemies/wabble-bee.webp",
+            }
+        "fire_imp":
+            return {
+                "ability_type": "fire",
+                "texture": EnemyTextureFire,
+                "texture_path": "res://resources/assets/images/enemies/blaze-imp.webp",
+            }
+        "frost_flyer", "flying", "flying_enemy":
+            return {
+                "ability_type": "frost",
+                "texture": EnemyTextureFrost,
+                "texture_path": "res://resources/assets/images/enemies/frost-flutter.webp",
+            }
+        "leaf_sprite":
+            return {
+                "ability_type": "leaf",
+                "texture": EnemyTextureLeaf,
+                "texture_path": "res://resources/assets/images/enemies/leaf-sprout.webp",
+            }
+        "stone_sentry", "sentry":
+            return {
+                "ability_type": "stone",
+                "texture": EnemyTextureStone,
+                "texture_path": "res://resources/assets/images/enemies/dronto-durt.webp",
+            }
+        _:
+            return {}
+
+
+func resolve_enemy_ability_type(enemy_type: String, marker_payload: Dictionary) -> String:
+    var identity := get_enemy_identity_profile(enemy_type)
+    if identity.has("ability_type"):
+        return String(identity.get("ability_type", "spark"))
+
+    return String(marker_payload.get("ability_type", "spark"))
+
+
+func apply_enemy_identity_profile(enemy: Node, enemy_type: String) -> void:
+    var identity := get_enemy_identity_profile(enemy_type)
+    if identity.is_empty():
+        return
+
+    var body := enemy.get_node_or_null("Body")
+    if body != null and identity.has("texture"):
+        body.texture = identity.get("texture")
 
 
 func apply_enemy_type_profile(enemy: Node, enemy_type: String) -> void:
@@ -603,6 +689,24 @@ func apply_enemy_type_profile(enemy: Node, enemy_type: String) -> void:
             enemy.patrol_speed = 18.0
             enemy.chase_speed = 38.0
             enemy.return_radius = 160.0
+        "stone_sentry":
+            enemy.normal_modulate = Color(0.72, 0.70, 0.64, 1.0)
+            enemy.max_hp = max(enemy.max_hp, 5)
+            enemy.patrol_speed = 18.0
+            enemy.chase_speed = 38.0
+            enemy.return_radius = 160.0
+        "fire_imp":
+            enemy.hit_flash_color = Color(1.0, 0.86, 0.20, 1.0)
+            enemy.chase_speed = 92.0
+            enemy.detection_radius = 200.0
+        "leaf_sprite":
+            enemy.hit_flash_color = Color(0.86, 1.0, 0.32, 1.0)
+            enemy.patrol_speed = 48.0
+            enemy.chase_speed = 66.0
+        "frost_flyer":
+            enemy.hit_flash_color = Color(0.62, 0.92, 1.0, 1.0)
+            enemy.chase_speed = 54.0
+            enemy.detection_radius = 220.0
         _:
             pass
 
@@ -703,6 +807,13 @@ func get_enemy_ability_ai_profile(ability_type: String) -> Dictionary:
                 "detection_radius": 140.0,
                 "return_radius": 180.0,
                 "attack_cooldown_multiplier": 1.35,
+            }
+        "leaf":
+            return {
+                "ai_behavior": "leaf_drift",
+                "chase_speed": 66.0,
+                "detection_radius": 190.0,
+                "attack_cooldown_multiplier": 1.05,
             }
         _:
             return {}
@@ -1058,7 +1169,7 @@ func get_ability_profile(ability_type: String) -> Dictionary:
                 "knockback": 16.0,
                 "attack_type": "cutter",
                 "visual_effect": "leaf_cutter",
-                "effect_texture": "res://resources/assets/images/effects/star-bullet.webp",
+                "effect_texture": "res://resources/assets/images/effects/leaf-attack.webp",
             }
         "stone":
             return {
@@ -1120,6 +1231,8 @@ func get_ability_effect_color(ability_type: String) -> Color:
             return Color(0.56, 0.82, 1.0, 0.82)
         "stone":
             return Color(0.62, 0.58, 0.50, 0.88)
+        "leaf":
+            return Color(0.38, 0.86, 0.24, 0.86)
         _:
             return Color(1.0, 0.92, 0.42, 0.82)
 
@@ -1340,6 +1453,7 @@ func apply_damage_to_enemy(enemy: Node, amount: int, source: Dictionary = {}, kn
             "player": get_player_trace(),
             "payload": result,
         })
+        grant_boss_orb_reward(result)
         clear_defeated_captured_enemy()
         sync_inventory_overlay("enemy.defeated", true)
 
@@ -1468,6 +1582,27 @@ func mark_enemy_defeated(result: Dictionary) -> void:
     if boss_id != "":
         defeated_boss_ids[boss_id] = true
         clear_resolved_locked_door_reason("missing_boss", boss_id)
+
+
+func grant_boss_orb_reward(result: Dictionary) -> void:
+    var boss_id := String(result.get("boss_id", ""))
+    if boss_id == "":
+        return
+
+    var orb_reward_item_id := String(result.get("orb_reward_item_id", ""))
+    trace_recorder.call("record_player_event", "boss.defeated", {
+        "level_id": current_level_id,
+        "player": get_player_trace(),
+        "payload": {
+            "enemy_id": String(result.get("enemy_id", "")),
+            "enemy_group_id": String(result.get("enemy_group_id", "")),
+            "boss_id": boss_id,
+            "orb_reward_item_id": orb_reward_item_id,
+            "defeated_boss_ids": get_defeated_boss_ids(),
+        },
+    })
+    if orb_reward_item_id != "":
+        acquire_item(orb_reward_item_id, boss_id)
 
 
 func check_enemy_attacks(delta: float) -> void:
@@ -2003,6 +2138,25 @@ func get_acquired_item_ids() -> Array:
     return item_ids
 
 
+func get_hud_orb_item_ids() -> Array:
+    return HUD_ORB_ITEM_IDS.duplicate()
+
+
+func get_acquired_orb_ids() -> Array:
+    var orb_lookup := {}
+    for orb_id in HUD_ORB_ITEM_IDS:
+        orb_lookup[String(orb_id)] = true
+
+    var acquired_orbs := []
+    for item_id in acquired_item_ids.keys():
+        var normalized_item_id := String(item_id)
+        if orb_lookup.has(normalized_item_id):
+            acquired_orbs.append(normalized_item_id)
+
+    acquired_orbs.sort()
+    return acquired_orbs
+
+
 func get_consumed_heal_ids() -> Array:
     var heal_ids := consumed_heal_ids.keys()
     heal_ids.sort()
@@ -2078,7 +2232,7 @@ func get_map_features_payload() -> Array:
     if current_definition == null:
         return features
 
-    append_map_features(features, current_definition.doors, "door")
+    append_door_map_features(features, current_definition.doors)
     append_map_features(features, current_definition.heals, "heal")
     append_dead_end_map_features(features, current_definition.heals)
     append_map_features(features, current_definition.collectibles, "collectible")
@@ -2086,6 +2240,30 @@ func get_map_features_payload() -> Array:
     append_map_features(features, current_definition.ability_gates, "ability_gate")
     append_map_features(features, current_definition.goals, "goal")
     return features
+
+
+func append_door_map_features(features: Array, markers: Array) -> void:
+    for marker in markers:
+        var marker_position := dictionary_to_vector2(marker.get("position", {}))
+        var tile_key := position_to_tile_key(marker_position)
+        var feature_id := String(marker.get("id", ""))
+        var payload: Dictionary = marker.get("payload", {})
+        var target_level_id := String(payload.get("target_level_id", ""))
+        var hidden := is_hidden_feature(marker)
+        var discovered := is_tile_explored(current_level_id, tile_key)
+        if hidden:
+            discovered = is_hidden_feature_discovered("door", feature_id)
+        features.append({
+            "level_id": current_level_id,
+            "feature_type": "door",
+            "feature_id": feature_id,
+            "tile_key": tile_key,
+            "discovered": discovered,
+            "hidden": hidden,
+            "door_label": get_door_label(payload, target_level_id),
+            "target_level_id": target_level_id,
+            "target_level_display_name": get_level_display_name(target_level_id),
+        })
 
 
 func append_map_features(features: Array, markers: Array, feature_type: String) -> void:
@@ -2595,6 +2773,7 @@ func open_pause_settings() -> void:
 
     pause_settings_open = true
     selected_setting_index = 0
+    ignore_next_settings_activate = true
     play_ui_sfx(null, "pause.settings.opened", "ui")
     sync_settings_menu_visibility()
     sync_settings_overlay("pause.settings.opened")
@@ -2609,6 +2788,7 @@ func close_pause_settings() -> void:
         return
 
     pause_settings_open = false
+    ignore_next_settings_activate = false
     play_ui_sfx(null, "pause.settings.closed", "ui")
     sync_settings_menu_visibility()
     sync_settings_overlay("pause.settings.closed")
@@ -2674,6 +2854,8 @@ func build_hud_payload() -> Dictionary:
         "revive_count": player_revive_count,
         "ability_type": get_player_ability_type(),
         "items_collected": get_acquired_item_ids(),
+        "orb_item_ids": get_hud_orb_item_ids(),
+        "acquired_orb_ids": get_acquired_orb_ids(),
         "score": calculate_total_score(),
         "remaining_life_bonus": calculate_remaining_life_bonus(),
         "difficulty": sanitize_setting_difficulty(setting_difficulty),
@@ -2837,6 +3019,7 @@ func open_settings_menu(reason: String = "settings.menu.opened") -> void:
 
     settings_menu_open = true
     selected_setting_index = 0
+    ignore_next_settings_activate = false
     play_ui_sfx(null, reason, "ui")
     sync_settings_overlay(reason)
     sync_virtual_controls_overlay(reason, true)
@@ -2850,6 +3033,7 @@ func close_settings_menu(reason: String = "settings.menu.closed") -> void:
         return
 
     settings_menu_open = false
+    ignore_next_settings_activate = false
     play_ui_sfx(null, reason, "ui")
     sync_settings_overlay(reason)
     sync_virtual_controls_overlay(reason, true)
@@ -2884,6 +3068,14 @@ func get_settings_focus_target() -> String:
 
 
 func check_settings_actions() -> void:
+    if is_session_action_just_pressed(pause_settings_action):
+        if ignore_next_settings_activate:
+            ignore_next_settings_activate = false
+            return
+
+        apply_focused_settings_action()
+        return
+
     if is_session_action_just_pressed(settings_volume_up_action):
         apply_settings_update({
             "volume": setting_volume + settings_volume_step,
@@ -2903,6 +3095,22 @@ func check_settings_actions() -> void:
         apply_settings_update({
             "difficulty": cycle_string(setting_difficulty, ["easy", "normal", "hard"]),
         }, "settings.difficulty.cycled")
+
+
+func apply_focused_settings_action() -> void:
+    match selected_setting_index:
+        1:
+            apply_settings_update({
+                "controls": cycle_string(setting_controls, ["keyboard", "touch", "controller"]),
+            }, "settings.focus_activated")
+        2:
+            apply_settings_update({
+                "difficulty": cycle_string(setting_difficulty, ["easy", "normal", "hard"]),
+            }, "settings.focus_activated")
+        _:
+            apply_settings_update({
+                "volume": setting_volume + settings_volume_step,
+            }, "settings.focus_activated")
 
 
 func apply_settings_update(next_settings: Dictionary, reason: String = "settings.updated") -> void:
@@ -3116,6 +3324,9 @@ func restore_result_actors(reason: String = "") -> void:
 
 
 func show_results_scene(reason: String = "") -> void:
+    if not can_show_results_scene():
+        return
+
     if results_scene_shown:
         return
 
@@ -3131,6 +3342,10 @@ func show_results_scene(reason: String = "") -> void:
 
     results_payload["reason"] = reason
     trace_recorder.call("record_event", "results.scene.shown", results_payload)
+
+
+func can_show_results_scene() -> bool:
+    return ["completed", "complete"].has(outcome)
 
 
 func show_error_overlay(message: String, reason: String = "", requested_level_id: String = "", requested_spawn_id: String = "default") -> void:
@@ -3445,12 +3660,19 @@ func check_door_transitions() -> void:
         if player.global_position.distance_to(door_position) > radius:
             continue
 
+        var target_level_id := String(payload.get("target_level_id", ""))
+        var target_spawn_id := String(payload.get("target_spawn_id", "default"))
+        var door_label := get_door_label(payload, target_level_id)
+        var target_level_display_name := get_level_display_name(target_level_id)
         if not is_door_interaction_confirmed(payload):
             trace_recorder.call("record_player_event", "door.prompted", {
                 "level_id": current_level_id,
                 "player": get_player_trace(),
                 "payload": {
                     "door_id": door_id,
+                    "door_label": door_label,
+                    "target_level_id": target_level_id,
+                    "target_level_display_name": target_level_display_name,
                     "interact_action": String(door_interact_action),
                 },
             })
@@ -3458,8 +3680,6 @@ func check_door_transitions() -> void:
             return
 
         var source_level_id := current_level_id
-        var target_level_id := String(payload.get("target_level_id", ""))
-        var target_spawn_id := String(payload.get("target_spawn_id", "default"))
         var unlocked_door_id := "%s:%s" % [source_level_id, door_id]
         var lock_reason := get_door_lock_reason(payload)
         if lock_reason != "":
@@ -3473,7 +3693,9 @@ func check_door_transitions() -> void:
                 "player": get_player_trace(),
                 "payload": {
                     "door_id": door_id,
+                    "door_label": door_label,
                     "target_level_id": target_level_id,
+                    "target_level_display_name": target_level_display_name,
                     "target_spawn_id": target_spawn_id,
                     "reason": lock_reason,
                 },
@@ -3490,8 +3712,10 @@ func check_door_transitions() -> void:
             "player": get_player_trace(),
             "payload": {
                 "door_id": door_id,
+                "door_label": door_label,
                 "unlocked_door_id": unlocked_door_id,
                 "target_level_id": target_level_id,
+                "target_level_display_name": target_level_display_name,
                 "target_spawn_id": target_spawn_id,
             },
         })
@@ -3513,6 +3737,32 @@ func is_door_interaction_confirmed(payload: Dictionary) -> bool:
         return true
 
     return is_session_action_just_pressed(door_interact_action)
+
+
+func get_door_label(payload: Dictionary, target_level_id: String) -> String:
+    var explicit_label := String(payload.get("door_label", "")).strip_edges()
+    if explicit_label != "":
+        return explicit_label
+
+    return get_level_display_name(target_level_id)
+
+
+func get_level_display_name(level_id: String) -> String:
+    var display_parts := []
+    var raw_parts := String(level_id).replace("-", "_").split("_")
+    for raw_part in raw_parts:
+        var part := String(raw_part).strip_edges()
+        if part == "":
+            continue
+        if part.is_valid_int():
+            display_parts.append(part)
+        else:
+            display_parts.append(part.substr(0, 1).to_upper() + part.substr(1).to_lower())
+
+    if display_parts.is_empty():
+        return "Unknown"
+
+    return " ".join(display_parts)
 
 
 func get_door_lock_reason(payload: Dictionary) -> String:
@@ -3650,6 +3900,7 @@ func get_player_trace() -> Dictionary:
 func get_enemy_payload(enemy: Node) -> Dictionary:
     return {
         "enemy_id": enemy.enemy_id,
+        "enemy_type": String(enemy.enemy_type),
         "ability_type": enemy.ability_type,
         "state": enemy.state,
         "hp": int(enemy.hp),
@@ -3659,6 +3910,7 @@ func get_enemy_payload(enemy: Node) -> Dictionary:
         "attack_cooldown_ms": int(enemy.attack_cooldown_ms),
         "enemy_group_id": String(enemy.enemy_group_id),
         "boss_id": String(enemy.boss_id),
+        "orb_reward_item_id": String(enemy.orb_reward_item_id),
         "position": {
             "x": enemy.global_position.x,
             "y": enemy.global_position.y,

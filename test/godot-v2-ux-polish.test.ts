@@ -150,17 +150,20 @@ describe('Godot v2 UX polish vertical slice', () => {
     expect(docs).toContain('nearby_door_ambiguity');
   });
 
-  it('lays out CentralHub as a symmetric cathedral hub with nave, altar, and side aisles', () => {
+  it('lays out CentralHub as a symmetric cathedral hub without the gray trapezoid backdrop', () => {
     const hub = readGodotFile('levels/central_hub.tscn');
+    const visualAssets = readGodotFile('scripts/level/LevelVisualAssets.gd');
     const docs = readRepoFile('docs/map-structure.md');
     const centerX = 420;
 
-    expect(hub).toContain('[node name="CathedralNave"');
+    expect(hub).not.toContain('[node name="CathedralNave" type="Polygon2D"');
     expect(hub).toContain('[node name="AltarPlatform"');
     expect(hub).toContain('[node name="LeftAislePlatform"');
     expect(hub).toContain('[node name="RightAislePlatform"');
     expect(hub).toContain('RectangleShape2D_side_aisle');
     expect(hub).toContain('RectangleShape2D_altar');
+    expect(visualAssets).toContain('if normalized_level_id == "central_hub":');
+    expect(visualAssets).toContain('return RoyalBackgroundTexture');
 
     const mirror = readNodePosition(hub, 'DoorToMirrorCorridor');
     const forest = readNodePosition(hub, 'DoorToForestArea');
@@ -178,5 +181,6 @@ describe('Godot v2 UX polish vertical slice', () => {
     expect(leftAisle.x + rightAisle.x).toBe(centerX * 2);
     expect(leftAisle.y).toBe(rightAisle.y);
     expect(docs).toContain('nave/altar/side aisle');
+    expect(docs).toContain('royal cathedral background');
   });
 });

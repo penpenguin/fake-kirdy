@@ -24,6 +24,7 @@ signal trace_event(event_type: String, payload: Dictionary)
 @export var kirdy_spit_texture: Texture2D
 @export var kirdy_fire_texture: Texture2D
 @export var kirdy_ice_texture: Texture2D
+@export var kirdy_leaf_texture: Texture2D
 @export var kirdy_sword_texture: Texture2D
 @export var kirdy_spark_texture: Texture2D
 @export var ability_texture_fallback_enabled: bool = true
@@ -307,7 +308,7 @@ func get_ability_texture(next_ability_type: String) -> Texture2D:
         "stone":
             return kirdy_sword_texture
         "leaf":
-            return kirdy_ice_texture
+            return kirdy_leaf_texture
         _:
             return null
 

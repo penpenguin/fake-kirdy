@@ -213,6 +213,34 @@ offset_bottom = 44.0
 theme_override_font_sizes/font_size = 11
 text = "0"
 
+[node name="OrbChip" type="Panel" parent="Panel/TopBarRow"]
+custom_minimum_size = Vector2(96, 50)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_chip")
+
+[node name="OrbCaption" type="Label" parent="Panel/TopBarRow/OrbChip"]
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 90.0
+offset_bottom = 18.0
+theme_override_font_sizes/font_size = 9
+text = "ORBS"
+
+[node name="OrbLabel" type="Label" parent="Panel/TopBarRow/OrbChip"]
+offset_left = 8.0
+offset_top = 20.0
+offset_right = 36.0
+offset_bottom = 44.0
+theme_override_font_sizes/font_size = 11
+text = "0/5"
+
+[node name="OrbSlots" type="HBoxContainer" parent="Panel/TopBarRow/OrbChip"]
+offset_left = 40.0
+offset_top = 25.0
+offset_right = 90.0
+offset_bottom = 37.0
+theme_override_constants/separation = 3
+
 [node name="ObjectiveChip" type="Panel" parent="Panel/TopBarRow"]
 custom_minimum_size = Vector2(150, 50)
 layout_mode = 2
@@ -255,55 +283,4 @@ offset_right = 68.0
 offset_bottom = 44.0
 theme_override_font_sizes/font_size = 11
 text = "ready"
-autowrap_mode = 2
-
-[node name="OutcomeBadge" type="Panel" parent="Panel/TopBarRow"]
-custom_minimum_size = Vector2(96, 50)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_badge")
-
-[node name="StatusIcon" type="ColorRect" parent="Panel/TopBarRow/OutcomeBadge"]
-offset_left = 8.0
-offset_top = 25.0
-offset_right = 20.0
-offset_bottom = 37.0
-color = Color(0.76, 0.9, 1, 1)
-
-[node name="OutcomeCaption" type="Label" parent="Panel/TopBarRow/OutcomeBadge"]
-offset_left = 8.0
-offset_top = 4.0
-offset_right = 90.0
-offset_bottom = 18.0
-theme_override_font_sizes/font_size = 9
-text = "RUN"
-
-[node name="OutcomeLabel" type="Label" parent="Panel/TopBarRow/OutcomeBadge"]
-offset_left = 24.0
-offset_top = 20.0
-offset_right = 90.0
-offset_bottom = 44.0
-theme_override_font_sizes/font_size = 11
-text = "RUNNING"
-autowrap_mode = 2
-
-[node name="StatusChip" type="Panel" parent="Panel/TopBarRow"]
-custom_minimum_size = Vector2(96, 50)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_chip")
-
-[node name="StatusCaption" type="Label" parent="Panel/TopBarRow/StatusChip"]
-offset_left = 8.0
-offset_top = 4.0
-offset_right = 90.0
-offset_bottom = 18.0
-theme_override_font_sizes/font_size = 9
-text = "STATUS"
-
-[node name="StatusLabel" type="Label" parent="Panel/TopBarRow/StatusChip"]
-offset_left = 8.0
-offset_top = 20.0
-offset_right = 90.0
-offset_bottom = 44.0
-theme_override_font_sizes/font_size = 11
-text = "CLEAR"
 autowrap_mode = 2

@@ -158,6 +158,7 @@ describe('Godot asset fallback audit', () => {
     const abilityAssetPaths = [
       'godot/resources/assets/images/characters/kirdy/kirdy-fire.webp',
       'godot/resources/assets/images/characters/kirdy/kirdy-ice.webp',
+      'godot/resources/assets/images/characters/kirdy/kirdy-leaf.webp',
       'godot/resources/assets/images/characters/kirdy/kirdy-sword.webp',
       'godot/resources/assets/images/characters/kirdy/kirdy-spark.webp',
     ];
@@ -193,6 +194,7 @@ describe('Godot asset fallback audit', () => {
       'images/effects/fire-attack.webp',
       'images/effects/ice-attack.webp',
       'images/effects/inhale-sparkle.webp',
+      'images/effects/leaf-attack.webp',
       'images/effects/spark-attack.webp',
       'images/effects/star-bullet.webp',
       'images/effects/sword-slash.webp',
@@ -211,6 +213,33 @@ describe('Godot asset fallback audit', () => {
     expect(contract.required_effect_assets).toEqual(expect.arrayContaining(requiredEffectAssets));
     expect(auditScript).toContain('checkRequiredEffectAssets');
     for (const assetPath of requiredEffectAssets) {
+      const fullPath = join(repoRoot, 'godot', 'resources', 'assets', assetPath);
+      expect(existsSync(fullPath)).toBe(true);
+      expect(manifest).toContain(assetPath);
+      expect(sourceText).toContain(`res://resources/assets/${assetPath}`);
+    }
+  });
+
+  it('audits enemy identity sprites as primary copy-ability enemy assets', () => {
+    const requiredEnemyAssets = [
+      'images/enemies/blaze-imp.webp',
+      'images/enemies/dronto-durt.webp',
+      'images/enemies/frost-flutter.webp',
+      'images/enemies/leaf-sprout.webp',
+      'images/enemies/wabble-bee.webp',
+    ];
+    const manifest = readFileSync(join(repoRoot, 'godot', 'resources', 'assets', 'asset_manifest.json'), 'utf8');
+    const contract = JSON.parse(readFileSync(join(repoRoot, 'godot', 'tests', 'asset_fallback_audit_contract.json'), 'utf8')) as {
+      primary_enemy_assets?: string[];
+    };
+    const sourceText = [
+      'godot/scripts/session/GameSession.gd',
+      'godot/scenes/enemies/SimpleEnemy.tscn',
+      'godot/scenes/enemies/FlyingEnemy.tscn',
+    ].map((path) => readFileSync(join(repoRoot, path), 'utf8')).join('\n');
+
+    expect(contract.primary_enemy_assets).toEqual(expect.arrayContaining(requiredEnemyAssets));
+    for (const assetPath of requiredEnemyAssets) {
       const fullPath = join(repoRoot, 'godot', 'resources', 'assets', assetPath);
       expect(existsSync(fullPath)).toBe(true);
       expect(manifest).toContain(assetPath);

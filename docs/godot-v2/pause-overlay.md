@@ -4,7 +4,7 @@
 
 The pause state remains session-owned so replay can pause and resume deterministically, but the visible menu now instantiates `PauseScene.gd` by default through `GameSession.pause_scene_enabled`. `PauseScene.gd` extends `PauseOverlay.gd`, keeps the existing labels and input hierarchy, and adds a canvas blur fallback background via `BlurFallback` when the session is paused.
 
-When paused, the `pause_settings` action opens the existing `SettingsOverlay`; Enter is the default keyboard binding. ESC closes settings first and leaves the game paused, then a second ESC resumes gameplay. Settings replay actions remain active only while that pause settings menu is open.
+When paused, the `pause_settings` action opens the existing `SettingsOverlay`; Enter is the default keyboard binding. ESC closes settings first and leaves the game paused, then a second ESC resumes gameplay. Enter activates the focused setting after the overlay is open, so the default keyboard path is ESC, Enter, then Enter again to change the selected setting. Settings replay actions remain active only while that pause settings menu is open.
 
 When paused outside the settings submenu, the `pause_reset` action resets Kirdy to the active safe spawn for the current level without clearing collected items, keys, completed levels, visited levels, score state, or save state. The session keeps the game paused, zeros player velocity, applies a short recovery window, and emits `pause.position_reset` with previous and reset positions for trace review.
 

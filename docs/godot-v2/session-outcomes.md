@@ -23,6 +23,8 @@ If `player_revive_count` is greater than zero when HP reaches zero, the session 
 
 `game_over_restart_option.json` keeps replay input active after the first finished state with `continue_after_finished`. It presses `result_restart`, emits `run.restart.selected`, reloads the current level, restores HP, and continues until `replay.max_frames_reached` with the HUD back to `outcome: running`.
 
+`game_over_no_auto_results.json` keeps a game-over replay active without pressing result controls long enough to cross `result_auto_results_delay_ms`. It forbids `results.scene.shown`, proving game-over remains on the restart-capable result overlay instead of being covered by the full results scene.
+
 ## Heal Flow
 
 `HealMarker` metadata is consumed by `GameSession.gd`. When the player overlaps a heal marker, the session records the marker id in `consumed_heal_ids`, emits `heal.collected`, and applies the marker `reward_type`.
@@ -53,6 +55,14 @@ The `*_reliquary_collectible.json` replays load `forest_reliquary`, `ice_reliqua
 
 Cluster progression is enforced by `GameSession.get_cluster_transition_lock_reason()`. `LevelLoader.get_level_cluster()` resolves authored cluster tags and generated `metadata.cluster`, then cross-cluster door transitions require the previous cluster keystone: ice requires `forest-keystone`, fire requires `ice-keystone`, ruins requires `fire-keystone`, and sky requires `cave-keystone`. Missing requirements emit `door.locked` with `missing_cluster_keystone:<item_id>`. `central_hub_ice_gate_without_keystone.json` validates that the hub ice door remains locked before the forest keystone, while the sky generated goal replay seeds the completed keystone chain explicitly through replay `initial_item_ids`.
 
+## Boss Orb Flow
+
+`EnemySpawnMarker` can set `boss_id` and `orb_reward_item_id` for boss encounters. When a damage action defeats such an enemy, `GameSession` records the boss id in `defeated_boss_ids`, emits `enemy.defeated`, then emits `boss.defeated` with the boss id, enemy group id, and orb reward id. If the reward id is non-empty, the session uses the normal `acquire_item()` path so the orb is saved, traced as `item.acquired`, reflected in inventory, and included in HUD `acquired_orb_ids`.
+
+The mainline boss-orb rooms now follow the same contract for forest, ice, fire, ruins, and sky. The boss ids are `forest_guard_boss`, `ice_guard_boss`, `fire_guard_boss`, `ruins_guard_boss`, and `sky_guard_boss`; their orb rewards are `forest-orb`, `ice-orb`, `fire-orb`, `cave-orb`, and `sky-orb`. Each Central return door requires both the matching defeated boss id and the matching orb item id, so a player cannot use the return shortcut before defeating the boss and receiving the orb.
+
+`forest_reliquary_boss_orb_return.json` is the first representative replay for this contract. It defeats `forest_guard_boss`, awards `forest-orb`, updates the HUD orb payload, and uses `forest_reliquary_return_to_central_hub` to return to `central_hub`. `ice_reliquary_boss_orb_return.json` repeats the same runtime proof outside the forest route by defeating `ice_guard_boss`, awarding `ice-orb`, and returning through `ice_reliquary_return_to_central_hub`.
+
 ## Goal Flow
 
 Goal completion remains separate: touching a `GoalMarker` emits `run.finished` with the goal metadata payload.
@@ -63,7 +73,7 @@ When save is enabled, touching a `GoalMarker` also records the current level in 
 
 Completed and game-over runs also call `ResultOverlay.set_result_state()` and emit `result.overlay.shown`. The overlay payload carries the level id, outcome, run time, frame count, collected item ids, and completed level ids. `trace:summary` exposes the latest payload as `last_result_overlay` so replay review can compare the player-facing result screen with `run.finished` and save state.
 
-The dedicated `ResultsScene` can then be shown by pressing `result_continue` or by waiting for the automatic result delay. `results_scene_continue.json` validates the key-driven path after a completed run and emits `results.scene.shown`, which `trace:summary` exposes as `last_results_scene`.
+The dedicated `ResultsScene` can then be shown for completed runs by pressing `result_continue` or by waiting for the automatic result delay. `results_scene_continue.json` validates the key-driven path after a completed run and emits `results.scene.shown`, which `trace:summary` exposes as `last_results_scene`. Game-over outcomes are intentionally excluded from this transition.
 
 Result menu input remains active after the full results scene is visible. `results_scene_restart.json` presses `result_continue`, then `result_restart`; the session emits `results.scene.hidden` and `run.restart.selected` before returning the HUD to `outcome: running`.
 
@@ -81,4 +91,6 @@ All flows use the same trace schema so metrics can compare completed runs, game-
 
 `HudOverlay.gd` is the first minimal player-facing HUD for the Godot mainline. `GameSession` creates it when `hud_overlay_enabled` is true and syncs level id, HP, max HP, revive count, ability type, collected item ids, and outcome.
 
-Each meaningful HUD state change can emit `hud.updated`. `trace:summary` exposes the latest HUD payload as `last_hud`, which lets replay review compare player-facing state with save, combat, item, and outcome events.
+The HUD also receives `orb_item_ids` and `acquired_orb_ids`, letting the visible `ORBS` row show acquired orbs and missing-orb silhouettes without relying on the removed constant run/status fields.
+
+Each meaningful HUD state change can emit `hud.updated`. `trace:summary` exposes the latest HUD payload as `last_hud`, including orb ids, which lets replay review compare player-facing state with save, combat, item, and outcome events.

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "hud_controller_lab_jump",
-  "content_hash": "e9dd0eb5f67bd010096b390d3e5c5eceda72b2cf6def799800a0cde44cc9d6d8",
+  "content_hash": "6998a838f3e8e385a3a84380b76371574af33fabb199d916297456072b972c29",
   "replay_path": "godot/tests/replays/controller_lab_jump.json",
   "frame": 30,
   "viewport": {

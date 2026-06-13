@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "spark_attack_effect_timing",
-  "content_hash": "09783b01bc8ced247b3d4cf8e75f40186e6ac7c6c639830e8612a83214649000",
+  "content_hash": "1a8bbce0ea59b1340ffabf4964eea7b46d50eb67beebc375fcfc06db9f23bb51",
   "replay_path": "godot/tests/replays/spark_ability_dash_movement.json",
   "frame": 3,
   "viewport": {

@@ -372,6 +372,8 @@ function parseHud(value) {
     revive_count: value.revive_count,
     ability_type: value.ability_type,
     items_collected: value.items_collected.filter((item) => typeof item === 'string').sort(),
+    orb_item_ids: Array.isArray(value.orb_item_ids) ? normalizeStringArray(value.orb_item_ids) : [],
+    acquired_orb_ids: Array.isArray(value.acquired_orb_ids) ? normalizeStringArray(value.acquired_orb_ids) : [],
     score: Number.isInteger(value.score) ? value.score : undefined,
     remaining_life_bonus: Number.isInteger(value.remaining_life_bonus) ? value.remaining_life_bonus : undefined,
     difficulty: typeof value.difficulty === 'string' ? value.difficulty : undefined,

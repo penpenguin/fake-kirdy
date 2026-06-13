@@ -42,6 +42,8 @@ type ProceduralLevelExport = {
         door_trigger_radius?: number;
         min_spawn_door_distance?: number;
         door_safe_radius?: number;
+        min_platform_clearance_px?: number;
+        max_bottom_floor_gap_px?: number;
         vertical_transition?: {
           enabled?: boolean;
           max_spawn_drop_distance?: number;
@@ -189,7 +191,7 @@ describe('Godot v2 procedural level schema generation', () => {
       grid: { columns: 18, rows: 12 },
       room: { width: 760, height: 432 },
       camera_bounds: {
-        position: { x: 380, y: 270 },
+        position: { x: 380, y: 178 },
         size: { x: 840, y: 540 },
       },
       spawns: {
@@ -205,6 +207,8 @@ describe('Godot v2 procedural level schema generation', () => {
         door_trigger_radius: 48,
         min_spawn_door_distance: 64,
         door_safe_radius: 96,
+        min_platform_clearance_px: 36,
+        max_bottom_floor_gap_px: 0,
       },
     });
     expect(iceRoom?.runtime_layout?.platforms?.map((platform) => platform.id)).toEqual([
@@ -260,7 +264,7 @@ describe('Godot v2 procedural level schema generation', () => {
         {
           id: 'GeneratedEnemySpawn',
           spawn_id: 'labyrinth_010_generated_enemy',
-          enemy_type: 'generated_ground',
+          enemy_type: 'frost_flyer',
           ability_type: 'frost',
           contact_damage: 1,
           attack_damage: 1,
@@ -271,7 +275,7 @@ describe('Godot v2 procedural level schema generation', () => {
         {
           id: 'GeneratedFlyingEnemySpawn',
           spawn_id: 'labyrinth_010_generated_flying',
-          enemy_type: 'generated_flying',
+          enemy_type: 'frost_flyer',
           ability_type: 'frost',
           contact_damage: 1,
           attack_damage: 1,
@@ -426,14 +430,14 @@ describe('Godot v2 procedural level schema generation', () => {
     expect(iceReliquaryRoute?.runtime_layout?.content?.enemies).toEqual(expect.arrayContaining([
       expect.objectContaining({
         spawn_id: 'labyrinth_010_generated_enemy',
-        enemy_type: 'generated_ground',
+        enemy_type: 'frost_flyer',
         attack_damage: 1,
         attack_radius: 112,
         attack_cooldown_ms: 4000,
       }),
       expect.objectContaining({
         spawn_id: 'labyrinth_010_generated_flying',
-        enemy_type: 'generated_flying',
+        enemy_type: 'frost_flyer',
         attack_radius: 148,
       }),
     ]));
@@ -441,7 +445,7 @@ describe('Godot v2 procedural level schema generation', () => {
     expect(skyRoute?.runtime_layout?.content?.enemies).toEqual(expect.arrayContaining([
       expect.objectContaining({
         spawn_id: 'labyrinth_051_generated_elite',
-        enemy_type: 'generated_flying',
+        enemy_type: 'spark_wisp',
         contact_damage: 1,
         attack_damage: 1,
         attack_cooldown_ms: 4000,
@@ -450,7 +454,7 @@ describe('Godot v2 procedural level schema generation', () => {
     expect(terminalRoom?.runtime_layout?.content?.enemies).toEqual([
       expect.objectContaining({
         spawn_id: 'labyrinth_132_final_boss',
-        enemy_type: 'generated_flying',
+        enemy_type: 'spark_wisp',
         ability_type: 'spark',
         enemy_group_id: 'labyrinth_132_final_guard',
         boss_id: 'labyrinth_132_final_boss',
@@ -551,6 +555,62 @@ describe('Godot v2 procedural level schema generation', () => {
         expect(distance, `${level.id} ${targetSpawnId} spawn too close to door`).toBeGreaterThanOrEqual(
           minSpawnDoorDistance,
         );
+      }
+    }
+  });
+
+  it('bottom-aligns generated floors and keeps platform gaps traversable', () => {
+    const generated = JSON.parse(readFileSync(proceduralLevelsPath, 'utf8')) as ProceduralLevelExport;
+
+    for (const level of generated.levels ?? []) {
+      const layout = level.runtime_layout;
+      const safety = layout?.safety;
+      const minClearance = Number(safety?.min_platform_clearance_px);
+      const maxBottomGap = Number(safety?.max_bottom_floor_gap_px);
+
+      expect(minClearance, `${level.id} missing platform clearance`).toBe(36);
+      expect(maxBottomGap, `${level.id} missing bottom floor gap limit`).toBe(0);
+
+      const cameraBottom = Number(layout?.camera_bounds?.position?.y) + Number(layout?.camera_bounds?.size?.y) / 2;
+      const floorSurfaces = [
+        layout?.floor,
+        ...(layout?.floor_segments ?? []),
+      ].filter((surface): surface is NonNullable<typeof surface> => surface !== undefined);
+      const allSurfaces = [
+        ...floorSurfaces,
+        ...(layout?.platforms ?? []),
+      ];
+      const bottomFloor = floorSurfaces.reduce((bottom, surface) => {
+        return Math.max(bottom, Number(surface.position?.y) + Number(surface.size?.y) / 2);
+      }, Number.NEGATIVE_INFINITY);
+
+      expect(cameraBottom - bottomFloor, `${level.id} bottom floor floats above camera bottom`).toBeLessThanOrEqual(maxBottomGap);
+
+      for (let lowerIndex = 0; lowerIndex < allSurfaces.length; lowerIndex += 1) {
+        for (let upperIndex = 0; upperIndex < allSurfaces.length; upperIndex += 1) {
+          if (lowerIndex === upperIndex) {
+            continue;
+          }
+          const lower = allSurfaces[lowerIndex];
+          const upper = allSurfaces[upperIndex];
+          const lowerTop = Number(lower.position?.y) - Number(lower.size?.y) / 2;
+          const upperBottom = Number(upper.position?.y) + Number(upper.size?.y) / 2;
+          const verticalGap = lowerTop - upperBottom;
+          if (verticalGap <= 0) {
+            continue;
+          }
+          const horizontalOverlap = Math.min(
+            Number(lower.position?.x) + Number(lower.size?.x) / 2,
+            Number(upper.position?.x) + Number(upper.size?.x) / 2,
+          ) - Math.max(
+            Number(lower.position?.x) - Number(lower.size?.x) / 2,
+            Number(upper.position?.x) - Number(upper.size?.x) / 2,
+          );
+          if (horizontalOverlap <= 0) {
+            continue;
+          }
+          expect(verticalGap, `${level.id} ${upper.id} -> ${lower.id} gap is not traversable`).toBeGreaterThanOrEqual(minClearance);
+        }
       }
     }
   });

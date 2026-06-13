@@ -10,6 +10,31 @@ const godotRoot = join(repoRoot, 'godot');
 const readGodotFile = (relativePath: string): string =>
   readFileSync(join(godotRoot, relativePath), 'utf8');
 
+const extractCameraBounds = (source: string): { x: number; y: number; width: number; height: number } => {
+  const match = source.match(
+    /\[node name="CameraBoundsMarker"[\s\S]*?position = Vector2\(([-0-9.]+), ([-0-9.]+)\)[\s\S]*?size = Vector2\(([-0-9.]+), ([-0-9.]+)\)/,
+  );
+  if (!match) {
+    throw new Error('Missing CameraBoundsMarker');
+  }
+  return {
+    x: Number(match[1]),
+    y: Number(match[2]),
+    width: Number(match[3]),
+    height: Number(match[4]),
+  };
+};
+
+const extractFloorBottom = (source: string): number => {
+  const match = source.match(
+    /\[sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"\]\s*size = Vector2\([-0-9.]+, ([-0-9.]+)\)[\s\S]*?\[node name="Floor" type="StaticBody2D"[\s\S]*?position = Vector2\([-0-9.]+, ([-0-9.]+)\)/,
+  );
+  if (!match) {
+    throw new Error('Missing Floor rectangle');
+  }
+  return Number(match[2]) + Number(match[1]) / 2;
+};
+
 describe('Godot v2 level lab', () => {
   it('defines editor-placeable marker scripts for level metadata', () => {
     [
@@ -104,6 +129,33 @@ describe('Godot v2 level lab', () => {
     expect(flatRoom).toContain('PlayerSpawn');
     expect(flatRoom).toContain('GoalMarker');
     expect(doorRoom).toContain('DoorMarker');
+  });
+
+  it('aligns authored mainline floor bottoms to camera bounds bottoms', () => {
+    const mainlineLevels = [
+      'central_hub',
+      'forest_area',
+      'labyrinth_001',
+      'ice_area',
+      'fire_area',
+      'cave_area',
+      'mirror_corridor',
+      'forest_reliquary',
+      'ice_reliquary',
+      'fire_reliquary',
+      'ruins_reliquary',
+      'sky_sanctum',
+      'goal_sanctum',
+    ];
+
+    for (const levelId of mainlineLevels) {
+      const scene = readGodotFile(`levels/${levelId}.tscn`);
+      const camera = extractCameraBounds(scene);
+      const floorBottom = extractFloorBottom(scene);
+      const cameraBottom = camera.y + camera.height / 2;
+
+      expect(cameraBottom - floorBottom, `${levelId} floor floats above camera bottom`).toBeLessThanOrEqual(0);
+    }
   });
 
   it('documents level lab editor workflow', () => {

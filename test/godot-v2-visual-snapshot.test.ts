@@ -202,8 +202,10 @@ describe('Godot visual snapshots', () => {
     const snapshots = contract.snapshots ?? [];
     const visualTags = snapshots.flatMap((snapshot) => snapshot.visual_tags ?? []);
     const requiredResources = snapshots.flatMap((snapshot) => snapshot.required_resource_paths ?? []);
+    const centralHubSnapshot = snapshots.find((snapshot) => snapshot.id === 'level_terrain_central_hub');
 
     expect(visualTags).toEqual(expect.arrayContaining(['hud_meaning', 'sealed_locked_door', 'stage_background']));
+    expect(centralHubSnapshot?.required_resource_paths).toContain('godot/resources/assets/images/world/royal-background.webp');
     for (const background of [
       'godot/resources/assets/images/world/hub-background.webp',
       'godot/resources/assets/images/world/forest-background.webp',

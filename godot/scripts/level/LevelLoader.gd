@@ -468,7 +468,25 @@ func get_generated_door_role(direction: String, runtime_layout: Dictionary) -> S
 
 
 func get_generated_door_label(target_level_id: String) -> String:
-    return String(target_level_id).replace("_", " ").to_pascal_case()
+    return format_generated_level_display_name(target_level_id)
+
+
+func format_generated_level_display_name(level_id: String) -> String:
+    var display_parts := []
+    var raw_parts := String(level_id).replace("-", "_").split("_")
+    for raw_part in raw_parts:
+        var part := String(raw_part).strip_edges()
+        if part == "":
+            continue
+        if part.is_valid_int():
+            display_parts.append(part)
+        else:
+            display_parts.append(part.substr(0, 1).to_upper() + part.substr(1).to_lower())
+
+    if display_parts.is_empty():
+        return "Unknown"
+
+    return " ".join(display_parts)
 
 
 func get_generated_branch_exit_rule(runtime_layout: Dictionary, direction: String) -> Dictionary:

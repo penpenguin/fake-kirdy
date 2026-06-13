@@ -185,7 +185,7 @@
       "visual_tags": ["level_terrain", "stage_background"],
       "required_scene_paths": ["godot/levels/central_hub.tscn", "godot/scripts/level/LevelVisualAssets.gd"],
       "required_resource_paths": [
-        "godot/resources/assets/images/world/hub-background.webp",
+        "godot/resources/assets/images/world/royal-background.webp",
         "godot/resources/assets/images/world/brick-tile.webp",
         "godot/resources/assets/images/world/wall-texture.webp"
       ]

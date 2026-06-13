@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "level_background_generated_labyrinth",
-  "content_hash": "88f1a86199d583c730c44175f2a89a7be53cad33ac53bd60e2e9fb11d560184a",
+  "content_hash": "690a9824a3f30a46dae7227ab1febad275ca3407d2a5a9078a87cdc6876291a9",
   "replay_path": "godot/tests/replays/labyrinth_010_generated_content.json",
   "frame": 45,
   "viewport": {

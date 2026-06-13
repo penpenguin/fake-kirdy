@@ -13,6 +13,7 @@ class_name EnemySpawnMarker
 @export var attack_cooldown_ms: int = 1200
 @export var enemy_group_id: String = ""
 @export var boss_id: String = ""
+@export var orb_reward_item_id: String = ""
 
 
 func _ready() -> void:
@@ -40,5 +41,6 @@ func to_level_marker() -> Dictionary:
             "attack_cooldown_ms": attack_cooldown_ms,
             "enemy_group_id": enemy_group_id,
             "boss_id": boss_id,
+            "orb_reward_item_id": orb_reward_item_id,
         },
     }

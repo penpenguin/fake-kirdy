@@ -14,7 +14,7 @@ The command reads `godot/tests/usability_accessibility_contract.json` and checks
 - visual feedback paths exist for touch buttons, combat damage, and map completion
 - minimap color roles are present and separated enough to avoid relying on a single indistinct hue
 - tutorial size ratios keep the player, enemies, heal pickups, and item/door/goal markers readable against each other
-- HUD runtime values include semantic captions such as `HEALTH`, `ABILITY`, `ITEMS`, `SCORE`, `OBJECTIVE`, `ATTACK`, and `STATUS`
+- HUD runtime values include semantic captions such as `HEALTH`, `ABILITY`, `ITEMS`, `SCORE`, `OBJECTIVE`, `ATTACK`, and `ORBS`
 - representative player, door, heal pickup, and enemy visuals stay within the one-block readability envelope
 - `central_hub` door markers have a nearby support platform so exits are not floating without obvious footing
 

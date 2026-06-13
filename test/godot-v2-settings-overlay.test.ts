@@ -63,6 +63,7 @@ describe('Godot v2 settings overlay and trace', () => {
     expect(session).toContain('close_settings_menu');
     expect(session).toContain('move_settings_focus');
     expect(session).toContain('check_settings_actions');
+    expect(session).toContain('apply_focused_settings_action');
     expect(session).toContain('sync_settings_overlay');
     expect(session).toContain('sync_settings_menu_visibility');
     expect(session).toContain('apply_settings_update');
@@ -70,6 +71,7 @@ describe('Godot v2 settings overlay and trace', () => {
     expect(session).toContain('settings.menu.opened');
     expect(session).toContain('settings.menu.closed');
     expect(session).toContain('settings.focus.changed');
+    expect(session).toContain('is_session_action_just_pressed(pause_settings_action)');
     expect(mainScene).toContain('settings_overlay_enabled = true');
     expect(project).toContain('settings_menu');
     expect(project).toContain('settings_focus_next');
@@ -86,6 +88,7 @@ describe('Godot v2 settings overlay and trace', () => {
     const replay = readFileSync(replayPath, 'utf8');
     const traceSummary = readFileSync(join(repoRoot, 'scripts', 'trace-summary.mjs'), 'utf8');
     const docs = readFileSync(join(repoRoot, 'docs', 'godot-v2', 'save-persistence.md'), 'utf8');
+    const pauseDocs = readFileSync(join(repoRoot, 'docs', 'godot-v2', 'pause-overlay.md'), 'utf8');
 
     expect(replay).toContain('settings_volume_up');
     expect(replay).toContain('settings_cycle_controls');
@@ -95,6 +98,8 @@ describe('Godot v2 settings overlay and trace', () => {
     expect(traceSummary).toContain("eventType === 'settings.updated'");
     expect(docs).toContain('SettingsOverlay.gd');
     expect(docs).toContain('settings.updated');
+    expect(docs).toContain('Enter activates the focused setting');
+    expect(pauseDocs).toContain('Enter activates the focused setting');
   });
 
   it('adds replay coverage for opening settings from the game menu with focus and blur state', () => {
@@ -131,5 +136,24 @@ describe('Godot v2 settings overlay and trace', () => {
       'settings.menu.opened',
       'settings.menu.closed',
     ]));
+  });
+
+  it('keeps Enter useful after opening settings from pause by applying the focused setting', () => {
+    const replayPath = join(godotRoot, 'tests', 'replays', 'pause_settings_flow.json');
+    const replay = JSON.parse(readFileSync(replayPath, 'utf8')) as {
+      frames?: Array<{
+        actions?: Record<string, boolean>;
+      }>;
+    };
+    const pauseSettingsPressFrames = replay.frames?.filter((frame) => frame.actions?.pause_settings) ?? [];
+    const directVolumePressFrames = replay.frames?.filter((frame) => frame.actions?.settings_volume_up) ?? [];
+
+    expect(pauseSettingsPressFrames.length).toBeGreaterThanOrEqual(2);
+    expect(directVolumePressFrames).toHaveLength(0);
+
+    const session = readFileSync(join(godotRoot, 'scripts', 'session', 'GameSession.gd'), 'utf8');
+    expect(session).toContain('func apply_focused_settings_action() -> void:');
+    expect(session).toContain('apply_focused_settings_action()');
+    expect(session).toContain('"settings.focus_activated"');
   });
 });

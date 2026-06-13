@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "level_background_sky",
-  "content_hash": "329119b3094d21f2e3c13b7232369ef30c358ada5b72064c269756b82e56eadf",
+  "content_hash": "f49ab315a6a6bf1e9a9130c62c6d39977ee3221e1f958c40bb19cdc0f2309b2b",
   "replay_path": "godot/tests/replays/sky_sanctum_to_goal_finish.json",
   "frame": 90,
   "viewport": {

@@ -38,13 +38,13 @@
     {
       "frame": 6,
       "actions": {
-        "settings_volume_up": true
+        "pause_settings": true
       }
     },
     {
       "frame": 7,
       "actions": {
-        "settings_volume_up": false
+        "pause_settings": false
       }
     },
     {

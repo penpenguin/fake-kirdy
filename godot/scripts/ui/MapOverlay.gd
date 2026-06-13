@@ -199,6 +199,9 @@ func duplicate_map_features(source: Array) -> Array:
             "discovered": bool(feature.get("discovered", false)),
             "hidden": bool(feature.get("hidden", false)),
             "completed": bool(feature.get("completed", false)),
+            "door_label": String(feature.get("door_label", "")),
+            "target_level_id": String(feature.get("target_level_id", "")),
+            "target_level_display_name": String(feature.get("target_level_display_name", "")),
         })
 
     return copy

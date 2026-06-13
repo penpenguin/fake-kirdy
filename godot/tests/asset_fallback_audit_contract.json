@@ -38,7 +38,7 @@
     },
     {
       "id": "leaf",
-      "texture_var": "kirdy_ice_texture",
+      "texture_var": "kirdy_leaf_texture",
       "allowed_sfx_streams": ["SfxKirdyInhale"]
     },
     {
@@ -57,15 +57,20 @@
     "audio/sfx/kirdy-swallow.wav",
     "images/characters/kirdy/kirdy-fire.webp",
     "images/characters/kirdy/kirdy-ice.webp",
+    "images/characters/kirdy/kirdy-leaf.webp",
     "images/characters/kirdy/kirdy-sword.webp",
     "images/characters/kirdy/kirdy-spark.webp",
     "images/effects/fire-attack.webp",
     "images/effects/ice-attack.webp",
     "images/effects/inhale-sparkle.webp",
+    "images/effects/leaf-attack.webp",
     "images/effects/spark-attack.webp",
     "images/effects/star-bullet.webp",
     "images/effects/sword-slash.webp",
     "images/enemies/dronto-durt.webp",
+    "images/enemies/blaze-imp.webp",
+    "images/enemies/frost-flutter.webp",
+    "images/enemies/leaf-sprout.webp",
     "images/enemies/wabble-bee.webp",
     "images/ui/door-marker.webp",
     "images/ui/goal-door.webp",
@@ -90,6 +95,7 @@
     "images/effects/fire-attack.webp",
     "images/effects/ice-attack.webp",
     "images/effects/inhale-sparkle.webp",
+    "images/effects/leaf-attack.webp",
     "images/effects/spark-attack.webp",
     "images/effects/star-bullet.webp",
     "images/effects/sword-slash.webp"
@@ -128,7 +134,10 @@
     ]
   },
   "primary_enemy_assets": [
+    "images/enemies/blaze-imp.webp",
     "images/enemies/dronto-durt.webp",
+    "images/enemies/frost-flutter.webp",
+    "images/enemies/leaf-sprout.webp",
     "images/enemies/wabble-bee.webp"
   ],
   "allowed_fallback_event_types": [

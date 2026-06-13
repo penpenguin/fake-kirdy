@@ -160,4 +160,38 @@ describe('Godot v2 ResultsScene', () => {
       expect.arrayContaining(['results.scene.shown', 'results.continue.selected', 'door.entered', 'player.jump.started']),
     );
   });
+
+  it('does not auto-cover game-over with the full ResultsScene', () => {
+    const replayPath = join(godotRoot, 'tests', 'replays', 'game_over_no_auto_results.json');
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const showResultsBody = session.slice(
+      session.indexOf('func show_results_scene'),
+      session.indexOf('func show_error_overlay'),
+    );
+    const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
+      replays?: Array<{
+        id?: string;
+        replay_path?: string;
+        expected_events?: string[];
+        forbidden_events?: string[];
+      }>;
+    };
+
+    expect(existsSync(replayPath)).toBe(true);
+    expect(session).toContain('func can_show_results_scene() -> bool:');
+    expect(session).toContain('return ["completed", "complete"].has(outcome)');
+    expect(showResultsBody).toContain('if not can_show_results_scene():');
+
+    const replay = JSON.parse(readFileSync(replayPath, 'utf8')) as {
+      continue_after_finished?: boolean;
+      frames?: Array<{ actions?: Record<string, boolean> }>;
+    };
+    const suiteEntry = suite.replays?.find((entry) => entry.id === 'game_over_no_auto_results');
+
+    expect(replay.continue_after_finished).toBe(true);
+    expect(replay.frames?.some((frame) => frame.actions?.result_continue)).toBe(false);
+    expect(suiteEntry?.replay_path).toBe('res://tests/replays/game_over_no_auto_results.json');
+    expect(suiteEntry?.expected_events).toEqual(expect.arrayContaining(['game.over', 'result.overlay.shown']));
+    expect(suiteEntry?.forbidden_events).toContain('results.scene.shown');
+  });
 });

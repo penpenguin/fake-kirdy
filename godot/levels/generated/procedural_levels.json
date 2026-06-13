@@ -77,7 +77,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -127,7 +127,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -204,7 +206,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_001_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "leaf_sprite",
               "ability_type": "leaf",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -334,7 +336,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -384,7 +386,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -466,7 +470,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_002_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "leaf_sprite",
               "ability_type": "leaf",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -596,7 +600,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -646,7 +650,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -728,7 +734,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_003_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "leaf_sprite",
               "ability_type": "leaf",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -858,7 +864,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -908,7 +914,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -990,7 +998,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_004_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "leaf_sprite",
               "ability_type": "leaf",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -1120,7 +1128,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -1170,7 +1178,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -1243,7 +1253,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_005_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "leaf_sprite",
               "ability_type": "leaf",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -1384,7 +1394,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -1434,7 +1444,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -1528,7 +1540,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_006_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "frost_flyer",
               "ability_type": "frost",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -1543,7 +1555,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_006_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "frost_flyer",
               "ability_type": "frost",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -1673,7 +1685,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -1723,7 +1735,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -1816,7 +1830,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_007_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "frost_flyer",
               "ability_type": "frost",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -1831,7 +1845,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_007_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "frost_flyer",
               "ability_type": "frost",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -1961,7 +1975,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -2011,7 +2025,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -2104,7 +2120,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_008_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "frost_flyer",
               "ability_type": "frost",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -2119,7 +2135,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_008_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "frost_flyer",
               "ability_type": "frost",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -2249,7 +2265,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -2299,7 +2315,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -2392,7 +2410,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_009_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "frost_flyer",
               "ability_type": "frost",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -2407,7 +2425,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_009_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "frost_flyer",
               "ability_type": "frost",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -2537,7 +2555,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -2587,7 +2605,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -2671,7 +2691,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_010_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "frost_flyer",
               "ability_type": "frost",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -2686,7 +2706,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_010_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "frost_flyer",
               "ability_type": "frost",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -2827,7 +2847,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -2878,6 +2898,8 @@
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
           "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0,
           "vertical_transition": {
             "enabled": true,
             "max_spawn_drop_distance": 96,
@@ -2965,7 +2987,7 @@
             "id": "GeneratedPlatformVerticalStep",
             "position": {
               "x": 380,
-              "y": 304
+              "y": 284
             },
             "size": {
               "x": 120,
@@ -2995,7 +3017,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_011_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -3010,7 +3032,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_011_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -3151,7 +3173,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -3201,7 +3223,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -3294,7 +3318,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_012_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -3309,7 +3333,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_012_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -3439,7 +3463,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -3489,7 +3513,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -3582,7 +3608,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_013_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -3597,7 +3623,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_013_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -3727,7 +3753,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -3777,7 +3803,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -3870,7 +3898,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_014_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -3885,7 +3913,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_014_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -4015,7 +4043,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -4065,7 +4093,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -4158,7 +4188,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_015_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -4173,7 +4203,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_015_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -4303,7 +4333,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -4353,7 +4383,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -4446,7 +4478,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_016_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -4461,7 +4493,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_016_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -4591,7 +4623,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -4641,7 +4673,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -4734,7 +4768,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_017_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -4749,7 +4783,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_017_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -4879,7 +4913,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -4929,7 +4963,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -5022,7 +5058,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_018_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -5037,7 +5073,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_018_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -5167,7 +5203,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -5217,7 +5253,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -5310,7 +5348,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_019_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -5325,7 +5363,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_019_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -5455,7 +5493,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -5505,7 +5543,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -5598,7 +5638,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_020_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -5613,7 +5653,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_020_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -5743,7 +5783,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -5793,7 +5833,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -5886,7 +5928,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_021_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -5901,7 +5943,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_021_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -6031,7 +6073,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -6081,7 +6123,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -6174,7 +6218,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_022_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -6189,7 +6233,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_022_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -6319,7 +6363,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -6369,7 +6413,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -6462,7 +6508,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_023_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -6477,7 +6523,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_023_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -6607,7 +6653,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -6657,7 +6703,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -6750,7 +6798,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_024_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -6765,7 +6813,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_024_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -6895,7 +6943,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -6945,7 +6993,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -7038,7 +7088,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_025_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -7053,7 +7103,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_025_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -7183,7 +7233,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -7233,7 +7283,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -7326,7 +7378,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_026_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -7341,7 +7393,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_026_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -7471,7 +7523,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -7521,7 +7573,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -7614,7 +7668,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_027_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -7629,7 +7683,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_027_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -7759,7 +7813,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -7809,7 +7863,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -7902,7 +7958,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_028_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -7917,7 +7973,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_028_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -8047,7 +8103,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -8097,7 +8153,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -8190,7 +8248,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_029_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -8205,7 +8263,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_029_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -8335,7 +8393,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -8385,7 +8443,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -8478,7 +8538,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_030_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -8493,7 +8553,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_030_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -8623,7 +8683,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -8673,7 +8733,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -8766,7 +8828,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_031_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -8781,7 +8843,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_031_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -8911,7 +8973,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -8961,7 +9023,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -9045,7 +9109,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_032_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -9060,7 +9124,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_032_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -9201,7 +9265,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -9252,6 +9316,8 @@
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
           "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0,
           "vertical_transition": {
             "enabled": true,
             "max_spawn_drop_distance": 96,
@@ -9328,7 +9394,7 @@
             "id": "GeneratedPlatformVerticalStep",
             "position": {
               "x": 380,
-              "y": 304
+              "y": 284
             },
             "size": {
               "x": 120,
@@ -9358,7 +9424,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_033_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -9488,7 +9554,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -9538,7 +9604,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -9620,7 +9688,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_034_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -9750,7 +9818,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -9800,7 +9868,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -9882,7 +9952,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_035_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -10012,7 +10082,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -10062,7 +10132,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -10144,7 +10216,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_036_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -10274,7 +10346,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -10324,7 +10396,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -10406,7 +10480,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_037_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -10536,7 +10610,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -10586,7 +10660,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -10668,7 +10744,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_038_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -10798,7 +10874,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -10848,7 +10924,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -10930,7 +11008,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_039_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -11060,7 +11138,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -11110,7 +11188,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -11192,7 +11272,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_040_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -11322,7 +11402,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -11372,7 +11452,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -11454,7 +11536,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_041_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -11584,7 +11666,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -11634,7 +11716,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -11716,7 +11800,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_042_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -11846,7 +11930,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -11896,7 +11980,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -11978,7 +12064,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_043_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -12108,7 +12194,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -12158,7 +12244,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -12240,7 +12328,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_044_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -12370,7 +12458,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -12420,7 +12508,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -12502,7 +12592,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_045_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -12632,7 +12722,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -12682,7 +12772,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -12764,7 +12856,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_046_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -12894,7 +12986,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -12944,7 +13036,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -13026,7 +13120,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_047_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -13156,7 +13250,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -13206,7 +13300,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -13288,7 +13384,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_048_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -13418,7 +13514,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -13468,7 +13564,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -13550,7 +13648,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_049_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -13680,7 +13778,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -13730,7 +13828,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -13803,7 +13903,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_050_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -13944,7 +14044,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -13995,6 +14095,8 @@
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
           "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0,
           "vertical_transition": {
             "enabled": true,
             "max_spawn_drop_distance": 96,
@@ -14082,7 +14184,7 @@
             "id": "GeneratedPlatformVerticalStep",
             "position": {
               "x": 380,
-              "y": 304
+              "y": 284
             },
             "size": {
               "x": 120,
@@ -14112,7 +14214,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_051_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -14127,7 +14229,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_051_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -14142,7 +14244,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_051_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -14272,7 +14374,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -14322,7 +14424,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -14415,7 +14519,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_052_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -14430,7 +14534,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_052_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -14445,7 +14549,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_052_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -14575,7 +14679,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -14625,7 +14729,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -14718,7 +14824,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_053_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -14733,7 +14839,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_053_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -14748,7 +14854,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_053_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -14878,7 +14984,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -14928,7 +15034,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -15021,7 +15129,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_054_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15036,7 +15144,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_054_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15051,7 +15159,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_054_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15181,7 +15289,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -15231,7 +15339,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -15324,7 +15434,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_055_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15339,7 +15449,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_055_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15354,7 +15464,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_055_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15484,7 +15594,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -15534,7 +15644,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -15627,7 +15739,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_056_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15642,7 +15754,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_056_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15657,7 +15769,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_056_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15787,7 +15899,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -15837,7 +15949,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -15930,7 +16044,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_057_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15945,7 +16059,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_057_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15960,7 +16074,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_057_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -16090,7 +16204,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -16140,7 +16254,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -16233,7 +16349,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_058_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -16248,7 +16364,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_058_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -16263,7 +16379,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_058_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -16393,7 +16509,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -16443,7 +16559,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -16536,7 +16654,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_059_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -16551,7 +16669,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_059_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -16566,7 +16684,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_059_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -16696,7 +16814,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -16746,7 +16864,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -16839,7 +16959,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_060_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -16854,7 +16974,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_060_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -16869,7 +16989,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_060_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -16999,7 +17119,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -17049,7 +17169,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -17142,7 +17264,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_061_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -17157,7 +17279,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_061_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -17172,7 +17294,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_061_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -17302,7 +17424,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -17352,7 +17474,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -17445,7 +17569,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_062_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -17460,7 +17584,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_062_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -17475,7 +17599,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_062_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -17605,7 +17729,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -17655,7 +17779,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -17748,7 +17874,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_063_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -17763,7 +17889,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_063_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -17778,7 +17904,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_063_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -17908,7 +18034,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -17958,7 +18084,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -18051,7 +18179,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_064_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18066,7 +18194,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_064_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18081,7 +18209,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_064_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18211,7 +18339,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -18261,7 +18389,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -18354,7 +18484,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_065_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18369,7 +18499,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_065_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18384,7 +18514,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_065_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18514,7 +18644,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -18564,7 +18694,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -18657,7 +18789,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_066_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18672,7 +18804,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_066_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18687,7 +18819,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_066_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18817,7 +18949,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -18867,7 +18999,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -18960,7 +19094,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_067_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18975,7 +19109,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_067_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18990,7 +19124,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_067_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -19120,7 +19254,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -19171,6 +19305,8 @@
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
           "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0,
           "vertical_transition": {
             "enabled": true,
             "max_spawn_drop_distance": 96,
@@ -19258,7 +19394,7 @@
             "id": "GeneratedPlatformVerticalStep",
             "position": {
               "x": 380,
-              "y": 304
+              "y": 284
             },
             "size": {
               "x": 120,
@@ -19287,7 +19423,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_068_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -19302,7 +19438,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_068_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -19317,7 +19453,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_068_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -19447,7 +19583,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -19498,6 +19634,8 @@
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
           "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0,
           "vertical_transition": {
             "enabled": true,
             "max_spawn_drop_distance": 96,
@@ -19563,7 +19701,7 @@
             "id": "GeneratedPlatformVerticalStep",
             "position": {
               "x": 380,
-              "y": 304
+              "y": 284
             },
             "size": {
               "x": 120,
@@ -19638,7 +19776,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -19688,7 +19826,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -19804,7 +19944,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -19854,7 +19994,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -19970,7 +20112,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -20020,7 +20162,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -20136,7 +20280,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -20186,7 +20330,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -20302,7 +20448,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -20352,7 +20498,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -20468,7 +20616,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -20518,7 +20666,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -20634,7 +20784,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -20684,7 +20834,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -20800,7 +20952,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -20850,7 +21002,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -20966,7 +21120,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -21016,7 +21170,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -21132,7 +21288,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -21182,7 +21338,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -21298,7 +21456,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -21348,7 +21506,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -21464,7 +21624,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -21514,7 +21674,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -21630,7 +21792,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -21680,7 +21842,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -21796,7 +21960,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -21846,7 +22010,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -21962,7 +22128,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -22012,7 +22178,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -22128,7 +22296,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -22178,7 +22346,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -22294,7 +22464,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -22344,7 +22514,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -22460,7 +22632,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -22510,7 +22682,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -22626,7 +22800,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -22676,7 +22850,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -22792,7 +22968,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -22842,7 +23018,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -22958,7 +23136,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -23008,7 +23186,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -23124,7 +23304,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -23174,7 +23354,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -23290,7 +23472,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -23340,7 +23522,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -23456,7 +23640,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -23506,7 +23690,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -23622,7 +23808,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -23672,7 +23858,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -23788,7 +23976,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -23838,7 +24026,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -23954,7 +24144,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -24004,7 +24194,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -24120,7 +24312,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -24170,7 +24362,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -24286,7 +24480,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -24336,7 +24530,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -24452,7 +24648,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -24502,7 +24698,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -24618,7 +24816,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -24668,7 +24866,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -24784,7 +24984,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -24834,7 +25034,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -24950,7 +25152,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -25000,7 +25202,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -25116,7 +25320,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -25166,7 +25370,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -25282,7 +25488,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -25332,7 +25538,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -25448,7 +25656,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -25498,7 +25706,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -25614,7 +25824,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -25664,7 +25874,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -25780,7 +25992,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -25830,7 +26042,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -25946,7 +26160,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -25996,7 +26210,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -26112,7 +26328,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -26162,7 +26378,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -26278,7 +26496,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -26328,7 +26546,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -26444,7 +26664,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -26494,7 +26714,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -26610,7 +26832,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -26660,7 +26882,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -26776,7 +27000,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -26826,7 +27050,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -26942,7 +27168,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -26992,7 +27218,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -27108,7 +27336,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -27158,7 +27386,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -27274,7 +27504,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -27324,7 +27554,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -27440,7 +27672,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -27490,7 +27722,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -27606,7 +27840,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -27656,7 +27890,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -27772,7 +28008,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -27822,7 +28058,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -27938,7 +28176,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -27988,7 +28226,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -28104,7 +28344,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -28154,7 +28394,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -28270,7 +28512,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -28320,7 +28562,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -28436,7 +28680,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -28486,7 +28730,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -28602,7 +28848,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -28652,7 +28898,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -28768,7 +29016,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -28818,7 +29066,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -28934,7 +29184,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -28984,7 +29234,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -29100,7 +29352,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -29150,7 +29402,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -29266,7 +29520,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -29316,7 +29570,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -29432,7 +29688,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -29482,7 +29738,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -29598,7 +29856,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -29648,7 +29906,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -29764,7 +30024,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -29814,7 +30074,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -29930,7 +30192,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -29980,7 +30242,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -30034,7 +30298,7 @@
             {
               "id": "GeneratedFinalBossSpawn",
               "spawn_id": "labyrinth_132_final_boss",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "enemy_group_id": "labyrinth_132_final_guard",
               "boss_id": "labyrinth_132_final_boss",

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "level_background_forest",
-  "content_hash": "350926c728d0f694b3490f8beced4f307e7cec1ab8d6fce81d30b8831319592f",
+  "content_hash": "ba1c802f015f8b3158cb83f426208b5efb0d1bff26fb857cc445dc1d75875b9e",
   "replay_path": "godot/tests/replays/forest_reliquary_collectible.json",
   "frame": 30,
   "viewport": {

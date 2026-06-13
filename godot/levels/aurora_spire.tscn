@@ -27,8 +27,8 @@ trigger_radius = 48.0
 position = Vector2(340, 400)
 script = ExtResource("3_enemy")
 spawn_id = "aurora_spire_enemy"
-enemy_type = "simple_ground"
-ability_type = "beam"
+enemy_type = "spark_wisp"
+ability_type = "spark"
 contact_damage = 1
 
 [node name="CameraBoundsMarker" type="Node2D" parent="."]
