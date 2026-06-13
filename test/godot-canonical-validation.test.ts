@@ -58,35 +58,24 @@ describe('Godot canonical validation and legacy boundary', () => {
     );
   });
 
-  it('documents that the legacy reference copy has been removed', () => {
-    const docsPath = join(repoRoot, 'docs', 'godot-v2', 'legacy-reference-boundary.md');
-    expect(existsSync(docsPath)).toBe(true);
-
-    const docs = readFileSync(docsPath, 'utf8');
+  it('keeps legacy removal out of the active docs tree', () => {
     const readme = readFileSync(join(repoRoot, 'README.md'), 'utf8');
     const agents = readFileSync(join(repoRoot, 'AGENTS.md'), 'utf8');
+    const docsIndex = readFileSync(join(repoRoot, 'docs', 'README.md'), 'utf8');
 
-    expect(docs).toContain('removed from the repository');
-    expect(docs).toContain('not required by the canonical runtime');
-    expect(docs).toContain('Root runtime dependencies removed');
-    expect(docs).toContain('retirement gates');
+    expect(existsSync(join(repoRoot, 'docs', 'godot-v2', 'legacy-reference-boundary.md'))).toBe(false);
     expect(readme).toContain('npm run test:canonical');
-    expect(readme).toContain('npm run legacy:inventory');
-    expect(readme).toContain('legacy reference copy has been removed');
     expect(agents).toContain('npm run test:canonical');
-    expect(agents).toContain('legacy:inventory');
-    expect(agents).toContain('legacy reference copy has been removed');
+    expect(docsIndex).not.toContain('legacy-reference-boundary.md');
   });
 
   it('does not retain the promoted Godot prototype tree', () => {
     const readme = readFileSync(join(repoRoot, 'README.md'), 'utf8');
     const agents = readFileSync(join(repoRoot, 'AGENTS.md'), 'utf8');
-    const plan = readFileSync(join(repoRoot, 'docs', 'godot-v2', 'full-migration-execplan.md'), 'utf8');
 
     expect(existsSync(join(repoRoot, 'prototypes'))).toBe(false);
-    expect(readme).toContain('promoted Godot prototype tree has been removed');
-    expect(agents).toContain('promoted Godot prototype tree has been removed');
-    expect(plan).toContain('promoted Godot prototype tree has been removed');
+    expect(readme).not.toContain('promoted Godot prototype tree');
+    expect(agents).not.toContain('promoted Godot prototype tree');
   });
 
   it('keeps root tests limited to Godot canonical validation', () => {

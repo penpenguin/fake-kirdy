@@ -40,7 +40,7 @@
     "godot:stage-manifest": "node scripts/check-godot-stage-manifest.mjs",
     "godot:procedural-levels": "node scripts/generate-godot-procedural-levels.mjs",
     "godot:catalog": "node scripts/generate-godot-level-catalog.mjs",
-    "godot:content-check": "node scripts/check-godot-content-migration.mjs",
+    "godot:content-check": "node scripts/check-godot-content-topology.mjs",
     "check:godot": "npm run godot:stage-manifest -- --check && npm run godot:procedural-levels -- --check && npm run godot:catalog -- --check && npm run godot:content-check && npm run godot:scene-lint && npm run godot:level-graph && npm run godot:progression-solver && npm run godot:combat-matrix && npm run godot:enemy-ai-arena && npm run godot:feel-metrics && npm run godot:visual-snapshot && npm run godot:audio-audit && npm run godot:content-budget && npm run godot:asset-fallback-audit && npm run godot:save-load-roundtrip && npm run godot:web-smoke && npm run godot:playtest-report -- --check && npm run godot:quality-report -- --check && npm run godot:replay-gen -- --check && npm run godot:export -- --check && node scripts/check-godot.mjs",
     "check:godot:runtime": "npm run godot:doctor -- --require-godot --skip-export-templates && npm run godot:save-load-roundtrip -- --runtime && npm run godot:replay-suite -- && npm run godot:trace-assert",
     "check:full": "npm run check:godot && npm run check:godot:runtime && npm run build:public && npm run godot:web-smoke -- --require-export --require-browser && npm run godot:web-performance",

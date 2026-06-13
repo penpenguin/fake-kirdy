@@ -152,8 +152,8 @@ describe('Godot content budget', () => {
               {
                 id: 'fixture_branch',
                 scene_path: scenePath,
-                tags: ['representative', 'phaser_branch'],
-                migration_status: 'representative',
+                tags: ['representative', 'branch'],
+                coverage_status: 'representative',
               },
             ],
           },
@@ -287,7 +287,7 @@ shape = SubResource("RectangleShape2D_floor")
         `${JSON.stringify(
           {
             version: 1,
-            levels: [{ id: 'fixture_return_spawn', scene_path: scenePath, tags: [], migration_status: 'representative' }],
+            levels: [{ id: 'fixture_return_spawn', scene_path: scenePath, tags: [], coverage_status: 'representative' }],
           },
           null,
           2,
@@ -339,7 +339,7 @@ door_preview_spacing_px = 32.0
         `${JSON.stringify(
           {
             version: 1,
-            levels: [{ id: 'empty_branch', scene_path: scenePath, tags: ['representative'], migration_status: 'representative' }],
+            levels: [{ id: 'empty_branch', scene_path: scenePath, tags: ['representative'], coverage_status: 'representative' }],
           },
           null,
           2,

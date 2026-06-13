@@ -18,4 +18,4 @@ The command reads `godot/tests/usability_accessibility_contract.json` and checks
 - representative player, door, heal pickup, and enemy visuals stay within the one-block readability envelope
 - `central_hub` door markers have a nearby support platform so exits are not floating without obvious footing
 
-This is a static contract, not a replacement for user research or full screen-reader support. It keeps the current Godot migration from regressing on the basic usability evidence that agents can verify quickly.
+This is a static contract, not a replacement for user research or full screen-reader support. It keeps the current Godot UI/input surface covered by basic usability evidence that agents can verify quickly.

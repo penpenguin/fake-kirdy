@@ -17,19 +17,17 @@ describe('retired Godot v2 Phaser parity ledger', () => {
     expect(existsSync(join(repoRoot, 'scripts', 'check-godot-parity-ledger.mjs'))).toBe(false);
   });
 
-  it('documents legacy retirement without an active parity ledger gate', () => {
-    const boundary = readFileSync(
-      join(repoRoot, 'docs', 'godot-v2', 'legacy-reference-boundary.md'),
-      'utf8',
-    );
+  it('keeps parity and legacy retirement docs out of the active docs tree', () => {
     const readme = readFileSync(join(repoRoot, 'README.md'), 'utf8');
     const agents = readFileSync(join(repoRoot, 'AGENTS.md'), 'utf8');
+    const docsIndex = readFileSync(join(repoRoot, 'docs', 'godot-v2', 'README.md'), 'utf8');
 
     expect(existsSync(join(repoRoot, 'docs', 'godot-v2', 'phaser-parity-ledger.md'))).toBe(false);
     expect(existsSync(join(repoRoot, 'docs', 'godot-v2', 'phaser-parity-ledger.json'))).toBe(false);
-    expect(boundary).not.toContain('godot:parity-ledger');
+    expect(existsSync(join(repoRoot, 'docs', 'godot-v2', 'legacy-reference-boundary.md'))).toBe(false);
     expect(readme).not.toContain('godot:parity-ledger');
     expect(agents).not.toContain('godot:parity-ledger');
-    expect(boundary).toContain('retired after the Godot mainline switch');
+    expect(docsIndex).not.toContain('parity ledger');
+    expect(docsIndex).not.toContain('legacy-reference-boundary');
   });
 });

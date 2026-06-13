@@ -9,7 +9,7 @@ const repoRoot = join(currentDir, '..');
 const godotRoot = join(repoRoot, 'godot');
 
 describe('Godot v2 catalog generation pipeline', () => {
-  it('keeps a source migration map for generating the canonical level catalog', () => {
+  it('keeps a source coverage map for generating the canonical level catalog', () => {
     const mapPath = join(godotRoot, 'levels', 'level_catalog.source.json');
 
     expect(existsSync(mapPath)).toBe(true);
@@ -25,14 +25,14 @@ describe('Godot v2 catalog generation pipeline', () => {
         expected_collectibles?: string[];
         expected_dead_end_rewards?: string[];
         expected_metadata?: Record<string, string | number | boolean>;
-        migration_status?: string;
+        coverage_status?: string;
       }>;
     };
 
     expect(source.version).toBe(1);
     expect(source.levels?.some((level) => level.id === 'central_hub' && level.source_ref === 'stage_manifest:central-hub')).toBe(true);
     expect(JSON.stringify(source)).not.toContain('legacy/phaser-reference');
-    expect(source.levels?.every((level) => typeof level.migration_status === 'string')).toBe(true);
+    expect(source.levels?.every((level) => typeof level.coverage_status === 'string')).toBe(true);
 
     const centralHub = source.levels?.find((level) => level.id === 'central_hub');
     expect(centralHub?.stage_id).toBe('central-hub');
@@ -45,11 +45,11 @@ describe('Godot v2 catalog generation pipeline', () => {
     ]);
     expect(centralHub?.expected_dead_end_rewards).toEqual(['health', 'max-health']);
 
-    const phaserStageIds = source.levels
+    const stageIds = source.levels
       ?.map((level) => level.stage_id)
       .filter((stageId): stageId is string => typeof stageId === 'string');
 
-    expect(phaserStageIds).toEqual(expect.arrayContaining([
+    expect(stageIds).toEqual(expect.arrayContaining([
       'central-hub',
       'ice-area',
       'mirror-corridor',

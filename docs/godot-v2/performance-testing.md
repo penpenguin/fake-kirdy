@@ -14,7 +14,7 @@ The command reads `godot/tests/performance_budget.json`, imports the Godot proje
 - Godot import/load time
 - trace output size
 
-The check skips gracefully when Godot is not installed, matching the rest of the optional Godot executable gates. It is intentionally separate from `npm test` because performance measurements are environment-sensitive and slower than static migration contracts.
+The check skips gracefully when Godot is not installed, matching the rest of the optional Godot executable gates. It is intentionally separate from `npm test` because performance measurements are environment-sensitive and slower than static contracts.
 
 The explicit browser 60 FPS gate is:
 

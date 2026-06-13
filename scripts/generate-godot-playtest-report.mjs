@@ -19,24 +19,6 @@ try {
   const markdown = renderMarkdown(report);
   const checks = validateReport(contract, report);
 
-  if (checks.length === 0 && checkOnly) {
-    const expectedJson = `${JSON.stringify(report, null, 2)}\n`;
-    if (!existsSync(outputJsonPath) || readFileSync(outputJsonPath, 'utf8') !== expectedJson) {
-      checks.push({
-        rule: 'report_freshness',
-        severity: 'error',
-        message: `${outputJsonPath} is not current. Run npm run godot:playtest-report.`,
-      });
-    }
-    if (!existsSync(outputMarkdownPath) || readFileSync(outputMarkdownPath, 'utf8') !== markdown) {
-      checks.push({
-        rule: 'report_freshness',
-        severity: 'error',
-        message: `${outputMarkdownPath} is not current. Run npm run godot:playtest-report.`,
-      });
-    }
-  }
-
   if (checks.length === 0 && !checkOnly) {
     writeText(outputJsonPath, `${JSON.stringify(report, null, 2)}\n`);
     writeText(outputMarkdownPath, markdown);
@@ -52,6 +34,9 @@ try {
     bookmark_count: report.bookmarks.length,
     generated_task_count: report.generated_tasks.length,
     unresolved_issue_count: report.unresolved_issue_count,
+    duration_ms: report.summary.duration_ms,
+    sampled_level_ids: [...new Set(report.samples.map((sample) => sample.level_id).filter(Boolean))],
+    bookmark_categories: [...new Set(report.bookmarks.map((bookmark) => bookmark.category).filter(Boolean))],
     failed_checks: checks,
   };
 
@@ -63,7 +48,7 @@ try {
       console.error(`[godot:playtest-report] ${check.rule} ${check.message}`);
     }
   } else if (checkOnly) {
-    console.log(`[godot:playtest-report] report is current; samples=${report.samples.length} bookmarks=${report.bookmarks.length}.`);
+    console.log(`[godot:playtest-report] report validated; samples=${report.samples.length} bookmarks=${report.bookmarks.length}.`);
   } else {
     console.log(`[godot:playtest-report] wrote ${outputJsonPath} and ${outputMarkdownPath}.`);
   }

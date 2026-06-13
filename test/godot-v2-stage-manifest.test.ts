@@ -50,7 +50,7 @@ describe('Godot v2 canonical stage manifest', () => {
     expect(existsSync(manifestPath)).toBe(true);
   });
 
-  it('captures durable topology and metadata needed by Godot content migration', () => {
+  it('captures durable topology and metadata needed by Godot content validation', () => {
     const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as StageManifest;
     const stages = new Map(manifest.stages?.map((stage) => [stage.id, stage]));
 

@@ -1,6 +1,6 @@
 # Godot Mainline Docs
 
-These documents describe the canonical Godot 4 project under `godot/`. The previous migration language is historical; current work should update the Godot project, Godot-owned data, and the validation scripts directly.
+These documents describe the canonical Godot 4 project under `godot/`. Current work should update the Godot project, Godot-owned data, replay fixtures, and validation scripts directly.
 
 ## Core Runtime
 
@@ -16,7 +16,7 @@ These documents describe the canonical Godot 4 project under `godot/`. The previ
 
 ## Content and gameplay
 
-- `content-migration.md`: hand-authored scenes, generated schema/importer data, level catalog, and replay coverage.
+- `content.md`: hand-authored scenes, generated schema data, level catalog, and replay coverage.
 - `procedural-level-generation.md`: `labyrinth_001` through `labyrinth_132`, branch density, generated markers, and terminal goals.
 - `combat-slice.md`: capture, release, swallow, ability acquisition/use, spit projectile, enemy damage, and replay evidence.
 
@@ -28,12 +28,6 @@ These documents describe the canonical Godot 4 project under `godot/`. The previ
 - `web-fallback.md`: Godot Web export and Canvas 2D fallback for WebGL 2 unavailable cases.
 - `usability-accessibility-testing.md`: static usability/accessibility contract.
 
-## Historical records
-
-- `full-migration-execplan.md`: completed migration record.
-- `gameplay-completion-execplan.md`: completed gameplay-loop record with one ongoing polish/tuning follow-up.
-- `legacy-reference-boundary.md`: boundary for the removed legacy reference copy.
-
 ## Validation
 
-Use `npm run test` for the fast gate and `npm run test:canonical` before claiming canonical gameplay parity on a machine with Godot installed.
+Use `npm run test` for the fast gate and `npm run test:canonical` before claiming canonical gameplay behavior on a machine with Godot installed.

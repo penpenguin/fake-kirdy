@@ -27,7 +27,7 @@
       "tags": [
         "ice",
         "representative",
-        "phaser_branch"
+        "branch"
       ],
       "source_ref": "stage_manifest:ice-area"
     },
@@ -37,7 +37,7 @@
       "tags": [
         "ruins",
         "representative",
-        "phaser_branch"
+        "branch"
       ],
       "source_ref": "stage_manifest:mirror-corridor"
     },
@@ -47,7 +47,7 @@
       "tags": [
         "fire",
         "representative",
-        "phaser_branch"
+        "branch"
       ],
       "source_ref": "stage_manifest:fire-area"
     },
@@ -57,7 +57,7 @@
       "tags": [
         "forest",
         "representative",
-        "phaser_branch"
+        "branch"
       ],
       "source_ref": "stage_manifest:forest-area"
     },
@@ -67,7 +67,7 @@
       "tags": [
         "ruins",
         "representative",
-        "phaser_branch"
+        "branch"
       ],
       "source_ref": "stage_manifest:cave-area"
     },
@@ -78,7 +78,7 @@
         "goal",
         "ruins",
         "representative",
-        "phaser_branch"
+        "branch"
       ],
       "source_ref": "stage_manifest:goal-sanctum"
     },
@@ -88,7 +88,7 @@
       "tags": [
         "sky",
         "representative",
-        "phaser_branch"
+        "branch"
       ],
       "source_ref": "stage_manifest:sky-sanctum"
     },
@@ -98,7 +98,7 @@
       "tags": [
         "sky",
         "representative",
-        "phaser_branch"
+        "branch"
       ],
       "source_ref": "stage_manifest:starlit-keep"
     },
@@ -108,7 +108,7 @@
       "tags": [
         "sky",
         "representative",
-        "phaser_branch"
+        "branch"
       ],
       "source_ref": "stage_manifest:aurora-spire"
     },
@@ -119,7 +119,7 @@
         "forest",
         "procedural",
         "representative",
-        "phaser_branch"
+        "branch"
       ],
       "source_ref": "stage_manifest:labyrinth-001"
     },
@@ -131,7 +131,7 @@
         "reliquary",
         "collectible",
         "representative",
-        "phaser_branch"
+        "branch"
       ],
       "source_ref": "stage_manifest:forest-reliquary"
     },
@@ -143,7 +143,7 @@
         "reliquary",
         "collectible",
         "representative",
-        "phaser_branch"
+        "branch"
       ],
       "source_ref": "stage_manifest:ice-reliquary"
     },
@@ -155,7 +155,7 @@
         "reliquary",
         "collectible",
         "representative",
-        "phaser_branch"
+        "branch"
       ],
       "source_ref": "stage_manifest:fire-reliquary"
     },
@@ -167,7 +167,7 @@
         "reliquary",
         "collectible",
         "representative",
-        "phaser_branch"
+        "branch"
       ],
       "source_ref": "stage_manifest:ruins-reliquary"
     },
@@ -176,7 +176,7 @@
       "scene_path": "res://levels/controller_lab.tscn",
       "tags": [
         "controller_lab",
-        "prototype"
+        "sandbox"
       ],
       "source_ref": ""
     },
@@ -267,7 +267,7 @@
         "hidden",
         "test_room"
       ],
-      "source_ref": "docs/godot-v2/content-migration.md"
+      "source_ref": "docs/godot-v2/content.md"
     },
     {
       "id": "revive_room",

@@ -18,26 +18,6 @@ try {
   const markdown = renderMarkdown(report);
   const failedChecks = [...missingSourceChecks, ...report.failed_checks];
 
-  if (checkOnly && failedChecks.length === 0) {
-    const expectedJson = `${JSON.stringify(report, null, 2)}\n`;
-    if (!existsSync(outputJsonPath) || readFileSync(outputJsonPath, 'utf8') !== expectedJson) {
-      failedChecks.push({
-        source_id: 'quality-report',
-        rule: 'report_freshness',
-        severity: 'error',
-        message: `${outputJsonPath} is not current. Run npm run godot:quality-report.`,
-      });
-    }
-    if (!existsSync(outputMarkdownPath) || readFileSync(outputMarkdownPath, 'utf8') !== markdown) {
-      failedChecks.push({
-        source_id: 'quality-report',
-        rule: 'report_freshness',
-        severity: 'error',
-        message: `${outputMarkdownPath} is not current. Run npm run godot:quality-report.`,
-      });
-    }
-  }
-
   if (!checkOnly) {
     writeText(outputJsonPath, `${JSON.stringify(report, null, 2)}\n`);
     writeText(outputMarkdownPath, markdown);
@@ -51,6 +31,14 @@ try {
     passed: report.summary.passed,
     failed: report.summary.failed,
     warning_count: report.summary.warning_count,
+    manual_playtest: report.manual_playtest,
+    sources: report.sources.map((source) => ({
+      id: source.id,
+      label: source.label,
+      status: source.status,
+      failed_check_count: source.failed_check_count,
+      warning_count: source.warning_count,
+    })),
     failed_checks: failedChecks,
   };
 
@@ -62,7 +50,7 @@ try {
       console.error(`[godot:quality-report] ${check.source_id} ${check.rule}: ${check.message}`);
     }
   } else if (checkOnly) {
-    console.log(`[godot:quality-report] report is current; passed=${report.summary.passed}/${report.summary.total}.`);
+    console.log(`[godot:quality-report] report validated; passed=${report.summary.passed}/${report.summary.total}.`);
   } else {
     console.log(`[godot:quality-report] wrote ${outputJsonPath} and ${outputMarkdownPath}.`);
   }

@@ -32,7 +32,7 @@ const inventory = {
   retirement_gates: [
     'canonical replay suite passes',
     'Godot export or export-template skip is documented',
-    'legacy migration decision recorded',
+    'legacy removal decision recorded',
     'Phaser reference behavior is ported or explicitly deprecated',
     'root Phaser/Vite dependencies removed',
   ],

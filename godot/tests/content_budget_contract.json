@@ -4,7 +4,7 @@
     "catalog_source": "godot/levels/level_catalog.source.json",
     "procedural_levels": "godot/levels/generated/procedural_levels.json"
   },
-  "include_migration_statuses": ["representative"],
+  "include_coverage_statuses": ["representative"],
   "generated_profile_by_shape": {
     "branch_room": "branch",
     "vertical_route": "branch",

@@ -37,7 +37,7 @@ Enemy contact damage uses a `player_invulnerability_ms` window so a single enemy
 
 `heal_room_recover_and_goal.json` loads `heal_room`, takes one enemy contact hit, collects `heal_room_recovery`, emits `player.healed`, then reaches the goal and emits `run.finished`.
 
-`central_hub_dead_end_max_health.json` starts at the Phaser-derived `central_hub` dead-end max-health marker, collects `central_hub_dead_end_max_health`, emits `player.max_hp_increased`, and ends by `replay.max_frames_reached`. The replay is intentionally short so it validates pickup/session/save behavior without drifting into a nearby hub door.
+`central_hub_dead_end_max_health.json` starts at the `central_hub` dead-end max-health marker, collects `central_hub_dead_end_max_health`, emits `player.max_hp_increased`, and ends by `replay.max_frames_reached`. The replay is intentionally short so it validates pickup/session/save behavior without drifting into a nearby hub door.
 
 Dead-end reward markers can also set `dead_end_id`. Collecting such a reward emits `dead_end.completed`, records the id in session state, and updates the map feature payload so the minimap can render the completed dead end separately from ordinary heal markers.
 
@@ -57,7 +57,7 @@ Cluster progression is enforced by `GameSession.get_cluster_transition_lock_reas
 
 Goal completion remains separate: touching a `GoalMarker` emits `run.finished` with the goal metadata payload.
 
-The canonical goal-door path uses `GoalDoorController.gd`, a thin `GoalMarker` specialization with the migrated `goal-door.webp` visual contract. `goal_sanctum.tscn` uses it for `goal_sanctum_clear`. Reaching that controller emits `goal.door.entered` before `run.finished`; both payloads include `time_ms`, `frames`, `score`, and `remaining_life_bonus` so trace review can compare the physical goal-door clear with result UI metrics.
+The canonical goal-door path uses `GoalDoorController.gd`, a thin `GoalMarker` specialization with the `goal-door.webp` visual contract. `goal_sanctum.tscn` uses it for `goal_sanctum_clear`. Reaching that controller emits `goal.door.entered` before `run.finished`; both payloads include `time_ms`, `frames`, `score`, and `remaining_life_bonus` so trace review can compare the physical goal-door clear with result UI metrics.
 
 When save is enabled, touching a `GoalMarker` also records the current level in `completed_level_ids` before `run.finished`.
 

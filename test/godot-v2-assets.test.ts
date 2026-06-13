@@ -11,8 +11,8 @@ const godotRoot = join(repoRoot, 'godot');
 const readGodotFile = (relativePath: string): string =>
   readFileSync(join(godotRoot, relativePath), 'utf8');
 
-describe('Godot v2 asset migration', () => {
-  it('tracks migrated assets from a Godot-owned manifest', () => {
+describe('Godot v2 assets', () => {
+  it('tracks canonical assets from a Godot-owned manifest', () => {
     const manifest = JSON.parse(readFileSync(join(godotAssetRoot, 'asset_manifest.json'), 'utf8')) as {
       version?: number;
       canonical_asset_root?: string;
@@ -42,7 +42,7 @@ describe('Godot v2 asset migration', () => {
     });
   });
 
-  it('renders the player from migrated Kirdy textures instead of a polygon placeholder', () => {
+  it('renders the player from Kirdy textures instead of a polygon placeholder', () => {
     const scene = readGodotFile('scenes/player/Player.tscn');
     const controller = readGodotFile('scripts/player/PlayerController.gd');
 

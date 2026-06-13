@@ -58,7 +58,7 @@ function validateSource(data, stageManifest) {
     const id = requireString(level.id, 'id');
     const scenePath = requireString(level.scene_path, `${id}.scene_path`);
     const tags = level.tags;
-    const migrationStatus = requireString(level.migration_status, `${id}.migration_status`);
+    const coverageStatus = requireString(level.coverage_status, `${id}.coverage_status`);
 
     if (seenIds.has(id)) {
       throw new Error(`Duplicate level id: ${id}`);
@@ -69,8 +69,8 @@ function validateSource(data, stageManifest) {
       throw new Error(`Level ${id} must define non-empty string tags`);
     }
 
-    if (migrationStatus.length === 0) {
-      throw new Error(`Level ${id} must define migration_status`);
+    if (coverageStatus.length === 0) {
+      throw new Error(`Level ${id} must define coverage_status`);
     }
 
     const localScenePath = godotPathToRepoPath(scenePath);

@@ -47,11 +47,11 @@ describe('Godot v2 canonical level catalog', () => {
     expect(source).not.toContain('var level_paths: Dictionary = {');
   });
 
-  it('documents catalog use as the next content migration interface', () => {
-    const docs = readFileSync(join(repoRoot, 'docs', 'godot-v2', 'content-migration.md'), 'utf8');
+  it('documents catalog use as the current content interface', () => {
+    const docs = readFileSync(join(repoRoot, 'docs', 'godot-v2', 'content.md'), 'utf8');
 
     expect(docs).toContain('level_catalog.json');
     expect(docs).toContain('source_ref');
-    expect(docs).toContain('schema/importer');
+    expect(docs).toContain('generated schema');
   });
 });

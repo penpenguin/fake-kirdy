@@ -10,7 +10,7 @@ const godotRoot = join(repoRoot, 'godot');
 const readGodotFile = (relativePath: string): string =>
   readFileSync(join(godotRoot, relativePath), 'utf8');
 
-describe('Godot v2 representative content migration', () => {
+describe('Godot v2 representative content', () => {
   it('adds a central hub level with TileMap and marker-driven door graph metadata', () => {
     const level = readGodotFile('levels/central_hub.tscn');
     const catalog = readGodotFile('levels/level_catalog.json');
@@ -74,7 +74,7 @@ describe('Godot v2 representative content migration', () => {
       }
       expect(catalogEntry?.source_ref).toBe(sourceRef);
       expect(catalogEntry?.tags).toContain('representative');
-      expect(catalogEntry?.tags).toContain('phaser_branch');
+      expect(catalogEntry?.tags).toContain('branch');
     }
   });
 
@@ -137,7 +137,7 @@ describe('Godot v2 representative content migration', () => {
     expect(replay.frames?.some((frame) => frame.actions?.move_right)).toBe(true);
   });
 
-  it('adds a replay that loads a migrated Phaser branch room and returns to the hub', () => {
+  it('adds a replay that loads a branch room and returns to the hub', () => {
     const replayPath = join(godotRoot, 'tests', 'replays', 'ice_area_return_hub.json');
 
     expect(existsSync(replayPath)).toBe(true);
@@ -153,7 +153,7 @@ describe('Godot v2 representative content migration', () => {
     expect(replay.frames?.some((frame) => frame.actions?.move_right)).toBe(true);
   });
 
-  it('adds a replay that proves the migrated goal shortcut is locked without the cave keystone', () => {
+  it('adds a replay that proves the goal shortcut is locked without the cave keystone', () => {
     const replayPath = join(godotRoot, 'tests', 'replays', 'mirror_to_goal_sanctum_locked_without_keystone.json');
 
     expect(existsSync(replayPath)).toBe(true);
@@ -169,7 +169,7 @@ describe('Godot v2 representative content migration', () => {
     expect(replay.frames?.some((frame) => frame.actions?.move_right)).toBe(true);
   });
 
-  it('adds a replay that loads the migrated sky sanctum and finishes through the goal path', () => {
+  it('adds a replay that loads the sky sanctum and finishes through the goal path', () => {
     const replayPath = join(godotRoot, 'tests', 'replays', 'sky_sanctum_to_goal_finish.json');
 
     expect(existsSync(replayPath)).toBe(true);
@@ -201,8 +201,8 @@ describe('Godot v2 representative content migration', () => {
     expect(replay.frames?.some((frame) => frame.actions?.move_right)).toBe(true);
   });
 
-  it('documents the current representative content migration subset', () => {
-    const docsPath = join(repoRoot, 'docs', 'godot-v2', 'content-migration.md');
+  it('documents the current playable content subset without migration history', () => {
+    const docsPath = join(repoRoot, 'docs', 'godot-v2', 'content.md');
 
     expect(existsSync(docsPath)).toBe(true);
 
@@ -220,6 +220,8 @@ describe('Godot v2 representative content migration', () => {
     expect(docs).toContain('mirror_to_goal_sanctum_locked_without_keystone.json');
     expect(docs).toContain('sky_sanctum_to_goal_finish.json');
     expect(docs).toContain('labyrinth_001_return_forest.json');
-    expect(docs).toContain('Phaser');
+    expect(docs).not.toContain('Content Migration');
+    expect(docs).not.toContain('Phaser');
+    expect(docs).not.toContain('legacy');
   });
 });

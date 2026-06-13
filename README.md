@@ -8,7 +8,7 @@
 
 ![Kirdy key visual](docs/key_visual.gif)
 
-Fake Kirdy uses Godot 4 as the canonical runtime. The former Phaser + Matter.js reference copy has been removed from the repository after its gameplay intent, topology, and asset evidence were migrated into Godot-owned data, docs, replay fixtures, and tests.
+Fake Kirdy uses Godot 4 as the canonical runtime. Gameplay behavior, topology, assets, replay fixtures, and validation contracts live in Godot-owned project data.
 
 ## Godot Mainline
 
@@ -22,7 +22,7 @@ Fake Kirdy uses Godot 4 as the canonical runtime. The former Phaser + Matter.js 
 - Run the Godot static/content/export validation directly: `npm run check:godot`
 - Validate canonical Godot behavior, including the replay suite when available: `npm run test:canonical`
 
-The canonical Godot project lives in `godot/`. The default export preset is `Web` and writes the public artifact to `dist/index.html`; the `Linux Headless` preset remains available through `npm run godot:export -- --preset="Linux Headless"`. The regular export wrapper skips gracefully if Godot or export templates are unavailable, while `npm run build:public` requires a complete Godot Web export for deployment. The promoted Godot prototype tree has been removed; use `godot/` for all runtime, replay, export, and content work.
+The canonical Godot project lives in `godot/`. The default export preset is `Web` and writes the public artifact to `dist/index.html`; the `Linux Headless` preset remains available through `npm run godot:export -- --preset="Linux Headless"`. The regular export wrapper skips gracefully if Godot or export templates are unavailable, while `npm run build:public` requires a complete Godot Web export for deployment.
 
 ## Documentation
 
@@ -31,12 +31,4 @@ The canonical Godot project lives in `godot/`. The default export preset is `Web
 - Map topology and generated levels: `docs/map-structure.md`
 - Current backlog/status: `Task.md`
 
-The old root design and requirements docs were retired during the Godot docs cleanup. Current implementation work should start from the docs index, checked-in Godot data under `godot/levels/`, replay fixtures under `godot/tests/`, and the Vitest contracts under `test/`.
-
-## Legacy Removal
-
-GitHub Pages publishes the Godot Web export from `dist/`. Phaser/Vite publishing is no longer part of the project.
-
-The root package no longer exposes Phaser/Vite runtime commands or dependencies, and the legacy reference copy has been removed. Use Godot commands for run/build/test.
-
-Run `npm run legacy:inventory` to confirm the removed legacy surface remains empty. The Phaser parity ledger gate was retired after the Godot mainline switch; canonical validation now lives in Godot-owned data, replay, trace, export, and content checks.
+Current implementation work should start from the docs index, checked-in Godot data under `godot/levels/`, replay fixtures under `godot/tests/`, and the Vitest contracts under `test/`.

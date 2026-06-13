@@ -10,9 +10,9 @@ const catalogSource = readJson(catalogSourcePath);
 const stageManifest = readJson(stageManifestPath);
 const proceduralLevels = readJson(proceduralLevelsPath);
 
-validateContentMigration(catalogSource, stageManifest, proceduralLevels);
+validateContentTopology(catalogSource, stageManifest, proceduralLevels);
 
-function validateContentMigration(catalog, manifest, procedural) {
+function validateContentTopology(catalog, manifest, procedural) {
   if (catalog?.version !== 1 || !Array.isArray(catalog.levels)) {
     throw new Error('Level catalog source must have version 1 and a levels array');
   }

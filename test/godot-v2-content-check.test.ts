@@ -7,9 +7,9 @@ import { describe, expect, it } from 'vitest';
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(currentDir, '..');
 
-describe('Godot v2 content migration checker', () => {
+describe('Godot v2 content topology checker', () => {
   it('validates mapped canonical neighbor edges against Godot DoorMarker targets', () => {
-    const output = execFileSync('node', ['scripts/check-godot-content-migration.mjs'], {
+    const output = execFileSync('node', ['scripts/check-godot-content-topology.mjs'], {
       cwd: repoRoot,
       encoding: 'utf8',
     });
@@ -27,7 +27,7 @@ describe('Godot v2 content migration checker', () => {
   });
 
   it('validates the full canonical stage topology against Godot scenes or generated schema', () => {
-    const output = execFileSync('node', ['scripts/check-godot-content-migration.mjs'], {
+    const output = execFileSync('node', ['scripts/check-godot-content-topology.mjs'], {
       cwd: repoRoot,
       encoding: 'utf8',
     });
@@ -42,7 +42,7 @@ describe('Godot v2 content migration checker', () => {
       scripts?: Record<string, string>;
     };
 
-    expect(packageJson.scripts?.['godot:content-check']).toContain('scripts/check-godot-content-migration.mjs');
+    expect(packageJson.scripts?.['godot:content-check']).toContain('scripts/check-godot-content-topology.mjs');
     expect(packageJson.scripts?.['check:godot']).toContain('godot:content-check');
   });
 });

@@ -124,19 +124,16 @@ describe('Godot v2 export workflow', () => {
   it('documents the default Godot Web build command and removes Phaser deployment guidance', () => {
     const readme = readText('README.md');
     const agents = readText('AGENTS.md');
-    const plan = readText('docs/godot-v2/full-migration-execplan.md');
 
     expect(readme).toContain('npm run godot:export');
     expect(readme).toContain('npm run build:public');
     expect(readme).toContain('Godot Web');
-    expect(readme).toContain('legacy reference copy has been removed');
     expect(readme).toContain('npm run build');
     expect(readme).not.toContain('deployed Phaser build');
     expect(agents).toContain('npm run godot:export');
     expect(agents).toContain('npm run build:public');
     expect(agents).toContain('npm run build');
-    expect(plan).toContain('Godot Web export');
-    expect(plan).toContain('default `build` command');
+    expect(existsSync(join(repoRoot, 'docs', 'godot-v2', 'full-migration-execplan.md'))).toBe(false);
   });
 
   it('uses the web-compatible Godot renderer for browser exports', () => {

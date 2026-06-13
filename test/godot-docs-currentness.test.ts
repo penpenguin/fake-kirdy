@@ -22,11 +22,14 @@ const listMarkdownFiles = (relativeDir: string): string[] => {
 };
 
 describe('Godot docs currentness', () => {
-  it('removes obsolete Phaser-era root docs after their durable facts move into Godot docs', () => {
+  it('removes obsolete Phaser-era and completed migration docs after their durable facts move into current docs', () => {
     expect(existsSync(join(repoRoot, 'docs', 'design.md'))).toBe(false);
     expect(existsSync(join(repoRoot, 'docs', 'requirements.md'))).toBe(false);
     expect(existsSync(join(repoRoot, 'docs', 'swallow-capture-detach.md'))).toBe(false);
     expect(existsSync(join(repoRoot, 'docs', 'godot-v2', 'migration-plan.md'))).toBe(false);
+    expect(existsSync(join(repoRoot, 'docs', 'godot-v2', 'full-migration-execplan.md'))).toBe(false);
+    expect(existsSync(join(repoRoot, 'docs', 'godot-v2', 'gameplay-completion-execplan.md'))).toBe(false);
+    expect(existsSync(join(repoRoot, 'docs', 'godot-v2', 'legacy-reference-boundary.md'))).toBe(false);
   });
 
   it('provides current entrypoints for the documentation tree', () => {
@@ -37,10 +40,13 @@ describe('Godot docs currentness', () => {
     expect(docsIndex).toContain('Godot 4');
     expect(docsIndex).toContain('現行仕様');
     expect(docsIndex).toContain('npm run test:canonical');
-    expect(docsIndex).toContain('削除済み');
+    expect(docsIndex).not.toContain('履歴');
+    expect(docsIndex).not.toContain('ExecPlan');
     expect(godotIndex).toContain('canonical Godot');
     expect(godotIndex).toContain('Replay and trace');
     expect(godotIndex).toContain('Web export');
+    expect(godotIndex).not.toContain('Historical records');
+    expect(godotIndex).not.toContain('migration record');
     expect(readme).toContain('docs/README.md');
     expect(readme).toContain('docs/godot-v2/README.md');
     expect(readme).toContain('docs/map-structure.md');
@@ -48,15 +54,13 @@ describe('Godot docs currentness', () => {
   });
 
   it('keeps current-facing docs from presenting Phaser or the prototype tree as active runtime facts', () => {
-    const currentFacingDocs = listMarkdownFiles('docs').filter(
-      (pathFromRoot) => !pathFromRoot.endsWith('full-migration-execplan.md') &&
-        !pathFromRoot.endsWith('gameplay-completion-execplan.md'),
-    );
-
-    const combinedDocs = currentFacingDocs
+    const combinedDocs = listMarkdownFiles('docs')
       .map((pathFromRoot) => `\n# ${pathFromRoot}\n${readRepoFile(pathFromRoot)}`)
       .join('\n');
 
+    expect(combinedDocs).not.toMatch(/Full Godot Migration ExecPlan/i);
+    expect(combinedDocs).not.toMatch(/completed migration record/i);
+    expect(combinedDocs).not.toMatch(/legacy reference boundary/i);
     expect(combinedDocs).not.toMatch(/Phaser remains the reference/i);
     expect(combinedDocs).not.toMatch(/current Phaser \+ Matter/i);
     expect(combinedDocs).not.toMatch(/src\/game\//);

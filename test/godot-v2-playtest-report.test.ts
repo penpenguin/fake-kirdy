@@ -162,15 +162,15 @@ const writeFixtureContract = (path: string, tracePath: string, bookmarksPath: st
 };
 
 describe('Godot playtest report', () => {
-  it('defines a playtest report command, contract, canonical report, and static gate hook', () => {
+  it('defines a playtest report command, contract, generated artifact policy, and static gate hook', () => {
     const scripts = readPackageScripts();
 
     expect(scripts['godot:playtest-report']).toBe('node scripts/generate-godot-playtest-report.mjs');
     expect(scripts['check:godot']).toContain('godot:playtest-report -- --check');
     expect(existsSync(join(repoRoot, 'scripts', 'generate-godot-playtest-report.mjs'))).toBe(true);
     expect(existsSync(join(repoRoot, 'godot', 'tests', 'playtest_report_contract.json'))).toBe(true);
-    expect(existsSync(join(repoRoot, 'reports', 'godot-playtest-report.json'))).toBe(true);
-    expect(existsSync(join(repoRoot, 'reports', 'godot-playtest-report.md'))).toBe(true);
+    expect(existsSync(join(repoRoot, 'reports', 'godot-playtest-report.json'))).toBe(false);
+    expect(existsSync(join(repoRoot, 'reports', 'godot-playtest-report.md'))).toBe(false);
   });
 
   it('turns a manual trace and issue bookmark into JSON, Markdown, and generated task text', () => {
@@ -249,7 +249,7 @@ describe('Godot playtest report', () => {
     }
   });
 
-  it('validates the checked-in canonical playtest report is current and issue-free', () => {
+  it('validates the canonical playtest inputs without requiring checked-in report artifacts', () => {
     const result = spawnSync(process.execPath, ['scripts/generate-godot-playtest-report.mjs', '--check', '--json'], {
       cwd: repoRoot,
       encoding: 'utf8',
@@ -259,24 +259,23 @@ describe('Godot playtest report', () => {
     const commandReport = JSON.parse(result.stdout) as {
       failed_checks: unknown[];
       sample_count: number;
+      bookmark_count: number;
       generated_task_count: number;
+      unresolved_issue_count: number;
+      duration_ms: number;
+      sampled_level_ids: string[];
+      bookmark_categories: string[];
     };
     expect(commandReport.failed_checks).toEqual([]);
     expect(commandReport.sample_count).toBeGreaterThanOrEqual(2);
+    expect(commandReport.bookmark_count).toBeGreaterThanOrEqual(4);
     expect(commandReport.generated_task_count).toBe(0);
-
-    const report = JSON.parse(readFileSync(join(repoRoot, 'reports', 'godot-playtest-report.json'), 'utf8')) as {
-      summary: { duration_ms: number };
-      unresolved_issue_count: number;
-      samples: { level_id: string }[];
-      bookmarks: { category: string }[];
-    };
-    expect(report.unresolved_issue_count).toBe(0);
-    expect(report.summary.duration_ms).toBeGreaterThanOrEqual(60000);
-    expect(report.samples.map((sample) => sample.level_id)).toEqual(
+    expect(commandReport.unresolved_issue_count).toBe(0);
+    expect(commandReport.duration_ms).toBeGreaterThanOrEqual(60000);
+    expect(commandReport.sampled_level_ids).toEqual(
       expect.arrayContaining(['central_hub', 'fire_area', 'labyrinth_011']),
     );
-    expect(report.bookmarks.map((bookmark) => bookmark.category)).toEqual(
+    expect(commandReport.bookmark_categories).toEqual(
       expect.arrayContaining(['navigation_blocker', 'combat_feedback', 'enemy_ai', 'objective_clarity']),
     );
   });

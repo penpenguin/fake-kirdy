@@ -35,7 +35,7 @@ const writeFixtureContract = (path: string, outJson: string, outMd: string, chec
 };
 
 describe('Godot quality report', () => {
-  it('defines a quality report command, contract, canonical report, and static gate hook', () => {
+  it('defines a quality report command, contract, generated artifact policy, and static gate hook', () => {
     const scripts = readPackageScripts();
     const contract = JSON.parse(readFileSync(join(repoRoot, 'godot', 'tests', 'quality_report_contract.json'), 'utf8')) as {
       required_check_ids?: string[];
@@ -49,8 +49,8 @@ describe('Godot quality report', () => {
     expect(contract.checks?.map((check) => check.id)).not.toContain('web-smoke');
     expect(existsSync(join(repoRoot, 'scripts', 'generate-godot-quality-report.mjs'))).toBe(true);
     expect(existsSync(join(repoRoot, 'godot', 'tests', 'quality_report_contract.json'))).toBe(true);
-    expect(existsSync(join(repoRoot, 'reports', 'godot-quality-report.json'))).toBe(true);
-    expect(existsSync(join(repoRoot, 'reports', 'godot-quality-report.md'))).toBe(true);
+    expect(existsSync(join(repoRoot, 'reports', 'godot-quality-report.json'))).toBe(false);
+    expect(existsSync(join(repoRoot, 'reports', 'godot-quality-report.md'))).toBe(false);
   });
 
   it('merges source reports into a single failed check list and Markdown summary', () => {
@@ -170,7 +170,7 @@ describe('Godot quality report', () => {
     }
   });
 
-  it('validates the checked-in canonical quality report is current and failure-free', () => {
+  it('validates the canonical quality checks without requiring checked-in report artifacts', () => {
     const result = spawnSync(process.execPath, ['scripts/generate-godot-quality-report.mjs', '--check', '--json'], {
       cwd: repoRoot,
       encoding: 'utf8',
@@ -181,21 +181,16 @@ describe('Godot quality report', () => {
       failed_checks: unknown[];
       total: number;
       failed: number;
+      sources: { id: string; status: string }[];
+      manual_playtest: { unresolved_issue_count: number };
     };
     expect(commandReport.failed_checks).toEqual([]);
     expect(commandReport.total).toBeGreaterThanOrEqual(10);
     expect(commandReport.failed).toBe(0);
-
-    const report = JSON.parse(readFileSync(join(repoRoot, 'reports', 'godot-quality-report.json'), 'utf8')) as {
-      summary: { failed: number };
-      sources: { id: string; status: string }[];
-      manual_playtest: { unresolved_issue_count: number };
-    };
-    expect(report.summary.failed).toBe(0);
-    expect(report.sources.map((source) => source.id)).toEqual(
+    expect(commandReport.sources.map((source) => source.id)).toEqual(
       expect.arrayContaining(['scene-lint', 'level-graph', 'progression-solver', 'playtest-report']),
     );
-    expect(report.sources.map((source) => source.id)).not.toContain('web-smoke');
-    expect(report.manual_playtest.unresolved_issue_count).toBe(0);
+    expect(commandReport.sources.map((source) => source.id)).not.toContain('web-smoke');
+    expect(commandReport.manual_playtest.unresolved_issue_count).toBe(0);
   });
 });

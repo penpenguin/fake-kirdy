@@ -7,26 +7,10 @@ const repoRoot = process.cwd();
 const readText = (relativePath: string): string =>
   readFileSync(join(repoRoot, relativePath), 'utf8');
 
-describe('Godot mainline migration contract', () => {
-  it('keeps a self-contained full migration ExecPlan with required living sections', () => {
-    const planPath = join(repoRoot, 'docs', 'godot-v2', 'full-migration-execplan.md');
-
-    expect(existsSync(planPath)).toBe(true);
-
-    const plan = readFileSync(planPath, 'utf8');
-
-    [
-      'Progress',
-      'Surprises & Discoveries',
-      'Decision Log',
-      'Outcomes & Retrospective',
-      'Godot canonical',
-      'legacy reference copy has been removed',
-      'promoted Godot prototype tree has been removed',
-      'Milestone 10',
-    ].forEach((requiredText) => {
-      expect(plan).toContain(requiredText);
-    });
+describe('Godot mainline contract', () => {
+  it('does not keep completed transition plans in the active docs tree', () => {
+    expect(existsSync(join(repoRoot, 'docs', 'godot-v2', 'full-migration-execplan.md'))).toBe(false);
+    expect(existsSync(join(repoRoot, 'docs', 'godot-v2', 'gameplay-completion-execplan.md'))).toBe(false);
   });
 
   it('promotes the Godot project to a canonical repo-level location', () => {
@@ -61,12 +45,10 @@ describe('Godot mainline migration contract', () => {
     const readme = readText('README.md');
 
     expect(agents).toContain('Godot canonical');
-    expect(agents).toContain('legacy reference copy has been removed');
-    expect(agents).toContain('promoted Godot prototype tree has been removed');
+    expect(agents).toContain('Do not add new Phaser runtime behavior');
     expect(readme).toContain('Godot');
     expect(readme).toContain('npm run dev');
-    expect(readme).toContain('legacy reference copy has been removed');
-    expect(readme).toContain('promoted Godot prototype tree has been removed');
+    expect(readme).not.toContain('promoted Godot prototype tree');
     expect(readme).toContain('godot:run');
     expect(readme).toContain('trace:summary');
   });

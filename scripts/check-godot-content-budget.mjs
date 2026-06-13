@@ -99,9 +99,9 @@ function loadJson(path, label) {
 
 function buildSceneLevelReports(contract, catalog) {
   const levels = requireArray(catalog.levels, 'catalog.levels');
-  const includeStatuses = new Set(requireOptionalArray(contract.include_migration_statuses, 'include_migration_statuses').map(String));
+  const includeStatuses = new Set(requireOptionalArray(contract.include_coverage_statuses, 'include_coverage_statuses').map(String));
   return levels
-    .filter((level) => includeStatuses.size === 0 || includeStatuses.has(String(level.migration_status ?? '')))
+    .filter((level) => includeStatuses.size === 0 || includeStatuses.has(String(level.coverage_status ?? '')))
     .map((level) => buildSceneLevelReport(contract, level));
 }
 
