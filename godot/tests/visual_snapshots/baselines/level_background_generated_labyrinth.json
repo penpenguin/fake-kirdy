@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "snapshot_id": "level_background_generated_labyrinth",
+  "content_hash": "88f1a86199d583c730c44175f2a89a7be53cad33ac53bd60e2e9fb11d560184a",
+  "replay_path": "godot/tests/replays/labyrinth_010_generated_content.json",
+  "frame": 45,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "level_terrain",
+    "stage_background"
+  ],
+  "required_scene_paths": [
+    "godot/levels/generated/procedural_levels.json",
+    "godot/scripts/level/LevelVisualAssets.gd"
+  ],
+  "required_resource_paths": [
+    "godot/resources/assets/images/world/generated-labyrinth-background.webp",
+    "godot/resources/assets/images/world/stone-tile.webp",
+    "godot/resources/assets/images/world/wall-texture.webp"
+  ]
+}

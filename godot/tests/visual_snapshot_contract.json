@@ -15,7 +15,10 @@
     "virtual_controls",
     "level_terrain",
     "door_scale",
-    "tutorial_onboarding"
+    "tutorial_onboarding",
+    "hud_meaning",
+    "sealed_locked_door",
+    "stage_background"
   ],
   "snapshots": [
     {
@@ -23,7 +26,7 @@
       "replay_path": "godot/tests/replays/controller_lab_jump.json",
       "frame": 30,
       "baseline_path": "godot/tests/visual_snapshots/baselines/hud_controller_lab_jump.json",
-      "visual_tags": ["hud"],
+      "visual_tags": ["hud", "hud_meaning"],
       "required_scene_paths": ["godot/scenes/ui/HudOverlay.tscn"],
       "required_resource_paths": ["godot/resources/assets/images/characters/kirdy/kirdy-jump.webp"]
     },
@@ -46,7 +49,8 @@
       "required_scene_paths": ["godot/scenes/player/Player.tscn", "godot/scenes/ui/HudOverlay.tscn"],
       "required_resource_paths": [
         "godot/resources/assets/images/characters/kirdy/kirdy-spark.webp",
-        "godot/resources/assets/images/effects/inhale-sparkle.webp"
+        "godot/resources/assets/images/effects/inhale-sparkle.webp",
+        "godot/resources/assets/images/effects/spark-attack.webp"
       ]
     },
     {
@@ -63,7 +67,7 @@
       "replay_path": "godot/tests/replays/combat_locked_door_without_ability.json",
       "frame": 18,
       "baseline_path": "godot/tests/visual_snapshots/baselines/locked_door_reason_hud.json",
-      "visual_tags": ["locked_door", "hud"],
+      "visual_tags": ["locked_door", "sealed_locked_door", "hud"],
       "required_scene_paths": ["godot/scenes/ui/HudOverlay.tscn"],
       "required_resource_paths": ["godot/resources/assets/images/ui/locked-door.webp"]
     },
@@ -178,9 +182,10 @@
       "replay_path": "godot/tests/replays/central_hub_to_heal_goal.json",
       "frame": 20,
       "baseline_path": "godot/tests/visual_snapshots/baselines/level_terrain_central_hub.json",
-      "visual_tags": ["level_terrain"],
+      "visual_tags": ["level_terrain", "stage_background"],
       "required_scene_paths": ["godot/levels/central_hub.tscn", "godot/scripts/level/LevelVisualAssets.gd"],
       "required_resource_paths": [
+        "godot/resources/assets/images/world/hub-background.webp",
         "godot/resources/assets/images/world/brick-tile.webp",
         "godot/resources/assets/images/world/wall-texture.webp"
       ]
@@ -190,9 +195,10 @@
       "replay_path": "godot/tests/replays/fire_area_ability_gate_trace.json",
       "frame": 20,
       "baseline_path": "godot/tests/visual_snapshots/baselines/level_terrain_fire_branch.json",
-      "visual_tags": ["level_terrain"],
+      "visual_tags": ["level_terrain", "stage_background"],
       "required_scene_paths": ["godot/levels/fire_area.tscn", "godot/scripts/level/LevelVisualAssets.gd"],
       "required_resource_paths": [
+        "godot/resources/assets/images/world/fire-background.webp",
         "godot/resources/assets/images/world/fire-tile.webp",
         "godot/resources/assets/images/world/wall-texture.webp"
       ]
@@ -202,9 +208,10 @@
       "replay_path": "godot/tests/replays/combat_ability_damage_enemy.json",
       "frame": 30,
       "baseline_path": "godot/tests/visual_snapshots/baselines/level_terrain_combat_room.json",
-      "visual_tags": ["level_terrain"],
+      "visual_tags": ["level_terrain", "stage_background"],
       "required_scene_paths": ["godot/levels/combat_room.tscn", "godot/scripts/level/LevelVisualAssets.gd"],
       "required_resource_paths": [
+        "godot/resources/assets/images/world/hub-background.webp",
         "godot/resources/assets/images/world/brick-tile.webp",
         "godot/resources/assets/images/world/wall-texture.webp"
       ]
@@ -214,10 +221,76 @@
       "replay_path": "godot/tests/replays/sky_sanctum_to_goal_finish.json",
       "frame": 180,
       "baseline_path": "godot/tests/visual_snapshots/baselines/level_terrain_goal_sanctum.json",
-      "visual_tags": ["level_terrain"],
+      "visual_tags": ["level_terrain", "stage_background"],
       "required_scene_paths": ["godot/levels/goal_sanctum.tscn", "godot/scripts/level/LevelVisualAssets.gd"],
       "required_resource_paths": [
+        "godot/resources/assets/images/world/royal-background.webp",
         "godot/resources/assets/images/world/royal-tile.webp",
+        "godot/resources/assets/images/world/wall-texture.webp"
+      ]
+    },
+    {
+      "id": "level_background_forest",
+      "replay_path": "godot/tests/replays/forest_reliquary_collectible.json",
+      "frame": 30,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/level_background_forest.json",
+      "visual_tags": ["level_terrain", "stage_background"],
+      "required_scene_paths": ["godot/levels/forest_reliquary.tscn", "godot/scripts/level/LevelVisualAssets.gd"],
+      "required_resource_paths": [
+        "godot/resources/assets/images/world/forest-background.webp",
+        "godot/resources/assets/images/world/forest-tile.webp",
+        "godot/resources/assets/images/world/wall-texture.webp"
+      ]
+    },
+    {
+      "id": "level_background_ice",
+      "replay_path": "godot/tests/replays/ice_reliquary_collectible.json",
+      "frame": 30,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/level_background_ice.json",
+      "visual_tags": ["level_terrain", "stage_background"],
+      "required_scene_paths": ["godot/levels/ice_reliquary.tscn", "godot/scripts/level/LevelVisualAssets.gd"],
+      "required_resource_paths": [
+        "godot/resources/assets/images/world/ice-background.webp",
+        "godot/resources/assets/images/world/ice-tile.webp",
+        "godot/resources/assets/images/world/wall-texture.webp"
+      ]
+    },
+    {
+      "id": "level_background_ruins",
+      "replay_path": "godot/tests/replays/ruins_reliquary_collectible.json",
+      "frame": 30,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/level_background_ruins.json",
+      "visual_tags": ["level_terrain", "stage_background"],
+      "required_scene_paths": ["godot/levels/ruins_reliquary.tscn", "godot/scripts/level/LevelVisualAssets.gd"],
+      "required_resource_paths": [
+        "godot/resources/assets/images/world/ruins-background.webp",
+        "godot/resources/assets/images/world/stone-tile.webp",
+        "godot/resources/assets/images/world/wall-texture.webp"
+      ]
+    },
+    {
+      "id": "level_background_sky",
+      "replay_path": "godot/tests/replays/sky_sanctum_to_goal_finish.json",
+      "frame": 90,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/level_background_sky.json",
+      "visual_tags": ["level_terrain", "stage_background"],
+      "required_scene_paths": ["godot/levels/sky_sanctum.tscn", "godot/scripts/level/LevelVisualAssets.gd"],
+      "required_resource_paths": [
+        "godot/resources/assets/images/world/sky-background.webp",
+        "godot/resources/assets/images/world/royal-tile.webp",
+        "godot/resources/assets/images/world/wall-texture.webp"
+      ]
+    },
+    {
+      "id": "level_background_generated_labyrinth",
+      "replay_path": "godot/tests/replays/labyrinth_010_generated_content.json",
+      "frame": 45,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/level_background_generated_labyrinth.json",
+      "visual_tags": ["level_terrain", "stage_background"],
+      "required_scene_paths": ["godot/levels/generated/procedural_levels.json", "godot/scripts/level/LevelVisualAssets.gd"],
+      "required_resource_paths": [
+        "godot/resources/assets/images/world/generated-labyrinth-background.webp",
+        "godot/resources/assets/images/world/stone-tile.webp",
         "godot/resources/assets/images/world/wall-texture.webp"
       ]
     }

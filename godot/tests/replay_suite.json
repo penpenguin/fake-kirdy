@@ -219,6 +219,16 @@
       "tags": ["results", "ui", "input", "restart", "trace"]
     },
     {
+      "id": "results_scene_continue_to_hub",
+      "replay_path": "res://tests/replays/results_scene_continue_to_hub.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["result.overlay.shown", "results.scene.shown", "results.continue.selected", "player.jump.started", "door.entered"],
+      "expected_last_hud": {
+        "outcome": "running"
+      },
+      "tags": ["results", "ui", "input", "continue", "hub", "trace"]
+    },
+    {
       "id": "danger_hazard_trace",
       "replay_path": "res://tests/replays/danger_hazard_trace.json",
       "expected_outcome": "game_over",
@@ -322,7 +332,7 @@
       "expected_last_hud": {
         "difficulty": "hard",
         "hp": 1,
-        "target_enemy_hp": 3
+        "target_enemy_hp": 1
       },
       "tags": ["combat", "enemy-attack", "difficulty", "hard", "trace"]
     },

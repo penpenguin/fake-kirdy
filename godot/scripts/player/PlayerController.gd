@@ -2,6 +2,8 @@ extends CharacterBody2D
 class_name PlayerController
 
 const PlayerTuningScript = preload("res://scripts/player/PlayerTuning.gd")
+const InhaleSparkleEffectTexture = preload("res://resources/assets/images/effects/inhale-sparkle.webp")
+const SparkAttackEffectTexture = preload("res://resources/assets/images/effects/spark-attack.webp")
 
 signal trace_event(event_type: String, payload: Dictionary)
 
@@ -40,7 +42,8 @@ var input_source: Node = null
 var last_facing: float = 1.0
 var last_ability_texture_fallback_key: String = ""
 var inhale_effect_fallback_line: Line2D = null
-var ability_attack_effect_line: Line2D = null
+var inhale_effect_fallback_sparkle: Sprite2D = null
+var ability_attack_effect_sprite: Sprite2D = null
 var ability_attack_effect_remaining_ms: int = 0
 
 @onready var body_sprite: Sprite2D = $Body
@@ -155,11 +158,21 @@ func show_inhale_effect_fallback(target_position: Vector2) -> void:
         inhale_effect_fallback_line.z_index = 5
         add_child(inhale_effect_fallback_line)
 
+    if inhale_effect_fallback_sparkle == null or not is_instance_valid(inhale_effect_fallback_sparkle):
+        inhale_effect_fallback_sparkle = Sprite2D.new()
+        inhale_effect_fallback_sparkle.name = "InhaleEffectSparkle"
+        inhale_effect_fallback_sparkle.texture = InhaleSparkleEffectTexture
+        inhale_effect_fallback_sparkle.z_index = 6
+        add_child(inhale_effect_fallback_sparkle)
+
     inhale_effect_fallback_line.visible = true
     inhale_effect_fallback_line.points = PackedVector2Array([
         Vector2.ZERO,
         to_local(target_position),
     ])
+    inhale_effect_fallback_sparkle.visible = true
+    inhale_effect_fallback_sparkle.position = to_local(target_position)
+    fit_effect_sprite_to_size(inhale_effect_fallback_sparkle, Vector2(42.0, 42.0))
 
 
 func hide_inhale_effect_fallback() -> void:
@@ -168,24 +181,28 @@ func hide_inhale_effect_fallback() -> void:
 
     inhale_effect_fallback_line.visible = false
     inhale_effect_fallback_line.points = PackedVector2Array()
+    if inhale_effect_fallback_sparkle != null and is_instance_valid(inhale_effect_fallback_sparkle):
+        inhale_effect_fallback_sparkle.visible = false
 
 
-func show_ability_attack_effect(_ability_attack_type: String, effect_color: Color, range: float) -> void:
-    if ability_attack_effect_line == null or not is_instance_valid(ability_attack_effect_line):
-        ability_attack_effect_line = Line2D.new()
-        ability_attack_effect_line.name = "AbilityAttackEffectFallback"
-        ability_attack_effect_line.width = 6.0
-        ability_attack_effect_line.z_index = 6
-        add_child(ability_attack_effect_line)
+func show_ability_attack_effect(attack_type: String, effect_color: Color, range: float, effect_texture: Texture2D = null) -> void:
+    if ability_attack_effect_sprite == null or not is_instance_valid(ability_attack_effect_sprite):
+        ability_attack_effect_sprite = Sprite2D.new()
+        ability_attack_effect_sprite.name = "AbilityAttackEffectSprite"
+        ability_attack_effect_sprite.centered = true
+        ability_attack_effect_sprite.z_index = 6
+        add_child(ability_attack_effect_sprite)
 
-    ability_attack_effect_line.visible = true
+    var attack_texture := effect_texture
+    if attack_texture == null and attack_type == "spark":
+        attack_texture = SparkAttackEffectTexture
+    ability_attack_effect_sprite.texture = attack_texture
+    ability_attack_effect_sprite.visible = attack_texture != null
     ability_attack_effect_remaining_ms = max(ability_attack_effect_duration_ms, 1)
-    ability_attack_effect_line.default_color = effect_color
-    var effect_range: float = maxf(range, 32.0)
-    ability_attack_effect_line.points = PackedVector2Array([
-        Vector2.ZERO,
-        Vector2(effect_range * last_facing, 0.0),
-    ])
+    ability_attack_effect_sprite.modulate = effect_color
+    ability_attack_effect_sprite.flip_h = last_facing < 0.0
+    ability_attack_effect_sprite.position = Vector2(maxf(range * 0.32, 32.0) * last_facing, -4.0)
+    fit_effect_sprite_to_size(ability_attack_effect_sprite, Vector2(64.0, 64.0))
 
 
 func tick_ability_attack_effect(delta: float) -> void:
@@ -198,15 +215,26 @@ func tick_ability_attack_effect(delta: float) -> void:
 
 
 func hide_ability_attack_effect() -> void:
-    if ability_attack_effect_line == null or not is_instance_valid(ability_attack_effect_line):
+    if ability_attack_effect_sprite == null or not is_instance_valid(ability_attack_effect_sprite):
         return
 
-    ability_attack_effect_line.visible = false
-    ability_attack_effect_line.points = PackedVector2Array()
+    ability_attack_effect_sprite.visible = false
 
 
 func get_ability_attack_effect_duration_ms() -> int:
     return max(ability_attack_effect_duration_ms, 1)
+
+
+func fit_effect_sprite_to_size(effect_sprite: Sprite2D, target_size: Vector2) -> void:
+    if effect_sprite == null or effect_sprite.texture == null:
+        return
+
+    var texture_size := effect_sprite.texture.get_size()
+    if texture_size.x <= 0.0 or texture_size.y <= 0.0:
+        return
+
+    var scale_factor: float = minf(target_size.x / texture_size.x, target_size.y / texture_size.y)
+    effect_sprite.scale = Vector2(scale_factor, scale_factor)
 
 
 func set_damage_feedback_state(is_invulnerable: bool, remaining_ms: int = 0) -> void:

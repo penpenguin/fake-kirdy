@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "snapshot_id": "level_background_forest",
+  "content_hash": "350926c728d0f694b3490f8beced4f307e7cec1ab8d6fce81d30b8831319592f",
+  "replay_path": "godot/tests/replays/forest_reliquary_collectible.json",
+  "frame": 30,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "level_terrain",
+    "stage_background"
+  ],
+  "required_scene_paths": [
+    "godot/levels/forest_reliquary.tscn",
+    "godot/scripts/level/LevelVisualAssets.gd"
+  ],
+  "required_resource_paths": [
+    "godot/resources/assets/images/world/forest-background.webp",
+    "godot/resources/assets/images/world/forest-tile.webp",
+    "godot/resources/assets/images/world/wall-texture.webp"
+  ]
+}

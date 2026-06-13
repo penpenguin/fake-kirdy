@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "level_terrain_central_hub",
-  "content_hash": "9a05e01c5a207fa08455ac7a3076318158d8e2e8f5bb66fa6217c27d39db4524",
+  "content_hash": "253a6ef16bf8c7f0c29b02c64ab660bda2daf14b2a397b1fa69cf7f1dea07c56",
   "replay_path": "godot/tests/replays/central_hub_to_heal_goal.json",
   "frame": 20,
   "viewport": {
@@ -9,7 +9,8 @@
     "height": 720
   },
   "visual_tags": [
-    "level_terrain"
+    "level_terrain",
+    "stage_background"
   ],
   "required_scene_paths": [
     "godot/levels/central_hub.tscn",
@@ -17,6 +18,7 @@
   ],
   "required_resource_paths": [
     "godot/resources/assets/images/world/brick-tile.webp",
+    "godot/resources/assets/images/world/hub-background.webp",
     "godot/resources/assets/images/world/wall-texture.webp"
   ]
 }

@@ -1,1 +1,14 @@
-2025-11-20: Converted all game assets to WebP (manifest/tests updated) and removed unused stage layout data. Later deleted deprecated asset generator script tools/generate_assets.py after review feedback. Recent commits: 9cea4a4 "Convert images to webp", 3fbeabd "Remove deprecated asset generator". Tests: npm run check:test green after WebP conversion; target test/index-html.test.ts after favicon; prior full run after stage-layout removal. Branch assets-update pushed to origin.
+# Task Completion Checklist
+
+For code changes:
+- Follow red -> green -> refactor. Start with the smallest failing Vitest/replay/trace contract that captures the behavior.
+- Run the narrow focused test first, then the relevant broader gate.
+- For TypeScript/tooling/shared docs rule changes, run `npm run test` unless the change is demonstrably docs-only and does not alter development rules.
+- For gameplay, movement, level topology, replay, trace, save, UI, or generated-schema changes, prefer a focused replay/trace assertion and run the relevant `check:godot` subcommand.
+- Before claiming canonical gameplay parity, run `npm run test:canonical` on a machine with Godot available.
+
+For docs/memory-only work:
+- No repo test is required when no repository files or development rules changed.
+- Verify Serena memory changes with `mcp__serena.list_memories` and read back the high-signal memory entries.
+
+Always mention skipped checks explicitly, especially when Godot or export templates are unavailable.

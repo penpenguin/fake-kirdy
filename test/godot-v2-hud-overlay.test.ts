@@ -74,6 +74,17 @@ describe('Godot v2 HUD overlay', () => {
     expect(scene).toContain('OutcomeLabel');
   });
 
+  it('exposes semantic HUD captions so every runtime value has an obvious meaning', () => {
+    const script = readGodotFile('scripts/ui/HudOverlay.gd');
+    const scene = readGodotFile('scenes/ui/HudOverlay.tscn');
+    const combined = `${scene}\n${script}`;
+
+    expect(script).toContain('get_hud_semantic_labels');
+    for (const caption of ['HEALTH', 'ABILITY', 'ITEMS', 'SCORE', 'OBJECTIVE', 'ATTACK', 'STATUS']) {
+      expect(combined).toContain(caption);
+    }
+  });
+
   it('documents the upgraded HUD visual contract', () => {
     const docsPath = join(repoRoot, 'docs', 'godot-v2', 'hud-overlay.md');
     const docs = readFileSync(docsPath, 'utf8');

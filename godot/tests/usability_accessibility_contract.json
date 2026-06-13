@@ -81,14 +81,14 @@
     {
       "id": "tutorial_collectible_marker_scale",
       "subject_file": "godot/scripts/level/markers/CollectibleMarker.gd",
-      "min_scale": 0.26,
-      "max_scale": 0.4
+      "min_scale": 0.45,
+      "max_scale": 0.62
     },
     {
       "id": "tutorial_heal_marker_scale",
       "subject_file": "godot/scripts/level/markers/HealMarker.gd",
-      "min_scale": 0.36,
-      "max_scale": 0.52
+      "min_scale": 0.56,
+      "max_scale": 0.72
     },
     {
       "id": "tutorial_door_marker_scale",
@@ -101,6 +101,46 @@
       "subject_file": "godot/scripts/level/markers/GoalMarker.gd",
       "min_scale": 0.75,
       "max_scale": 1.2
+    }
+  ],
+  "hud_semantic_label_checks": [
+    {
+      "id": "hud_runtime_values_have_captions",
+      "subject_file": "godot/scripts/ui/HudOverlay.gd",
+      "required_labels": ["HEALTH", "ABILITY", "ITEMS", "SCORE", "OBJECTIVE", "ATTACK", "STATUS"]
+    }
+  ],
+  "one_block_visual_size_checks": [
+    {
+      "id": "player_visual_one_block",
+      "subject_file": "godot/scripts/player/PlayerController.gd",
+      "min_size": 32,
+      "max_size": 64
+    },
+    {
+      "id": "door_visual_one_block",
+      "subject_file": "godot/scripts/level/markers/DoorMarker.gd",
+      "min_size": 48,
+      "max_size": 64
+    },
+    {
+      "id": "heal_visual_one_block",
+      "subject_file": "godot/scripts/level/markers/HealMarker.gd",
+      "min_size": 32,
+      "max_size": 64
+    },
+    {
+      "id": "enemy_visual_one_block",
+      "subject_file": "godot/scenes/enemies/SimpleEnemy.tscn",
+      "min_size": 32,
+      "max_size": 64
+    }
+  ],
+  "central_hub_door_platform_checks": [
+    {
+      "id": "central_hub_major_doors_have_platforms",
+      "level_scene": "godot/levels/central_hub.tscn",
+      "max_vertical_gap": 80
     }
   ],
   "min_color_distance": 0.18

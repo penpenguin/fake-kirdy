@@ -559,6 +559,8 @@ func spawn_enemies() -> void:
             continue
 
         var payload: Dictionary = enemy_marker.get("payload", {})
+        var marker_payload := payload.duplicate()
+        marker_payload["spawn_id"] = String(enemy_marker.get("id", "enemy"))
         var enemy_type := String(payload.get("enemy_type", "simple_ground"))
         var enemy = instantiate_enemy(enemy_type)
         apply_enemy_type_profile(enemy, enemy_type)
@@ -570,6 +572,7 @@ func spawn_enemies() -> void:
         enemy.attack_cooldown_ms = int(payload.get("attack_cooldown_ms", 1200))
         enemy.enemy_group_id = String(payload.get("enemy_group_id", ""))
         enemy.boss_id = String(payload.get("boss_id", ""))
+        enemy.max_hp = resolve_enemy_max_hp(enemy_type, marker_payload)
         enemy.global_position = dictionary_to_vector2(enemy_marker.get("position", {}))
         apply_difficulty_to_enemy(enemy)
         enemy.call("configure_ai", player, float(payload.get("patrol_radius", 0.0)))
@@ -601,6 +604,26 @@ func apply_enemy_type_profile(enemy: Node, enemy_type: String) -> void:
             enemy.return_radius = 160.0
         _:
             pass
+
+
+func resolve_enemy_max_hp(enemy_type: String, marker_payload: Dictionary) -> int:
+    var explicit_max_hp := int(marker_payload.get("max_hp", 0))
+    if explicit_max_hp > 0:
+        return explicit_max_hp
+
+    var enemy_rank := String(marker_payload.get("enemy_rank", "basic")).to_lower()
+    var boss_id := String(marker_payload.get("boss_id", ""))
+    var spawn_id := String(marker_payload.get("spawn_id", "")).to_lower()
+    var normalized_enemy_type := enemy_type.to_lower()
+
+    if boss_id != "" or enemy_rank == "boss" or normalized_enemy_type == "boss" or spawn_id.contains("final_boss"):
+        return 230
+    if enemy_rank == "midboss" or enemy_rank == "elite" or normalized_enemy_type == "elite" or spawn_id.contains("elite"):
+        return 45
+    if normalized_enemy_type == "sentry":
+        return 5
+
+    return 1
 
 
 func apply_enemy_crowd_spacing() -> void:
@@ -1001,7 +1024,7 @@ func get_ability_profile(ability_type: String) -> Dictionary:
                 "movement_impulse": 64.0,
                 "attack_type": "burst",
                 "visual_effect": "electric_burst",
-                "effect_texture": "res://resources/assets/images/effects/inhale-sparkle.webp",
+                "effect_texture": "res://resources/assets/images/effects/spark-attack.webp",
             }
         "leaf":
             return {
@@ -1039,15 +1062,21 @@ func get_ability_profile(ability_type: String) -> Dictionary:
 
 
 func show_ability_attack_visual(ability_type: String, profile: Dictionary) -> void:
+    var current_ability_type := ability_type
+    var effect_texture_path := String(profile.get("effect_texture", ""))
     var visual_payload := {
-        "ability_type": ability_type,
+        "ability_type": current_ability_type,
         "attack_type": String(profile.get("attack_type", "")),
         "visual_effect": String(profile.get("visual_effect", "")),
-        "effect_texture": String(profile.get("effect_texture", "")),
+        "effect_texture": effect_texture_path,
+        "effect_texture_path": effect_texture_path,
         "range": float(profile.get("range", 0.0)),
     }
     if player != null and is_instance_valid(player) and player.has_method("show_ability_attack_effect"):
-        player.call("show_ability_attack_effect", ability_type, get_ability_effect_color(ability_type), float(profile.get("range", 96.0)))
+        var effect_texture: Texture2D = null
+        if effect_texture_path != "":
+            effect_texture = load(effect_texture_path)
+        player.call("show_ability_attack_effect", current_ability_type, get_ability_effect_color(current_ability_type), float(profile.get("range", 96.0)), effect_texture)
         if player.has_method("get_ability_attack_effect_duration_ms"):
             visual_payload["duration_ms"] = int(player.call("get_ability_attack_effect_duration_ms"))
     if trace_recorder != null:
@@ -1061,7 +1090,7 @@ func show_ability_attack_visual(ability_type: String, profile: Dictionary) -> vo
 func get_ability_effect_color(ability_type: String) -> Color:
     match ability_type:
         "spark":
-            return Color(0.48, 0.90, 1.0, 0.88)
+            return Color(1.0, 0.86, 0.18, 0.9)
         "fire", "flame":
             return Color(1.0, 0.38, 0.12, 0.88)
         "ice", "frost":
@@ -2372,7 +2401,10 @@ func get_difficulty_profile() -> Dictionary:
 
 func apply_difficulty_to_enemy(enemy: Node) -> void:
     var profile := get_difficulty_profile()
-    enemy.max_hp = max(int(round(float(enemy.max_hp) * float(profile.get("enemy_hp_multiplier", 1.0)))), 1)
+    if int(enemy.max_hp) <= 1:
+        enemy.max_hp = 1
+    else:
+        enemy.max_hp = max(int(round(float(enemy.max_hp) * float(profile.get("enemy_hp_multiplier", 1.0)))), 1)
     enemy.hp = enemy.max_hp
     enemy.contact_damage = scale_enemy_damage_for_difficulty(int(enemy.contact_damage), profile)
     enemy.attack_damage = scale_enemy_damage_for_difficulty(int(enemy.attack_damage), profile)
@@ -2844,6 +2876,13 @@ func check_result_actions() -> void:
         restart_current_run(true)
         return
 
+    if outcome != "running" and is_session_action_just_pressed(result_continue_action):
+        if results_scene_shown:
+            continue_results_to_hub()
+        else:
+            show_results_scene("result.continued")
+        return
+
     if results_scene_shown:
         return
 
@@ -2895,6 +2934,47 @@ func restart_current_run(allow_completed: bool = false) -> void:
         sync_hud_overlay("run.restarted", true)
         sync_inventory_overlay("run.restarted", true)
         sync_virtual_controls_overlay("run.restarted", true)
+        write_persistent_state()
+
+
+func continue_results_to_hub() -> void:
+    if outcome == "running":
+        return
+
+    var previous_outcome := outcome
+    hide_results_scene("results.continue.selected")
+    reset_run_clock()
+    outcome = "running"
+    session_paused = false
+    pause_settings_open = false
+    result_elapsed_ms = 0
+    results_scene_shown = false
+    player_hp = max(player_max_hp, 1)
+    player_invulnerability_remaining_ms = 0
+    ability_cooldown_remaining_ms = 0
+    last_locked_door_reason = ""
+    captured_enemy = null
+
+    if result_overlay != null and is_instance_valid(result_overlay):
+        result_overlay.call("set_result_state", {})
+    if results_scene != null and is_instance_valid(results_scene):
+        results_scene.call("set_results_state", {})
+
+    if trace_recorder != null:
+        trace_recorder.call("record_event", "results.continue.selected", {
+            "level_id": "central_hub",
+            "spawn_id": "default",
+            "previous_level_id": current_level_id,
+            "previous_outcome": previous_outcome,
+        })
+
+    if load_level("central_hub", "default"):
+        mark_level_visited(current_level_id)
+        mark_player_tile_explored()
+        sync_map_overlay("results.continued", true)
+        sync_hud_overlay("results.continued", true)
+        sync_inventory_overlay("results.continued", true)
+        sync_virtual_controls_overlay("results.continued", true)
         write_persistent_state()
 
 

@@ -79,7 +79,7 @@ describe('Godot v2 UX polish vertical slice', () => {
     expect(player).toContain('"spark":');
     expect(player).not.toContain('"spark", "stone":\n            return kirdy_sword_texture');
     expect(session).toContain('"visual_effect": "electric_burst"');
-    expect(session).toContain('"effect_texture": "res://resources/assets/images/effects/inhale-sparkle.webp"');
+    expect(session).toContain('"effect_texture": "res://resources/assets/images/effects/spark-attack.webp"');
     expect(session).toContain('ability.attack.visualized');
     expect(assetContract).toContain('"id": "spark"');
     expect(assetContract).toContain('"texture_var": "kirdy_spark_texture"');

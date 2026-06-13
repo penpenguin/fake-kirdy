@@ -4,6 +4,8 @@ class_name EnemySpawnMarker
 @export var spawn_id: String = "enemy"
 @export var enemy_type: String = "test_dummy"
 @export var ability_type: String = "spark"
+@export var enemy_rank: String = "basic"
+@export var max_hp: int = 0
 @export var patrol_radius: float = 0.0
 @export var contact_damage: int = 1
 @export var attack_damage: int = 1
@@ -29,6 +31,8 @@ func to_level_marker() -> Dictionary:
         "payload": {
             "enemy_type": enemy_type,
             "ability_type": ability_type,
+            "enemy_rank": enemy_rank,
+            "max_hp": max_hp,
             "patrol_radius": patrol_radius,
             "contact_damage": contact_damage,
             "attack_damage": attack_damage,

@@ -14,7 +14,7 @@ size = Vector2(840, 32)
 size = Vector2(120, 24)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_right_platform"]
-size = Vector2(120, 24)
+size = Vector2(520, 24)
 
 [node name="CentralHub" type="Node2D"]
 
@@ -208,4 +208,4 @@ shape = SubResource("RectangleShape2D_right_platform")
 
 [node name="PlatformVisual" type="Polygon2D" parent="RightPlatform"]
 color = Color(0.30, 0.36, 0.42, 1)
-polygon = PackedVector2Array(-60, -12, 60, -12, 60, 12, -60, 12)
+polygon = PackedVector2Array(-260, -12, 260, -12, 260, 12, -260, 12)

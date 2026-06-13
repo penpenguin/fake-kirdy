@@ -189,7 +189,7 @@ describe('Godot v2 replay suite workflow', () => {
     ]));
     expect(byId.get('hard_enemy_attack_trace')?.expected_last_hud).toMatchObject({
       difficulty: 'hard',
-      target_enemy_hp: 3,
+      target_enemy_hp: 1,
     });
     expect(readReplay('hard_enemy_attack_trace.json').setting_difficulty).toBe('hard');
 

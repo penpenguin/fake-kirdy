@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "snapshot_id": "level_background_ice",
+  "content_hash": "29c8207af6a94cd4ab0cbfea713248082a36f331f4b0abfce852ea9c5574c0ca",
+  "replay_path": "godot/tests/replays/ice_reliquary_collectible.json",
+  "frame": 30,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "level_terrain",
+    "stage_background"
+  ],
+  "required_scene_paths": [
+    "godot/levels/ice_reliquary.tscn",
+    "godot/scripts/level/LevelVisualAssets.gd"
+  ],
+  "required_resource_paths": [
+    "godot/resources/assets/images/world/ice-background.webp",
+    "godot/resources/assets/images/world/ice-tile.webp",
+    "godot/resources/assets/images/world/wall-texture.webp"
+  ]
+}

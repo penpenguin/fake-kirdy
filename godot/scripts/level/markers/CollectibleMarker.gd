@@ -5,6 +5,7 @@ const FireArtifactTexture = preload("res://resources/assets/images/items/fire-ar
 const IceArtifactTexture = preload("res://resources/assets/images/items/ice-artifact.webp")
 const LeafArtifactTexture = preload("res://resources/assets/images/items/leaf-artifact.webp")
 const RuinArtifactTexture = preload("res://resources/assets/images/items/ruin-artifact.webp")
+const COLLECTIBLE_VISUAL_SCALE := 0.50
 
 @export var collectible_id: String = "collectible"
 @export var item_id: String = "collectible"
@@ -26,7 +27,7 @@ func ensure_visual() -> void:
     var visual := Sprite2D.new()
     visual.name = "Visual"
     visual.texture = get_artifact_texture()
-    visual.scale = Vector2(0.30, 0.30)
+    visual.scale = Vector2(COLLECTIBLE_VISUAL_SCALE, COLLECTIBLE_VISUAL_SCALE)
     visual.z_index = 2
     visual.visible = not hidden_until_discovered
     add_child(visual)

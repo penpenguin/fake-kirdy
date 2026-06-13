@@ -230,6 +230,36 @@ describe('Godot asset fallback audit', () => {
     expect(sparkColors.pinkBodyRatio).toBeLessThan(0.12);
   });
 
+  it('audits every checked-in effect image as a live action effect asset', () => {
+    const requiredEffectAssets = [
+      'images/effects/fire-attack.webp',
+      'images/effects/ice-attack.webp',
+      'images/effects/inhale-sparkle.webp',
+      'images/effects/spark-attack.webp',
+      'images/effects/star-bullet.webp',
+      'images/effects/sword-slash.webp',
+    ];
+    const manifest = readFileSync(join(repoRoot, 'godot', 'resources', 'assets', 'asset_manifest.json'), 'utf8');
+    const contract = JSON.parse(readFileSync(join(repoRoot, 'godot', 'tests', 'asset_fallback_audit_contract.json'), 'utf8')) as {
+      required_effect_assets?: string[];
+    };
+    const auditScript = readFileSync(join(repoRoot, 'scripts', 'check-godot-asset-fallback-audit.mjs'), 'utf8');
+    const sourceText = [
+      'godot/scripts/session/GameSession.gd',
+      'godot/scripts/player/PlayerController.gd',
+      'godot/scenes/player/Player.tscn',
+    ].map((path) => readFileSync(join(repoRoot, path), 'utf8')).join('\n');
+
+    expect(contract.required_effect_assets).toEqual(expect.arrayContaining(requiredEffectAssets));
+    expect(auditScript).toContain('checkRequiredEffectAssets');
+    for (const assetPath of requiredEffectAssets) {
+      const fullPath = join(repoRoot, 'godot', 'resources', 'assets', assetPath);
+      expect(existsSync(fullPath)).toBe(true);
+      expect(manifest).toContain(assetPath);
+      expect(sourceText).toContain(`res://resources/assets/${assetPath}`);
+    }
+  });
+
   it('passes a fixture with explicit ability visuals, SFX mappings, labels, and resource paths', () => {
     const tempDir = mkdtempSync(join(tmpdir(), 'fake-kirdy-asset-fallback-audit-'));
     const assetsRoot = join(tempDir, 'assets');

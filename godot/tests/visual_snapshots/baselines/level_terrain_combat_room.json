@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "level_terrain_combat_room",
-  "content_hash": "bcbc2916c92dbbdd5d3e07f1b1d2816d37973ed105112b1b3204610df1b73126",
+  "content_hash": "219711b9d6e5f05d6bf4cd01a9192105add145cdbbfec405f400f451195589f3",
   "replay_path": "godot/tests/replays/combat_ability_damage_enemy.json",
   "frame": 30,
   "viewport": {
@@ -9,7 +9,8 @@
     "height": 720
   },
   "visual_tags": [
-    "level_terrain"
+    "level_terrain",
+    "stage_background"
   ],
   "required_scene_paths": [
     "godot/levels/combat_room.tscn",
@@ -17,6 +18,7 @@
   ],
   "required_resource_paths": [
     "godot/resources/assets/images/world/brick-tile.webp",
+    "godot/resources/assets/images/world/hub-background.webp",
     "godot/resources/assets/images/world/wall-texture.webp"
   ]
 }

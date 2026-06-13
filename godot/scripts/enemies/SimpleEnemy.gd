@@ -5,7 +5,7 @@ class_name SimpleEnemy
 @export var ability_type: String = "spark"
 @export var contact_damage: int = 1
 @export var follow_offset: Vector2 = Vector2(42, -20)
-@export var max_hp: int = 2
+@export var max_hp: int = 1
 @export var hurt_invulnerability_ms: int = 180
 @export var patrol_radius: float = 0.0
 @export var patrol_speed: float = 42.0
@@ -23,7 +23,7 @@ class_name SimpleEnemy
 @export var normal_modulate: Color = Color(1.0, 1.0, 1.0, 1.0)
 
 var state: String = "enemy.idle"
-var hp: int = 2
+var hp: int = 1
 var captured_by: Node = null
 var initial_collision_layer: int = 1
 var initial_collision_mask: int = 1

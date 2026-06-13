@@ -1,28 +1,21 @@
 # Gameplay Completion Status
 
-Updated 2026-05-30.
+Updated 2026-06-14 from current docs.
 
-The `Goal.md` gameplay-completion backlog has been implemented through the first complete Godot replay-backed milestone.
+The first replay-backed Godot gameplay loop is complete. Current remaining work is polish/tuning/expansion, not a blocking gameplay-loop gap.
 
-Key shipped behavior:
-- Mainline start is `central_hub`, with `combat_room` kept as a tutorial/fixture room.
-- `combat_room` no longer completes before its exit door.
-- Enemies have HP, damage, defeat, knockback, patrol/chase metadata, group/boss ids, and active timed attacks.
-- Ability use damages enemies and emits `ability.used`, `enemy.damaged`, and `enemy.defeated`; spit release emits `spit.projectile.fired` and `spit.projectile.hit`.
-- Door gates support item, ability, completed-level, defeated-group, and boss requirements with `door.locked` trace/HUD feedback.
-- Difficulty now affects enemy HP, contact damage, attack cadence, heal amount, and player invulnerability.
-- Hazard and ability-gate markers are implemented, loaded from authored and generated content, persisted where needed, and summarized in traces.
-- Generated levels now include objectives, hazards, ability gates, varied enemy roles, route heals, and attack metadata.
-- Replay suite schema now enforces `expected_events` and `expected_last_hud`; replay input accepts `initial_ability_type` and `setting_difficulty`.
+Implemented loop coverage:
+- Mainline starts from the Godot hub path rather than the old combat-only slice.
+- Player controller, door transitions, goal completion, damage, game-over, revive, heals, collectibles, dead-end rewards, save/load, and result UI are traceable.
+- Combat supports capture, release/spit, swallow, ability acquisition, ability use, enemy HP/damage/defeat/feedback, active enemy attacks, ability-specific profiles, and focused replay evidence.
+- Door locks and progression checks support item, ability, completed-level, defeated-group, boss, and cluster-keystone requirements, with `door.locked` trace/HUD feedback.
+- Generated schema rooms carry topology, placement, safety, route variants, enemies, heals, collectibles, hazards, ability gates, objectives, and representative replay coverage.
+- HUD, inventory/progress, map, settings, pause, result, runtime error, virtual controls, audio mix, performance, and usability/accessibility contracts are documented and validated through Godot-owned checks.
 
-Validation performed:
-- `npm run test` passed: 29 files, 143 tests.
-- `PATH=/tmp/fake-kirdy-godot-bin:$PATH npm run godot:replay-suite -- --out-dir /tmp/fake-kirdy-godot-replay-suite-gameplay-16` passed with `replay_count: 23`, `passed_replays: 23`, `failed_replays: 0` using temporary official Godot 4.6.3.
+Representative commands:
+- `npm run check:test`
+- `npm run check:godot`
+- `npm run godot:replay-suite -- --out-dir <dir>`
+- `npm run trace:summary -- <trace.ndjson>`
 
-Notable runtime tuning from real traces:
-- Generated route heal amount is 3.
-- Generated elite contact/attack damage is 1.
-- Generated enemy attack cooldowns are 4000 ms to keep long generated traversal replayable while still proving active attacks.
-- Ice/fire generated-chain replay max frames were trimmed after reliquary arrival to avoid testing unrelated reliquary survival.
-
-Remaining work is polish and expansion, not a blocking gameplay-loop gap: richer hand-authored pacing, stronger visual/audio feedback, and more nuanced ability-specific attacks.
+Historical implementation record: `mem:docs/execplans/gameplay-completion`.

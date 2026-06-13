@@ -16,6 +16,7 @@ try {
   const failedChecks = [
     ...checkRoleExpectations(contract, resolvedProfiles),
     ...checkMatrixCoverage(contract, matrix, resolvedProfiles),
+    ...checkBasicEnemyHp(contract),
     ...checkTtkRanges(contract, matrix),
     ...checkDifficultyMonotonicity(contract, matrix),
   ];
@@ -206,7 +207,10 @@ function buildMatrix(contract, profiles) {
   for (const profile of profiles) {
     for (const enemy of enemyArchetypes) {
       for (const [difficultyId, difficulty] of difficulties) {
-        const scaledHp = Math.max(Math.round(requireNumber(enemy.base_hp, `${enemy.id}.base_hp`) * Number(difficulty.enemy_hp_multiplier ?? 1)), 1);
+        const baseHp = requireNumber(enemy.base_hp, `${enemy.id}.base_hp`);
+        const scaledHp = String(enemy.role ?? 'basic') === 'basic'
+          ? baseHp
+          : Math.max(Math.round(baseHp * Number(difficulty.enemy_hp_multiplier ?? 1)), 1);
         const entry = {
           ability_id: profile.id,
           role: profile.role,
@@ -315,6 +319,35 @@ function checkMatrixCoverage(contract, matrix, profiles) {
         rule: 'matrix_coverage',
         ability_id: profile.id,
         message: `${profile.id} is attack-capable but has no cooldown_ms`,
+      });
+    }
+  }
+
+  return failedChecks;
+}
+
+function checkBasicEnemyHp(contract) {
+  if (!isErrorRuleEnabled(contract, 'basic_enemy_hp')) {
+    return [];
+  }
+
+  const failedChecks = [];
+  for (const enemy of requireArray(contract.enemy_archetypes, 'enemy_archetypes')) {
+    const role = String(enemy.role ?? 'basic');
+    const hpException = Boolean(enemy.hp_exception ?? false);
+    const baseHp = requireNumber(enemy.base_hp, `${enemy.id}.base_hp`);
+    if (role === 'basic' && baseHp !== 1) {
+      failedChecks.push({
+        rule: 'basic_enemy_hp',
+        enemy_archetype_id: enemy.id,
+        message: `${enemy.id} is a basic enemy but base_hp is ${baseHp}; expected 1`,
+      });
+    }
+    if (baseHp > 1 && (!hpException || !['midboss', 'boss'].includes(role))) {
+      failedChecks.push({
+        rule: 'basic_enemy_hp',
+        enemy_archetype_id: enemy.id,
+        message: `${enemy.id} has base_hp ${baseHp} without a midboss/boss HP exception`,
       });
     }
   }

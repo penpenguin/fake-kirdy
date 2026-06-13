@@ -16,6 +16,8 @@ Door Transition is the canonical level-change path for hand-authored scenes and 
 
 Representative Hub doors must use readable labels and distinct roles/styles such as `trial`, `region`, `locked`, or `support`. The scene lint rule `nearby_door_ambiguity` checks `central_hub` so nearby visible doors fail validation when they do not have distinct labels, roles, or `door_visual_style` values.
 
+Locked doors use the sealed `images/ui/locked-door.webp` visual when `door_visual_style` is `locked`, `door_role` is `locked_gate`, or any item/ability/boss requirement is present. The usability gate also checks that visible `central_hub` doors have a nearby platform support, so key exits do not appear to float without footing.
+
 `PlayerSpawn` owns spawn placement. `GoalMarker` owns completion placement and has a `trigger_radius` for the minimal proximity check.
 
 ## Session Flow

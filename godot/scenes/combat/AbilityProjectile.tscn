@@ -5,6 +5,9 @@
 [node name="AbilityProjectile" type="Node2D"]
 script = ExtResource("1_projectile")
 
+[node name="EffectSprite" type="Sprite2D" parent="."]
+z_index = 5
+
 [node name="Trail" type="Line2D" parent="."]
 width = 6.0
 default_color = Color(1, 0.36, 0.12, 0.95)

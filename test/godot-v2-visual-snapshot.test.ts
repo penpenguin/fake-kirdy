@@ -176,17 +176,46 @@ describe('Godot visual snapshots', () => {
     expect(playerController).toContain('ability_attack_effect_remaining_ms');
     expect(playerController).toContain('tick_ability_attack_effect(delta)');
     expect(playerController).toContain('hide_ability_attack_effect()');
-    expect(playerController).toContain('ability_attack_effect_line.visible = false');
+    expect(playerController).toContain('ability_attack_effect_sprite.visible = false');
+    expect(playerController).toContain('res://resources/assets/images/effects/spark-attack.webp');
     expect(gameSession).toContain('visual_payload["duration_ms"] = int(player.call("get_ability_attack_effect_duration_ms"))');
     expect(contract.snapshots).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           id: 'spark_attack_effect_timing',
           visual_tags: expect.arrayContaining(['ability_feedback', 'spark_effect']),
+          required_resource_paths: expect.arrayContaining(['godot/resources/assets/images/effects/spark-attack.webp']),
           required_trace_events: expect.arrayContaining(['ability.attack.visualized']),
         }),
       ]),
     );
+  });
+
+  it('covers semantic HUD labels, sealed locked doors, and major stage backgrounds in visual snapshots', () => {
+    const contract = JSON.parse(readFileSync(join(repoRoot, 'godot', 'tests', 'visual_snapshot_contract.json'), 'utf8')) as {
+      snapshots?: Array<{
+        id?: string;
+        visual_tags?: string[];
+        required_resource_paths?: string[];
+      }>;
+    };
+    const snapshots = contract.snapshots ?? [];
+    const visualTags = snapshots.flatMap((snapshot) => snapshot.visual_tags ?? []);
+    const requiredResources = snapshots.flatMap((snapshot) => snapshot.required_resource_paths ?? []);
+
+    expect(visualTags).toEqual(expect.arrayContaining(['hud_meaning', 'sealed_locked_door', 'stage_background']));
+    for (const background of [
+      'godot/resources/assets/images/world/hub-background.webp',
+      'godot/resources/assets/images/world/forest-background.webp',
+      'godot/resources/assets/images/world/ice-background.webp',
+      'godot/resources/assets/images/world/fire-background.webp',
+      'godot/resources/assets/images/world/ruins-background.webp',
+      'godot/resources/assets/images/world/sky-background.webp',
+      'godot/resources/assets/images/world/generated-labyrinth-background.webp',
+    ]) {
+      expect(requiredResources).toContain(background);
+      expect(existsSync(join(repoRoot, background))).toBe(true);
+    }
   });
 
   it('tiles terrain textures across multi-cell floor polygons instead of stretching one tile', () => {

@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "snapshot_id": "level_background_sky",
+  "content_hash": "329119b3094d21f2e3c13b7232369ef30c358ada5b72064c269756b82e56eadf",
+  "replay_path": "godot/tests/replays/sky_sanctum_to_goal_finish.json",
+  "frame": 90,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "level_terrain",
+    "stage_background"
+  ],
+  "required_scene_paths": [
+    "godot/levels/sky_sanctum.tscn",
+    "godot/scripts/level/LevelVisualAssets.gd"
+  ],
+  "required_resource_paths": [
+    "godot/resources/assets/images/world/royal-tile.webp",
+    "godot/resources/assets/images/world/sky-background.webp",
+    "godot/resources/assets/images/world/wall-texture.webp"
+  ]
+}

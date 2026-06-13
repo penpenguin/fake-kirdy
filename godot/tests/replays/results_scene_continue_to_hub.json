@@ -1,0 +1,62 @@
+{
+  "start_level_id": "labyrinth_132",
+  "start_spawn_id": "default",
+  "level_id": "labyrinth_132",
+  "fps": 60,
+  "max_frames": 160,
+  "continue_after_finished": true,
+  "frames": [
+    {
+      "frame": 0,
+      "actions": {
+        "move_right": true,
+        "result_continue": false,
+        "jump": false
+      }
+    },
+    {
+      "frame": 50,
+      "actions": {
+        "move_right": false,
+        "result_continue": true
+      }
+    },
+    {
+      "frame": 51,
+      "actions": {
+        "result_continue": false
+      }
+    },
+    {
+      "frame": 70,
+      "actions": {
+        "result_continue": true
+      }
+    },
+    {
+      "frame": 71,
+      "actions": {
+        "result_continue": false
+      }
+    },
+    {
+      "frame": 72,
+      "actions": {
+        "move_right": true,
+        "jump": true
+      }
+    },
+    {
+      "frame": 74,
+      "actions": {
+        "jump": false
+      }
+    },
+    {
+      "frame": 145,
+      "actions": {
+        "move_right": false
+      }
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "hud_controller_lab_jump",
-  "content_hash": "db442db69079d6873aa625631f7fe53d7b6bfab4d30f45d596b13a1a1e92c625",
+  "content_hash": "b878424bdc6097cdb3b5cd0a23668399a10f8d1e52028b168106f2dc3eec0bae",
   "replay_path": "godot/tests/replays/controller_lab_jump.json",
   "frame": 30,
   "viewport": {
@@ -9,7 +9,8 @@
     "height": 720
   },
   "visual_tags": [
-    "hud"
+    "hud",
+    "hud_meaning"
   ],
   "required_scene_paths": [
     "godot/scenes/ui/HudOverlay.tscn"

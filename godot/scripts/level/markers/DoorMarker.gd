@@ -2,6 +2,7 @@ extends Node2D
 class_name DoorMarker
 
 const DoorTexture = preload("res://resources/assets/images/ui/door-marker.webp")
+const LockedDoorTexture = preload("res://resources/assets/images/ui/locked-door.webp")
 
 @export var door_id: String = "door"
 @export var door_role: String = "progress"
@@ -20,7 +21,7 @@ const DoorTexture = preload("res://resources/assets/images/ui/door-marker.webp")
 @export var hidden_until_discovered: bool = false
 @export var discovery_radius: float = 80.0
 @export var requires_interact: bool = true
-@export var visual_target_size: Vector2 = Vector2(56.0, 72.0)
+@export var visual_target_size: Vector2 = Vector2(64.0, 64.0)
 
 
 func _ready() -> void:
@@ -32,11 +33,15 @@ func _ready() -> void:
 
 func ensure_visual() -> void:
     if has_node("Visual"):
+        var existing_visual := $Visual as Sprite2D
+        existing_visual.texture = get_door_texture()
+        existing_visual.visible = not hidden_until_discovered
+        fit_visual_to_target_size(existing_visual)
         return
 
     var visual := Sprite2D.new()
     visual.name = "Visual"
-    visual.texture = DoorTexture
+    visual.texture = get_door_texture()
     visual.z_index = 2
     visual.visible = not hidden_until_discovered
     visual.scale = Vector2(0.36, 0.36)
@@ -53,6 +58,17 @@ func fit_visual_to_target_size(visual: Sprite2D) -> void:
 
     var scale_factor: float = minf(visual_target_size.x / texture_size.x, visual_target_size.y / texture_size.y)
     visual.scale = Vector2(scale_factor, scale_factor)
+
+
+func get_door_texture() -> Texture2D:
+    if is_locked_visual():
+        return LockedDoorTexture
+
+    return DoorTexture
+
+
+func is_locked_visual() -> bool:
+    return door_visual_style == "locked" or door_role == "locked_gate" or required_item_id != "" or required_keystone_item_id != "" or required_ability_type != "" or required_completed_level_id != "" or required_defeated_enemy_group_id != "" or required_boss_id != ""
 
 
 func to_level_marker() -> Dictionary:

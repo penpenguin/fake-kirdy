@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "snapshot_id": "level_background_ruins",
+  "content_hash": "c7822482be9ab174836ce4505e1942ef8822dba0618d2712c80fe0a3834185d8",
+  "replay_path": "godot/tests/replays/ruins_reliquary_collectible.json",
+  "frame": 30,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "level_terrain",
+    "stage_background"
+  ],
+  "required_scene_paths": [
+    "godot/levels/ruins_reliquary.tscn",
+    "godot/scripts/level/LevelVisualAssets.gd"
+  ],
+  "required_resource_paths": [
+    "godot/resources/assets/images/world/ruins-background.webp",
+    "godot/resources/assets/images/world/stone-tile.webp",
+    "godot/resources/assets/images/world/wall-texture.webp"
+  ]
+}

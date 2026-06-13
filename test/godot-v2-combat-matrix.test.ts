@@ -35,7 +35,8 @@ const writeContract = (path: string, overrides: Record<string, unknown> = {}): v
           {
             id: 'ground',
             type: 'ground',
-            base_hp: 2,
+            role: 'basic',
+            base_hp: 1,
             ttk_seconds: { min: 0, max: 4 },
           },
         ],
@@ -156,5 +157,39 @@ describe('Godot combat matrix', () => {
     expect(report.ability_profiles.fire.attack_type).toBe('projectile');
     expect(report.ability_profiles.leaf.attack_type).toBe('cutter');
     expect(report.ability_profiles.none.role).toBe('no_direct_attack');
+  });
+
+  it('keeps basic small enemies at 1 HP and marks midboss or boss HP exceptions explicitly', () => {
+    const contract = JSON.parse(readFileSync(join(repoRoot, 'godot', 'tests', 'combat_matrix_contract.json'), 'utf8')) as {
+      enemy_archetypes?: Array<{
+        id?: string;
+        base_hp?: number;
+        role?: string;
+        hp_exception?: boolean;
+      }>;
+      rules?: Record<string, { severity?: string }>;
+    };
+    const simpleEnemy = readFileSync(join(repoRoot, 'godot', 'scripts', 'enemies', 'SimpleEnemy.gd'), 'utf8');
+    const enemyMarker = readFileSync(join(repoRoot, 'godot', 'scripts', 'level', 'markers', 'EnemySpawnMarker.gd'), 'utf8');
+    const session = readFileSync(join(repoRoot, 'godot', 'scripts', 'session', 'GameSession.gd'), 'utf8');
+
+    expect(simpleEnemy).toContain('@export var max_hp: int = 1');
+    expect(simpleEnemy).toContain('var hp: int = 1');
+    expect(enemyMarker).toContain('@export var max_hp');
+    expect(enemyMarker).toContain('@export var enemy_rank');
+    expect(session).toContain('func resolve_enemy_max_hp(enemy_type: String, marker_payload: Dictionary) -> int:');
+    expect(session).toContain('enemy.max_hp = resolve_enemy_max_hp(enemy_type, marker_payload)');
+    expect(contract.rules?.basic_enemy_hp?.severity).toBe('error');
+
+    const archetypes = contract.enemy_archetypes ?? [];
+    expect(archetypes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'ground', base_hp: 1, role: 'basic' }),
+        expect.objectContaining({ id: 'flying', base_hp: 1, role: 'basic' }),
+        expect.objectContaining({ id: 'sentry', role: 'midboss', hp_exception: true }),
+        expect.objectContaining({ id: 'elite', role: 'midboss', hp_exception: true }),
+        expect.objectContaining({ id: 'boss', role: 'boss', hp_exception: true }),
+      ]),
+    );
   });
 });

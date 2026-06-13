@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "spark_attack_effect_timing",
-  "content_hash": "b4bf68fc6cd9282b40d2955c32ba482a429af7d78335ff902c58aa397ffcdf9e",
+  "content_hash": "1b444fd54324f157f189f7087a820199f68073753336f877bf241566a551f94f",
   "replay_path": "godot/tests/replays/spark_ability_dash_movement.json",
   "frame": 3,
   "viewport": {
@@ -18,6 +18,7 @@
   ],
   "required_resource_paths": [
     "godot/resources/assets/images/characters/kirdy/kirdy-spark.webp",
-    "godot/resources/assets/images/effects/inhale-sparkle.webp"
+    "godot/resources/assets/images/effects/inhale-sparkle.webp",
+    "godot/resources/assets/images/effects/spark-attack.webp"
   ]
 }

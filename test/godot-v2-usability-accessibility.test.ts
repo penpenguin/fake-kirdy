@@ -35,6 +35,9 @@ describe('Godot v2 usability and accessibility checks', () => {
     expect(script).toContain('parseInputActions');
     expect(script).toContain('assertMinimumColorDistance');
     expect(script).toContain('assertTutorialSizeRatios');
+    expect(script).toContain('assertHudSemanticLabels');
+    expect(script).toContain('assertOneBlockVisualSizes');
+    expect(script).toContain('assertCentralHubDoorPlatforms');
 
     const contract = JSON.parse(readFileSync(contractPath, 'utf8')) as {
       version: number;
@@ -57,6 +60,22 @@ describe('Godot v2 usability and accessibility checks', () => {
         reference_scene: string;
         min_ratio: number;
         max_ratio: number;
+      }>;
+      hud_semantic_label_checks?: Array<{
+        id: string;
+        subject_file: string;
+        required_labels: string[];
+      }>;
+      one_block_visual_size_checks?: Array<{
+        id: string;
+        subject_file: string;
+        min_size: number;
+        max_size: number;
+      }>;
+      central_hub_door_platform_checks?: Array<{
+        id: string;
+        level_scene: string;
+        max_vertical_gap: number;
       }>;
       min_color_distance: number;
     };
@@ -111,18 +130,43 @@ describe('Godot v2 usability and accessibility checks', () => {
         }),
         expect.objectContaining({
           id: 'tutorial_collectible_marker_scale',
-          min_scale: 0.26,
-          max_scale: 0.4,
+          min_scale: 0.45,
+          max_scale: 0.62,
         }),
         expect.objectContaining({
           id: 'tutorial_heal_marker_scale',
-          min_scale: 0.36,
-          max_scale: 0.52,
+          min_scale: 0.56,
+          max_scale: 0.72,
         }),
         expect.objectContaining({
           id: 'tutorial_door_marker_scale',
           min_scale: 0.3,
           max_scale: 0.45,
+        }),
+      ]),
+    );
+    expect(contract.hud_semantic_label_checks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'hud_runtime_values_have_captions',
+          required_labels: expect.arrayContaining(['HEALTH', 'ABILITY', 'ITEMS', 'SCORE', 'OBJECTIVE', 'ATTACK', 'STATUS']),
+        }),
+      ]),
+    );
+    expect(contract.one_block_visual_size_checks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'player_visual_one_block', subject_file: 'godot/scripts/player/PlayerController.gd', min_size: 32, max_size: 64 }),
+        expect.objectContaining({ id: 'door_visual_one_block', subject_file: 'godot/scripts/level/markers/DoorMarker.gd', min_size: 48, max_size: 64 }),
+        expect.objectContaining({ id: 'heal_visual_one_block', subject_file: 'godot/scripts/level/markers/HealMarker.gd', min_size: 32, max_size: 64 }),
+        expect.objectContaining({ id: 'enemy_visual_one_block', subject_file: 'godot/scenes/enemies/SimpleEnemy.tscn', min_size: 32, max_size: 64 }),
+      ]),
+    );
+    expect(contract.central_hub_door_platform_checks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'central_hub_major_doors_have_platforms',
+          level_scene: 'godot/levels/central_hub.tscn',
+          max_vertical_gap: 80,
         }),
       ]),
     );

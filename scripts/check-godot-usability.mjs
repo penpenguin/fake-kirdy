@@ -75,6 +75,9 @@ for (const role of contract.required_color_roles) {
 failures.push(...assertMinimumColorDistance(colorRoles, contract.min_color_distance));
 failures.push(...assertTutorialSizeRatios(contract.tutorial_size_ratio_checks));
 failures.push(...assertObjectVisibilityChecks(contract.object_visibility_checks));
+failures.push(...assertHudSemanticLabels(contract.hud_semantic_label_checks));
+failures.push(...assertOneBlockVisualSizes(contract.one_block_visual_size_checks));
+failures.push(...assertCentralHubDoorPlatforms(contract.central_hub_door_platform_checks));
 
 const result = {
   contract_path: relativeToRepo(contractPath),
@@ -85,6 +88,9 @@ const result = {
   checked_color_roles: colorRoles.size,
   checked_tutorial_size_ratios: contract.tutorial_size_ratio_checks.length,
   checked_object_visibility: contract.object_visibility_checks.length,
+  checked_hud_semantic_labels: contract.hud_semantic_label_checks.length,
+  checked_one_block_visual_sizes: contract.one_block_visual_size_checks.length,
+  checked_central_hub_door_platforms: contract.central_hub_door_platform_checks.length,
   failed_checks: failures,
   status: failures.length === 0 ? 'passed' : 'failed',
 };
@@ -208,6 +214,84 @@ function assertObjectVisibilityChecks(checks) {
   return visibilityFailures;
 }
 
+function assertHudSemanticLabels(checks) {
+  const semanticFailures = [];
+
+  for (const check of checks) {
+    const subjectPath = resolve(repoRoot, check.subject_file);
+    if (!existsSync(subjectPath)) {
+      semanticFailures.push(`missing HUD semantic label file: ${check.subject_file}`);
+      continue;
+    }
+    const source = readText(subjectPath);
+    for (const label of check.required_labels ?? []) {
+      if (!source.includes(`"${label}"`) && !source.includes(label)) {
+        semanticFailures.push(`HUD semantic label ${check.id} missing label: ${label}`);
+      }
+    }
+  }
+
+  return semanticFailures;
+}
+
+function assertOneBlockVisualSizes(checks) {
+  const sizeFailures = [];
+
+  for (const check of checks) {
+    const subjectPath = resolve(repoRoot, check.subject_file);
+    if (!existsSync(subjectPath)) {
+      sizeFailures.push(`missing one-block visual file: ${check.subject_file}`);
+      continue;
+    }
+
+    const source = readText(subjectPath);
+    const size = parseRepresentativeVisualSize(source);
+    if (size === null) {
+      sizeFailures.push(`one-block visual size ${check.id} has no representative size`);
+      continue;
+    }
+
+    if (size < check.min_size || size > check.max_size) {
+      sizeFailures.push(`one-block visual size ${check.id} ${size.toFixed(1)} outside ${check.min_size}-${check.max_size}`);
+    }
+  }
+
+  return sizeFailures;
+}
+
+function assertCentralHubDoorPlatforms(checks) {
+  const platformFailures = [];
+
+  for (const check of checks) {
+    const levelPath = resolve(repoRoot, check.level_scene);
+    if (!existsSync(levelPath)) {
+      platformFailures.push(`missing central hub platform scene: ${check.level_scene}`);
+      continue;
+    }
+
+    const source = readText(levelPath);
+    const doors = parseDoorPositions(source);
+    const surfaces = parseSupportSurfaces(source);
+    if (doors.length === 0 || surfaces.length === 0) {
+      platformFailures.push(`central hub platform check ${check.id} missing doors or support surfaces`);
+      continue;
+    }
+
+    for (const door of doors) {
+      const hasPlatform = surfaces.some((surface) => {
+        const horizontallySupported = door.x >= surface.left && door.x <= surface.right;
+        const verticalGap = Math.abs(door.y - surface.top);
+        return horizontallySupported && verticalGap <= check.max_vertical_gap;
+      });
+      if (!hasPlatform) {
+        platformFailures.push(`central hub door ${door.name} has no platform within ${check.max_vertical_gap}px`);
+      }
+    }
+  }
+
+  return platformFailures;
+}
+
 function readVisibilitySource(relativePath, failures) {
   const filePath = resolve(repoRoot, relativePath);
   if (!existsSync(filePath)) {
@@ -254,6 +338,71 @@ function parseFirstRectangleShapeArea(source) {
     return null;
   }
   return width * height;
+}
+
+function parseRepresentativeVisualSize(source) {
+  const targetSizeMatch = source.match(/(?:target_size|visual_target_size)[^=\n]*(?:=|:=)\s*Vector2\(([-0-9.]+),\s*([-0-9.]+)\)/);
+  if (targetSizeMatch !== null) {
+    return Math.max(Number(targetSizeMatch[1]), Number(targetSizeMatch[2]));
+  }
+
+  const sceneScaleMatch = source.match(/scale = Vector2\(([-0-9.]+),\s*[-0-9.]+\)/);
+  if (sceneScaleMatch !== null) {
+    return Number(sceneScaleMatch[1]) * 64;
+  }
+
+  const scriptScale = parseVector2UniformScale(source);
+  if (scriptScale !== null) {
+    return scriptScale * 64;
+  }
+
+  return null;
+}
+
+function parseDoorPositions(source) {
+  const doors = [];
+  const doorRegex = /\[node name="([^"]*Door[^"]*)" type="Node2D" parent="\."\]\nposition = Vector2\(([-0-9.]+),\s*([-0-9.]+)\)[\s\S]*?script = ExtResource\("2_door"\)/g;
+  for (const match of source.matchAll(doorRegex)) {
+    doors.push({
+      name: match[1],
+      x: Number(match[2]),
+      y: Number(match[3]),
+    });
+  }
+  return doors;
+}
+
+function parseSupportSurfaces(source) {
+  const shapeSizes = new Map();
+  const shapeRegex = /\[sub_resource type="RectangleShape2D" id="([^"]+)"\]\nsize = Vector2\(([-0-9.]+),\s*([-0-9.]+)\)/g;
+  for (const match of source.matchAll(shapeRegex)) {
+    shapeSizes.set(match[1], {
+      width: Number(match[2]),
+      height: Number(match[3]),
+    });
+  }
+
+  const surfaces = [];
+  const bodyRegex = /\[node name="([^"]*(?:Floor|Platform)[^"]*)" type="StaticBody2D" parent="\."\]\nposition = Vector2\(([-0-9.]+),\s*([-0-9.]+)\)([\s\S]*?)(?=\n\[node name="[^"]+" type="StaticBody2D" parent="\."]|\n\[node name="[^"]+" type="Node2D" parent="\."]|$)/g;
+  for (const match of source.matchAll(bodyRegex)) {
+    const shapeMatch = match[4].match(/shape = SubResource\("([^"]+)"\)/);
+    if (shapeMatch === null) {
+      continue;
+    }
+    const shape = shapeSizes.get(shapeMatch[1]);
+    if (shape === undefined) {
+      continue;
+    }
+    const x = Number(match[2]);
+    const y = Number(match[3]);
+    surfaces.push({
+      name: match[1],
+      left: x - shape.width / 2,
+      right: x + shape.width / 2,
+      top: y - shape.height / 2,
+    });
+  }
+  return surfaces;
 }
 
 function parseVector2UniformScale(source) {
@@ -338,6 +487,9 @@ function readContract(path) {
     'required_color_roles',
     'object_visibility_checks',
     'tutorial_size_ratio_checks',
+    'hud_semantic_label_checks',
+    'one_block_visual_size_checks',
+    'central_hub_door_platform_checks',
   ]) {
     if (!Array.isArray(parsed[key]) || parsed[key].length === 0) {
       throw new Error(`Usability/accessibility contract has invalid ${key}`);

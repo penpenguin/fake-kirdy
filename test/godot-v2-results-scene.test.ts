@@ -112,4 +112,36 @@ describe('Godot v2 ResultsScene', () => {
       expect.arrayContaining(['results.scene.shown', 'results.scene.hidden', 'run.restart.selected']),
     );
   });
+
+  it('continues from the full ResultsScene back to Central Hub with live controls', () => {
+    const replayPath = join(godotRoot, 'tests', 'replays', 'results_scene_continue_to_hub.json');
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
+      replays?: Array<{
+        id?: string;
+        replay_path?: string;
+        expected_events?: string[];
+      }>;
+    };
+
+    expect(existsSync(replayPath)).toBe(true);
+    expect(session).toContain('func continue_results_to_hub() -> void:');
+    expect(session).toContain('hide_results_scene("results.continue.selected")');
+    expect(session).toContain('load_level("central_hub", "default")');
+    expect(session).toContain('record_event", "results.continue.selected"');
+
+    const replay = JSON.parse(readFileSync(replayPath, 'utf8')) as {
+      continue_after_finished?: boolean;
+      frames?: Array<{ actions?: Record<string, boolean> }>;
+    };
+    const suiteEntry = suite.replays?.find((entry) => entry.id === 'results_scene_continue_to_hub');
+
+    expect(replay.continue_after_finished).toBe(true);
+    expect(replay.frames?.some((frame) => frame.actions?.result_continue)).toBe(true);
+    expect(replay.frames?.some((frame) => frame.actions?.move_right || frame.actions?.jump)).toBe(true);
+    expect(suiteEntry?.replay_path).toBe('res://tests/replays/results_scene_continue_to_hub.json');
+    expect(suiteEntry?.expected_events).toEqual(
+      expect.arrayContaining(['results.scene.shown', 'results.continue.selected', 'door.entered', 'player.jump.started']),
+    );
+  });
 });

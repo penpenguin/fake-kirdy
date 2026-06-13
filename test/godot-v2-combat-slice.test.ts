@@ -129,6 +129,22 @@ describe('Godot v2 minimal combat slice', () => {
     );
   });
 
+  it('uses a dedicated timed Spark attack texture instead of a permanent blue line', () => {
+    const controller = readGodotFile('scripts/player/PlayerController.gd');
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const effectAssetPath = join(godotRoot, 'resources', 'assets', 'images', 'effects', 'spark-attack.webp');
+
+    expect(existsSync(effectAssetPath)).toBe(true);
+    expect(controller).toContain('ability_attack_effect_sprite');
+    expect(controller).toContain('Sprite2D.new()');
+    expect(controller).toContain('show_ability_attack_effect(attack_type: String, effect_color: Color, range: float, effect_texture: Texture2D');
+    expect(controller).not.toContain('ability_attack_effect_line');
+    expect(controller).not.toContain('AbilityAttackEffectFallback');
+    expect(session).toContain('effect_texture_path');
+    expect(session).toContain('res://resources/assets/images/effects/spark-attack.webp');
+    expect(session).toContain('player.call("show_ability_attack_effect", current_ability_type,');
+  });
+
   it('clears the capture link when a held enemy is defeated externally', () => {
     const source = readGodotFile('scripts/session/GameSession.gd');
 

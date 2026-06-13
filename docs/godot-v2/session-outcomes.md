@@ -67,6 +67,8 @@ The dedicated `ResultsScene` can then be shown by pressing `result_continue` or 
 
 Result menu input remains active after the full results scene is visible. `results_scene_restart.json` presses `result_continue`, then `result_restart`; the session emits `results.scene.hidden` and `run.restart.selected` before returning the HUD to `outcome: running`.
 
+The full results scene also supports continuing back to the hub. `results_scene_continue_to_hub.json` presses `result_continue` to open `ResultsScene`, presses `result_continue` again after it is visible, emits `results.continue.selected`, hides the results scene, loads `central_hub/default`, and verifies that normal movement/jump input is live again with the HUD at `outcome: running`.
+
 ## Runtime Error Flow
 
 If a session cannot load its requested level, `GameSession` records the existing `replay.error`, switches the outcome to `error`, and shows `ErrorOverlay.gd`. The overlay receives the requested level/spawn, a user-facing message, and retry metadata.

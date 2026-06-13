@@ -1,1 +1,15 @@
-2026-05-28 final migration status: Godot is canonical. Root `package.json` now has Godot run/build/replay/trace/test commands only; legacy Phaser/Vite commands are removed. Direct root dependencies `phaser`, `matter-js`, and `vite` are removed; `package-lock.json` updated. Phaser reference source was physically moved to `legacy/phaser-reference/` (`src`, `public`, `index.html`, `vite.config.ts`). Godot import/catalog references now point to `legacy/phaser-reference/src/game/...`. `scripts/generate-phaser-stage-manifest.mjs` reads `legacy/phaser-reference/src/game/world/stages`. Canonical Vitest/typecheck scope is Godot migration tests (`test/godot*.test.ts`) plus `test/trace-summary.test.ts`; legacy Phaser tests are no longer part of the root gate. `godot:content-check` validates 146 Phaser stage mappings, 132 generated schema levels, and 263 generated neighbor edges. Parity ledger reports 12 entries: 11 ported, 1 deferred (`audio-and-polish`), blocker_count 0; `--fail-on-blockers` passes. Final validation after physical move: `npm test` passed 27 files / 116 tests; `npm run test:canonical` passed and replay suite passed 14/14; `npm run build` reached Godot export and skipped successfully because local Godot export templates are not installed. ExecPlan Outcomes now marks the requested mainline migration boundary complete.
+# Godot Full Migration Status
+
+Updated 2026-06-14 from current docs.
+
+The full mainline migration boundary is complete. Godot is canonical in `godot/`; root Phaser/Vite runtime commands and direct runtime dependencies are removed; the legacy reference copy is no longer present in the repository.
+
+Completed migration evidence:
+- `godot/` owns the active project, scenes, scripts, levels, resources, tests, replay fixtures, and Web export preset.
+- Root commands route run/build/replay/trace/test validation through Godot-owned scripts.
+- `npm run test` validates TypeScript contracts, trace summary, and Godot-owned static/export/content/project checks.
+- `npm run test:canonical` adds the canonical replay suite when Godot is available.
+- `npm run build` targets the Godot Web export wrapper; `npm run build:public` is strict for publishable `dist/` output.
+- `npm run legacy:inventory` is the current audit command for confirming the removed legacy surface remains empty.
+
+Historical details live in `mem:docs/execplans/full-migration/01-purpose-context-progress`, `mem:docs/execplans/full-migration/02-discoveries-decisions`, and `mem:docs/execplans/full-migration/03-work-validation-outcomes`.

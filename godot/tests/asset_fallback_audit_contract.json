@@ -61,6 +61,9 @@
     "images/characters/kirdy/kirdy-spark.webp",
     "images/effects/fire-attack.webp",
     "images/effects/ice-attack.webp",
+    "images/effects/inhale-sparkle.webp",
+    "images/effects/spark-attack.webp",
+    "images/effects/star-bullet.webp",
     "images/effects/sword-slash.webp",
     "images/enemies/dronto-durt.webp",
     "images/enemies/wabble-bee.webp",
@@ -69,11 +72,27 @@
     "images/ui/locked-door.webp",
     "images/world/wall-texture.webp",
     "images/world/brick-tile.webp",
+    "images/world/hub-background.webp",
+    "images/world/forest-background.webp",
+    "images/world/ice-background.webp",
+    "images/world/fire-background.webp",
+    "images/world/ruins-background.webp",
+    "images/world/sky-background.webp",
+    "images/world/generated-labyrinth-background.webp",
+    "images/world/royal-background.webp",
     "images/world/forest-tile.webp",
     "images/world/fire-tile.webp",
     "images/world/ice-tile.webp",
     "images/world/stone-tile.webp",
     "images/world/royal-tile.webp"
+  ],
+  "required_effect_assets": [
+    "images/effects/fire-attack.webp",
+    "images/effects/ice-attack.webp",
+    "images/effects/inhale-sparkle.webp",
+    "images/effects/spark-attack.webp",
+    "images/effects/star-bullet.webp",
+    "images/effects/sword-slash.webp"
   ],
   "level_visuals": {
     "required_polygon_name_terms": ["floor", "platform", "step", "wall"],
@@ -137,6 +156,15 @@
       "severity": "error"
     },
     "missing_primary_enemy_asset": {
+      "severity": "error"
+    },
+    "missing_effect_manifest_asset": {
+      "severity": "error"
+    },
+    "missing_effect_asset_file": {
+      "severity": "error"
+    },
+    "unused_required_effect_asset": {
       "severity": "error"
     },
     "missing_level_texture_asset": {

@@ -28,6 +28,7 @@ try {
   const levelVisualChecks = checkLevelVisualAssets(contract, levelVisualAssets, assetRoot, manifestAssets);
   const resourcePathChecks = checkResourcePaths(sourceTexts, assetRoot, manifestAssets);
   const requiredAssetChecks = checkRequiredAssets(contract, assetRoot, manifestAssets);
+  const requiredEffectAssetChecks = checkRequiredEffectAssets(contract, assetRoot, manifestAssets, sourceTexts);
   const labelChecks = checkUiLabels(sourceTexts, contract);
   const fallbackChecks = checkFallbackEvents(sourceTexts, contract);
   const unusedAssetChecks = checkUnusedAssets(manifestAssets, sourceTexts, contract);
@@ -35,6 +36,7 @@ try {
     ...mainlineAbilities.checks,
     ...levelVisualChecks.checks,
     ...requiredAssetChecks,
+    ...requiredEffectAssetChecks.checks,
     ...resourcePathChecks.checks,
     ...labelChecks.checks,
     ...fallbackChecks.checks,
@@ -57,6 +59,7 @@ try {
       ability_assets: mainlineAbilities.abilities.length,
       level_visual_assets: levelVisualChecks.textureAssets.length,
       audio_assets: countAudioAssets(contract),
+      effect_assets: requiredEffectAssetChecks.count,
       ui_labels: labelChecks.count,
       resource_paths: resourcePathChecks.count,
       unused_assets: unusedAssetChecks.count,
@@ -92,6 +95,7 @@ try {
       ability_assets: 0,
       level_visual_assets: 0,
       audio_assets: 0,
+      effect_assets: 0,
       ui_labels: 0,
       resource_paths: 0,
       unused_assets: 0,
@@ -285,6 +289,35 @@ function checkRequiredAssets(contract, assetRoot, manifestAssets) {
     }
   }
   return checks;
+}
+
+function checkRequiredEffectAssets(contract, assetRoot, manifestAssets, sourceTexts) {
+  const checks = [];
+  const sourceBlob = sourceTexts.map((source) => source.text).join('\n');
+  const effectAssets = requireOptionalArray(contract.required_effect_assets, 'required_effect_assets').map(String);
+
+  for (const assetPath of effectAssets) {
+    if (!manifestAssets.has(assetPath)) {
+      checks.push(buildCheck(contract, 'missing_effect_manifest_asset', {
+        asset_path: assetPath,
+        message: `required effect asset is not listed in asset_manifest.json: ${assetPath}.`,
+      }));
+    }
+    if (!existsSync(join(assetRoot, assetPath))) {
+      checks.push(buildCheck(contract, 'missing_effect_asset_file', {
+        asset_path: assetPath,
+        message: `required effect asset file is missing: ${assetPath}.`,
+      }));
+    }
+    if (!sourceBlob.includes(`res://resources/assets/${assetPath}`)) {
+      checks.push(buildCheck(contract, 'unused_required_effect_asset', {
+        asset_path: assetPath,
+        message: `required effect asset is not referenced by a Godot resource path: ${assetPath}.`,
+      }));
+    }
+  }
+
+  return { count: effectAssets.length, checks };
 }
 
 function checkLevelVisualAssets(contract, levelVisualAssets, assetRoot, manifestAssets) {

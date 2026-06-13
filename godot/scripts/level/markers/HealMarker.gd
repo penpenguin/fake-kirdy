@@ -2,7 +2,7 @@ extends Node2D
 class_name HealMarker
 
 const HealTexture = preload("res://resources/assets/images/items/heal-orb.webp")
-const HEAL_VISUAL_SCALE := 0.42
+const HEAL_VISUAL_SCALE := 0.62
 
 @export var heal_id: String = "heal"
 @export var amount: int = 1

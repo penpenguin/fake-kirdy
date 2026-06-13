@@ -1,6 +1,8 @@
 extends Control
 class_name HudOverlay
 
+const HUD_SEMANTIC_LABELS := ["HEALTH", "ABILITY", "ITEMS", "SCORE", "OBJECTIVE", "ATTACK", "STATUS"]
+
 @onready var panel: Panel = $Panel
 @onready var top_bar_row: HBoxContainer = $Panel/TopBarRow
 @onready var level_label: Label = $Panel/TopBarRow/LevelLabel
@@ -50,17 +52,17 @@ func set_hud_state(next_state: Dictionary) -> void:
     if not is_inside_tree():
         return
 
-    level_label.text = "LV  %s" % String(hud_state.get("level_id", ""))
+    level_label.text = "AREA  %s" % String(hud_state.get("level_id", ""))
     hp_bar.max_value = max(int(hud_state.get("max_hp", 0)), 1)
     hp_bar.value = clampi(int(hud_state.get("hp", 0)), 0, int(hp_bar.max_value))
-    hp_label.text = "HP  %d / %d" % [int(hud_state.get("hp", 0)), int(hud_state.get("max_hp", 0))]
-    ability_label.text = get_ability_label().to_upper()
-    items_label.text = format_item_progress()
-    score_label.text = "%d" % int(hud_state.get("score", 0))
+    hp_label.text = "HEALTH  %d/%d" % [int(hud_state.get("hp", 0)), int(hud_state.get("max_hp", 0))]
+    ability_label.text = "ABILITY  %s" % get_ability_label().to_upper()
+    items_label.text = "ITEMS  %s" % format_item_progress()
+    score_label.text = "SCORE  %d" % int(hud_state.get("score", 0))
     outcome_label.text = get_readable_outcome_label().to_upper()
-    objective_label.text = String(hud_state.get("objective_text", "Reach the goal"))
-    cooldown_label.text = "Z  %s" % get_cooldown_label()
-    status_label.text = get_status_label()
+    objective_label.text = "OBJECTIVE  %s" % String(hud_state.get("objective_text", "Reach the goal"))
+    cooldown_label.text = "ATTACK  %s" % get_cooldown_label()
+    status_label.text = "STATUS  %s" % get_status_label()
     apply_hud_theme()
 
 
@@ -92,6 +94,10 @@ func get_summary_text() -> String:
         get_readable_outcome_label(),
         String(hud_state.get("objective_text", "Reach the goal")),
     ]
+
+
+func get_hud_semantic_labels() -> Array:
+    return HUD_SEMANTIC_LABELS.duplicate()
 
 
 func normalize_hud_state(source: Dictionary) -> Dictionary:

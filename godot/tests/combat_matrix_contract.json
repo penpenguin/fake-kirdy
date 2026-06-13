@@ -114,7 +114,8 @@
     {
       "id": "ground",
       "type": "ground",
-      "base_hp": 2,
+      "role": "basic",
+      "base_hp": 1,
       "ttk_seconds": {
         "min": 0,
         "max": 4
@@ -123,7 +124,8 @@
     {
       "id": "flying",
       "type": "flying",
-      "base_hp": 2,
+      "role": "basic",
+      "base_hp": 1,
       "ttk_seconds": {
         "min": 0,
         "max": 4
@@ -132,6 +134,8 @@
     {
       "id": "elite",
       "type": "elite",
+      "role": "midboss",
+      "hp_exception": true,
       "base_hp": 45,
       "ttk_seconds": {
         "min": 2.5,
@@ -141,6 +145,8 @@
     {
       "id": "sentry",
       "type": "sentry",
+      "role": "midboss",
+      "hp_exception": true,
       "base_hp": 5,
       "ttk_seconds": {
         "min": 0,
@@ -150,6 +156,8 @@
     {
       "id": "boss",
       "type": "boss",
+      "role": "boss",
+      "hp_exception": true,
       "base_hp": 230,
       "ttk_seconds": {
         "min": 15,
@@ -171,6 +179,9 @@
       "severity": "error"
     },
     "ttk_range": {
+      "severity": "error"
+    },
+    "basic_enemy_hp": {
       "severity": "error"
     },
     "difficulty_monotonicity": {

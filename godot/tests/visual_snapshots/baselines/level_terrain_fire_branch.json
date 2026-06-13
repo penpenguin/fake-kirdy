@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "level_terrain_fire_branch",
-  "content_hash": "bcf7baf8075b6c0d53464e8db5e8d975b08326080bea2a7267dd7a3a4317ae89",
+  "content_hash": "89da74acc946bd4f7cbd02225dabee0a0961f38bd9d1ca6f611ddfa7b2738e78",
   "replay_path": "godot/tests/replays/fire_area_ability_gate_trace.json",
   "frame": 20,
   "viewport": {
@@ -9,13 +9,15 @@
     "height": 720
   },
   "visual_tags": [
-    "level_terrain"
+    "level_terrain",
+    "stage_background"
   ],
   "required_scene_paths": [
     "godot/levels/fire_area.tscn",
     "godot/scripts/level/LevelVisualAssets.gd"
   ],
   "required_resource_paths": [
+    "godot/resources/assets/images/world/fire-background.webp",
     "godot/resources/assets/images/world/fire-tile.webp",
     "godot/resources/assets/images/world/wall-texture.webp"
   ]
