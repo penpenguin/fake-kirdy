@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "tutorial_real_stage_cue",
-  "content_hash": "84c1bc25ed61602ed6cbaad83bd89d894f2127cef5cea854f7e368068e6c6307",
+  "content_hash": "c923af39c86f2f766f7e28f28e5c2b292e0ecbf337bd4a043ae52a678f4b35c6",
   "replay_path": "godot/tests/replays/tutorial_to_real_stage_path.json",
   "frame": 188,
   "viewport": {

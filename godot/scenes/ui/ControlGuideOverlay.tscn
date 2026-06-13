@@ -3,21 +3,43 @@
 [ext_resource type="Script" path="res://scripts/ui/ControlGuideOverlay.gd" id="1_control_guide"]
 
 [node name="ControlGuideOverlay" type="Control"]
-offset_left = 16.0
-offset_top = 16.0
-offset_right = 260.0
-offset_bottom = 150.0
+offset_right = 960.0
+offset_bottom = 540.0
 mouse_filter = 2
 script = ExtResource("1_control_guide")
 
-[node name="ControlsLabel" type="Label" parent="."]
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 244.0
-offset_bottom = 120.0
-text = "Move: A/D or arrows
-Jump: Space
-Inhale: C
-Swallow: X
-Ability: Z
-Map: M"
+[node name="PopupPanel" type="Panel" parent="."]
+offset_left = 300.0
+offset_top = 132.0
+offset_right = 660.0
+offset_bottom = 376.0
+mouse_filter = 2
+
+[node name="TitleLabel" type="Label" parent="PopupPanel"]
+offset_left = 24.0
+offset_top = 18.0
+offset_right = 336.0
+offset_bottom = 46.0
+text = "Controls"
+horizontal_alignment = 1
+
+[node name="ControlsLabel" type="Label" parent="PopupPanel"]
+offset_left = 28.0
+offset_top = 58.0
+offset_right = 332.0
+offset_bottom = 184.0
+text = "Move  A/D or arrows
+Jump  Space
+Inhale  C
+Swallow  X
+Spark Burst  Z
+Map  M
+Pause  Esc"
+
+[node name="DismissLabel" type="Label" parent="PopupPanel"]
+offset_left = 28.0
+offset_top = 202.0
+offset_right = 332.0
+offset_bottom = 226.0
+text = "Press Space to close"
+horizontal_alignment = 1

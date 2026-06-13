@@ -1,6 +1,6 @@
 # Godot v2 Result Overlay
 
-`ResultOverlay.gd` is the minimal run-end UI for the Godot mainline. It appears when a replay/session reaches a goal or ends in game-over.
+`ResultOverlay.gd` is the run-end popup UI for the Godot mainline. It appears when a replay/session reaches a goal or ends in game-over, dims the playfield with `PopupBackdrop`, and frames the summary inside `ModalPanel` so it reads as a modal result card instead of loose HUD text.
 
 Displayed state:
 
@@ -10,6 +10,7 @@ Displayed state:
 - remaining-life bonus
 - collected item count
 - restart prompt when the outcome is `game_over`
+- continue prompt for moving to the dedicated results scene
 
 `GameSession.gd` owns the data. It builds a result payload from the current session state, calls `ResultOverlay.set_result_state()`, and emits `result.overlay.shown`. The result payload includes the same deterministic score as the HUD plus the remaining-life bonus used inside that total.
 
@@ -22,3 +23,5 @@ For game-over results, the payload sets `restart_available`. `ResultOverlay` sho
 `ResultsScene.gd` is the dedicated final-results UI. `GameSession` shows it from the result overlay after `result_auto_results_delay_ms` or immediately when `result_continue` is pressed. It receives the same score, time, and remaining-life bonus payload and emits `results.scene.shown`; `trace:summary` exposes that payload as `last_results_scene`.
 
 The result overlay now carries the first Godot-owned presentation polish pass: `score_countup_ms` animates the visible score, `polish_transition_ms` fades the overlay in, and the session audio mix continues to emit `audio.mix.updated` when settings or menu state changes.
+
+The popup contract is intentionally lightweight: clear and game-over both use the same backdrop, modal panel, score count-up, restart/continue labels, and trace-owned payload. Future results-scene polish should keep `result.overlay.shown` and `last_result_overlay` stable unless the trace contract is updated with tests.

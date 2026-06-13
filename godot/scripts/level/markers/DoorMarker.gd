@@ -6,6 +6,7 @@ const DoorTexture = preload("res://resources/assets/images/ui/door-marker.webp")
 @export var door_id: String = "door"
 @export var door_role: String = "progress"
 @export var door_label: String = ""
+@export var door_visual_style: String = "region"
 @export var target_level_id: String = ""
 @export var target_spawn_id: String = "default"
 @export var trigger_radius: float = 64.0
@@ -38,6 +39,7 @@ func ensure_visual() -> void:
     visual.texture = DoorTexture
     visual.z_index = 2
     visual.visible = not hidden_until_discovered
+    visual.scale = Vector2(0.36, 0.36)
     add_child(visual)
 
 
@@ -64,6 +66,7 @@ func to_level_marker() -> Dictionary:
         "payload": {
             "door_role": door_role,
             "door_label": door_label,
+            "door_visual_style": door_visual_style,
             "target_level_id": target_level_id,
             "target_spawn_id": target_spawn_id,
             "trigger_radius": trigger_radius,

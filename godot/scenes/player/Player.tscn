@@ -48,6 +48,7 @@ kirdy_spit_texture = ExtResource("9_spit")
 kirdy_fire_texture = ExtResource("10_fire")
 kirdy_ice_texture = ExtResource("11_ice")
 kirdy_sword_texture = ExtResource("12_sword")
+kirdy_spark_texture = ExtResource("9_spit")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_player")

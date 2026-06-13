@@ -23,8 +23,10 @@ signal trace_event(event_type: String, payload: Dictionary)
 @export var kirdy_fire_texture: Texture2D
 @export var kirdy_ice_texture: Texture2D
 @export var kirdy_sword_texture: Texture2D
+@export var kirdy_spark_texture: Texture2D
 @export var ability_texture_fallback_enabled: bool = true
 @export var inhale_effect_fallback_enabled: bool = true
+@export var damage_blink_alpha: float = 0.42
 
 var ability_type: String = ""
 var coyote_time: float = 0.0
@@ -37,6 +39,7 @@ var input_source: Node = null
 var last_facing: float = 1.0
 var last_ability_texture_fallback_key: String = ""
 var inhale_effect_fallback_line: Line2D = null
+var ability_attack_effect_line: Line2D = null
 
 @onready var body_sprite: Sprite2D = $Body
 
@@ -164,6 +167,36 @@ func hide_inhale_effect_fallback() -> void:
     inhale_effect_fallback_line.points = PackedVector2Array()
 
 
+func show_ability_attack_effect(_ability_attack_type: String, effect_color: Color, range: float) -> void:
+    if ability_attack_effect_line == null or not is_instance_valid(ability_attack_effect_line):
+        ability_attack_effect_line = Line2D.new()
+        ability_attack_effect_line.name = "AbilityAttackEffectFallback"
+        ability_attack_effect_line.width = 6.0
+        ability_attack_effect_line.z_index = 6
+        add_child(ability_attack_effect_line)
+
+    ability_attack_effect_line.visible = true
+    ability_attack_effect_line.default_color = effect_color
+    var effect_range: float = maxf(range, 32.0)
+    ability_attack_effect_line.points = PackedVector2Array([
+        Vector2.ZERO,
+        Vector2(effect_range * last_facing, 0.0),
+    ])
+
+
+func set_damage_feedback_state(is_invulnerable: bool, remaining_ms: int = 0) -> void:
+    if body_sprite == null:
+        return
+
+    if not is_invulnerable or remaining_ms <= 0:
+        body_sprite.modulate = Color(1.0, 1.0, 1.0, 1.0)
+        return
+
+    var blink_step := int(floor(float(remaining_ms) / 120.0)) % 2
+    var alpha := damage_blink_alpha if blink_step == 0 else 1.0
+    body_sprite.modulate = Color(1.0, 1.0, 1.0, alpha)
+
+
 func update_visual_state(input_x: float, jump_held: bool) -> void:
     if body_sprite == null:
         return
@@ -216,7 +249,9 @@ func get_ability_texture(next_ability_type: String) -> Texture2D:
             return kirdy_ice_texture
         "sword", "blade":
             return kirdy_sword_texture
-        "spark", "stone":
+        "spark":
+            return kirdy_spark_texture
+        "stone":
             return kirdy_sword_texture
         "leaf":
             return kirdy_ice_texture

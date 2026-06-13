@@ -369,6 +369,7 @@ function lintSceneLevels(levels, levelIndex, rules) {
   for (const level of levels) {
     lintDoors(level, levelIndex, rules, issues);
     lintDoorRoles(level, rules, issues);
+    lintNearbyDoorAmbiguity(level, rules, issues);
     lintAbilityGates(level, rules, issues);
     lintHiddenDiscovery(level, rules, issues);
     lintDoorGoalOverlap(level, rules, issues);
@@ -422,6 +423,48 @@ function lintDoorRoles(level, rules, issues) {
     }
     if (label.length === 0 && role !== 'return') {
       addIssue(issues, rules, 'door_role_required', level, door, 'Visible non-return door must declare a readable door_label.');
+    }
+  }
+}
+
+function lintNearbyDoorAmbiguity(level, rules, issues) {
+  const rule = rules.nearby_door_ambiguity;
+  if (rule?.severity === 'off') {
+    return;
+  }
+  const representativeLevelIds = new Set(rule?.representative_level_ids ?? []);
+  if (representativeLevelIds.size > 0 && !representativeLevelIds.has(level.id) && options.levelsDir === null) {
+    return;
+  }
+  const minDistance = Number(rule?.min_distance_px ?? 96);
+  const visibleDoors = level.marker_groups.door.filter((door) => door.props.hidden_until_discovered !== true);
+  for (let leftIndex = 0; leftIndex < visibleDoors.length; leftIndex += 1) {
+    for (let rightIndex = leftIndex + 1; rightIndex < visibleDoors.length; rightIndex += 1) {
+      const left = visibleDoors[leftIndex];
+      const right = visibleDoors[rightIndex];
+      const actualDistance = distance(left.position, right.position);
+      if (actualDistance >= minDistance) {
+        continue;
+      }
+      const leftRole = stringProp(left.props.door_role, '');
+      const rightRole = stringProp(right.props.door_role, '');
+      const leftLabel = stringProp(left.props.door_label, '');
+      const rightLabel = stringProp(right.props.door_label, '');
+      const leftStyle = stringProp(left.props.door_visual_style, '');
+      const rightStyle = stringProp(right.props.door_visual_style, '');
+      const hasReadablePurpose = leftLabel.length > 0 && rightLabel.length > 0 && leftLabel !== rightLabel;
+      const hasDistinctCategory = leftRole !== rightRole || (leftStyle.length > 0 && rightStyle.length > 0 && leftStyle !== rightStyle);
+      if (hasReadablePurpose && hasDistinctCategory) {
+        continue;
+      }
+      addIssue(
+        issues,
+        rules,
+        'nearby_door_ambiguity',
+        level,
+        left,
+        `Nearby doors '${left.id}' and '${right.id}' are ${round(actualDistance)}px apart without distinct labels, roles, or visual styles.`,
+      );
     }
   }
 }

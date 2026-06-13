@@ -149,9 +149,9 @@ describe('Godot combat matrix', () => {
       ability_profiles: Record<string, { role: string; attack_type?: string }>;
     };
     expect(report.ability_count).toBe(8);
-    expect(report.enemy_archetype_count).toBe(4);
+    expect(report.enemy_archetype_count).toBe(5);
     expect(report.difficulty_count).toBe(3);
-    expect(report.matrix_count).toBe(96);
+    expect(report.matrix_count).toBe(120);
     expect(report.failed_checks).toEqual([]);
     expect(report.ability_profiles.fire.attack_type).toBe('projectile');
     expect(report.ability_profiles.leaf.attack_type).toBe('cutter');

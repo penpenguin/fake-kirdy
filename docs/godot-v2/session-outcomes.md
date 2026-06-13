@@ -33,7 +33,7 @@ The current reward types are:
 - `max-health`: increase `player_max_hp` by `amount`, heal by the same amount, emit `player.max_hp_increased`, and write the new max HP through the save path when save is enabled.
 - `revive`: increase `player_revive_count` by `amount`, emit `player.revive_acquired`, and write the new revive count through the save path when save is enabled.
 
-Enemy contact damage uses a short `player_invulnerability_ms` window so a single enemy does not drain all HP every physics frame. This keeps the first healing replay deterministic without adding the full Phaser damage model yet.
+Enemy contact damage uses a `player_invulnerability_ms` window so a single enemy does not drain all HP every physics frame. The default recovery is now 2000ms with blinking translucent player feedback. The session emits `player.invulnerability.started` and `player.invulnerability.ended`, and the `player.damaged` payload includes `invulnerability_remaining_ms` so replay traces can prove repeated contact during the recovery window does not stack damage.
 
 `heal_room_recover_and_goal.json` loads `heal_room`, takes one enemy contact hit, collects `heal_room_recovery`, emits `player.healed`, then reaches the goal and emits `run.finished`.
 

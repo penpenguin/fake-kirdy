@@ -39,7 +39,7 @@ const writeContract = (path: string, overrides: Record<string, unknown> = {}): v
           stop_frames: { min: 3, max: 10 },
           turn_frames: { min: 6, max: 18 },
           attack_latency_frames: { min: 0, max: 6 },
-          damage_recovery_frames: { min: 24, max: 80 },
+          damage_recovery_frames: { min: 110, max: 130 },
         },
         ...overrides,
       },
@@ -81,7 +81,7 @@ describe('Godot feel metrics', () => {
       expect(report.metrics.acceleration_frames).toBe(7);
       expect(report.metrics.turn_frames).toBeGreaterThan(report.metrics.stop_frames);
       expect(report.metrics.attack_latency_frames).toBe(0);
-      expect(report.metrics.damage_recovery_frames).toBe(48);
+      expect(report.metrics.damage_recovery_frames).toBe(120);
     } finally {
       rmSync(tempDir, { recursive: true, force: true });
     }

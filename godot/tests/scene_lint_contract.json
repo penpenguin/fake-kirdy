@@ -27,6 +27,13 @@
         "side_room"
       ]
     },
+    "nearby_door_ambiguity": {
+      "severity": "error",
+      "representative_level_ids": [
+        "central_hub"
+      ],
+      "min_distance_px": 96
+    },
     "ability_gate_requires_ability": {
       "severity": "error"
     },

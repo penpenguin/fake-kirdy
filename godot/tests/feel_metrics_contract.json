@@ -55,8 +55,8 @@
       "max": 96
     },
     "damage_recovery_frames": {
-      "min": 24,
-      "max": 80
+      "min": 110,
+      "max": 130
     }
   }
 }

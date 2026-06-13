@@ -1,13 +1,16 @@
 extends Control
 class_name ResultOverlay
 
-@onready var title_label: Label = $TitleLabel
-@onready var outcome_label: Label = $OutcomeLabel
-@onready var time_label: Label = $TimeLabel
-@onready var score_label: Label = $ScoreLabel
-@onready var bonus_label: Label = $BonusLabel
-@onready var items_label: Label = $ItemsLabel
-@onready var restart_label: Label = $RestartLabel
+@onready var popup_backdrop: ColorRect = $PopupBackdrop
+@onready var modal_panel: Panel = $ModalPanel
+@onready var title_label: Label = $ModalPanel/TitleLabel
+@onready var outcome_label: Label = $ModalPanel/OutcomeLabel
+@onready var time_label: Label = $ModalPanel/TimeLabel
+@onready var score_label: Label = $ModalPanel/ScoreLabel
+@onready var bonus_label: Label = $ModalPanel/BonusLabel
+@onready var items_label: Label = $ModalPanel/ItemsLabel
+@onready var restart_label: Label = $ModalPanel/RestartLabel
+@onready var continue_label: Label = $ModalPanel/ContinueLabel
 
 @export var polish_transition_ms: int = 180
 @export var score_countup_ms: int = 420
@@ -53,6 +56,7 @@ func refresh_labels() -> void:
     bonus_label.text = "Life Bonus  %d" % int(result_state.get("remaining_life_bonus", 0))
     items_label.text = "Items  %d" % get_items_collected().size()
     restart_label.text = "Press R to restart" if bool(result_state.get("restart_available", false)) else ""
+    continue_label.text = get_continue_text(normalized_outcome)
 
 
 func get_summary_text() -> String:
@@ -64,6 +68,14 @@ func get_summary_text() -> String:
         int(result_state.get("remaining_life_bonus", 0)),
         get_items_collected().size(),
     ]
+
+
+func get_continue_text(outcome: String = "") -> String:
+    if outcome == "completed" or outcome == "complete":
+        return "Press Enter to continue"
+    if outcome == "game_over":
+        return "Press Enter for results"
+    return ""
 
 
 func normalize_result_state(source: Dictionary) -> Dictionary:

@@ -50,10 +50,34 @@ facing = 1
 position = Vector2(200, 400)
 script = ExtResource("2_enemy")
 spawn_id = "tutorial_spark"
-enemy_type = "simple_ground"
+enemy_type = "spark_wisp"
 ability_type = "spark"
 enemy_group_id = "tutorial_spark"
 patrol_radius = 24.0
+contact_damage = 0
+attack_damage = 0
+attack_radius = 72.0
+
+[node name="TutorialFlyingEnemySpawnMarker" type="Node2D" parent="."]
+position = Vector2(690, 400)
+script = ExtResource("2_enemy")
+spawn_id = "tutorial_frost_flyer"
+enemy_type = "flying"
+ability_type = "frost"
+enemy_group_id = "tutorial_frost"
+patrol_radius = 16.0
+contact_damage = 0
+attack_damage = 0
+attack_radius = 72.0
+
+[node name="TutorialSentryEnemySpawnMarker" type="Node2D" parent="."]
+position = Vector2(760, 400)
+script = ExtResource("2_enemy")
+spawn_id = "tutorial_stone_sentry"
+enemy_type = "sentry"
+ability_type = "stone"
+enemy_group_id = "tutorial_stone"
+patrol_radius = 8.0
 contact_damage = 0
 attack_damage = 0
 attack_radius = 72.0
@@ -80,12 +104,15 @@ shape = SubResource("RectangleShape2D_gate")
 [node name="BlueWallHintLabel" type="Label" parent="."]
 position = Vector2(424, 232)
 size = Vector2(232, 28)
-text = "Blue wall: get Spark, press Z"
+text = "Storm Wall: Copy Spark, then burst"
 
 [node name="DoorToCentralHub" type="Node2D" parent="."]
 position = Vector2(800, 368)
 script = ExtResource("5_door")
 door_id = "tutorial_to_central_hub"
+door_role = "progress"
+door_label = "To the Hub"
+door_visual_style = "region"
 target_level_id = "central_hub"
 target_spawn_id = "tutorial_fire_route"
 trigger_radius = 44.0
@@ -93,7 +120,7 @@ trigger_radius = 44.0
 [node name="HubExitLabel" type="Label" parent="."]
 position = Vector2(708, 320)
 size = Vector2(196, 28)
-text = "Hub -> first real stage"
+text = "Hub Gate: choose your first trial"
 
 [node name="CameraBoundsMarker" type="Node2D" parent="."]
 position = Vector2(460, 270)

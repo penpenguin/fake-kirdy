@@ -4,58 +4,79 @@
 
 [node name="ResultOverlay" type="Control"]
 visible = false
-offset_left = 300.0
-offset_top = 160.0
-offset_right = 660.0
-offset_bottom = 428.0
-mouse_filter = 2
+offset_right = 960.0
+offset_bottom = 540.0
+mouse_filter = 1
 script = ExtResource("1_result")
 
-[node name="TitleLabel" type="Label" parent="."]
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 360.0
-offset_bottom = 28.0
-text = "Run Complete"
+[node name="PopupBackdrop" type="ColorRect" parent="."]
+offset_right = 960.0
+offset_bottom = 540.0
+mouse_filter = 2
+color = Color(0.02, 0.025, 0.035, 0.58)
 
-[node name="OutcomeLabel" type="Label" parent="."]
-offset_left = 0.0
-offset_top = 36.0
-offset_right = 360.0
-offset_bottom = 60.0
+[node name="ModalPanel" type="Panel" parent="."]
+offset_left = 300.0
+offset_top = 132.0
+offset_right = 660.0
+offset_bottom = 408.0
+mouse_filter = 2
+
+[node name="TitleLabel" type="Label" parent="ModalPanel"]
+offset_left = 24.0
+offset_top = 18.0
+offset_right = 336.0
+offset_bottom = 46.0
+text = "Run Complete"
+horizontal_alignment = 1
+
+[node name="OutcomeLabel" type="Label" parent="ModalPanel"]
+offset_left = 28.0
+offset_top = 58.0
+offset_right = 332.0
+offset_bottom = 82.0
 text = "Outcome"
 
-[node name="TimeLabel" type="Label" parent="."]
-offset_left = 0.0
-offset_top = 68.0
-offset_right = 360.0
-offset_bottom = 92.0
+[node name="TimeLabel" type="Label" parent="ModalPanel"]
+offset_left = 28.0
+offset_top = 90.0
+offset_right = 332.0
+offset_bottom = 114.0
 text = "Time"
 
-[node name="ItemsLabel" type="Label" parent="."]
-offset_left = 0.0
-offset_top = 156.0
-offset_right = 360.0
-offset_bottom = 180.0
+[node name="ItemsLabel" type="Label" parent="ModalPanel"]
+offset_left = 28.0
+offset_top = 178.0
+offset_right = 332.0
+offset_bottom = 202.0
 text = "Items"
 
-[node name="ScoreLabel" type="Label" parent="."]
-offset_left = 0.0
-offset_top = 100.0
-offset_right = 360.0
-offset_bottom = 124.0
+[node name="ScoreLabel" type="Label" parent="ModalPanel"]
+offset_left = 28.0
+offset_top = 122.0
+offset_right = 332.0
+offset_bottom = 146.0
 text = "Score"
 
-[node name="BonusLabel" type="Label" parent="."]
-offset_left = 0.0
-offset_top = 128.0
-offset_right = 360.0
-offset_bottom = 152.0
+[node name="BonusLabel" type="Label" parent="ModalPanel"]
+offset_left = 28.0
+offset_top = 150.0
+offset_right = 332.0
+offset_bottom = 174.0
 text = "Life Bonus"
 
-[node name="RestartLabel" type="Label" parent="."]
-offset_left = 0.0
-offset_top = 188.0
-offset_right = 360.0
-offset_bottom = 212.0
+[node name="RestartLabel" type="Label" parent="ModalPanel"]
+offset_left = 28.0
+offset_top = 210.0
+offset_right = 332.0
+offset_bottom = 234.0
 text = "Press R to restart"
+horizontal_alignment = 1
+
+[node name="ContinueLabel" type="Label" parent="ModalPanel"]
+offset_left = 28.0
+offset_top = 238.0
+offset_right = 332.0
+offset_bottom = 262.0
+text = "Press Enter to continue"
+horizontal_alignment = 1

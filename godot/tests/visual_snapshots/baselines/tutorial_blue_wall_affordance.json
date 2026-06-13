@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "tutorial_blue_wall_affordance",
-  "content_hash": "9cc1cc967f0f1f8dbabfcf26e03510b74ccb8a19e6c20f4fd81a78e770b18963",
+  "content_hash": "fc1db4eb8ed1ec2ddb62f156e64cd2c9c83d9758c6225b653f30ed433ac08440",
   "replay_path": "godot/tests/replays/tutorial_to_real_stage_path.json",
   "frame": 110,
   "viewport": {

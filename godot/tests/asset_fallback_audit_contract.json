@@ -33,7 +33,7 @@
     },
     {
       "id": "spark",
-      "texture_var": "kirdy_sword_texture",
+      "texture_var": "kirdy_spark_texture",
       "allowed_sfx_streams": ["SfxKirdySpit"]
     },
     {

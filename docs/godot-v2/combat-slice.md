@@ -2,7 +2,7 @@
 
 The Combat Slice adds the smallest Kirdy-like loop: inhale an enemy, optionally release it, swallow it, acquire its ability type, use that ability once, and finish the room.
 
-This is not a full enemy port. It has `SimpleEnemy` and a small `FlyingEnemy` variant selected by `EnemySpawnMarker.enemy_type`. The Godot mainline now uses the retained Phaser reference sprites and basic combat audio cues, but polished animation, a broad enemy roster, and final presentation remain outside this slice.
+This is not a full enemy port. It has `SimpleEnemy`, a small `FlyingEnemy` variant, and lightweight early-route archetype profiles selected by `EnemySpawnMarker.enemy_type`. `spark_wisp` uses the simple enemy scene with a bright electric tint and faster chase profile, `flying` uses `FlyingEnemy`, and `sentry` uses a heavier simple enemy profile with slower movement and higher HP. The Godot mainline now uses retained Phaser reference sprites, basic combat audio cues, and small Godot-owned visual differentiation; a broad enemy roster remains outside this slice.
 
 Spawned enemies also receive a lightweight ability AI profile. `frost`, `fire`, and `stone` tune chase speed, detection, attack cadence, or hover behavior, and emit `enemy.ai.profile.applied` when the profile is applied.
 
@@ -12,7 +12,7 @@ Spawned enemies also receive a lightweight ability AI profile. `frost`, `fire`, 
 - `swallow`: press while an enemy is captured to acquire its `ability_type`.
 - `swallow`: press with no captured enemy and a current ability to detach that ability and return to the base state.
 - `use_ability`: press after swallowing to emit an ability trace.
-- `spark` ability use also applies a short facing-direction dash and emits `ability.movement.applied`.
+- `spark` ability use also applies a short facing-direction dash, uses an `electric_burst` visual contract backed by `images/effects/inhale-sparkle.webp`, and emits `ability.movement.applied`.
 - `fire` ability use spawns an `AbilityProjectile` node, emits projectile spawn/hit trace events, and resolves damage from the projectile hit.
 
 ## Trace Events
@@ -26,6 +26,7 @@ The session emits:
 - `ability.acquired`
 - `ability.detached`
 - `ability.used`
+- `ability.attack.visualized`
 - `ability.movement.applied`
 - `ability.projectile.spawned`
 - `ability.projectile.hit`
@@ -63,6 +64,8 @@ The flying replay starts in `flying_combat_room`, captures `FlyingEnemy`, releas
 The detach replay starts with `spark`, presses `swallow` without a captured enemy, emits `ability.detached`, and updates HUD/inventory state with an empty ability.
 
 The fire projectile replay starts with `fire`, presses `use_ability`, spawns `AbilityProjectile`, emits `ability.projectile.spawned` and `ability.projectile.hit`, then damages the target enemy from a projectile source.
+
+Spark is explicitly not mapped to the sword texture or sword/iai presentation. `PlayerController.gd` exposes `kirdy_spark_texture`, the player scene maps it to a non-sword Kirdy state texture, and `GameSession.get_ability_profile("spark")` reports `attack_type: burst` plus `visual_effect: electric_burst`.
 
 The capture-clear replay captures a ground enemy, applies replay-scoped external damage while it is held, emits `enemy.defeated`, and then clears the held enemy link through `enemy.capture.cleared`.
 

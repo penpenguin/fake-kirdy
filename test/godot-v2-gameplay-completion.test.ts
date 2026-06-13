@@ -110,11 +110,11 @@ describe('Godot v2 gameplay completion backlog', () => {
     const scene = readGodotFile('scenes/ui/ControlGuideOverlay.tscn');
 
     expect(script).toContain('class_name ControlGuideOverlay');
-    expect(scene).toContain('Move: A/D or arrows');
-    expect(scene).toContain('Jump: Space');
-    expect(scene).toContain('Inhale: C');
-    expect(scene).toContain('Swallow: X');
-    expect(scene).toContain('Ability: Z');
+    expect(scene).toContain('Move  A/D or arrows');
+    expect(scene).toContain('Jump  Space');
+    expect(scene).toContain('Inhale  C');
+    expect(scene).toContain('Swallow  X');
+    expect(scene).toContain('Spark Burst  Z');
   });
 
   it('uses an explicit interact action for player-facing door transitions', () => {
@@ -212,14 +212,15 @@ describe('Godot v2 gameplay completion backlog', () => {
 
     expect(tutorial).toContain('hint_text = "Spark opens blue walls. Inhale the spark enemy, swallow, then press Z."');
     expect(tutorial).toContain('[node name="BlueWallHintLabel" type="Label" parent="."]');
-    expect(tutorial).toContain('text = "Blue wall: get Spark, press Z"');
+    expect(tutorial).toContain('text = "Storm Wall: Copy Spark, then burst"');
     expect(tutorial).toContain('[node name="HubExitLabel" type="Label" parent="."]');
-    expect(tutorial).toContain('text = "Hub -> first real stage"');
+    expect(tutorial).toContain('text = "Hub Gate: choose your first trial"');
     expect(tutorial).toContain('target_spawn_id = "tutorial_fire_route"');
     expect(hub).toContain('spawn_id = "tutorial_fire_route"');
     expect(hub).toContain('[node name="TutorialFireRouteLabel" type="Label" parent="."]');
-    expect(hub).toContain('text = "First stage: Fire Area"');
+    expect(hub).toContain('text = "Ember Gate: first route"');
     expect(hub).toContain('door_id = "hub_tutorial_to_fire_area"');
+    expect(hub).toContain('door_label = "Ember Gate"');
     expect(hub).toContain('target_level_id = "fire_area"');
     expect(hub).toContain('bypass_cluster_lock = true');
     expect(readGodotFile('scripts/level/markers/DoorMarker.gd')).toContain('@export var bypass_cluster_lock: bool = false');

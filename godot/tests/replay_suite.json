@@ -295,10 +295,11 @@
     {
       "id": "hard_enemy_attack_trace",
       "replay_path": "res://tests/replays/hard_enemy_attack_trace.json",
-      "expected_outcome": "game_over",
-      "expected_events": ["enemy.attack.started", "player.damaged"],
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["enemy.attack.started", "player.damaged", "player.invulnerability.started"],
       "expected_last_hud": {
         "difficulty": "hard",
+        "hp": 1,
         "target_enemy_hp": 3
       },
       "tags": ["combat", "enemy-attack", "difficulty", "hard", "trace"]

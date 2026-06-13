@@ -139,6 +139,15 @@
       }
     },
     {
+      "id": "sentry",
+      "type": "sentry",
+      "base_hp": 5,
+      "ttk_seconds": {
+        "min": 0,
+        "max": 8
+      }
+    },
+    {
       "id": "boss",
       "type": "boss",
       "base_hp": 230,

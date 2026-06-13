@@ -91,6 +91,7 @@ var inventory_overlay: Control = null
 var control_guide_overlay: Control = null
 var bgm_player: AudioStreamPlayer = null
 var sfx_player: AudioStreamPlayer = null
+var control_guide_dismissed: bool = false
 
 var level_loader = null
 var level_visual_assets = LevelVisualAssetsScript.new()
@@ -120,7 +121,7 @@ var error_retry_fps: int = 60
 @export var enemy_crowd_min_player_distance: float = 72.0
 @export var contact_damage_radius: float = 48.0
 @export var heal_pickup_radius: float = 48.0
-@export var player_invulnerability_ms: int = 800
+@export var player_invulnerability_ms: int = 2000
 @export var setting_volume: float = 0.4
 @export var setting_controls: String = "keyboard"
 @export var setting_difficulty: String = "normal"
@@ -155,6 +156,7 @@ var error_retry_fps: int = 60
 @export var inventory_overlay_enabled: bool = true
 @export var inventory_debug_overlay_enabled: bool = false
 @export var control_guide_overlay_enabled: bool = true
+@export var control_guide_dismiss_action: StringName = &"jump"
 @export var audio_enabled: bool = true
 @export var bgm_volume_scale: float = 0.65
 @export var sfx_volume_scale: float = 1.0
@@ -394,6 +396,7 @@ func _physics_process(delta: float) -> void:
         write_persistent_state()
 
     check_map_actions()
+    check_control_guide_actions()
     check_settings_menu_actions()
     if settings_menu_open:
         check_settings_actions()
@@ -501,6 +504,7 @@ func spawn_enemies() -> void:
         var payload: Dictionary = enemy_marker.get("payload", {})
         var enemy_type := String(payload.get("enemy_type", "simple_ground"))
         var enemy = instantiate_enemy(enemy_type)
+        apply_enemy_type_profile(enemy, enemy_type)
         enemy.enemy_id = String(enemy_marker.get("id", "enemy"))
         enemy.ability_type = String(payload.get("ability_type", "spark"))
         enemy.contact_damage = int(payload.get("contact_damage", 1))
@@ -523,6 +527,23 @@ func instantiate_enemy(enemy_type: String) -> Node:
             return FlyingEnemyScene.instantiate()
         _:
             return SimpleEnemyScene.instantiate()
+
+
+func apply_enemy_type_profile(enemy: Node, enemy_type: String) -> void:
+    match enemy_type:
+        "spark_wisp":
+            enemy.normal_modulate = Color(0.58, 0.92, 1.0, 1.0)
+            enemy.hit_flash_color = Color(0.95, 1.0, 0.42, 1.0)
+            enemy.chase_speed = 88.0
+            enemy.detection_radius = 210.0
+        "sentry":
+            enemy.normal_modulate = Color(0.72, 0.70, 0.64, 1.0)
+            enemy.max_hp = max(enemy.max_hp, 5)
+            enemy.patrol_speed = 18.0
+            enemy.chase_speed = 38.0
+            enemy.return_radius = 160.0
+        _:
+            pass
 
 
 func apply_enemy_crowd_spacing() -> void:
@@ -848,6 +869,7 @@ func use_ability() -> void:
     ability_cooldown_remaining_ms = int(profile.get("cooldown_ms", 0))
     play_sfx(get_ability_sfx(String(player.ability_type)), -1.0, "ability.used", "attack")
     apply_ability_movement(ability_type, profile)
+    show_ability_attack_visual(ability_type, profile)
     trace_recorder.call("record_player_event", "ability.used", {
         "level_id": current_level_id,
         "player": get_player_trace(),
@@ -883,6 +905,8 @@ func get_ability_profile(ability_type: String) -> Dictionary:
                 "attack_type": "projectile",
                 "projectile_speed": 520.0,
                 "pierce": false,
+                "visual_effect": "fire_projectile",
+                "effect_texture": "res://resources/assets/images/effects/fire-attack.webp",
             }
         "ice", "frost":
             return {
@@ -893,6 +917,8 @@ func get_ability_profile(ability_type: String) -> Dictionary:
                 "knockback": 10.0,
                 "status": "frozen",
                 "attack_type": "beam",
+                "visual_effect": "ice_beam",
+                "effect_texture": "res://resources/assets/images/effects/ice-attack.webp",
             }
         "sword":
             return {
@@ -904,6 +930,8 @@ func get_ability_profile(ability_type: String) -> Dictionary:
                 "movement_effect": "lunge",
                 "movement_impulse": 40.0,
                 "attack_type": "melee",
+                "visual_effect": "sword_slash",
+                "effect_texture": "res://resources/assets/images/effects/sword-slash.webp",
             }
         "spark":
             return {
@@ -915,6 +943,8 @@ func get_ability_profile(ability_type: String) -> Dictionary:
                 "movement_effect": "dash",
                 "movement_impulse": 64.0,
                 "attack_type": "burst",
+                "visual_effect": "electric_burst",
+                "effect_texture": "res://resources/assets/images/effects/inhale-sparkle.webp",
             }
         "leaf":
             return {
@@ -924,6 +954,8 @@ func get_ability_profile(ability_type: String) -> Dictionary:
                 "cooldown_ms": 160,
                 "knockback": 16.0,
                 "attack_type": "cutter",
+                "visual_effect": "leaf_cutter",
+                "effect_texture": "res://resources/assets/images/effects/star-bullet.webp",
             }
         "stone":
             return {
@@ -933,6 +965,8 @@ func get_ability_profile(ability_type: String) -> Dictionary:
                 "cooldown_ms": 320,
                 "knockback": 30.0,
                 "attack_type": "heavy",
+                "visual_effect": "stone_impact",
+                "effect_texture": "res://resources/assets/images/effects/sword-slash.webp",
             }
         _:
             return {
@@ -942,7 +976,41 @@ func get_ability_profile(ability_type: String) -> Dictionary:
                 "cooldown_ms": 220,
                 "knockback": 12.0,
                 "attack_type": "generic",
+                "visual_effect": "generic_burst",
+                "effect_texture": "res://resources/assets/images/effects/star-bullet.webp",
             }
+
+
+func show_ability_attack_visual(ability_type: String, profile: Dictionary) -> void:
+    var visual_payload := {
+        "ability_type": ability_type,
+        "attack_type": String(profile.get("attack_type", "")),
+        "visual_effect": String(profile.get("visual_effect", "")),
+        "effect_texture": String(profile.get("effect_texture", "")),
+        "range": float(profile.get("range", 0.0)),
+    }
+    if player != null and is_instance_valid(player) and player.has_method("show_ability_attack_effect"):
+        player.call("show_ability_attack_effect", ability_type, get_ability_effect_color(ability_type), float(profile.get("range", 96.0)))
+    if trace_recorder != null:
+        trace_recorder.call("record_player_event", "ability.attack.visualized", {
+            "level_id": current_level_id,
+            "player": get_player_trace(),
+            "payload": visual_payload,
+        })
+
+
+func get_ability_effect_color(ability_type: String) -> Color:
+    match ability_type:
+        "spark":
+            return Color(0.48, 0.90, 1.0, 0.88)
+        "fire", "flame":
+            return Color(1.0, 0.38, 0.12, 0.88)
+        "ice", "frost":
+            return Color(0.56, 0.82, 1.0, 0.82)
+        "stone":
+            return Color(0.62, 0.58, 0.50, 0.88)
+        _:
+            return Color(1.0, 0.92, 0.42, 0.82)
 
 
 func clear_active_ability_projectiles() -> void:
@@ -1476,6 +1544,8 @@ func damage_player(amount: int, source: Dictionary = {}) -> void:
     if normalized_amount <= 0:
         return
 
+    var difficulty_profile := get_difficulty_profile()
+    var invulnerability_ms: int = maxi(int(difficulty_profile.get("player_invulnerability_ms", player_invulnerability_ms)), 0)
     player_hp = max(player_hp - normalized_amount, 0)
     play_sfx(SfxAbilitySwordAttack, -1.0, "player.damaged", "damage")
     trace_recorder.call("record_player_event", "player.damaged", {
@@ -1485,12 +1555,13 @@ func damage_player(amount: int, source: Dictionary = {}) -> void:
             "damage": normalized_amount,
             "hp": player_hp,
             "max_hp": player_max_hp,
+            "invulnerability_remaining_ms": invulnerability_ms,
             "source": source,
         },
     })
     sync_hud_overlay("player.damaged", true)
-    var difficulty_profile := get_difficulty_profile()
-    player_invulnerability_remaining_ms = max(int(difficulty_profile.get("player_invulnerability_ms", player_invulnerability_ms)), 0)
+    player_invulnerability_remaining_ms = invulnerability_ms
+    sync_player_damage_feedback("player.invulnerability.started", true)
 
     if player_hp <= 0:
         if consume_player_revive(source):
@@ -1544,7 +1615,29 @@ func tick_player_invulnerability(delta: float) -> void:
         return
 
     var elapsed_ms: int = int(round(max(delta, 0.0) * 1000.0))
+    var previous_remaining_ms := player_invulnerability_remaining_ms
     player_invulnerability_remaining_ms = max(player_invulnerability_remaining_ms - elapsed_ms, 0)
+    sync_player_damage_feedback("player.invulnerability.tick", false)
+    if previous_remaining_ms > 0 and player_invulnerability_remaining_ms <= 0:
+        sync_player_damage_feedback("player.invulnerability.ended", true)
+
+
+func sync_player_damage_feedback(reason: String = "", emit_trace: bool = false) -> void:
+    var is_invulnerable := player_invulnerability_remaining_ms > 0
+    if player != null and is_instance_valid(player) and player.has_method("set_damage_feedback_state"):
+        player.call("set_damage_feedback_state", is_invulnerable, player_invulnerability_remaining_ms)
+    if not emit_trace or trace_recorder == null:
+        return
+
+    trace_recorder.call("record_player_event", reason, {
+        "level_id": current_level_id,
+        "player": get_player_trace(),
+        "payload": {
+            "invulnerable": is_invulnerable,
+            "invulnerability_remaining_ms": player_invulnerability_remaining_ms,
+            "blink_feedback": "translucent",
+        },
+    })
 
 
 func tick_ability_cooldown(delta: float) -> void:
@@ -2025,6 +2118,32 @@ func setup_control_guide_overlay() -> void:
 
     control_guide_overlay = ControlGuideOverlayScene.instantiate()
     add_child(control_guide_overlay)
+    sync_control_guide_overlay("session.started")
+
+
+func sync_control_guide_overlay(reason: String = "") -> void:
+    if control_guide_overlay == null or not is_instance_valid(control_guide_overlay):
+        return
+
+    control_guide_overlay.call("set_guide_state", {
+        "visible": not control_guide_dismissed,
+        "dismissed": control_guide_dismissed,
+        "presentation_mode": "initial_popup",
+        "reason": reason,
+    })
+
+
+func check_control_guide_actions() -> void:
+    if control_guide_dismissed or control_guide_overlay == null or not is_instance_valid(control_guide_overlay):
+        return
+    if not is_session_action_just_pressed(control_guide_dismiss_action):
+        return
+
+    control_guide_dismissed = true
+    var dismiss_payload: Dictionary = control_guide_overlay.call("dismiss", "control.guide.dismissed")
+    dismiss_payload["reason"] = "control.guide.dismissed"
+    if trace_recorder != null:
+        trace_recorder.call("record_event", "control.guide.dismissed", dismiss_payload)
 
 
 func setup_audio_players() -> void:
@@ -2169,7 +2288,7 @@ func get_difficulty_profile() -> Dictionary:
                 "enemy_hp_multiplier": 0.75,
                 "contact_damage_multiplier": 0.5,
                 "enemy_attack_cooldown_multiplier": 1.25,
-                "player_invulnerability_ms": 1100,
+                "player_invulnerability_ms": 2000,
                 "heal_multiplier": 1.5,
             }
         "hard":
@@ -2177,7 +2296,7 @@ func get_difficulty_profile() -> Dictionary:
                 "enemy_hp_multiplier": 1.5,
                 "contact_damage_multiplier": 1.5,
                 "enemy_attack_cooldown_multiplier": 0.75,
-                "player_invulnerability_ms": 550,
+                "player_invulnerability_ms": 2000,
                 "heal_multiplier": 0.75,
             }
         _:

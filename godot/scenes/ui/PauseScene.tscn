@@ -39,3 +39,12 @@ offset_right = 640.0
 offset_bottom = 272.0
 text = "Press Enter for settings"
 horizontal_alignment = 1
+
+[node name="ControlsHelpLabel" type="Label" parent="."]
+offset_left = 160.0
+offset_top = 304.0
+offset_right = 800.0
+offset_bottom = 348.0
+text = "Move  A/D or arrows  |  Jump  Space  |  Inhale  C  |  Swallow  X  |  Ability  Z  |  Map  M"
+horizontal_alignment = 1
+autowrap_mode = 2

@@ -10,6 +10,11 @@ Door Transition is the canonical level-change path for hand-authored scenes and 
 - `target_level_id`
 - `target_spawn_id`
 - `trigger_radius`
+- `door_role`
+- `door_label`
+- `door_visual_style`
+
+Representative Hub doors must use readable labels and distinct roles/styles such as `trial`, `region`, `locked`, or `support`. The scene lint rule `nearby_door_ambiguity` checks `central_hub` so nearby visible doors fail validation when they do not have distinct labels, roles, or `door_visual_style` values.
 
 `PlayerSpawn` owns spawn placement. `GoalMarker` owns completion placement and has a `trigger_radius` for the minimal proximity check.
 
