@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "level_terrain_fire_branch",
-  "content_hash": "c217c86c92fb1f6e486935ce84ca45ad328b1b3c27566a68945e775ab25374d6",
+  "content_hash": "bcf7baf8075b6c0d53464e8db5e8d975b08326080bea2a7267dd7a3a4317ae89",
   "replay_path": "godot/tests/replays/fire_area_ability_gate_trace.json",
   "frame": 20,
   "viewport": {

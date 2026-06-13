@@ -198,6 +198,8 @@ describe('trace summary metrics', () => {
             completed_level_ids: ['flat_room'],
             score: 1700,
             remaining_life_bonus: 700,
+            result_elapsed_ms: 306,
+            auto_delay_ms: 3000,
           },
         }),
         JSON.stringify({
@@ -277,6 +279,8 @@ describe('trace summary metrics', () => {
         frames: number;
         score: number;
         remaining_life_bonus: number;
+        result_elapsed_ms?: number;
+        auto_delay_ms?: number;
       } | null;
       player_motion: {
         sample_count: number;
@@ -369,6 +373,8 @@ describe('trace summary metrics', () => {
       completed_level_ids: ['flat_room'],
       score: 1700,
       remaining_life_bonus: 700,
+      result_elapsed_ms: 306,
+      auto_delay_ms: 3000,
     });
     expect(summary.player_motion).toEqual({
       sample_count: 3,

@@ -21,15 +21,15 @@ func apply_to_level(level_root: Node, level_id: String) -> void:
 func get_texture_for_level(level_id: String) -> Texture2D:
     var normalized_level_id := level_id.to_lower()
 
-    if normalized_level_id.contains("forest"):
+    if normalized_level_id.contains("cluster:forest") or normalized_level_id.contains("forest"):
         return ForestTileTexture
-    if normalized_level_id.contains("fire"):
+    if normalized_level_id.contains("cluster:fire") or normalized_level_id.contains("fire"):
         return FireTileTexture
-    if normalized_level_id.contains("ice") or normalized_level_id.contains("aurora"):
+    if normalized_level_id.contains("cluster:ice") or normalized_level_id.contains("ice") or normalized_level_id.contains("aurora"):
         return IceTileTexture
-    if normalized_level_id.contains("cave") or normalized_level_id.contains("ruin"):
+    if normalized_level_id.contains("cluster:ruins") or normalized_level_id.contains("cave") or normalized_level_id.contains("ruin"):
         return StoneTileTexture
-    if normalized_level_id.contains("sanctum") or normalized_level_id.contains("keep") or normalized_level_id.contains("spire"):
+    if normalized_level_id.contains("cluster:sky") or normalized_level_id.contains("sanctum") or normalized_level_id.contains("keep") or normalized_level_id.contains("spire"):
         return RoyalTileTexture
     if normalized_level_id.contains("hub") or normalized_level_id.contains("room"):
         return BrickTileTexture

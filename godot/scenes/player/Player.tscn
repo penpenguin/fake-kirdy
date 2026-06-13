@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://b0q6x3cvk4l1a"]
+[gd_scene load_steps=16 format=3 uid="uid://b0q6x3cvk4l1a"]
 
 [ext_resource type="Script" path="res://scripts/player/PlayerController.gd" id="1_controller"]
 [ext_resource type="Script" path="res://scripts/player/PlayerTuning.gd" id="2_tuning"]
@@ -12,6 +12,7 @@
 [ext_resource type="Texture2D" path="res://resources/assets/images/characters/kirdy/kirdy-fire.webp" id="10_fire"]
 [ext_resource type="Texture2D" path="res://resources/assets/images/characters/kirdy/kirdy-ice.webp" id="11_ice"]
 [ext_resource type="Texture2D" path="res://resources/assets/images/characters/kirdy/kirdy-sword.webp" id="12_sword"]
+[ext_resource type="Texture2D" path="res://resources/assets/images/characters/kirdy/kirdy-spark.webp" id="13_spark"]
 
 [sub_resource type="Resource" id="Resource_player_tuning"]
 script = ExtResource("2_tuning")
@@ -48,7 +49,7 @@ kirdy_spit_texture = ExtResource("9_spit")
 kirdy_fire_texture = ExtResource("10_fire")
 kirdy_ice_texture = ExtResource("11_ice")
 kirdy_sword_texture = ExtResource("12_sword")
-kirdy_spark_texture = ExtResource("9_spit")
+kirdy_spark_texture = ExtResource("13_spark")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_player")

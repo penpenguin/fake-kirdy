@@ -1,0 +1,29 @@
+{
+  "start_level_id": "flat_room",
+  "start_spawn_id": "fall_check",
+  "fps": 60,
+  "max_frames": 130,
+  "frames": [
+    {
+      "frame": 0,
+      "actions": {
+        "move_right": false,
+        "move_left": false,
+        "jump": false
+      }
+    },
+    {
+      "frame": 78,
+      "actions": {
+        "jump": true
+      }
+    },
+    {
+      "frame": 86,
+      "actions": {
+        "jump": false,
+        "move_right": true
+      }
+    }
+  ]
+}

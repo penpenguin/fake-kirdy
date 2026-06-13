@@ -14,15 +14,20 @@ position = Vector2(96, 368)
 script = ExtResource("1_spawn")
 spawn_id = "default"
 
+[node name="PlayerSpawnFallCheck" type="Node2D" parent="."]
+position = Vector2(700, 368)
+script = ExtResource("1_spawn")
+spawn_id = "fall_check"
+
 [node name="GoalMarker" type="Node2D" parent="."]
 position = Vector2(560, 368)
 script = ExtResource("2_goal")
 goal_id = "flat_goal"
 
 [node name="CameraBoundsMarker" type="Node2D" parent="."]
-position = Vector2(320, 270)
+position = Vector2(360, 270)
 script = ExtResource("3_camera_bounds")
-size = Vector2(720, 540)
+size = Vector2(880, 540)
 
 [node name="Floor" type="StaticBody2D" parent="."]
 position = Vector2(320, 432)

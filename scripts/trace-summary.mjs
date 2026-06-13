@@ -405,6 +405,8 @@ function parseResultOverlay(value) {
     completed_level_ids: value.completed_level_ids.filter((levelId) => typeof levelId === 'string').sort(),
     score: Number.isInteger(value.score) ? value.score : undefined,
     remaining_life_bonus: Number.isInteger(value.remaining_life_bonus) ? value.remaining_life_bonus : undefined,
+    result_elapsed_ms: Number.isInteger(value.result_elapsed_ms) ? value.result_elapsed_ms : undefined,
+    auto_delay_ms: Number.isInteger(value.auto_delay_ms) ? value.auto_delay_ms : undefined,
   };
 }
 

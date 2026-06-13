@@ -451,4 +451,21 @@ func should_texture_polygon(polygon: Polygon2D) -> bool:
     expect(report.mainline_abilities.every((ability) => ability.texture_status === 'explicit')).toBe(true);
     expect(report.mainline_abilities.every((ability) => ability.sfx_status === 'explicit')).toBe(true);
   });
+
+  it('wires Spark to a dedicated Kirdy texture asset instead of reusing spit or fallback art', () => {
+    const playerScene = readFileSync(join(repoRoot, 'godot', 'scenes', 'player', 'Player.tscn'), 'utf8');
+    const playerController = readFileSync(join(repoRoot, 'godot', 'scripts', 'player', 'PlayerController.gd'), 'utf8');
+    const manifest = JSON.parse(readFileSync(join(repoRoot, 'godot', 'resources', 'assets', 'asset_manifest.json'), 'utf8')) as {
+      assets?: string[];
+    };
+    const sparkAsset = join(repoRoot, 'godot', 'resources', 'assets', 'images', 'characters', 'kirdy', 'kirdy-spark.webp');
+
+    expect(existsSync(sparkAsset)).toBe(true);
+    expect(manifest.assets).toContain('images/characters/kirdy/kirdy-spark.webp');
+    expect(playerScene).toContain('path="res://resources/assets/images/characters/kirdy/kirdy-spark.webp"');
+    expect(playerScene).toContain('kirdy_spark_texture = ExtResource("13_spark")');
+    expect(playerScene).not.toContain('kirdy_spark_texture = ExtResource("9_spit")');
+    expect(playerController).toContain('"spark":');
+    expect(playerController).toContain('return kirdy_spark_texture');
+  });
 });

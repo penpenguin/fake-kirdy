@@ -167,4 +167,19 @@ describe('Godot visual snapshots', () => {
     expect(levelVisualAssets).toContain('polygon.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED');
     expect(levelVisualAssets).toContain('polygon.texture_scale = Vector2(1.0, 1.0)');
   });
+
+  it('applies terrain textures from stage metadata instead of only the raw level id', () => {
+    const session = readFileSync(join(repoRoot, 'godot', 'scripts', 'session', 'GameSession.gd'), 'utf8');
+    const levelVisualAssets = readFileSync(join(repoRoot, 'godot', 'scripts', 'level', 'LevelVisualAssets.gd'), 'utf8');
+
+    expect(session).toContain('func get_level_visual_key(level_id: String) -> String:');
+    expect(session).toContain('current_level.get_meta("stage_id", "")');
+    expect(session).toContain('level_loader.call("get_level_cluster", level_id)');
+    expect(session).toContain('level_visual_assets.call("apply_to_level", current_level, get_level_visual_key(current_level_id))');
+    expect(levelVisualAssets).toContain('normalized_level_id.contains("cluster:forest")');
+    expect(levelVisualAssets).toContain('normalized_level_id.contains("cluster:fire")');
+    expect(levelVisualAssets).toContain('normalized_level_id.contains("cluster:ice")');
+    expect(levelVisualAssets).toContain('normalized_level_id.contains("cluster:ruins")');
+    expect(levelVisualAssets).toContain('normalized_level_id.contains("cluster:sky")');
+  });
 });

@@ -29,10 +29,14 @@ describe('Godot v2 ResultsScene', () => {
     expect(script).toContain('remaining_life_bonus');
     expect(script).toContain('time_ms');
     expect(scene).toContain('ResultsScene.gd');
+    expect(scene).toContain('PopupBackdrop');
+    expect(scene).toContain('ModalPanel');
     expect(scene).toContain('TitleLabel');
     expect(scene).toContain('ScoreLabel');
     expect(scene).toContain('TimeLabel');
     expect(scene).toContain('BonusLabel');
+    expect(script).toContain('$ModalPanel/TitleLabel');
+    expect(script).toContain('$ModalPanel/ScoreLabel');
   });
 
   it('wires ResultsScene transition through GameSession with key and delay paths', () => {
@@ -46,6 +50,9 @@ describe('Godot v2 ResultsScene', () => {
     expect(session).toContain('check_result_actions');
     expect(session).toContain('show_results_scene');
     expect(session).toContain('results.scene.shown');
+    expect(session).toContain('result_elapsed_ms');
+    expect(session).toContain('results_payload["result_elapsed_ms"] = result_elapsed_ms');
+    expect(session).toContain('results_payload["auto_delay_ms"] = result_auto_results_delay_ms');
     expect(project).toContain('result_continue');
   });
 

@@ -284,6 +284,21 @@ describe('Godot v2 replay suite workflow', () => {
     });
     expect(readReplay('tutorial_right_edge_recovery_path.json').frames?.some((frame) => frame.actions?.move_right)).toBe(true);
 
+    expect(byId.get('flat_room_fall_recovery')).toMatchObject({
+      replay_path: 'res://tests/replays/flat_room_fall_recovery.json',
+      expected_outcome: 'replay.max_frames_reached',
+      expected_events: ['player.fall.recovered', 'player.jump.started'],
+      expected_event_sequence: [
+        { event_type: 'player.fall.recovered' },
+        { event_type: 'player.jump.started' },
+      ],
+      forbidden_events: ['game.over', 'player.defeated', 'replay.error', 'result.overlay.shown'],
+      tags: expect.arrayContaining(['movement', 'fall-recovery', 'trace']),
+    });
+    expect(readReplay('flat_room_fall_recovery.json').start_level_id).toBe('flat_room');
+    expect(readReplay('flat_room_fall_recovery.json').start_spawn_id).toBe('fall_check');
+    expect(readReplay('flat_room_fall_recovery.json').frames?.some((frame) => frame.actions?.jump)).toBe(true);
+
     expect(byId.get('tutorial_to_real_stage_path')?.expected_event_sequence).toEqual([
       { event_type: 'door.entered', payload: { target_level_id: 'central_hub' } },
       { event_type: 'level.loaded', payload: { level_id: 'central_hub' } },
@@ -379,6 +394,20 @@ describe('Godot v2 replay suite workflow', () => {
     expect(listed.replays?.map((replay) => replay.id)).toContain('flying_spit_projectile_hit');
     expect(listed.replays?.map((replay) => replay.id)).toContain('forest_reliquary_key_unlocks_door');
     expect(listed.replays?.map((replay) => replay.id)).toContain('sky_generated_exit_locked_without_keystone');
+  });
+
+  it('can filter replay suite list output to a focused fixture id without Godot', () => {
+    const output = execFileSync('node', ['scripts/run-godot-replay-suite.mjs', '--list', '--filter', 'flat_room_fall_recovery'], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+    });
+    const listed = JSON.parse(output) as {
+      replay_count?: number;
+      replays?: Array<{ id?: string }>;
+    };
+
+    expect(listed.replay_count).toBe(1);
+    expect(listed.replays?.map((replay) => replay.id)).toEqual(['flat_room_fall_recovery']);
   });
 
   it('fails a replay when expected_event_sequence is present but the trace is out of order', () => {

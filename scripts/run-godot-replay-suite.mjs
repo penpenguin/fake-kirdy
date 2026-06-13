@@ -9,7 +9,7 @@ const defaultSuitePath = join(godotRoot, 'tests', 'replay_suite.json');
 
 const options = parseArgs(process.argv.slice(2));
 const suitePath = resolve(repoRoot, options.suitePath ?? defaultSuitePath);
-const suite = readSuite(suitePath);
+const suite = filterSuite(readSuite(suitePath), options.filter);
 
 if (options.list) {
   writeJson({
@@ -73,6 +73,7 @@ function parseArgs(args) {
     list: false,
     suitePath: null,
     outDir: null,
+    filter: null,
   };
 
   for (let index = 0; index < args.length; index += 1) {
@@ -91,6 +92,12 @@ function parseArgs(args) {
 
     if (arg === '--out-dir') {
       parsed.outDir = readArgValue(args, index, arg);
+      index += 1;
+      continue;
+    }
+
+    if (arg === '--filter') {
+      parsed.filter = readArgValue(args, index, arg);
       index += 1;
       continue;
     }
@@ -198,6 +205,17 @@ function readSuite(path) {
   return {
     version: parsed.version,
     replays,
+  };
+}
+
+function filterSuite(suite, filter) {
+  if (typeof filter !== 'string' || filter.length === 0) {
+    return suite;
+  }
+
+  return {
+    ...suite,
+    replays: suite.replays.filter((replay) => replay.id.includes(filter)),
   };
 }
 

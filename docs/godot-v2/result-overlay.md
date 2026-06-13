@@ -20,7 +20,7 @@ For game-over results, the payload sets `restart_available`. `ResultOverlay` sho
 
 `trace:summary` records the latest result payload as `last_result_overlay`. This keeps result-screen checks available to agents without needing image recognition or manual UI inspection.
 
-`ResultsScene.gd` is the dedicated final-results UI. `GameSession` shows it from the result overlay after `result_auto_results_delay_ms` or immediately when `result_continue` is pressed. It receives the same score, time, and remaining-life bonus payload and emits `results.scene.shown`; `trace:summary` exposes that payload as `last_results_scene`.
+`ResultsScene.gd` is the dedicated final-results UI. It uses its own dim backdrop and modal panel rather than loose labels, so the final results read as a modal scene after the run-end overlay. `GameSession` shows it from the result overlay after `result_auto_results_delay_ms` or immediately when `result_continue` is pressed. It receives the same score, time, and remaining-life bonus payload plus `result_elapsed_ms` and `auto_delay_ms`, then emits `results.scene.shown`; `trace:summary` exposes that payload as `last_results_scene`.
 
 The result overlay now carries the first Godot-owned presentation polish pass: `score_countup_ms` animates the visible score, `polish_transition_ms` fades the overlay in, and the session audio mix continues to emit `audio.mix.updated` when settings or menu state changes.
 

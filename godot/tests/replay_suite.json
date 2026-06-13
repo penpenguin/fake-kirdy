@@ -275,6 +275,18 @@
       "tags": ["tutorial", "onboarding", "edge-guard", "boundary", "trace"]
     },
     {
+      "id": "flat_room_fall_recovery",
+      "replay_path": "res://tests/replays/flat_room_fall_recovery.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["player.fall.recovered", "player.jump.started"],
+      "expected_event_sequence": [
+        { "event_type": "player.fall.recovered" },
+        { "event_type": "player.jump.started" }
+      ],
+      "forbidden_events": ["game.over", "player.defeated", "replay.error", "result.overlay.shown"],
+      "tags": ["movement", "fall-recovery", "trace"]
+    },
+    {
       "id": "tutorial_to_real_stage_path",
       "replay_path": "res://tests/replays/tutorial_to_real_stage_path.json",
       "expected_outcome": "replay.max_frames_reached",

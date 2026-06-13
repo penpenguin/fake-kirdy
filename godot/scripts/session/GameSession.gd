@@ -136,6 +136,7 @@ var error_retry_fps: int = 60
 @export var exploration_tile_size: int = 32
 @export var player_boundary_padding: float = 36.0
 @export var player_boundary_snap_epsilon: float = 1.5
+@export var fall_recovery_margin: float = 72.0
 @export var map_overlay_enabled: bool = true
 @export var map_toggle_action: StringName = &"map_toggle"
 @export var door_interact_action: StringName = &"interact"
@@ -322,9 +323,13 @@ func constrain_player_to_camera_bounds() -> void:
     var min_position := center - bounds_size * 0.5 + Vector2(player_boundary_padding, player_boundary_padding)
     var max_position := center + bounds_size * 0.5 - Vector2(player_boundary_padding, player_boundary_padding)
     var previous_position: Vector2 = player.global_position
+    if previous_position.y > max_position.y + fall_recovery_margin:
+        recover_player_from_stage_fall(bounds, previous_position, max_position.y + fall_recovery_margin)
+        return
+
     var clamped_position := Vector2(
         clamp_with_boundary_snap(previous_position.x, min_position.x, max_position.x),
-        clamp_with_boundary_snap(previous_position.y, min_position.y, max_position.y)
+        previous_position.y if previous_position.y >= min_position.y else clamp_with_boundary_snap(previous_position.y, min_position.y, max_position.y)
     )
     if clamped_position == previous_position:
         return
@@ -358,6 +363,42 @@ func constrain_player_to_camera_bounds() -> void:
             },
         },
     })
+
+
+func recover_player_from_stage_fall(bounds: Dictionary, fall_position: Vector2, recovery_y: float) -> void:
+    if player == null or current_definition == null:
+        return
+
+    var recovery_spawn_id := "default"
+    var spawn_marker := find_marker_by_id(current_definition.player_spawns, recovery_spawn_id)
+    if spawn_marker.is_empty() and current_definition.player_spawns.size() > 0:
+        spawn_marker = current_definition.player_spawns[0]
+        recovery_spawn_id = String(spawn_marker.get("id", recovery_spawn_id))
+
+    var recovery_position := Vector2.ZERO
+    if not spawn_marker.is_empty():
+        recovery_position = dictionary_to_vector2(spawn_marker.get("position", {}))
+
+    player.global_position = recovery_position
+    player.velocity = Vector2.ZERO
+    trace_recorder.call("record_player_event", "player.fall.recovered", {
+        "level_id": current_level_id,
+        "player": get_player_trace(),
+        "payload": {
+            "bounds_id": String(bounds.get("id", "")),
+            "recovery_spawn_id": recovery_spawn_id,
+            "recovery_y": recovery_y,
+            "from": {
+                "x": fall_position.x,
+                "y": fall_position.y,
+            },
+            "to": {
+                "x": recovery_position.x,
+                "y": recovery_position.y,
+            },
+        },
+    })
+    sync_hud_overlay("player.fall.recovered", true)
 
 
 func clamp_with_boundary_snap(value: float, minimum: float, maximum: float) -> float:
@@ -435,7 +476,7 @@ func load_level(level_id: String, spawn_id: String = "default") -> bool:
     current_level_id = level_id
     requested_spawn_id = spawn_id
     add_child(current_level)
-    level_visual_assets.call("apply_to_level", current_level, current_level_id)
+    level_visual_assets.call("apply_to_level", current_level, get_level_visual_key(current_level_id))
     current_definition = level_loader.call("build_level_definition", current_level, level_id)
     reapply_opened_ability_gate_scene_nodes()
     spawn_player(spawn_id)
@@ -452,6 +493,21 @@ func load_level(level_id: String, spawn_id: String = "default") -> bool:
     sync_hud_overlay("level.loaded", true)
     sync_inventory_overlay("level.loaded")
     return true
+
+
+func get_level_visual_key(level_id: String) -> String:
+    var visual_key := level_id
+    if current_level != null:
+        var stage_id := String(current_level.get_meta("stage_id", ""))
+        if stage_id != "":
+            visual_key += " stage:%s" % stage_id
+
+    if level_loader != null and level_loader.has_method("get_level_cluster"):
+        var cluster := String(level_loader.call("get_level_cluster", level_id))
+        if cluster != "":
+            visual_key += " cluster:%s" % cluster
+
+    return visual_key
 
 
 func spawn_player(spawn_id: String = "default") -> void:
@@ -2854,6 +2910,8 @@ func show_results_scene(reason: String = "") -> void:
 
     results_scene_shown = true
     var results_payload := build_result_payload()
+    results_payload["result_elapsed_ms"] = result_elapsed_ms
+    results_payload["auto_delay_ms"] = result_auto_results_delay_ms
     if results_scene != null and is_instance_valid(results_scene):
         results_scene.call("set_results_state", results_payload)
 

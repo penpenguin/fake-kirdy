@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "level_terrain_combat_room",
-  "content_hash": "2891bf283a1575934db71261c291a4d548485fc506ce508530b6101f1069e2dd",
+  "content_hash": "bcbc2916c92dbbdd5d3e07f1b1d2816d37973ed105112b1b3204610df1b73126",
   "replay_path": "godot/tests/replays/combat_ability_damage_enemy.json",
   "frame": 30,
   "viewport": {

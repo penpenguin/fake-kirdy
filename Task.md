@@ -172,13 +172,13 @@
 
 - [x] スコア / クリアタイム / 残機ボーナスつきリザルト
   - 状態: 実装済み
-  - 実装: result overlay と dedicated `ResultsScene` に score、clear time、remaining-life bonus を表示し、3秒後または `result_continue` で `ResultsScene` に遷移する。
-  - 根拠: `ResultOverlay.gd`、`ResultsScene.gd` / `ResultsScene.tscn`、`GameSession.gd` の `show_results_scene`、`results_scene_continue.json`、`trace:summary` の `last_results_scene`。
+  - 実装: result overlay と dedicated `ResultsScene` に score、clear time、remaining-life bonus を表示し、3秒後または `result_continue` で `ResultsScene` に遷移する。`ResultsScene` も backdrop と modal panel を持ち、`results.scene.shown` payload に `result_elapsed_ms` / `auto_delay_ms` を含める。
+  - 根拠: `ResultOverlay.gd`、`ResultsScene.gd` / `ResultsScene.tscn`、`GameSession.gd` の `show_results_scene`、`results_scene_continue.json`、`trace:summary` の `last_results_scene`、`test/godot-v2-results-scene.test.ts`。
 
 - [x] ResultsScene
   - 状態: 実装済み
   - 内容: 最終結果専用シーン。
-  - 実装: `ResultsScene` が outcome、time、score、remaining-life bonus を表示し、`results.scene.shown` trace で検証可能。
+  - 実装: `ResultsScene` が outcome、time、score、remaining-life bonus を modal panel 内に表示し、`results.scene.shown` trace で検証可能。
   - 根拠: `ResultsScene.gd` / `ResultsScene.tscn`、`results_scene_continue.json`、replay suite の `results_scene_continue`。
 
 - [x] GoalDoorController 相当
@@ -203,8 +203,13 @@
 
 - [x] アセット欠損時の能力テクスチャ fallback 完全仕様
   - 状態: 実装済み
-  - 実装: `PlayerController` が `fire` / `burn`、`ice` / `frost`、`sword` / `blade` の能力テクスチャを明示解決し、欠損時は idle/run/current texture へ安全に fallback する。fallback は `player.ability_texture.fallback` として1能力・1fallbackにつき1回だけ trace する。
-  - 根拠: `PlayerController.gd` の `get_ability_texture` / `get_ability_fallback_texture` / `emit_ability_texture_fallback`、`spark_ability_dash_movement` replay suite、`test/godot-v2-asset-migration.test.ts`。
+  - 実装: `PlayerController` が `fire` / `burn`、`ice` / `frost`、`sword` / `blade`、`spark` の能力テクスチャを明示解決し、欠損時は idle/run/current texture へ安全に fallback する。Spark は `kirdy-spark.webp` を使い、fallback は `player.ability_texture.fallback` として1能力・1fallbackにつき1回だけ trace する。
+  - 根拠: `PlayerController.gd` の `get_ability_texture` / `get_ability_fallback_texture` / `emit_ability_texture_fallback`、`Player.tscn`、`godot/resources/assets/images/characters/kirdy/kirdy-spark.webp`、`godot:asset-fallback-audit`、`test/godot-v2-asset-fallback-audit.test.ts`。
+
+- [x] ステージ別 terrain texture と落下復帰
+  - 状態: 実装済み
+  - 実装: `GameSession.get_level_visual_key()` が level id、scene `stage_id` metadata、`LevelLoader.get_level_cluster()` を合わせて `LevelVisualAssets` に渡し、forest/fire/ice/ruins/sky/hub 系 texture を stage/cluster に応じて適用する。ステージ端から落下した場合は `player.fall.recovered` を trace し、default spawn へ復帰して replay 入力を継続できる。
+  - 根拠: `LevelVisualAssets.gd`、`GameSession.gd`、`flat_room_fall_recovery.json`、replay suite の `flat_room_fall_recovery`、`godot:visual-snapshot`、`test/godot-v2-visual-snapshot.test.ts`、`test/godot-v2-replay-suite.test.ts`。
 
 - [x] 引き寄せエフェクト fallback
   - 状態: 実装済み

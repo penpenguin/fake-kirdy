@@ -1,18 +1,20 @@
 extends Control
 class_name ResultsScene
 
-@onready var title_label: Label = $TitleLabel
-@onready var outcome_label: Label = $OutcomeLabel
-@onready var time_label: Label = $TimeLabel
-@onready var score_label: Label = $ScoreLabel
-@onready var bonus_label: Label = $BonusLabel
+@onready var popup_backdrop: ColorRect = $PopupBackdrop
+@onready var modal_panel: Panel = $ModalPanel
+@onready var title_label: Label = $ModalPanel/TitleLabel
+@onready var outcome_label: Label = $ModalPanel/OutcomeLabel
+@onready var time_label: Label = $ModalPanel/TimeLabel
+@onready var score_label: Label = $ModalPanel/ScoreLabel
+@onready var bonus_label: Label = $ModalPanel/BonusLabel
 
 var results_state: Dictionary = {}
 
 
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_IGNORE
-    custom_minimum_size = Vector2(420.0, 220.0)
+    custom_minimum_size = Vector2(420.0, 244.0)
     visible = has_results_state(results_state)
     refresh_labels()
 
