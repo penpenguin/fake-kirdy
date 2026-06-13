@@ -4,7 +4,8 @@
 [![Deploy](https://img.shields.io/website?label=deploy&url=https%3A%2F%2Fpenpenguin.github.io%2Ffake-kirdy%2F)](https://penpenguin.github.io/fake-kirdy/)
 ![Vitest](https://img.shields.io/badge/tested_with-vitest-6E9F18?logo=vitest&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178C6?logo=typescript&logoColor=white)
-![Node.js](https://img.shields.io/badge/node-%3E%3D18-339933?logo=node.js&logoColor=white)
+![Node.js](https://img.shields.io/badge/node-22.x-339933?logo=node.js&logoColor=white)
+![Godot](https://img.shields.io/badge/Godot-4.6.3-478CBF?logo=godotengine&logoColor=white)
 
 ![Kirdy key visual](docs/key_visual.gif)
 
