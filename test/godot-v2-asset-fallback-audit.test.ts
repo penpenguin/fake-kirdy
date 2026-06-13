@@ -45,6 +45,54 @@ const readWebpInfo = (relativePath: string): { width: number; height: number; ha
   throw new Error(`${relativePath} has no supported VP8X/VP8L dimension chunk`);
 };
 
+const readWebpRgba = (relativePath: string): Buffer => {
+  const result = spawnSync('ffmpeg', ['-v', 'error', '-i', join(repoRoot, relativePath), '-f', 'rawvideo', '-pix_fmt', 'rgba', '-'], {
+    encoding: 'buffer',
+    maxBuffer: 1024 * 1024,
+  });
+  if (result.status !== 0) {
+    throw new Error(`Failed to decode ${relativePath}: ${result.stderr.toString('utf8')}`);
+  }
+  return result.stdout;
+};
+
+const summarizeKirdySpriteColors = (
+  relativePath: string,
+): { opaquePixels: number; redBodyRatio: number; yellowStarRatio: number; pinkBodyRatio: number } => {
+  const rgba = readWebpRgba(relativePath);
+  let opaquePixels = 0;
+  let redBodyPixels = 0;
+  let yellowStarPixels = 0;
+  let pinkBodyPixels = 0;
+
+  for (let offset = 0; offset < rgba.length; offset += 4) {
+    const red = rgba[offset];
+    const green = rgba[offset + 1];
+    const blue = rgba[offset + 2];
+    const alpha = rgba[offset + 3];
+    if (alpha < 128) {
+      continue;
+    }
+    opaquePixels += 1;
+    if (red > 120 && green < 95 && blue < 85) {
+      redBodyPixels += 1;
+    }
+    if (red > 150 && green > 95 && blue < 80) {
+      yellowStarPixels += 1;
+    }
+    if (red > 170 && green > 75 && blue > 120) {
+      pinkBodyPixels += 1;
+    }
+  }
+
+  return {
+    opaquePixels,
+    redBodyRatio: redBodyPixels / opaquePixels,
+    yellowStarRatio: yellowStarPixels / opaquePixels,
+    pinkBodyRatio: pinkBodyPixels / opaquePixels,
+  };
+};
+
 const writeFixtureManifest = (path: string): void => {
   writeFileSync(
     path,
@@ -170,6 +218,16 @@ describe('Godot asset fallback audit', () => {
     expect(sparkInfo?.hasAlpha).toBe(true);
     expect(manifest).toContain('images/characters/kirdy/kirdy-spark.webp');
     expect(playerScene).toContain('path="res://resources/assets/images/characters/kirdy/kirdy-spark.webp"');
+  });
+
+  it('keeps Spark based on the canonical idle Kirdy body instead of drifting to a different mascot', () => {
+    const idleColors = summarizeKirdySpriteColors('godot/resources/assets/images/characters/kirdy/kirdy-idle.webp');
+    const sparkColors = summarizeKirdySpriteColors('godot/resources/assets/images/characters/kirdy/kirdy-spark.webp');
+
+    expect(sparkColors.opaquePixels).toBeGreaterThan(idleColors.opaquePixels * 0.65);
+    expect(sparkColors.redBodyRatio).toBeGreaterThan(0.35);
+    expect(sparkColors.yellowStarRatio).toBeGreaterThan(0.03);
+    expect(sparkColors.pinkBodyRatio).toBeLessThan(0.12);
   });
 
   it('passes a fixture with explicit ability visuals, SFX mappings, labels, and resource paths', () => {
