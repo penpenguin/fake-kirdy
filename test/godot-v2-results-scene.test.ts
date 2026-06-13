@@ -39,6 +39,22 @@ describe('Godot v2 ResultsScene', () => {
     expect(script).toContain('$ModalPanel/ScoreLabel');
   });
 
+  it('shows foreground result controls so the full results scene is operable over the map', () => {
+    const script = readGodotFile('scripts/ui/ResultsScene.gd');
+    const scene = readGodotFile('scenes/ui/ResultsScene.tscn');
+
+    expect(scene).toContain('PopupBackdrop');
+    expect(scene).toContain('ModalPanel');
+    expect(scene).toContain('z_index = 100');
+    expect(scene).toContain('z_index = 101');
+    expect(scene).toContain('ContinueLabel');
+    expect(scene).toContain('RestartLabel');
+    expect(script).toContain('continue_label');
+    expect(script).toContain('restart_label');
+    expect(script).toContain('Press Enter to return to hub');
+    expect(script).toContain('Press R to restart');
+  });
+
   it('wires ResultsScene transition through GameSession with key and delay paths', () => {
     const session = readGodotFile('scripts/session/GameSession.gd');
     const project = readGodotFile('project.godot');

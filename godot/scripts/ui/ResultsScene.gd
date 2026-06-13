@@ -8,13 +8,15 @@ class_name ResultsScene
 @onready var time_label: Label = $ModalPanel/TimeLabel
 @onready var score_label: Label = $ModalPanel/ScoreLabel
 @onready var bonus_label: Label = $ModalPanel/BonusLabel
+@onready var continue_label: Label = $ModalPanel/ContinueLabel
+@onready var restart_label: Label = $ModalPanel/RestartLabel
 
 var results_state: Dictionary = {}
 
 
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_IGNORE
-    custom_minimum_size = Vector2(420.0, 244.0)
+    custom_minimum_size = Vector2(420.0, 296.0)
     visible = has_results_state(results_state)
     refresh_labels()
 
@@ -37,6 +39,8 @@ func refresh_labels() -> void:
     time_label.text = "Time  %s" % format_time_ms(int(results_state.get("time_ms", 0)))
     score_label.text = "Score  %d" % int(results_state.get("score", 0))
     bonus_label.text = "Life Bonus  %d" % int(results_state.get("remaining_life_bonus", 0))
+    continue_label.text = "Press Enter to return to hub"
+    restart_label.text = "Press R to restart"
 
 
 func get_summary_text() -> String:

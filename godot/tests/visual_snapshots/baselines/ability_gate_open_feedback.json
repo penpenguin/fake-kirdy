@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "ability_gate_open_feedback",
-  "content_hash": "a1d0330c1bad5171f219ecf1b498f6b7285a255210cfb6725e98cbe0ccf83cf7",
+  "content_hash": "faa55ab573cc4a5e55c757cc5d46cc81953f0785fa28140a2eec4e3c23805c23",
   "replay_path": "godot/tests/replays/fire_area_ability_gate_trace.json",
   "frame": 25,
   "viewport": {

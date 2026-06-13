@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "result_overlay_finish",
-  "content_hash": "7aaa92aa8368ffedcff2d24f80db31f7bd68a8ee3dbd118ed1d6563e874956f0",
+  "content_hash": "4476d933ad93ee6a17c1c1f16bbb3c614ebf889b96a2b0c54ee0a952d9df4651",
   "replay_path": "godot/tests/replays/sky_sanctum_to_goal_finish.json",
   "frame": 200,
   "viewport": {

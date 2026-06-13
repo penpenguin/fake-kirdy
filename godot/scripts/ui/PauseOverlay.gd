@@ -4,6 +4,7 @@ class_name PauseOverlay
 @onready var title_label: Label = $TitleLabel
 @onready var resume_label: Label = $ResumeLabel
 @onready var settings_label: Label = $SettingsLabel
+@onready var reset_label: Label = $ResetLabel
 @onready var controls_help_label: Label = $ControlsHelpLabel
 
 var pause_state: Dictionary = {}
@@ -26,6 +27,7 @@ func set_pause_state(next_state: Dictionary) -> void:
     title_label.text = "Paused" if is_paused else ""
     resume_label.text = "Press Esc to return to pause" if settings_open else "Press Esc to resume" if is_paused else ""
     settings_label.text = "Settings open" if settings_open else "Press Enter for settings" if is_paused else ""
+    reset_label.text = get_pause_reset_text() if is_paused and not settings_open else ""
     controls_help_label.text = get_controls_help_text() if is_paused and not settings_open else ""
 
 
@@ -38,3 +40,7 @@ func normalize_pause_state(source: Dictionary) -> Dictionary:
 
 func get_controls_help_text() -> String:
     return "Move  A/D or arrows  |  Jump  Space  |  Inhale  C  |  Swallow  X  |  Ability  Z  |  Map  M"
+
+
+func get_pause_reset_text() -> String:
+    return "Press R to reset position"

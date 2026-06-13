@@ -1,0 +1,38 @@
+{
+  "start_level_id": "forest_reliquary",
+  "start_spawn_id": "door_check",
+  "level_id": "forest_reliquary",
+  "fps": 60,
+  "max_frames": 330,
+  "frames": [
+    {
+      "frame": 0,
+      "actions": {
+        "move_right": true,
+        "inhale": false,
+        "swallow": false,
+        "use_ability": false
+      }
+    },
+    {
+      "frame": 24,
+      "actions": {
+        "move_right": false,
+        "move_left": true
+      }
+    },
+    {
+      "frame": 150,
+      "actions": {
+        "move_left": false,
+        "move_right": true
+      }
+    },
+    {
+      "frame": 310,
+      "actions": {
+        "move_right": false
+      }
+    }
+  ]
+}

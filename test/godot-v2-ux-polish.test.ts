@@ -13,6 +13,19 @@ const readGodotFile = (relativePath: string): string =>
 const readRepoFile = (relativePath: string): string =>
   readFileSync(join(repoRoot, relativePath), 'utf8');
 
+const readNodePosition = (scene: string, nodeName: string): { x: number; y: number } => {
+  const nodeStart = scene.indexOf(`[node name="${nodeName}"`);
+  expect(nodeStart).toBeGreaterThanOrEqual(0);
+  const nextNode = scene.indexOf('\n[node ', nodeStart + 1);
+  const nodeBlock = scene.slice(nodeStart, nextNode === -1 ? undefined : nextNode);
+  const match = nodeBlock.match(/position = Vector2\(([-0-9.]+), ([-0-9.]+)\)/);
+  expect(match).not.toBeNull();
+  return {
+    x: Number(match?.[1]),
+    y: Number(match?.[2]),
+  };
+};
+
 describe('Godot v2 UX polish vertical slice', () => {
   it('shows operation help as a dismissible initial popup and exposes controls from pause', () => {
     const guideScript = readGodotFile('scripts/ui/ControlGuideOverlay.gd');
@@ -135,5 +148,35 @@ describe('Godot v2 UX polish vertical slice', () => {
     expect(lintContract).toContain('"central_hub"');
     expect(docs).toContain('door_visual_style');
     expect(docs).toContain('nearby_door_ambiguity');
+  });
+
+  it('lays out CentralHub as a symmetric cathedral hub with nave, altar, and side aisles', () => {
+    const hub = readGodotFile('levels/central_hub.tscn');
+    const docs = readRepoFile('docs/map-structure.md');
+    const centerX = 420;
+
+    expect(hub).toContain('[node name="CathedralNave"');
+    expect(hub).toContain('[node name="AltarPlatform"');
+    expect(hub).toContain('[node name="LeftAislePlatform"');
+    expect(hub).toContain('[node name="RightAislePlatform"');
+    expect(hub).toContain('RectangleShape2D_side_aisle');
+    expect(hub).toContain('RectangleShape2D_altar');
+
+    const mirror = readNodePosition(hub, 'DoorToMirrorCorridor');
+    const forest = readNodePosition(hub, 'DoorToForestArea');
+    const tutorialFire = readNodePosition(hub, 'DoorToTutorialFireArea');
+    const ice = readNodePosition(hub, 'DoorToIceArea');
+    const cave = readNodePosition(hub, 'DoorToCaveArea');
+    const leftAisle = readNodePosition(hub, 'LeftAislePlatform');
+    const rightAisle = readNodePosition(hub, 'RightAislePlatform');
+
+    expect(mirror.x).toBe(centerX);
+    expect(forest.x + tutorialFire.x).toBe(centerX * 2);
+    expect(forest.y).toBe(tutorialFire.y);
+    expect(ice.x + cave.x).toBe(centerX * 2);
+    expect(ice.y).toBe(cave.y);
+    expect(leftAisle.x + rightAisle.x).toBe(centerX * 2);
+    expect(leftAisle.y).toBe(rightAisle.y);
+    expect(docs).toContain('nave/altar/side aisle');
   });
 });

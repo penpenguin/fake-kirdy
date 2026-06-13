@@ -152,6 +152,7 @@ var error_retry_fps: int = 60
 @export var pause_scene_enabled: bool = true
 @export var pause_toggle_action: StringName = &"pause_toggle"
 @export var pause_settings_action: StringName = &"pause_settings"
+@export var pause_reset_action: StringName = &"pause_reset"
 @export var settings_overlay_enabled: bool = true
 @export var virtual_controls_enabled: bool = true
 @export var inventory_overlay_enabled: bool = true
@@ -923,6 +924,20 @@ func detach_current_ability() -> void:
     if ability_type == "":
         return
 
+    if should_block_tutorial_spark_detach(ability_type):
+        trace_recorder.call("record_player_event", "ability.detach.blocked", {
+            "level_id": current_level_id,
+            "player": get_player_trace(),
+            "payload": {
+                "ability_type": ability_type,
+                "gate_id": "tutorial_spark_gate",
+                "reason": "tutorial_spark_gate_unopened",
+            },
+        })
+        sync_hud_overlay("ability.detach.blocked", true)
+        sync_inventory_overlay("ability.detach.blocked", true)
+        return
+
     player.call("clear_ability_type")
     ability_cooldown_remaining_ms = 0
     trace_recorder.call("record_player_event", "ability.detached", {
@@ -935,6 +950,14 @@ func detach_current_ability() -> void:
     sync_hud_overlay("ability.detached", true)
     sync_inventory_overlay("ability.detached", true)
     write_persistent_state()
+
+
+func should_block_tutorial_spark_detach(ability_type: String) -> bool:
+    return (
+        current_level_id == "tutorial_room"
+        and ability_matches_requirement(ability_type, "spark")
+        and not opened_ability_gate_ids.has("tutorial_spark_gate")
+    )
 
 
 func use_ability() -> void:
@@ -2468,11 +2491,15 @@ func check_pause_actions() -> void:
 
     if session_paused and not pause_settings_open and is_session_action_just_pressed(pause_settings_action):
         open_pause_settings()
+        return
+
+    if session_paused and not pause_settings_open and is_session_action_just_pressed(pause_reset_action):
+        reset_player_to_safe_spawn()
 
 
 func toggle_pause_menu() -> void:
     session_paused = not session_paused
-    apply_actor_pause_state(session_paused)
+    set_pause_actor_state(session_paused, "pause.toggled")
     if not session_paused:
         pause_settings_open = false
     play_ui_sfx(null, "pause.toggled", "ui")
@@ -2480,6 +2507,34 @@ func toggle_pause_menu() -> void:
     sync_virtual_controls_overlay("pause.toggled")
     sync_pause_overlay("pause.toggled", true)
     update_audio_mix("pause.toggled", true)
+
+
+func reset_player_to_safe_spawn() -> void:
+    if not session_paused or pause_settings_open or player == null:
+        return
+
+    var previous_position := get_player_position_payload()
+    var previous_velocity := {
+        "x": player.velocity.x,
+        "y": player.velocity.y,
+    }
+    spawn_player(requested_spawn_id)
+    player_invulnerability_remaining_ms = max(player_invulnerability_remaining_ms, 250)
+    sync_player_damage_feedback("pause.position_reset.invulnerability", false)
+    var reset_position := get_player_position_payload()
+    trace_recorder.call("record_player_event", "pause.position_reset", {
+        "level_id": current_level_id,
+        "player": get_player_trace(),
+        "payload": {
+            "spawn_id": requested_spawn_id,
+            "previous_position": previous_position,
+            "previous_velocity": previous_velocity,
+            "reset_position": reset_position,
+            "settings_open": pause_settings_open,
+            "is_paused": session_paused,
+        },
+    })
+    sync_hud_overlay("pause.position_reset", true)
 
 
 func apply_actor_pause_state(paused: bool) -> void:
@@ -2490,6 +2545,29 @@ func apply_actor_pause_state(paused: bool) -> void:
         return
 
     restore_paused_actor_physics()
+
+
+func set_pause_actor_state(paused: bool, reason: String = "") -> void:
+    if paused:
+        apply_actor_pause_state(true)
+        if trace_recorder != null:
+            trace_recorder.call("record_event", "pause.actors.paused", {
+                "level_id": current_level_id,
+                "reason": reason,
+                "paused_actor_count": paused_actor_physics_states.size(),
+            })
+        return
+
+    var restored_actor_count := paused_actor_physics_states.size()
+    restore_paused_actor_physics()
+    if trace_recorder == null:
+        return
+
+    trace_recorder.call("record_event", "pause.actors.restored", {
+        "level_id": current_level_id,
+        "reason": reason,
+        "restored_actor_count": restored_actor_count,
+    })
 
 
 func pause_actor_physics(actor) -> void:
@@ -2912,6 +2990,7 @@ func restart_current_run(allow_completed: bool = false) -> void:
     outcome = "running"
     session_paused = false
     pause_settings_open = false
+    restore_result_actors("result.restart.selected")
     result_elapsed_ms = 0
     results_scene_shown = false
     player_hp = max(player_max_hp, 1)
@@ -2947,6 +3026,7 @@ func continue_results_to_hub() -> void:
     outcome = "running"
     session_paused = false
     pause_settings_open = false
+    restore_result_actors("results.continue.selected")
     result_elapsed_ms = 0
     results_scene_shown = false
     player_hp = max(player_max_hp, 1)
@@ -2996,6 +3076,7 @@ func hide_results_scene(reason: String = "") -> void:
 func show_result_overlay(reason: String = "") -> void:
     result_elapsed_ms = 0
     results_scene_shown = false
+    pause_result_actors(reason)
     var result_payload := build_result_payload()
     if result_overlay != null and is_instance_valid(result_overlay):
         result_overlay.call("set_result_state", result_payload)
@@ -3005,6 +3086,33 @@ func show_result_overlay(reason: String = "") -> void:
 
     result_payload["reason"] = reason
     trace_recorder.call("record_event", "result.overlay.shown", result_payload)
+
+
+func pause_result_actors(reason: String = "") -> void:
+    apply_actor_pause_state(true)
+    if trace_recorder == null:
+        return
+
+    trace_recorder.call("record_event", "result.actors.paused", {
+        "level_id": current_level_id,
+        "outcome": outcome,
+        "reason": reason,
+        "paused_actor_count": paused_actor_physics_states.size(),
+    })
+
+
+func restore_result_actors(reason: String = "") -> void:
+    var restored_actor_count := paused_actor_physics_states.size()
+    restore_paused_actor_physics()
+    if trace_recorder == null:
+        return
+
+    trace_recorder.call("record_event", "result.actors.restored", {
+        "level_id": current_level_id,
+        "outcome": outcome,
+        "reason": reason,
+        "restored_actor_count": restored_actor_count,
+    })
 
 
 func show_results_scene(reason: String = "") -> void:

@@ -1,0 +1,65 @@
+{
+  "start_level_id": "tutorial_room",
+  "start_spawn_id": "default",
+  "level_id": "tutorial_room",
+  "fps": 60,
+  "max_frames": 430,
+  "frames": [
+    {
+      "frame": 0,
+      "actions": {
+        "move_right": true,
+        "inhale": true,
+        "swallow": false,
+        "use_ability": false
+      }
+    },
+    {
+      "frame": 22,
+      "actions": {
+        "inhale": false
+      }
+    },
+    {
+      "frame": 160,
+      "actions": {
+        "move_right": false,
+        "move_left": true,
+        "inhale": true
+      }
+    },
+    {
+      "frame": 205,
+      "actions": {
+        "swallow": true
+      }
+    },
+    {
+      "frame": 206,
+      "actions": {
+        "move_left": false,
+        "move_right": true,
+        "inhale": false,
+        "swallow": false
+      }
+    },
+    {
+      "frame": 235,
+      "actions": {
+        "use_ability": true
+      }
+    },
+    {
+      "frame": 237,
+      "actions": {
+        "use_ability": false
+      }
+    },
+    {
+      "frame": 410,
+      "actions": {
+        "move_right": false
+      }
+    }
+  ]
+}

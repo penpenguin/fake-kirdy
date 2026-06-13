@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "ability_feedback_fire_projectile",
-  "content_hash": "7b89c5f28479c24c6bb4fb32e342d5ebc2a0a71d33ae3c0b0d2742b186e29e98",
+  "content_hash": "4611ef14050be454ea9857fe2465137e8667fe49ceb72922b488844b40409acc",
   "replay_path": "godot/tests/replays/fire_ability_projectile_hit.json",
   "frame": 75,
   "viewport": {

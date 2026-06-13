@@ -43,6 +43,7 @@ describe('Godot progression solver', () => {
       required_solution_level_ids?: string[];
       required_gameplay_beats?: string[];
       required_cluster_minimum_level_counts?: Record<string, number>;
+      required_reachable_biome_destinations?: string[];
       required_boss_ids?: string[];
       required_final_boss_id?: string;
       rules?: Record<string, { severity?: string }>;
@@ -67,6 +68,10 @@ describe('Godot progression solver', () => {
     for (const count of Object.values(contract.required_cluster_minimum_level_counts ?? {})) {
       expect(count).toBeGreaterThanOrEqual(5);
     }
+    expect(contract.required_reachable_biome_destinations?.length).toBeGreaterThanOrEqual(8);
+    expect(contract.required_reachable_biome_destinations).toEqual(
+      expect.arrayContaining(['forest_area', 'ice_area', 'fire_area', 'cave_area', 'sky_sanctum', 'aurora_spire', 'starlit_keep', 'goal_sanctum']),
+    );
     expect(contract.required_boss_ids).toEqual(
       expect.arrayContaining(['forest_guard_boss', 'ice_guard_boss', 'fire_guard_boss', 'ruins_guard_boss', 'sky_guard_boss']),
     );
@@ -79,12 +84,15 @@ describe('Godot progression solver', () => {
     expect(contract.rules?.minimum_solution_transitions?.severity).toBe('error');
     expect(contract.rules?.required_gameplay_beat_present?.severity).toBe('error');
     expect(contract.rules?.required_cluster_minimum_level_count?.severity).toBe('error');
+    expect(contract.rules?.required_reachable_biome_destination?.severity).toBe('error');
     expect(contract.rules?.required_boss_defeated?.severity).toBe('error');
     expect(contract.rules?.final_boss_before_clear?.severity).toBe('error');
 
     const solver = readFileSync(join(repoRoot, 'scripts', 'check-godot-progression-solver.mjs'), 'utf8');
     expect(solver).toContain('bosses');
     expect(solver).toContain('validateClusterMinimumLevelCounts');
+    expect(solver).toContain('validateReachableBiomeDestinations');
+    expect(solver).toContain('reachable_biome_destinations');
     expect(solver).toContain('required_boss_ids');
     expect(solver).toContain('required_final_boss_id');
   });
@@ -315,6 +323,7 @@ spawn_id = "default"
     const report = JSON.parse(result.stdout) as {
       failed_checks: unknown[];
       solution?: { path: string[]; items: string[]; completed_levels: string[]; defeated_bosses: string[]; gameplay_beats: string[] };
+      reachable_biome_destinations?: string[];
       explored_state_count: number;
     };
     expect(report.failed_checks).toEqual([]);
@@ -332,6 +341,10 @@ spawn_id = "default"
     );
     expect(report.solution?.gameplay_beats).toEqual(
       expect.arrayContaining(['collectible', 'enemy', 'boss', 'ability_reward', 'locked_gate', 'generated_route']),
+    );
+    expect(report.reachable_biome_destinations?.length).toBeGreaterThanOrEqual(8);
+    expect(report.reachable_biome_destinations).toEqual(
+      expect.arrayContaining(['forest_area', 'ice_area', 'fire_area', 'cave_area', 'sky_sanctum', 'aurora_spire', 'starlit_keep', 'goal_sanctum']),
     );
   });
 });

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "level_terrain_central_hub",
-  "content_hash": "253a6ef16bf8c7f0c29b02c64ab660bda2daf14b2a397b1fa69cf7f1dea07c56",
+  "content_hash": "f6171ec68600a303f53cda081d977ce0f126943a076ba306cef41bbabc59c345",
   "replay_path": "godot/tests/replays/central_hub_to_heal_goal.json",
   "frame": 20,
   "viewport": {

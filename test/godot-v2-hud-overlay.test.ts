@@ -85,6 +85,33 @@ describe('Godot v2 HUD overlay', () => {
     }
   });
 
+  it('separates HUD captions from values so compact chips do not clip meaning and state on one line', () => {
+    const script = readGodotFile('scripts/ui/HudOverlay.gd');
+    const scene = readGodotFile('scenes/ui/HudOverlay.tscn');
+
+    for (const captionNode of [
+      'AreaCaption',
+      'HealthCaption',
+      'AbilityCaption',
+      'ItemsCaption',
+      'ScoreCaption',
+      'ObjectiveCaption',
+      'AttackCaption',
+      'StatusCaption',
+    ]) {
+      expect(scene).toContain(captionNode);
+    }
+
+    expect(script).toContain('set_caption_value(area_caption, level_label, "AREA"');
+    expect(script).toContain('set_caption_value(ability_caption, ability_label, "ABILITY"');
+    expect(script).toContain('set_caption_value(items_caption, items_label, "ITEMS"');
+    expect(script).toContain('format_level_value');
+    expect(script).toContain('format_item_progress');
+    expect(script).not.toContain('level_label.text = "AREA  %s"');
+    expect(script).not.toContain('ability_label.text = "ABILITY  %s"');
+    expect(script).not.toContain('items_label.text = "ITEMS  %s"');
+  });
+
   it('documents the upgraded HUD visual contract', () => {
     const docsPath = join(repoRoot, 'docs', 'godot-v2', 'hud-overlay.md');
     const docs = readFileSync(docsPath, 'utf8');

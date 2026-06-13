@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "pause_overlay_menu",
-  "content_hash": "c3c48516ed195c4bf86680924bf9f2393b48eea9820dda8d33051e65c2eeb043",
+  "content_hash": "1fcbc2d4984945527985d02e3e313707a8a19d7f130ccb9381e3970ea0625866",
   "replay_path": "godot/tests/replays/pause_toggle_menu.json",
   "frame": 4,
   "viewport": {

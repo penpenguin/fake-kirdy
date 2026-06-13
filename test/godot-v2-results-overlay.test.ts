@@ -77,4 +77,28 @@ describe('Godot v2 result overlay', () => {
     expect(traceSummary).toContain('last_result_overlay');
     expect(traceSummary).toContain("eventType === 'result.overlay.shown'");
   });
+
+  it('pauses gameplay actors while result UI is active and restores that pause state before leaving results', () => {
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const showResultBody = session.slice(
+      session.indexOf('func show_result_overlay'),
+      session.indexOf('func show_results_scene'),
+    );
+    const restartBody = session.slice(
+      session.indexOf('func restart_current_run'),
+      session.indexOf('func continue_results_to_hub'),
+    );
+    const continueBody = session.slice(
+      session.indexOf('func continue_results_to_hub'),
+      session.indexOf('func hide_results_scene'),
+    );
+
+    expect(session).toContain('func pause_result_actors(reason: String = "") -> void:');
+    expect(showResultBody).toContain('pause_result_actors(reason)');
+    expect(session).toContain('"result.actors.paused"');
+    expect(session).toContain('func restore_result_actors(reason: String = "") -> void:');
+    expect(session).toContain('"result.actors.restored"');
+    expect(restartBody).toContain('restore_result_actors("result.restart.selected")');
+    expect(continueBody).toContain('restore_result_actors("results.continue.selected")');
+  });
 });

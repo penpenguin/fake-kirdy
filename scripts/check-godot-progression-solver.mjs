@@ -27,6 +27,8 @@ const report = {
   final_level_id: finalLevelId,
   canonical_contract_checks: canonicalContractChecks,
   explored_state_count: solverResult.explored_state_count,
+  reachable_level_ids: solverResult.reachable_level_ids,
+  reachable_biome_destinations: getReachableBiomeDestinations(solverResult, contract),
   blocked_requirements: solverResult.blocked_requirements,
   solution: solverResult.solution,
   failed_checks: failedChecks,
@@ -152,6 +154,7 @@ function solveProgression(graph, contract, startLevelId, finalLevelId, canonical
   if (!levelsById.has(startLevelId)) {
     return {
       explored_state_count: 0,
+      reachable_level_ids: [],
       blocked_requirements: {},
       solution: null,
     };
@@ -170,17 +173,16 @@ function solveProgression(graph, contract, startLevelId, finalLevelId, canonical
   const queue = [initialState];
   const seen = new Set([stateKey(initialState)]);
   const blockedRequirements = {};
+  const reachableLevelIds = new Set();
   let exploredStateCount = 0;
+  let solution = null;
 
   while (queue.length > 0) {
     const state = queue.shift();
     exploredStateCount += 1;
-    if (state.level_id === finalLevelId) {
-      return {
-        explored_state_count: exploredStateCount,
-        blocked_requirements: sortRecordArrays(blockedRequirements),
-        solution: serializeState(state),
-      };
+    reachableLevelIds.add(state.level_id);
+    if (state.level_id === finalLevelId && solution === null) {
+      solution = serializeState(state);
     }
 
     const level = levelsById.get(state.level_id);
@@ -220,8 +222,9 @@ function solveProgression(graph, contract, startLevelId, finalLevelId, canonical
 
   return {
     explored_state_count: exploredStateCount,
+    reachable_level_ids: [...reachableLevelIds].sort(),
     blocked_requirements: sortRecordArrays(blockedRequirements),
-    solution: null,
+    solution,
   };
 }
 
@@ -344,6 +347,7 @@ function validateProgression(graph, solverResult, contract, startLevelId, finalL
       addIssue(issues, contract, 'final_boss_before_clear', finalLevelId, `Final solution did not defeat final boss ${requiredFinalBossId}.`);
     }
     validateClusterMinimumLevelCounts(graph, solverResult, contract, issues);
+    validateReachableBiomeDestinations(solverResult, contract, issues);
   }
   return issues;
 }
@@ -363,6 +367,28 @@ function validateClusterMinimumLevelCounts(graph, solverResult, contract, issues
       );
     }
   }
+}
+
+function validateReachableBiomeDestinations(solverResult, contract, issues) {
+  const reachable = new Set(solverResult.reachable_level_ids ?? []);
+  for (const levelId of contract.required_reachable_biome_destinations ?? []) {
+    if (!reachable.has(levelId)) {
+      addIssue(
+        issues,
+        contract,
+        'required_reachable_biome_destination',
+        levelId,
+        `Required biome/area destination ${levelId} is not progression-reachable.`,
+      );
+    }
+  }
+}
+
+function getReachableBiomeDestinations(solverResult, contract) {
+  const reachable = new Set(solverResult.reachable_level_ids ?? []);
+  return (contract.required_reachable_biome_destinations ?? [])
+    .filter((levelId) => reachable.has(levelId))
+    .sort();
 }
 
 function addIssue(issues, contract, rule, levelId, message) {

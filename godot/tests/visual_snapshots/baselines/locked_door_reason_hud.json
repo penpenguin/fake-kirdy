@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "locked_door_reason_hud",
-  "content_hash": "12e548c0c32b5b00166f6ed7aa6980f1964b76d7663ca25cdceccda3597da07d",
+  "content_hash": "70b03dbcf88de3c52bf38a0070a0394a55fd07479c7d08b239a3811843c81646",
   "replay_path": "godot/tests/replays/combat_locked_door_without_ability.json",
   "frame": 18,
   "viewport": {

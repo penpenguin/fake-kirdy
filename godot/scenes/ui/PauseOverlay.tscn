@@ -32,10 +32,17 @@ offset_right = 320.0
 offset_bottom = 96.0
 text = "Press Enter for settings"
 
+[node name="ResetLabel" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 104.0
+offset_right = 320.0
+offset_bottom = 128.0
+text = "Press R to reset position"
+
 [node name="ControlsHelpLabel" type="Label" parent="."]
 offset_left = -180.0
-offset_top = 112.0
+offset_top = 136.0
 offset_right = 500.0
-offset_bottom = 148.0
+offset_bottom = 172.0
 text = "Move  A/D or arrows  |  Jump  Space  |  Inhale  C  |  Swallow  X  |  Ability  Z  |  Map  M"
 horizontal_alignment = 1

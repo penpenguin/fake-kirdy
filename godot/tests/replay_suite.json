@@ -167,7 +167,7 @@
       "id": "pause_toggle_menu",
       "replay_path": "res://tests/replays/pause_toggle_menu.json",
       "expected_outcome": "replay.max_frames_reached",
-      "expected_events": ["pause.toggled", "pause.scene.shown"],
+      "expected_events": ["pause.toggled", "pause.scene.shown", "pause.actors.paused", "pause.actors.restored"],
       "tags": ["pause", "ui", "input", "trace"]
     },
     {
@@ -176,6 +176,13 @@
       "expected_outcome": "replay.max_frames_reached",
       "expected_events": ["pause.settings.opened", "settings.updated", "pause.settings.closed", "pause.toggled"],
       "tags": ["pause", "settings", "ui", "input", "trace"]
+    },
+    {
+      "id": "pause_position_reset",
+      "replay_path": "res://tests/replays/pause_position_reset.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["pause.actors.paused", "pause.position_reset", "pause.actors.restored", "hud.updated"],
+      "tags": ["pause", "reset", "ui", "input", "trace"]
     },
     {
       "id": "virtual_controls_touch_mode",
@@ -194,7 +201,7 @@
       "id": "game_over_restart_option",
       "replay_path": "res://tests/replays/game_over_restart_option.json",
       "expected_outcome": "replay.max_frames_reached",
-      "expected_events": ["game.over", "run.restart.selected", "level.loaded"],
+      "expected_events": ["game.over", "result.actors.paused", "result.actors.restored", "run.restart.selected", "level.loaded"],
       "expected_last_hud": {
         "hp": 3,
         "outcome": "running"
@@ -205,14 +212,14 @@
       "id": "results_scene_continue",
       "replay_path": "res://tests/replays/results_scene_continue.json",
       "expected_outcome": "complete",
-      "expected_events": ["result.overlay.shown", "results.scene.shown"],
+      "expected_events": ["result.actors.paused", "result.overlay.shown", "results.scene.shown"],
       "tags": ["results", "ui", "input", "trace"]
     },
     {
       "id": "results_scene_restart",
       "replay_path": "res://tests/replays/results_scene_restart.json",
       "expected_outcome": "replay.max_frames_reached",
-      "expected_events": ["result.overlay.shown", "results.scene.shown", "results.scene.hidden", "run.restart.selected"],
+      "expected_events": ["result.actors.paused", "result.overlay.shown", "results.scene.shown", "results.scene.hidden", "result.actors.restored", "run.restart.selected"],
       "expected_last_hud": {
         "outcome": "running"
       },
@@ -222,7 +229,7 @@
       "id": "results_scene_continue_to_hub",
       "replay_path": "res://tests/replays/results_scene_continue_to_hub.json",
       "expected_outcome": "replay.max_frames_reached",
-      "expected_events": ["result.overlay.shown", "results.scene.shown", "results.continue.selected", "player.jump.started", "door.entered"],
+      "expected_events": ["result.actors.paused", "result.overlay.shown", "results.scene.shown", "results.continue.selected", "result.actors.restored", "player.jump.started", "door.entered"],
       "expected_last_hud": {
         "outcome": "running"
       },
@@ -269,6 +276,44 @@
         { "event_type": "run.finished", "payload": { "outcome": "completed" } }
       ],
       "tags": ["tutorial", "onboarding", "safety", "trace"]
+    },
+    {
+      "id": "tutorial_spark_release_recover_path",
+      "replay_path": "res://tests/replays/tutorial_spark_release_recover_path.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["enemy.released", "enemy.captured", "ability.acquired", "ability_gate.opened", "door.entered"],
+      "forbidden_events": ["game.over", "player.defeated", "replay.error", "goal.door.entered", "result.overlay.shown"],
+      "forbidden_event_payloads": [
+        { "event_type": "run.finished", "payload": { "result_label": "complete" } },
+        { "event_type": "run.finished", "payload": { "outcome": "completed" } }
+      ],
+      "expected_event_sequence": [
+        { "event_type": "enemy.released", "payload": { "ability_type": "spark" } },
+        { "event_type": "enemy.captured", "payload": { "ability_type": "spark" } },
+        { "event_type": "ability.acquired", "payload": { "ability_type": "spark" } },
+        { "event_type": "ability_gate.opened", "payload": { "gate_id": "tutorial_spark_gate" } },
+        { "event_type": "door.entered", "payload": { "door_id": "tutorial_to_central_hub" } }
+      ],
+      "tags": ["tutorial", "onboarding", "spark", "softlock", "trace"]
+    },
+    {
+      "id": "tutorial_spark_detach_gate_recover_path",
+      "replay_path": "res://tests/replays/tutorial_spark_detach_gate_recover_path.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["ability.acquired", "ability.detach.blocked", "ability.used", "ability_gate.opened", "door.entered"],
+      "forbidden_events": ["ability.detached", "game.over", "player.defeated", "replay.error", "goal.door.entered", "result.overlay.shown"],
+      "forbidden_event_payloads": [
+        { "event_type": "run.finished", "payload": { "result_label": "complete" } },
+        { "event_type": "run.finished", "payload": { "outcome": "completed" } }
+      ],
+      "expected_event_sequence": [
+        { "event_type": "ability.acquired", "payload": { "ability_type": "spark" } },
+        { "event_type": "ability.detach.blocked", "payload": { "ability_type": "spark" } },
+        { "event_type": "ability.used", "payload": { "ability_type": "spark" } },
+        { "event_type": "ability_gate.opened", "payload": { "gate_id": "tutorial_spark_gate" } },
+        { "event_type": "door.entered", "payload": { "door_id": "tutorial_to_central_hub" } }
+      ],
+      "tags": ["tutorial", "onboarding", "spark", "softlock", "detach", "trace"]
     },
     {
       "id": "tutorial_no_edge_fall_path",
@@ -368,6 +413,22 @@
         "items_collected": ["forest-keystone"]
       },
       "tags": ["progression", "item", "collectible", "door", "trace"]
+    },
+    {
+      "id": "forest_reliquary_lock_then_key_unlocks_door",
+      "replay_path": "res://tests/replays/forest_reliquary_lock_then_key_unlocks_door.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["door.locked", "collectible.collected", "item.acquired", "inventory.updated", "hud.updated", "door.entered"],
+      "forbidden_events": ["collectible.pickup.ignored", "game.over", "player.defeated", "replay.error"],
+      "expected_event_sequence": [
+        { "event_type": "door.locked", "payload": { "reason": "missing_item:forest-keystone" } },
+        { "event_type": "item.acquired", "payload": { "item_id": "forest-keystone" } },
+        { "event_type": "door.entered", "payload": { "door_id": "forest_reliquary_to_labyrinth_001" } }
+      ],
+      "expected_last_hud": {
+        "items_collected": ["forest-keystone"]
+      },
+      "tags": ["progression", "item", "collectible", "door", "locked-first", "trace"]
     },
     {
       "id": "forest_generated_reliquary_chain",

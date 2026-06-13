@@ -3,12 +3,12 @@
 [ext_resource type="Script" path="res://scripts/ui/HudOverlay.gd" id="1_hud"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-bg_color = Color(0.03, 0.045, 0.06, 0.78)
+bg_color = Color(0.03, 0.045, 0.06, 0.82)
 border_width_bottom = 1
 border_color = Color(0.72, 0.86, 0.95, 0.72)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_chip"]
-bg_color = Color(0.12, 0.17, 0.22, 0.88)
+bg_color = Color(0.12, 0.17, 0.22, 0.9)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -39,7 +39,7 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_badge"]
-bg_color = Color(0.17, 0.31, 0.42, 0.9)
+bg_color = Color(0.17, 0.31, 0.42, 0.92)
 corner_radius_top_left = 5
 corner_radius_top_right = 5
 corner_radius_bottom_right = 5
@@ -60,143 +60,250 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="TopBarRow" type="HBoxContainer" parent="Panel"]
 anchor_right = 1.0
-offset_left = 12.0
-offset_top = 8.0
-offset_right = -12.0
-offset_bottom = 56.0
-theme_override_constants/separation = 10
+offset_left = 8.0
+offset_top = 7.0
+offset_right = -8.0
+offset_bottom = 57.0
+theme_override_constants/separation = 4
 
-[node name="LevelLabel" type="Label" parent="Panel/TopBarRow"]
-custom_minimum_size = Vector2(132, 48)
+[node name="AreaChip" type="Panel" parent="Panel/TopBarRow"]
+custom_minimum_size = Vector2(100, 50)
 layout_mode = 2
-vertical_alignment = 1
-text = "LV"
-clip_text = true
+theme_override_styles/panel = SubResource("StyleBoxFlat_chip")
 
-[node name="HealthCluster" type="HBoxContainer" parent="Panel/TopBarRow"]
-custom_minimum_size = Vector2(220, 48)
+[node name="AreaCaption" type="Label" parent="Panel/TopBarRow/AreaChip"]
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 94.0
+offset_bottom = 18.0
+theme_override_font_sizes/font_size = 9
+text = "AREA"
+
+[node name="LevelLabel" type="Label" parent="Panel/TopBarRow/AreaChip"]
+offset_left = 8.0
+offset_top = 20.0
+offset_right = 94.0
+offset_bottom = 46.0
+theme_override_font_sizes/font_size = 11
+text = "central hub"
+autowrap_mode = 2
+
+[node name="HealthCluster" type="Panel" parent="Panel/TopBarRow"]
+custom_minimum_size = Vector2(126, 50)
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_styles/panel = SubResource("StyleBoxFlat_chip")
+
+[node name="HealthCaption" type="Label" parent="Panel/TopBarRow/HealthCluster"]
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 74.0
+offset_bottom = 18.0
+theme_override_font_sizes/font_size = 9
+text = "HEALTH"
 
 [node name="HpIcon" type="ColorRect" parent="Panel/TopBarRow/HealthCluster"]
-custom_minimum_size = Vector2(14, 14)
-layout_mode = 2
+offset_left = 8.0
+offset_top = 25.0
+offset_right = 20.0
+offset_bottom = 37.0
 color = Color(0.95, 0.18, 0.28, 1)
 
 [node name="HpBar" type="ProgressBar" parent="Panel/TopBarRow/HealthCluster"]
-custom_minimum_size = Vector2(190, 26)
-layout_mode = 2
+offset_left = 24.0
+offset_top = 23.0
+offset_right = 92.0
+offset_bottom = 39.0
 max_value = 3.0
 value = 3.0
 show_percentage = false
 theme_override_styles/background = SubResource("StyleBoxFlat_hp_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_hp_fill")
 
-[node name="HpLabel" type="Label" parent="Panel/TopBarRow/HealthCluster/HpBar"]
-offset_left = 8.0
-offset_top = 3.0
-offset_right = 182.0
-offset_bottom = 23.0
-text = "HP  3 / 3"
-clip_text = true
+[node name="HpLabel" type="Label" parent="Panel/TopBarRow/HealthCluster"]
+offset_left = 94.0
+offset_top = 20.0
+offset_right = 122.0
+offset_bottom = 42.0
+theme_override_font_sizes/font_size = 11
+text = "3/3"
 
 [node name="AbilityChip" type="Panel" parent="Panel/TopBarRow"]
-custom_minimum_size = Vector2(126, 32)
+custom_minimum_size = Vector2(92, 50)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_chip")
 
 [node name="AbilityIcon" type="ColorRect" parent="Panel/TopBarRow/AbilityChip"]
 offset_left = 8.0
-offset_top = 9.0
-offset_right = 22.0
-offset_bottom = 23.0
+offset_top = 25.0
+offset_right = 20.0
+offset_bottom = 37.0
 color = Color(0.2, 0.62, 1, 1)
 
+[node name="AbilityCaption" type="Label" parent="Panel/TopBarRow/AbilityChip"]
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 86.0
+offset_bottom = 18.0
+theme_override_font_sizes/font_size = 9
+text = "ABILITY"
+
 [node name="AbilityLabel" type="Label" parent="Panel/TopBarRow/AbilityChip"]
-offset_left = 30.0
-offset_top = 5.0
-offset_right = 118.0
-offset_bottom = 27.0
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 86.0
+offset_bottom = 44.0
+theme_override_font_sizes/font_size = 11
 text = "NONE"
-clip_text = true
+autowrap_mode = 2
 
 [node name="ItemsChip" type="Panel" parent="Panel/TopBarRow"]
-custom_minimum_size = Vector2(126, 32)
+custom_minimum_size = Vector2(92, 50)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_chip")
 
 [node name="ItemsIcon" type="ColorRect" parent="Panel/TopBarRow/ItemsChip"]
 offset_left = 8.0
-offset_top = 9.0
-offset_right = 22.0
-offset_bottom = 23.0
+offset_top = 25.0
+offset_right = 20.0
+offset_bottom = 37.0
 color = Color(0.5, 0.95, 0.62, 1)
 
+[node name="ItemsCaption" type="Label" parent="Panel/TopBarRow/ItemsChip"]
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 86.0
+offset_bottom = 18.0
+theme_override_font_sizes/font_size = 9
+text = "ITEMS"
+
 [node name="ItemsLabel" type="Label" parent="Panel/TopBarRow/ItemsChip"]
-offset_left = 30.0
-offset_top = 5.0
-offset_right = 118.0
-offset_bottom = 27.0
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 86.0
+offset_bottom = 44.0
+theme_override_font_sizes/font_size = 11
 text = "0"
-clip_text = true
+autowrap_mode = 2
 
 [node name="ScoreChip" type="Panel" parent="Panel/TopBarRow"]
-custom_minimum_size = Vector2(108, 32)
+custom_minimum_size = Vector2(78, 50)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_chip")
 
 [node name="ScoreIcon" type="ColorRect" parent="Panel/TopBarRow/ScoreChip"]
 offset_left = 8.0
-offset_top = 9.0
-offset_right = 22.0
-offset_bottom = 23.0
+offset_top = 25.0
+offset_right = 20.0
+offset_bottom = 37.0
 color = Color(1, 0.86, 0.25, 1)
 
+[node name="ScoreCaption" type="Label" parent="Panel/TopBarRow/ScoreChip"]
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 72.0
+offset_bottom = 18.0
+theme_override_font_sizes/font_size = 9
+text = "SCORE"
+
 [node name="ScoreLabel" type="Label" parent="Panel/TopBarRow/ScoreChip"]
-offset_left = 30.0
-offset_top = 5.0
-offset_right = 100.0
-offset_bottom = 27.0
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 72.0
+offset_bottom = 44.0
+theme_override_font_sizes/font_size = 11
 text = "0"
-clip_text = true
 
-[node name="ObjectiveLabel" type="Label" parent="Panel/TopBarRow"]
-custom_minimum_size = Vector2(220, 48)
+[node name="ObjectiveChip" type="Panel" parent="Panel/TopBarRow"]
+custom_minimum_size = Vector2(150, 50)
 layout_mode = 2
-vertical_alignment = 1
+theme_override_styles/panel = SubResource("StyleBoxFlat_chip")
+
+[node name="ObjectiveCaption" type="Label" parent="Panel/TopBarRow/ObjectiveChip"]
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 144.0
+offset_bottom = 18.0
+theme_override_font_sizes/font_size = 9
+text = "OBJECTIVE"
+
+[node name="ObjectiveLabel" type="Label" parent="Panel/TopBarRow/ObjectiveChip"]
+offset_left = 8.0
+offset_top = 20.0
+offset_right = 144.0
+offset_bottom = 44.0
+theme_override_font_sizes/font_size = 11
 text = "Reach the goal"
-clip_text = true
+autowrap_mode = 2
 
-[node name="CooldownLabel" type="Label" parent="Panel/TopBarRow"]
-custom_minimum_size = Vector2(76, 48)
+[node name="AttackChip" type="Panel" parent="Panel/TopBarRow"]
+custom_minimum_size = Vector2(74, 50)
 layout_mode = 2
-vertical_alignment = 1
-text = "Z ready"
-clip_text = true
+theme_override_styles/panel = SubResource("StyleBoxFlat_chip")
+
+[node name="AttackCaption" type="Label" parent="Panel/TopBarRow/AttackChip"]
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 68.0
+offset_bottom = 18.0
+theme_override_font_sizes/font_size = 9
+text = "ATTACK"
+
+[node name="CooldownLabel" type="Label" parent="Panel/TopBarRow/AttackChip"]
+offset_left = 8.0
+offset_top = 20.0
+offset_right = 68.0
+offset_bottom = 44.0
+theme_override_font_sizes/font_size = 11
+text = "ready"
+autowrap_mode = 2
 
 [node name="OutcomeBadge" type="Panel" parent="Panel/TopBarRow"]
-custom_minimum_size = Vector2(128, 32)
+custom_minimum_size = Vector2(96, 50)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_badge")
 
 [node name="StatusIcon" type="ColorRect" parent="Panel/TopBarRow/OutcomeBadge"]
 offset_left = 8.0
-offset_top = 9.0
-offset_right = 22.0
-offset_bottom = 23.0
+offset_top = 25.0
+offset_right = 20.0
+offset_bottom = 37.0
 color = Color(0.76, 0.9, 1, 1)
 
-[node name="OutcomeLabel" type="Label" parent="Panel/TopBarRow/OutcomeBadge"]
-offset_left = 30.0
-offset_top = 5.0
-offset_right = 120.0
-offset_bottom = 27.0
-text = "RUNNING"
-clip_text = true
+[node name="OutcomeCaption" type="Label" parent="Panel/TopBarRow/OutcomeBadge"]
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 90.0
+offset_bottom = 18.0
+theme_override_font_sizes/font_size = 9
+text = "RUN"
 
-[node name="StatusLabel" type="Label" parent="Panel/TopBarRow"]
-custom_minimum_size = Vector2(96, 48)
+[node name="OutcomeLabel" type="Label" parent="Panel/TopBarRow/OutcomeBadge"]
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 90.0
+offset_bottom = 44.0
+theme_override_font_sizes/font_size = 11
+text = "RUNNING"
+autowrap_mode = 2
+
+[node name="StatusChip" type="Panel" parent="Panel/TopBarRow"]
+custom_minimum_size = Vector2(96, 50)
 layout_mode = 2
-vertical_alignment = 1
+theme_override_styles/panel = SubResource("StyleBoxFlat_chip")
+
+[node name="StatusCaption" type="Label" parent="Panel/TopBarRow/StatusChip"]
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 90.0
+offset_bottom = 18.0
+theme_override_font_sizes/font_size = 9
+text = "STATUS"
+
+[node name="StatusLabel" type="Label" parent="Panel/TopBarRow/StatusChip"]
+offset_left = 8.0
+offset_top = 20.0
+offset_right = 90.0
+offset_bottom = 44.0
+theme_override_font_sizes/font_size = 11
 text = "CLEAR"
-clip_text = true
+autowrap_mode = 2

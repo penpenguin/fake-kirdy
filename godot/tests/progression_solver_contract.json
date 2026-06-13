@@ -38,6 +38,16 @@
     "ruins": 5,
     "sky": 5
   },
+  "required_reachable_biome_destinations": [
+    "forest_area",
+    "ice_area",
+    "fire_area",
+    "cave_area",
+    "sky_sanctum",
+    "aurora_spire",
+    "starlit_keep",
+    "goal_sanctum"
+  ],
   "required_boss_ids": [
     "forest_guard_boss",
     "ice_guard_boss",
@@ -66,6 +76,9 @@
       "severity": "error"
     },
     "required_cluster_minimum_level_count": {
+      "severity": "error"
+    },
+    "required_reachable_biome_destination": {
       "severity": "error"
     },
     "required_boss_defeated": {

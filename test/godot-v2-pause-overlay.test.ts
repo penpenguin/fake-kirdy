@@ -55,6 +55,7 @@ describe('Godot v2 pause overlay', () => {
     expect(mainScene).toContain('pause_menu_enabled = true');
     expect(project).toContain('pause_toggle');
     expect(project).toContain('pause_settings');
+    expect(project).toContain('pause_reset');
     expect(project).toContain('keycode":4194305');
   });
 
@@ -85,6 +86,21 @@ describe('Godot v2 pause overlay', () => {
     expect(session).toContain('blur_active');
     expect(docs).toContain('PauseScene.gd');
     expect(docs).toContain('blur fallback');
+  });
+
+  it('keeps pause text in a foreground modal panel with readable controls and reset affordance', () => {
+    const script = readGodotFile('scripts/ui/PauseOverlay.gd');
+    const scene = readGodotFile('scenes/ui/PauseScene.tscn');
+
+    expect(scene).toContain('ModalPanel');
+    expect(scene).toContain('z_index = 100');
+    expect(scene).toContain('z_index = 101');
+    expect(scene).toContain('ResetLabel');
+    expect(scene).toContain('ControlsHelpLabel');
+    expect(script).toContain('reset_label');
+    expect(script).toContain('Press R to reset position');
+    expect(script).toContain('get_pause_reset_text');
+    expect(script).toContain('get_controls_help_text');
   });
 
   it('adds replay coverage for pausing and resuming', () => {
@@ -127,10 +143,28 @@ describe('Godot v2 pause overlay', () => {
 
     expect(session).toContain('var paused_actor_physics_states: Dictionary = {}');
     expect(session).toContain('func apply_actor_pause_state(paused: bool) -> void:');
+    expect(session).toContain('func set_pause_actor_state(paused: bool, reason: String = "") -> void:');
     expect(session).toContain('pause_actor_physics(player)');
     expect(session).toContain('pause_actor_physics(enemy)');
     expect(session).toContain('restore_paused_actor_physics()');
-    expect(session).toContain('apply_actor_pause_state(session_paused)');
+    expect(session).toContain('set_pause_actor_state(session_paused, "pause.toggled")');
+    expect(session).toContain('"pause.actors.paused"');
+    expect(session).toContain('"pause.actors.restored"');
+  });
+
+  it('resets the player to the active safe spawn from pause without leaving pause state', () => {
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const project = readGodotFile('project.godot');
+
+    expect(session).toContain('@export var pause_reset_action');
+    expect(session).toContain('is_session_action_just_pressed(pause_reset_action)');
+    expect(session).toContain('func reset_player_to_safe_spawn() -> void:');
+    expect(session).toContain('spawn_player(requested_spawn_id)');
+    expect(session).toContain('"pause.position_reset"');
+    expect(session).toContain('"previous_position"');
+    expect(session).toContain('"reset_position"');
+    expect(project).toContain('pause_reset');
+    expect(project).toContain('keycode":82');
   });
 
   it('adds replay coverage for opening settings from pause and closing the menu hierarchy', () => {
@@ -160,5 +194,28 @@ describe('Godot v2 pause overlay', () => {
       'pause.settings.closed',
       'pause.toggled',
     ]));
+  });
+
+  it('adds replay coverage for pause position reset', () => {
+    const replayPath = join(godotRoot, 'tests', 'replays', 'pause_position_reset.json');
+    const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
+      replays?: Array<{
+        id?: string;
+        replay_path?: string;
+        expected_events?: string[];
+      }>;
+    };
+
+    expect(existsSync(replayPath)).toBe(true);
+
+    const replay = JSON.parse(readFileSync(replayPath, 'utf8')) as {
+      frames?: Array<{ actions?: Record<string, boolean> }>;
+    };
+    const suiteEntry = suite.replays?.find((entry) => entry.id === 'pause_position_reset');
+
+    expect(replay.frames?.some((frame) => frame.actions?.pause_toggle)).toBe(true);
+    expect(replay.frames?.some((frame) => frame.actions?.pause_reset)).toBe(true);
+    expect(suiteEntry?.replay_path).toBe('res://tests/replays/pause_position_reset.json');
+    expect(suiteEntry?.expected_events).toEqual(expect.arrayContaining(['pause.position_reset', 'hud.updated']));
   });
 });

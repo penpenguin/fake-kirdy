@@ -5,25 +5,33 @@ const HUD_SEMANTIC_LABELS := ["HEALTH", "ABILITY", "ITEMS", "SCORE", "OBJECTIVE"
 
 @onready var panel: Panel = $Panel
 @onready var top_bar_row: HBoxContainer = $Panel/TopBarRow
-@onready var level_label: Label = $Panel/TopBarRow/LevelLabel
+@onready var area_caption: Label = $Panel/TopBarRow/AreaChip/AreaCaption
+@onready var level_label: Label = $Panel/TopBarRow/AreaChip/LevelLabel
+@onready var health_caption: Label = $Panel/TopBarRow/HealthCluster/HealthCaption
 @onready var hp_icon: ColorRect = $Panel/TopBarRow/HealthCluster/HpIcon
 @onready var hp_bar: ProgressBar = $Panel/TopBarRow/HealthCluster/HpBar
-@onready var hp_label: Label = $Panel/TopBarRow/HealthCluster/HpBar/HpLabel
+@onready var hp_label: Label = $Panel/TopBarRow/HealthCluster/HpLabel
 @onready var ability_chip: Panel = $Panel/TopBarRow/AbilityChip
 @onready var ability_icon: ColorRect = $Panel/TopBarRow/AbilityChip/AbilityIcon
+@onready var ability_caption: Label = $Panel/TopBarRow/AbilityChip/AbilityCaption
 @onready var ability_label: Label = $Panel/TopBarRow/AbilityChip/AbilityLabel
 @onready var items_chip: Panel = $Panel/TopBarRow/ItemsChip
 @onready var items_icon: ColorRect = $Panel/TopBarRow/ItemsChip/ItemsIcon
+@onready var items_caption: Label = $Panel/TopBarRow/ItemsChip/ItemsCaption
 @onready var items_label: Label = $Panel/TopBarRow/ItemsChip/ItemsLabel
 @onready var score_chip: Panel = $Panel/TopBarRow/ScoreChip
 @onready var score_icon: ColorRect = $Panel/TopBarRow/ScoreChip/ScoreIcon
+@onready var score_caption: Label = $Panel/TopBarRow/ScoreChip/ScoreCaption
 @onready var score_label: Label = $Panel/TopBarRow/ScoreChip/ScoreLabel
-@onready var objective_label: Label = $Panel/TopBarRow/ObjectiveLabel
-@onready var cooldown_label: Label = $Panel/TopBarRow/CooldownLabel
+@onready var objective_caption: Label = $Panel/TopBarRow/ObjectiveChip/ObjectiveCaption
+@onready var objective_label: Label = $Panel/TopBarRow/ObjectiveChip/ObjectiveLabel
+@onready var attack_caption: Label = $Panel/TopBarRow/AttackChip/AttackCaption
+@onready var cooldown_label: Label = $Panel/TopBarRow/AttackChip/CooldownLabel
 @onready var outcome_badge: Panel = $Panel/TopBarRow/OutcomeBadge
 @onready var status_icon: ColorRect = $Panel/TopBarRow/OutcomeBadge/StatusIcon
 @onready var outcome_label: Label = $Panel/TopBarRow/OutcomeBadge/OutcomeLabel
-@onready var status_label: Label = $Panel/TopBarRow/StatusLabel
+@onready var status_caption: Label = $Panel/TopBarRow/StatusChip/StatusCaption
+@onready var status_label: Label = $Panel/TopBarRow/StatusChip/StatusLabel
 
 var hud_state: Dictionary = {}
 
@@ -52,18 +60,25 @@ func set_hud_state(next_state: Dictionary) -> void:
     if not is_inside_tree():
         return
 
-    level_label.text = "AREA  %s" % String(hud_state.get("level_id", ""))
+    set_caption_value(area_caption, level_label, "AREA", format_level_value(String(hud_state.get("level_id", ""))))
     hp_bar.max_value = max(int(hud_state.get("max_hp", 0)), 1)
     hp_bar.value = clampi(int(hud_state.get("hp", 0)), 0, int(hp_bar.max_value))
-    hp_label.text = "HEALTH  %d/%d" % [int(hud_state.get("hp", 0)), int(hud_state.get("max_hp", 0))]
-    ability_label.text = "ABILITY  %s" % get_ability_label().to_upper()
-    items_label.text = "ITEMS  %s" % format_item_progress()
-    score_label.text = "SCORE  %d" % int(hud_state.get("score", 0))
+    set_caption_value(health_caption, hp_label, "HEALTH", "%d/%d" % [int(hud_state.get("hp", 0)), int(hud_state.get("max_hp", 0))])
+    set_caption_value(ability_caption, ability_label, "ABILITY", get_ability_label().to_upper())
+    set_caption_value(items_caption, items_label, "ITEMS", format_item_progress())
+    set_caption_value(score_caption, score_label, "SCORE", "%d" % int(hud_state.get("score", 0)))
     outcome_label.text = get_readable_outcome_label().to_upper()
-    objective_label.text = "OBJECTIVE  %s" % String(hud_state.get("objective_text", "Reach the goal"))
-    cooldown_label.text = "ATTACK  %s" % get_cooldown_label()
-    status_label.text = "STATUS  %s" % get_status_label()
+    set_caption_value(objective_caption, objective_label, "OBJECTIVE", String(hud_state.get("objective_text", "Reach the goal")))
+    set_caption_value(attack_caption, cooldown_label, "ATTACK", get_cooldown_label())
+    set_caption_value(status_caption, status_label, "STATUS", get_status_label())
     apply_hud_theme()
+
+
+func set_caption_value(caption_label: Label, value_label: Label, caption_text: String, value_text: String) -> void:
+    if caption_label != null:
+        caption_label.text = caption_text
+    if value_label != null:
+        value_label.text = value_text
 
 
 func apply_hud_theme() -> void:
@@ -141,7 +156,15 @@ func format_item_progress() -> String:
     if items.is_empty():
         return "0"
 
-    return "%d  %s" % [items.size(), ", ".join(PackedStringArray(items))]
+    return "%d collected" % items.size()
+
+
+func format_level_value(level_id: String) -> String:
+    var readable := level_id.replace("_", " ").strip_edges()
+    if readable == "":
+        return "unknown"
+
+    return readable
 
 
 func get_hp_ratio() -> float:

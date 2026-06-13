@@ -1,0 +1,53 @@
+{
+  "start_level_id": "central_hub",
+  "start_spawn_id": "default",
+  "fps": 60,
+  "max_frames": 14,
+  "frames": [
+    {
+      "frame": 0,
+      "actions": {
+        "move_right": true,
+        "pause_toggle": false,
+        "pause_reset": false
+      }
+    },
+    {
+      "frame": 2,
+      "actions": {
+        "pause_toggle": true
+      }
+    },
+    {
+      "frame": 3,
+      "actions": {
+        "move_right": false,
+        "pause_toggle": false
+      }
+    },
+    {
+      "frame": 4,
+      "actions": {
+        "pause_reset": true
+      }
+    },
+    {
+      "frame": 5,
+      "actions": {
+        "pause_reset": false
+      }
+    },
+    {
+      "frame": 8,
+      "actions": {
+        "pause_toggle": true
+      }
+    },
+    {
+      "frame": 9,
+      "actions": {
+        "pause_toggle": false
+      }
+    }
+  ]
+}

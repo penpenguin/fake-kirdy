@@ -23,6 +23,8 @@
 
 `flat_room`、`door_room`、`heal_room`、`danger_room`、`revive_room`、`combat_room`、`flying_combat_room`、`enemy_spawn_limit_room`、`enemy_crowd_spacing_room`、`hidden_discovery_room` は canonical replay や focused contract のための Godot-owned 検証レベルです。これらも `level_catalog.source.json` で管理し、実行時は通常の `DoorMarker`、`GoalMarker`、`HealMarker`、`EnemySpawnMarker`、`HazardMarker`、`AbilityGateMarker` として扱います。
 
+`central_hub` は左右対称の聖堂ハブとして、中央の nave/altar/side aisle 構造に主要扉を配置します。`DoorToMirrorCorridor` は中央軸、`DoorToForestArea` と `DoorToTutorialFireArea`、`DoorToIceArea` と `DoorToCaveArea` は左右の対応ペアとして扱い、足場と camera bounds の安全性を保ちます。
+
 ## 生成マップ
 
 `stage_manifest.json` は `labyrinth-001` から `labyrinth-132` までの 132 generated stages を含みます。`npm run godot:procedural-levels` はそれらを Godot id の `labyrinth_001` から `labyrinth_132` に変換し、`procedural_levels.json` に保存します。
@@ -49,6 +51,8 @@
 | void | `labyrinth_069` - `labyrinth_132` | sky chain | generated terminal goal |
 
 Cross-cluster access is controlled by collected keystones, completed levels, defeated enemy groups, boss requirements, and authored/generated door metadata. Missing requirements emit `door.locked`; successful transitions emit `door.entered` and update HUD, inventory, save, map, and trace state.
+
+Progression solver の canonical contract は、forest/ice/fire/cave/sky に加えて `goal_sanctum`、`aurora_spire`、`starlit_keep` を含む8つ以上の到達可能な biome/area destination を `reachable_biome_destinations` として報告します。
 
 ## Validation
 
