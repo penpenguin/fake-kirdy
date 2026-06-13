@@ -17,6 +17,7 @@ try {
   const failedChecks = [
     ...checkSfxTraceContract(contract, gameSession),
     ...checkMixTraceContract(contract, gameSession),
+    ...checkMaxVolumeScales(contract, gameSession),
     ...checkSfxEvents(contract, gameSession, assetManifest, sfxEvents),
     ...checkMixEvents(contract, gameSession, mixEvents),
   ];
@@ -143,6 +144,39 @@ function checkMixTraceContract(contract, gameSession) {
   return failedChecks;
 }
 
+function checkMaxVolumeScales(contract, gameSession) {
+  const failedChecks = [];
+  const maxVolumeScales = contract.max_volume_scales ?? {};
+  const exportedScales = {
+    sfx: parseExportedFloat(gameSession, 'sfx_volume_scale'),
+    ui_sfx: parseExportedFloat(gameSession, 'ui_sfx_volume_scale'),
+    ability_sfx: parseExportedFloat(gameSession, 'ability_sfx_volume_scale'),
+  };
+
+  for (const [key, maxValue] of Object.entries(maxVolumeScales)) {
+    const actualValue = exportedScales[key];
+    if (actualValue === null) {
+      failedChecks.push({
+        rule: 'missing_volume_scale',
+        scale: key,
+        message: `GameSession is missing exported ${key} volume scale.`,
+      });
+      continue;
+    }
+    if (actualValue > Number(maxValue)) {
+      failedChecks.push({
+        rule: 'sfx_volume_too_loud',
+        scale: key,
+        actual_value: actualValue,
+        max_value: Number(maxValue),
+        message: `${key} volume scale ${actualValue} exceeds max ${maxValue}.`,
+      });
+    }
+  }
+
+  return failedChecks;
+}
+
 function checkSfxEvents(contract, gameSession, assetManifest, sfxEvents) {
   const failedChecks = [];
   const manifestAssets = new Set(requireArray(assetManifest.assets, 'asset_manifest.assets').map(String));
@@ -241,6 +275,15 @@ function checkMixEvents(contract, gameSession, mixEvents) {
     }
   }
   return failedChecks;
+}
+
+function parseExportedFloat(sourceText, exportName) {
+  const match = sourceText.match(new RegExp(`@export\\s+var\\s+${escapeRegExp(exportName)}\\s*:\\s*float\\s*=\\s*([0-9.]+)`));
+  if (match === null) {
+    return null;
+  }
+  const value = Number(match[1]);
+  return Number.isFinite(value) ? value : null;
 }
 
 function extractFunctionBody(sourceText, functionName) {

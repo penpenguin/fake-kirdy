@@ -163,6 +163,7 @@ function solveProgression(graph, contract, startLevelId, finalLevelId, canonical
     abilities: new Set(),
     completed_levels: new Set(),
     defeated_enemy_groups: new Set(),
+    defeated_bosses: new Set(),
     gameplay_beats: new Set(),
     path: [startLevelId],
   }, levelsById);
@@ -202,6 +203,7 @@ function solveProgression(graph, contract, startLevelId, finalLevelId, canonical
         abilities: new Set(state.abilities),
         completed_levels: new Set(state.completed_levels),
         defeated_enemy_groups: new Set(state.defeated_enemy_groups),
+        defeated_bosses: new Set(state.defeated_bosses),
         gameplay_beats: new Set(state.gameplay_beats),
         path: [...state.path, targetLevel.id],
       }, levelsById);
@@ -243,6 +245,10 @@ function collectLevelRewards(state, levelsById) {
     state.defeated_enemy_groups.add(groupId);
     state.gameplay_beats.add('enemy');
   }
+  for (const bossId of level?.bosses ?? []) {
+    state.defeated_bosses.add(bossId);
+    state.gameplay_beats.add('boss');
+  }
   for (const abilityType of level?.ability_rewards ?? []) {
     state.abilities.add(abilityType);
     state.gameplay_beats.add('ability_reward');
@@ -267,7 +273,7 @@ function missingDoorRequirements(state, fromLevel, targetLevel, door, contract, 
     requirements.required_defeated_enemy_group_id,
     state.defeated_enemy_groups,
   );
-  requireSetValue(missing, 'required_boss_id', requirements.required_boss_id, state.defeated_enemy_groups);
+  requireSetValue(missing, 'required_boss_id', requirements.required_boss_id, state.defeated_bosses);
 
   const dynamicClusterRequirement = canonicalContractChecks ? clusterRequirement(fromLevel, targetLevel, contract) : null;
   if (dynamicClusterRequirement !== null && !state.items.has(dynamicClusterRequirement)) {
@@ -328,8 +334,35 @@ function validateProgression(graph, solverResult, contract, startLevelId, finalL
         addIssue(issues, contract, 'required_gameplay_beat_present', finalLevelId, `Final solution is missing gameplay beat ${beat}.`);
       }
     }
+    for (const bossId of contract.required_boss_ids ?? []) {
+      if (!solverResult.solution.defeated_bosses.includes(bossId)) {
+        addIssue(issues, contract, 'required_boss_defeated', bossId, `Final solution did not defeat required boss ${bossId}.`);
+      }
+    }
+    const requiredFinalBossId = String(contract.required_final_boss_id ?? '');
+    if (requiredFinalBossId !== '' && !solverResult.solution.defeated_bosses.includes(requiredFinalBossId)) {
+      addIssue(issues, contract, 'final_boss_before_clear', finalLevelId, `Final solution did not defeat final boss ${requiredFinalBossId}.`);
+    }
+    validateClusterMinimumLevelCounts(graph, solverResult, contract, issues);
   }
   return issues;
+}
+
+function validateClusterMinimumLevelCounts(graph, solverResult, contract, issues) {
+  const requirements = contract.required_cluster_minimum_level_counts ?? {};
+  const levelsById = new Map((graph.levels ?? []).map((level) => [level.id, level]));
+  for (const [cluster, minimumCount] of Object.entries(requirements)) {
+    const count = (solverResult.solution.path ?? []).filter((levelId) => levelsById.get(levelId)?.cluster === cluster).length;
+    if (count < Number(minimumCount)) {
+      addIssue(
+        issues,
+        contract,
+        'required_cluster_minimum_level_count',
+        cluster,
+        `Final solution visited ${count} ${cluster} level(s), expected at least ${minimumCount}.`,
+      );
+    }
+  }
 }
 
 function addIssue(issues, contract, rule, levelId, message) {
@@ -353,6 +386,7 @@ function serializeState(state) {
     abilities: [...state.abilities].sort(),
     completed_levels: [...state.completed_levels].sort(),
     defeated_enemy_groups: [...state.defeated_enemy_groups].sort(),
+    defeated_bosses: [...state.defeated_bosses].sort(),
     gameplay_beats: [...state.gameplay_beats].sort(),
   };
 }
@@ -364,6 +398,7 @@ function stateKey(state) {
     [...state.abilities].sort().join(','),
     [...state.completed_levels].sort().join(','),
     [...state.defeated_enemy_groups].sort().join(','),
+    [...state.defeated_bosses].sort().join(','),
     [...state.gameplay_beats].sort().join(','),
   ].join('|');
 }

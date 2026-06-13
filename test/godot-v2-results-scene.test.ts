@@ -45,15 +45,19 @@ describe('Godot v2 ResultsScene', () => {
 
     expect(session).toContain('ResultsSceneScene');
     expect(session).toContain('@export var result_continue_action');
+    expect(session).toContain('@export var result_restart_action');
     expect(session).toContain('@export var result_auto_results_delay_ms');
     expect(session).toContain('result_elapsed_ms');
     expect(session).toContain('check_result_actions');
     expect(session).toContain('show_results_scene');
+    expect(session).toContain('hide_results_scene("result.restart.selected")');
+    expect(session).toContain('restart_current_run(true)');
     expect(session).toContain('results.scene.shown');
     expect(session).toContain('result_elapsed_ms');
     expect(session).toContain('results_payload["result_elapsed_ms"] = result_elapsed_ms');
     expect(session).toContain('results_payload["auto_delay_ms"] = result_auto_results_delay_ms');
     expect(project).toContain('result_continue');
+    expect(project).toContain('result_restart');
   });
 
   it('adds replay coverage for continuing from result overlay into ResultsScene', () => {
@@ -78,5 +82,34 @@ describe('Godot v2 ResultsScene', () => {
     expect(replay.frames?.some((frame) => frame.actions?.result_continue)).toBe(true);
     expect(suiteEntry?.replay_path).toBe('res://tests/replays/results_scene_continue.json');
     expect(suiteEntry?.expected_events).toContain('results.scene.shown');
+  });
+
+  it('keeps result menu controls live after the full ResultsScene is visible', () => {
+    const replayPath = join(godotRoot, 'tests', 'replays', 'results_scene_restart.json');
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
+      replays?: Array<{
+        id?: string;
+        replay_path?: string;
+        expected_events?: string[];
+      }>;
+    };
+
+    expect(existsSync(replayPath)).toBe(true);
+    expect(session).toContain('func hide_results_scene(reason: String = "") -> void:');
+    expect(session).toContain('"results.scene.hidden"');
+
+    const replay = JSON.parse(readFileSync(replayPath, 'utf8')) as {
+      continue_after_finished?: boolean;
+      frames?: Array<{ actions?: Record<string, boolean> }>;
+    };
+    const suiteEntry = suite.replays?.find((entry) => entry.id === 'results_scene_restart');
+
+    expect(replay.continue_after_finished).toBe(true);
+    expect(replay.frames?.some((frame) => frame.actions?.result_continue)).toBe(true);
+    expect(replay.frames?.some((frame) => frame.actions?.result_restart)).toBe(true);
+    expect(suiteEntry?.expected_events).toEqual(
+      expect.arrayContaining(['results.scene.shown', 'results.scene.hidden', 'run.restart.selected']),
+    );
   });
 });

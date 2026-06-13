@@ -37,6 +37,19 @@
       "required_resource_paths": ["godot/resources/assets/images/effects/fire-attack.webp"]
     },
     {
+      "id": "spark_attack_effect_timing",
+      "replay_path": "godot/tests/replays/spark_ability_dash_movement.json",
+      "frame": 3,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/spark_attack_effect_timing.json",
+      "visual_tags": ["ability_feedback", "spark_effect"],
+      "required_trace_events": ["ability.attack.visualized"],
+      "required_scene_paths": ["godot/scenes/player/Player.tscn", "godot/scenes/ui/HudOverlay.tscn"],
+      "required_resource_paths": [
+        "godot/resources/assets/images/characters/kirdy/kirdy-spark.webp",
+        "godot/resources/assets/images/effects/inhale-sparkle.webp"
+      ]
+    },
+    {
       "id": "enemy_hit_feedback",
       "replay_path": "godot/tests/replays/combat_ability_damage_enemy.json",
       "frame": 70,

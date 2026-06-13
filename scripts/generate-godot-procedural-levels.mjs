@@ -442,6 +442,25 @@ function buildRuntimeCollectibles(levelId, cluster, neighbors) {
 }
 
 function buildRuntimeEnemies(levelId, cluster, difficulty) {
+  if (levelId === 'labyrinth_132') {
+    return [
+      {
+        id: 'GeneratedFinalBossSpawn',
+        spawn_id: 'labyrinth_132_final_boss',
+        enemy_type: 'generated_flying',
+        ability_type: 'spark',
+        enemy_group_id: 'labyrinth_132_final_guard',
+        boss_id: 'labyrinth_132_final_boss',
+        contact_damage: 1,
+        attack_damage: 1,
+        attack_radius: 172,
+        attack_cooldown_ms: 4000,
+        patrol_radius: 128,
+        position: { x: 420, y: 320 },
+      },
+    ];
+  }
+
   if (difficulty < 2) {
     return [];
   }

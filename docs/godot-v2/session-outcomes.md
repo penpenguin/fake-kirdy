@@ -65,6 +65,8 @@ Completed and game-over runs also call `ResultOverlay.set_result_state()` and em
 
 The dedicated `ResultsScene` can then be shown by pressing `result_continue` or by waiting for the automatic result delay. `results_scene_continue.json` validates the key-driven path after a completed run and emits `results.scene.shown`, which `trace:summary` exposes as `last_results_scene`.
 
+Result menu input remains active after the full results scene is visible. `results_scene_restart.json` presses `result_continue`, then `result_restart`; the session emits `results.scene.hidden` and `run.restart.selected` before returning the HUD to `outcome: running`.
+
 ## Runtime Error Flow
 
 If a session cannot load its requested level, `GameSession` records the existing `replay.error`, switches the outcome to `error`, and shows `ErrorOverlay.gd`. The overlay receives the requested level/spawn, a user-facing message, and retry metadata.

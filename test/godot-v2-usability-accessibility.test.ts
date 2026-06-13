@@ -116,8 +116,8 @@ describe('Godot v2 usability and accessibility checks', () => {
         }),
         expect.objectContaining({
           id: 'tutorial_heal_marker_scale',
-          min_scale: 0.26,
-          max_scale: 0.4,
+          min_scale: 0.36,
+          max_scale: 0.52,
         }),
         expect.objectContaining({
           id: 'tutorial_door_marker_scale',
@@ -127,6 +127,10 @@ describe('Godot v2 usability and accessibility checks', () => {
       ]),
     );
     expect(contract.min_color_distance).toBeGreaterThan(0);
+
+    const healMarker = readRepoFile('godot/scripts/level/markers/HealMarker.gd');
+    expect(healMarker).toContain('HEAL_VISUAL_SCALE');
+    expect(healMarker).toContain('visual.scale = Vector2(HEAL_VISUAL_SCALE, HEAL_VISUAL_SCALE)');
 
     const docs = readFileSync(docsPath, 'utf8');
     expect(docs).toContain('Usability and Accessibility Testing');

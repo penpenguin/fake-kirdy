@@ -26,6 +26,7 @@ signal trace_event(event_type: String, payload: Dictionary)
 @export var kirdy_spark_texture: Texture2D
 @export var ability_texture_fallback_enabled: bool = true
 @export var inhale_effect_fallback_enabled: bool = true
+@export var ability_attack_effect_duration_ms: int = 180
 @export var damage_blink_alpha: float = 0.42
 
 var ability_type: String = ""
@@ -40,6 +41,7 @@ var last_facing: float = 1.0
 var last_ability_texture_fallback_key: String = ""
 var inhale_effect_fallback_line: Line2D = null
 var ability_attack_effect_line: Line2D = null
+var ability_attack_effect_remaining_ms: int = 0
 
 @onready var body_sprite: Sprite2D = $Body
 
@@ -65,6 +67,7 @@ func _physics_process(delta: float) -> void:
     apply_gravity(jump_held, delta)
 
     move_and_slide()
+    tick_ability_attack_effect(delta)
     update_landing_trace()
     update_visual_state(input_x, jump_held)
 
@@ -176,12 +179,34 @@ func show_ability_attack_effect(_ability_attack_type: String, effect_color: Colo
         add_child(ability_attack_effect_line)
 
     ability_attack_effect_line.visible = true
+    ability_attack_effect_remaining_ms = max(ability_attack_effect_duration_ms, 1)
     ability_attack_effect_line.default_color = effect_color
     var effect_range: float = maxf(range, 32.0)
     ability_attack_effect_line.points = PackedVector2Array([
         Vector2.ZERO,
         Vector2(effect_range * last_facing, 0.0),
     ])
+
+
+func tick_ability_attack_effect(delta: float) -> void:
+    if ability_attack_effect_remaining_ms <= 0:
+        return
+
+    ability_attack_effect_remaining_ms = max(ability_attack_effect_remaining_ms - int(round(delta * 1000.0)), 0)
+    if ability_attack_effect_remaining_ms == 0:
+        hide_ability_attack_effect()
+
+
+func hide_ability_attack_effect() -> void:
+    if ability_attack_effect_line == null or not is_instance_valid(ability_attack_effect_line):
+        return
+
+    ability_attack_effect_line.visible = false
+    ability_attack_effect_line.points = PackedVector2Array()
+
+
+func get_ability_attack_effect_duration_ms() -> int:
+    return max(ability_attack_effect_duration_ms, 1)
 
 
 func set_damage_feedback_state(is_invulnerable: bool, remaining_ms: int = 0) -> void:

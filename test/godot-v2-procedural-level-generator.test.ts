@@ -447,7 +447,16 @@ describe('Godot v2 procedural level schema generation', () => {
         attack_cooldown_ms: 4000,
       }),
     ]));
-    expect(terminalRoom?.runtime_layout?.content?.enemies).toEqual([]);
+    expect(terminalRoom?.runtime_layout?.content?.enemies).toEqual([
+      expect.objectContaining({
+        spawn_id: 'labyrinth_132_final_boss',
+        enemy_type: 'generated_flying',
+        ability_type: 'spark',
+        enemy_group_id: 'labyrinth_132_final_guard',
+        boss_id: 'labyrinth_132_final_boss',
+        attack_cooldown_ms: 4000,
+      }),
+    ]);
   });
 
   it('marks north/south procedural rooms with vertical-route layout metadata', () => {

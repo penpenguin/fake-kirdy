@@ -13,6 +13,38 @@ const readPackageScripts = (): Record<string, string> => {
   return packageJson.scripts ?? {};
 };
 
+const readWebpInfo = (relativePath: string): { width: number; height: number; hasAlpha: boolean } => {
+  const data = readFileSync(join(repoRoot, relativePath));
+  if (data.toString('ascii', 0, 4) !== 'RIFF' || data.toString('ascii', 8, 12) !== 'WEBP') {
+    throw new Error(`${relativePath} is not a WebP file`);
+  }
+
+  let offset = 12;
+  while (offset + 8 <= data.length) {
+    const chunkType = data.toString('ascii', offset, offset + 4);
+    const chunkSize = data.readUInt32LE(offset + 4);
+    const chunkStart = offset + 8;
+    if (chunkType === 'VP8X') {
+      return {
+        width: 1 + data.readUIntLE(chunkStart + 4, 3),
+        height: 1 + data.readUIntLE(chunkStart + 7, 3),
+        hasAlpha: (data[chunkStart] & 0x10) !== 0,
+      };
+    }
+    if (chunkType === 'VP8L') {
+      const bits = data.readUInt32LE(chunkStart + 1);
+      return {
+        width: 1 + (bits & 0x3fff),
+        height: 1 + ((bits >> 14) & 0x3fff),
+        hasAlpha: true,
+      };
+    }
+    offset = chunkStart + chunkSize + (chunkSize % 2);
+  }
+
+  throw new Error(`${relativePath} has no supported VP8X/VP8L dimension chunk`);
+};
+
 const writeFixtureManifest = (path: string): void => {
   writeFileSync(
     path,
@@ -120,6 +152,24 @@ describe('Godot asset fallback audit', () => {
     expect(scripts['check:godot']).toContain('godot:asset-fallback-audit');
     expect(existsSync(join(repoRoot, 'scripts', 'check-godot-asset-fallback-audit.mjs'))).toBe(true);
     expect(existsSync(join(repoRoot, 'godot', 'tests', 'asset_fallback_audit_contract.json'))).toBe(true);
+  });
+
+  it('keeps Spark ability texture aligned with the existing Kirdy ability asset format', () => {
+    const abilityAssetPaths = [
+      'godot/resources/assets/images/characters/kirdy/kirdy-fire.webp',
+      'godot/resources/assets/images/characters/kirdy/kirdy-ice.webp',
+      'godot/resources/assets/images/characters/kirdy/kirdy-sword.webp',
+      'godot/resources/assets/images/characters/kirdy/kirdy-spark.webp',
+    ];
+    const infos = abilityAssetPaths.map(readWebpInfo);
+    const sparkInfo = infos.at(-1);
+    const manifest = readFileSync(join(repoRoot, 'godot', 'resources', 'assets', 'asset_manifest.json'), 'utf8');
+    const playerScene = readFileSync(join(repoRoot, 'godot', 'scenes', 'player', 'Player.tscn'), 'utf8');
+
+    expect(new Set(infos.map((info) => `${info.width}x${info.height}`))).toEqual(new Set(['64x64']));
+    expect(sparkInfo?.hasAlpha).toBe(true);
+    expect(manifest).toContain('images/characters/kirdy/kirdy-spark.webp');
+    expect(playerScene).toContain('path="res://resources/assets/images/characters/kirdy/kirdy-spark.webp"');
   });
 
   it('passes a fixture with explicit ability visuals, SFX mappings, labels, and resource paths', () => {

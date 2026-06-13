@@ -77,6 +77,8 @@ Only `labyrinth_001` is currently scene-authored in Godot. The remaining generat
 
 `godot/tests/replays/labyrinth_051_to_sky_sanctum_generated_exit.json` validates a generated sky branch exit into `sky_sanctum`, then continues through the existing hand-authored goal path into `goal_sanctum` so the trace ends with `outcome: complete`. The replay suite now requires `door.entered`, `goal.door.entered`, and `run.finished` for this path, giving the long generated-to-hand-authored cross-cluster chain explicit event coverage.
 
+`labyrinth_132` also carries the canonical generated final boss metadata, `labyrinth_132_final_boss`, in `runtime_layout.content.enemies`. `godot:progression-solver` treats boss ids separately from ordinary enemy groups and requires the final boss id in its canonical solution before accepting the generated terminal clear.
+
 `godot/tests/replays/labyrinth_132_generated_goal.json` validates a generated terminal room that completes through a generated `GoalMarker`, producing `run.finished` with `outcome: complete`.
 
 The generated fallback now reads placement from `runtime_layout` instead of keeping spawn, door, floor, platform, and gameplay marker positions as scattered GDScript constants. This makes future importer work safer: layout changes can be reviewed in generated JSON, tested in Vitest, and then replayed headlessly.

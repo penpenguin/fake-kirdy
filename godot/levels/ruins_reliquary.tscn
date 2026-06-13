@@ -45,6 +45,8 @@ script = ExtResource("3_enemy")
 spawn_id = "ruins_reliquary_guard"
 enemy_type = "simple_ground"
 ability_type = "stone"
+enemy_group_id = "ruins_guard"
+boss_id = "ruins_guard_boss"
 contact_damage = 1
 
 [node name="DoorToCaveArea" type="Node2D" parent="."]

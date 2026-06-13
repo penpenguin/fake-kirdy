@@ -12,6 +12,7 @@
     "category",
     "volume",
     "volume_scale",
+    "ability_sfx_volume_scale",
     "audio_enabled"
   ],
   "required_mix_payload_keys": [
@@ -19,6 +20,7 @@
     "bgm_volume",
     "sfx_volume",
     "ui_sfx_volume",
+    "ability_sfx_volume",
     "ducking_active",
     "audio_enabled",
     "bgm_playing",
@@ -35,6 +37,11 @@
     "lock",
     "ui"
   ],
+  "max_volume_scales": {
+    "sfx": 0.7,
+    "ui_sfx": 0.5,
+    "ability_sfx": 0.65
+  },
   "required_sfx_events": [
     {
       "id": "capture_inhale",
@@ -67,7 +74,7 @@
       "stream_const": "SfxAbilityFireAttack",
       "asset_path": "audio/sfx/ability-fire-attack.wav",
       "required_source_markers": [
-        "play_sfx(get_ability_sfx(String(player.ability_type)), -1.0, \"ability.used\", \"attack\")",
+        "play_sfx(get_ability_sfx(String(player.ability_type)), ability_sfx_volume_scale, \"ability.used\", \"attack\")",
         "return SfxAbilityFireAttack"
       ]
     },
@@ -78,7 +85,7 @@
       "stream_const": "SfxAbilityIceAttack",
       "asset_path": "audio/sfx/ability-ice-attack.wav",
       "required_source_markers": [
-        "play_sfx(get_ability_sfx(String(player.ability_type)), -1.0, \"ability.used\", \"attack\")",
+        "play_sfx(get_ability_sfx(String(player.ability_type)), ability_sfx_volume_scale, \"ability.used\", \"attack\")",
         "return SfxAbilityIceAttack"
       ]
     },
@@ -89,7 +96,7 @@
       "stream_const": "SfxAbilitySwordAttack",
       "asset_path": "audio/sfx/ability-sword-attack.wav",
       "required_source_markers": [
-        "play_sfx(get_ability_sfx(String(player.ability_type)), -1.0, \"ability.used\", \"attack\")",
+        "play_sfx(get_ability_sfx(String(player.ability_type)), ability_sfx_volume_scale, \"ability.used\", \"attack\")",
         "return SfxAbilitySwordAttack"
       ]
     },

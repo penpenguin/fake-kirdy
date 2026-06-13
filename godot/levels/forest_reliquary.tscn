@@ -50,6 +50,8 @@ script = ExtResource("3_enemy")
 spawn_id = "forest_reliquary_guard"
 enemy_type = "simple_ground"
 ability_type = "leaf"
+enemy_group_id = "forest_guard"
+boss_id = "forest_guard_boss"
 contact_damage = 1
 
 [node name="DoorToLabyrinth001" type="Node2D" parent="."]

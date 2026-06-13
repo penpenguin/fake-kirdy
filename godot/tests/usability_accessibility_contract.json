@@ -87,8 +87,8 @@
     {
       "id": "tutorial_heal_marker_scale",
       "subject_file": "godot/scripts/level/markers/HealMarker.gd",
-      "min_scale": 0.26,
-      "max_scale": 0.4
+      "min_scale": 0.36,
+      "max_scale": 0.52
     },
     {
       "id": "tutorial_door_marker_scale",

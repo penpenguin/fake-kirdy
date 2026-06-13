@@ -26,10 +26,26 @@
   "required_gameplay_beats": [
     "collectible",
     "enemy",
+    "boss",
     "ability_reward",
     "locked_gate",
     "generated_route"
   ],
+  "required_cluster_minimum_level_counts": {
+    "forest": 5,
+    "ice": 5,
+    "fire": 5,
+    "ruins": 5,
+    "sky": 5
+  },
+  "required_boss_ids": [
+    "forest_guard_boss",
+    "ice_guard_boss",
+    "fire_guard_boss",
+    "ruins_guard_boss",
+    "sky_guard_boss"
+  ],
+  "required_final_boss_id": "labyrinth_132_final_boss",
   "rules": {
     "level_graph_valid": {
       "severity": "error"
@@ -47,6 +63,15 @@
       "severity": "error"
     },
     "required_gameplay_beat_present": {
+      "severity": "error"
+    },
+    "required_cluster_minimum_level_count": {
+      "severity": "error"
+    },
+    "required_boss_defeated": {
+      "severity": "error"
+    },
+    "final_boss_before_clear": {
       "severity": "error"
     }
   }

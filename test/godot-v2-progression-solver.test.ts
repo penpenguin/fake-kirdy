@@ -42,6 +42,9 @@ describe('Godot progression solver', () => {
       minimum_solution_transitions?: number;
       required_solution_level_ids?: string[];
       required_gameplay_beats?: string[];
+      required_cluster_minimum_level_counts?: Record<string, number>;
+      required_boss_ids?: string[];
+      required_final_boss_id?: string;
       rules?: Record<string, { severity?: string }>;
     };
     expect(contract.version).toBe(1);
@@ -52,8 +55,22 @@ describe('Godot progression solver', () => {
       expect.arrayContaining(['forest_reliquary', 'ice_reliquary', 'fire_reliquary', 'ruins_reliquary', 'labyrinth_132']),
     );
     expect(contract.required_gameplay_beats).toEqual(
-      expect.arrayContaining(['collectible', 'enemy', 'ability_reward', 'locked_gate', 'generated_route']),
+      expect.arrayContaining(['collectible', 'enemy', 'boss', 'ability_reward', 'locked_gate', 'generated_route']),
     );
+    expect(contract.required_cluster_minimum_level_counts).toMatchObject({
+      forest: expect.any(Number),
+      ice: expect.any(Number),
+      fire: expect.any(Number),
+      ruins: expect.any(Number),
+      sky: expect.any(Number),
+    });
+    for (const count of Object.values(contract.required_cluster_minimum_level_counts ?? {})) {
+      expect(count).toBeGreaterThanOrEqual(5);
+    }
+    expect(contract.required_boss_ids).toEqual(
+      expect.arrayContaining(['forest_guard_boss', 'ice_guard_boss', 'fire_guard_boss', 'ruins_guard_boss', 'sky_guard_boss']),
+    );
+    expect(contract.required_final_boss_id).toBe('labyrinth_132_final_boss');
     expect(contract.cluster_unlocks?.ice).toBe('forest-keystone');
     expect(contract.required_final_items).toEqual(
       expect.arrayContaining(['forest-keystone', 'ice-keystone', 'fire-keystone', 'cave-keystone']),
@@ -61,6 +78,15 @@ describe('Godot progression solver', () => {
     expect(contract.rules?.final_state_reachable?.severity).toBe('error');
     expect(contract.rules?.minimum_solution_transitions?.severity).toBe('error');
     expect(contract.rules?.required_gameplay_beat_present?.severity).toBe('error');
+    expect(contract.rules?.required_cluster_minimum_level_count?.severity).toBe('error');
+    expect(contract.rules?.required_boss_defeated?.severity).toBe('error');
+    expect(contract.rules?.final_boss_before_clear?.severity).toBe('error');
+
+    const solver = readFileSync(join(repoRoot, 'scripts', 'check-godot-progression-solver.mjs'), 'utf8');
+    expect(solver).toContain('bosses');
+    expect(solver).toContain('validateClusterMinimumLevelCounts');
+    expect(solver).toContain('required_boss_ids');
+    expect(solver).toContain('required_final_boss_id');
   });
 
   it('solves item-gated scene progression in order', () => {
@@ -288,7 +314,7 @@ spawn_id = "default"
     expect(result.status).toBe(0);
     const report = JSON.parse(result.stdout) as {
       failed_checks: unknown[];
-      solution?: { path: string[]; items: string[]; completed_levels: string[]; gameplay_beats: string[] };
+      solution?: { path: string[]; items: string[]; completed_levels: string[]; defeated_bosses: string[]; gameplay_beats: string[] };
       explored_state_count: number;
     };
     expect(report.failed_checks).toEqual([]);
@@ -301,8 +327,11 @@ spawn_id = "default"
       expect.arrayContaining(['forest-keystone', 'ice-keystone', 'fire-keystone', 'cave-keystone']),
     );
     expect(report.solution?.completed_levels).toContain('labyrinth_132');
+    expect(report.solution?.defeated_bosses).toEqual(
+      expect.arrayContaining(['forest_guard_boss', 'ice_guard_boss', 'fire_guard_boss', 'ruins_guard_boss', 'sky_guard_boss', 'labyrinth_132_final_boss']),
+    );
     expect(report.solution?.gameplay_beats).toEqual(
-      expect.arrayContaining(['collectible', 'enemy', 'ability_reward', 'locked_gate', 'generated_route']),
+      expect.arrayContaining(['collectible', 'enemy', 'boss', 'ability_reward', 'locked_gate', 'generated_route']),
     );
   });
 });

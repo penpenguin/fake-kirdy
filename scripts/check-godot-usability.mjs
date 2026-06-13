@@ -257,17 +257,29 @@ function parseFirstRectangleShapeArea(source) {
 }
 
 function parseVector2UniformScale(source) {
-  const match = source.match(/\.scale = Vector2\(([-0-9.]+), ([-0-9.]+)\)/);
+  const match = source.match(/\.scale = Vector2\(([-0-9.A-Za-z_]+), ([-0-9.A-Za-z_]+)\)/);
   if (match === null) {
     return null;
   }
 
-  const x = Number(match[1]);
-  const y = Number(match[2]);
+  const x = parseNumberOrConst(source, match[1]);
+  const y = parseNumberOrConst(source, match[2]);
   if (!Number.isFinite(x) || !Number.isFinite(y) || x <= 0 || y <= 0 || Math.abs(x - y) > 0.001) {
     return null;
   }
   return x;
+}
+
+function parseNumberOrConst(source, rawValue) {
+  const directValue = Number(rawValue);
+  if (Number.isFinite(directValue)) {
+    return directValue;
+  }
+  const constMatch = source.match(new RegExp(`const\\s+${escapeRegExp(rawValue)}\\s*(?::=|=)\\s*([-0-9.]+)`));
+  if (constMatch === null) {
+    return Number.NaN;
+  }
+  return Number(constMatch[1]);
 }
 
 function parseExportedColor(source, role) {

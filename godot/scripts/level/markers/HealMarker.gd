@@ -2,6 +2,7 @@ extends Node2D
 class_name HealMarker
 
 const HealTexture = preload("res://resources/assets/images/items/heal-orb.webp")
+const HEAL_VISUAL_SCALE := 0.42
 
 @export var heal_id: String = "heal"
 @export var amount: int = 1
@@ -22,7 +23,7 @@ func ensure_visual() -> void:
     var visual := Sprite2D.new()
     visual.name = "Visual"
     visual.texture = HealTexture
-    visual.scale = Vector2(0.30, 0.30)
+    visual.scale = Vector2(HEAL_VISUAL_SCALE, HEAL_VISUAL_SCALE)
     visual.z_index = 2
     add_child(visual)
 

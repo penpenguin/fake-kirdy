@@ -209,6 +209,16 @@
       "tags": ["results", "ui", "input", "trace"]
     },
     {
+      "id": "results_scene_restart",
+      "replay_path": "res://tests/replays/results_scene_restart.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["result.overlay.shown", "results.scene.shown", "results.scene.hidden", "run.restart.selected"],
+      "expected_last_hud": {
+        "outcome": "running"
+      },
+      "tags": ["results", "ui", "input", "restart", "trace"]
+    },
+    {
       "id": "danger_hazard_trace",
       "replay_path": "res://tests/replays/danger_hazard_trace.json",
       "expected_outcome": "game_over",

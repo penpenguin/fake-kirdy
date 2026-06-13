@@ -161,6 +161,34 @@ describe('Godot visual snapshots', () => {
     expect(report.coverage.door_scale).toBeGreaterThanOrEqual(1);
   });
 
+  it('keeps Spark attack effects synchronized to ability use instead of permanently showing a blue line', () => {
+    const playerController = readFileSync(join(repoRoot, 'godot', 'scripts', 'player', 'PlayerController.gd'), 'utf8');
+    const gameSession = readFileSync(join(repoRoot, 'godot', 'scripts', 'session', 'GameSession.gd'), 'utf8');
+    const contract = JSON.parse(readFileSync(join(repoRoot, 'godot', 'tests', 'visual_snapshot_contract.json'), 'utf8')) as {
+      snapshots?: Array<{
+        id?: string;
+        visual_tags?: string[];
+        required_trace_events?: string[];
+      }>;
+    };
+
+    expect(playerController).toContain('@export var ability_attack_effect_duration_ms');
+    expect(playerController).toContain('ability_attack_effect_remaining_ms');
+    expect(playerController).toContain('tick_ability_attack_effect(delta)');
+    expect(playerController).toContain('hide_ability_attack_effect()');
+    expect(playerController).toContain('ability_attack_effect_line.visible = false');
+    expect(gameSession).toContain('visual_payload["duration_ms"] = int(player.call("get_ability_attack_effect_duration_ms"))');
+    expect(contract.snapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'spark_attack_effect_timing',
+          visual_tags: expect.arrayContaining(['ability_feedback', 'spark_effect']),
+          required_trace_events: expect.arrayContaining(['ability.attack.visualized']),
+        }),
+      ]),
+    );
+  });
+
   it('tiles terrain textures across multi-cell floor polygons instead of stretching one tile', () => {
     const levelVisualAssets = readFileSync(join(repoRoot, 'godot', 'scripts', 'level', 'LevelVisualAssets.gd'), 'utf8');
 

@@ -160,8 +160,9 @@ var error_retry_fps: int = 60
 @export var control_guide_dismiss_action: StringName = &"jump"
 @export var audio_enabled: bool = true
 @export var bgm_volume_scale: float = 0.65
-@export var sfx_volume_scale: float = 1.0
-@export var ui_sfx_volume_scale: float = 0.75
+@export var sfx_volume_scale: float = 0.65
+@export var ui_sfx_volume_scale: float = 0.45
+@export var ability_sfx_volume_scale: float = 0.60
 @export var audio_ducking_volume_scale: float = 0.45
 
 
@@ -923,7 +924,7 @@ func use_ability() -> void:
     var ability_type := String(player.ability_type)
     var profile := get_ability_profile(ability_type)
     ability_cooldown_remaining_ms = int(profile.get("cooldown_ms", 0))
-    play_sfx(get_ability_sfx(String(player.ability_type)), -1.0, "ability.used", "attack")
+    play_sfx(get_ability_sfx(String(player.ability_type)), ability_sfx_volume_scale, "ability.used", "attack")
     apply_ability_movement(ability_type, profile)
     show_ability_attack_visual(ability_type, profile)
     trace_recorder.call("record_player_event", "ability.used", {
@@ -1047,6 +1048,8 @@ func show_ability_attack_visual(ability_type: String, profile: Dictionary) -> vo
     }
     if player != null and is_instance_valid(player) and player.has_method("show_ability_attack_effect"):
         player.call("show_ability_attack_effect", ability_type, get_ability_effect_color(ability_type), float(profile.get("range", 96.0)))
+        if player.has_method("get_ability_attack_effect_duration_ms"):
+            visual_payload["duration_ms"] = int(player.call("get_ability_attack_effect_duration_ms"))
     if trace_recorder != null:
         trace_recorder.call("record_player_event", "ability.attack.visualized", {
             "level_id": current_level_id,
@@ -2244,6 +2247,7 @@ func get_audio_mix_payload(reason: String = "") -> Dictionary:
         "bgm_volume": bgm_volume,
         "sfx_volume": clampf(normalized_volume * sfx_volume_scale, 0.0, 1.0),
         "ui_sfx_volume": clampf(normalized_volume * ui_sfx_volume_scale, 0.0, 1.0),
+        "ability_sfx_volume": clampf(normalized_volume * ability_sfx_volume_scale, 0.0, 1.0),
         "ducking_active": ducking_active,
         "audio_enabled": audio_enabled,
         "bgm_playing": bgm_player != null and is_instance_valid(bgm_player) and bgm_player.playing,
@@ -2276,6 +2280,7 @@ func play_sfx(stream: AudioStream, volume_scale: float = -1.0, source_event_type
             "category": category,
             "volume": resolved_volume,
             "volume_scale": resolved_volume_scale,
+            "ability_sfx_volume_scale": ability_sfx_volume_scale,
             "audio_enabled": audio_enabled,
         })
 
@@ -2834,8 +2839,9 @@ func cycle_string(current_value: String, values: Array) -> String:
 
 
 func check_result_actions() -> void:
-    if outcome == "game_over" and is_session_action_just_pressed(result_restart_action):
-        restart_current_run()
+    if outcome != "running" and is_session_action_just_pressed(result_restart_action):
+        hide_results_scene("result.restart.selected")
+        restart_current_run(true)
         return
 
     if results_scene_shown:
@@ -2849,8 +2855,10 @@ func check_result_actions() -> void:
         show_results_scene("result.auto_timeout")
 
 
-func restart_current_run() -> void:
-    if outcome != "game_over":
+func restart_current_run(allow_completed: bool = false) -> void:
+    if outcome == "running" or outcome == "error":
+        return
+    if outcome != "game_over" and not allow_completed:
         return
 
     var restart_level_id := current_level_id
@@ -2888,6 +2896,21 @@ func restart_current_run() -> void:
         sync_inventory_overlay("run.restarted", true)
         sync_virtual_controls_overlay("run.restarted", true)
         write_persistent_state()
+
+
+func hide_results_scene(reason: String = "") -> void:
+    if not results_scene_shown:
+        return
+
+    results_scene_shown = false
+    if results_scene != null and is_instance_valid(results_scene):
+        results_scene.call("set_results_state", {})
+    if trace_recorder != null:
+        trace_recorder.call("record_event", "results.scene.hidden", {
+            "level_id": current_level_id,
+            "reason": reason,
+            "result_elapsed_ms": result_elapsed_ms,
+        })
 
 
 func show_result_overlay(reason: String = "") -> void:

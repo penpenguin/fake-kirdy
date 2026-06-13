@@ -16,19 +16,36 @@ const readRepoFile = (relativePath: string): string =>
 describe('Godot v2 audio and presentation polish', () => {
   it('routes migrated audio through a traceable BGM/SFX mix with menu ducking', () => {
     const session = readGodotFile('scripts/session/GameSession.gd');
+    const contract = JSON.parse(readGodotFile('tests/audio_audit_contract.json')) as {
+      max_volume_scales?: {
+        sfx?: number;
+        ui_sfx?: number;
+        ability_sfx?: number;
+      };
+    };
+    const auditScript = readRepoFile('scripts/check-godot-audio-audit.mjs');
 
     expect(session).toContain('@export var bgm_volume_scale: float');
     expect(session).toContain('@export var sfx_volume_scale: float');
     expect(session).toContain('@export var ui_sfx_volume_scale: float');
+    expect(session).toContain('@export var ability_sfx_volume_scale: float');
+    expect(session).toContain('play_sfx(get_ability_sfx(String(player.ability_type)), ability_sfx_volume_scale, "ability.used", "attack")');
     expect(session).toContain('@export var audio_ducking_volume_scale: float');
     expect(session).toContain('func update_audio_mix(reason: String = "audio.mix.updated", emit_trace: bool = false) -> void:');
     expect(session).toContain('func get_audio_mix_payload(reason: String = "") -> Dictionary:');
     expect(session).toContain('"audio.mix.updated"');
     expect(session).toContain('"ducking_active"');
+    expect(session).toContain('"ability_sfx_volume"');
+    expect(session).toContain('"ability_sfx_volume_scale"');
     expect(session).toContain('session_paused or settings_menu_open or pause_settings_open');
     expect(session).toContain('play_ui_sfx');
     expect(session).toContain('update_audio_mix("pause.toggled", true)');
     expect(session).toContain('update_audio_mix(reason, true)');
+
+    expect(contract.max_volume_scales?.sfx).toBeLessThanOrEqual(0.7);
+    expect(contract.max_volume_scales?.ui_sfx).toBeLessThanOrEqual(0.5);
+    expect(contract.max_volume_scales?.ability_sfx).toBeLessThanOrEqual(0.65);
+    expect(auditScript).toContain('checkMaxVolumeScales');
   });
 
   it('adds tween-backed presentation contracts to pause, settings, and result overlays', () => {
