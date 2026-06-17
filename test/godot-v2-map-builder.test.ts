@@ -8,6 +8,7 @@ import { buildWorldGraph } from '../tools/map-builder/src/domain/buildWorldGraph
 import { parseAuthoredSceneRoom, patchAuthoredSceneRoom } from '../tools/map-builder/src/domain/godotTscnRoom';
 import { layoutWorldGraph, worldGraphLayoutNodeSize } from '../tools/map-builder/src/domain/layoutWorldGraph';
 import { normalizeBuilderProject } from '../tools/map-builder/src/domain/loadGodotProject';
+import { getMarkerFieldInputType, parseMarkerFieldInputValue } from '../tools/map-builder/src/domain/markerFieldValues';
 import { dragRoomObjectPosition, resizeRoomObject } from '../tools/map-builder/src/domain/roomCanvasInteraction';
 import { buildRoomOptions } from '../tools/map-builder/src/domain/roomIndex';
 import type { BuilderProject, CatalogLevel, RuntimeContent, StageDefinition } from '../tools/map-builder/src/domain/project';
@@ -51,6 +52,7 @@ describe('Godot map builder local tool boundary', () => {
       'tools/map-builder/src/main.tsx',
       'tools/map-builder/src/domain/project.ts',
       'tools/map-builder/src/domain/builderMarkerIds.ts',
+      'tools/map-builder/src/domain/markerFieldValues.ts',
       'tools/map-builder/src/domain/loadGodotProject.ts',
       'tools/map-builder/src/domain/buildWorldGraph.ts',
       'tools/map-builder/src/domain/layoutWorldGraph.ts',
@@ -93,6 +95,17 @@ describe('Godot map builder local tool boundary', () => {
       { id: 'CustomHazard' },
       { id: 'BuilderHazards4' },
     ])).toBe('BuilderHazards5');
+  });
+
+  it('keeps boolean object marker edits typed as booleans', () => {
+    expect(getMarkerFieldInputType(true)).toBe('checkbox');
+    expect(getMarkerFieldInputType(false)).toBe('checkbox');
+    expect(getMarkerFieldInputType(2)).toBe('number');
+    expect(getMarkerFieldInputType('false')).toBe('text');
+    expect(parseMarkerFieldInputValue(true, 'false', Number.NaN, false)).toBe(false);
+    expect(parseMarkerFieldInputValue(false, 'true', Number.NaN, true)).toBe(true);
+    expect(parseMarkerFieldInputValue(2, '3', 3, false)).toBe(3);
+    expect(parseMarkerFieldInputValue('closed', 'open', Number.NaN, false)).toBe('open');
   });
 
   it('loads Godot level data into a React Flow world graph with authored, generated, and dynamic topology markers', () => {

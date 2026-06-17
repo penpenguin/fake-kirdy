@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { getEffectiveRuntimeLayout, updateRuntimeContent, updateRuntimeLayoutSection } from '../domain/applyRoomEdits';
+import { getMarkerFieldInputType, parseMarkerFieldInputValue } from '../domain/markerFieldValues';
 import { buildRoomOptions, type BuilderRoomOption, updateAuthoredRoomLayout } from '../domain/roomIndex';
 import type { BuilderProject, JsonObject, RectPayload, RuntimeContent, RuntimeLayout, Vector2 } from '../domain/project';
 import { ObjectPalette } from './ObjectPalette';
@@ -419,19 +420,24 @@ function MarkerEditor({
   const position = marker.position as Vector2 | undefined ?? { x: 0, y: 0 };
   return (
     <div className="marker-editor">
-      {Object.entries(marker).filter(([key]) => key !== 'position').map(([key, value]) => (
-        <label key={key}>
-          {key}
-          <input
-            value={String(value)}
-            type={typeof value === 'number' ? 'number' : 'text'}
-            onChange={(event) => onChange({
-              ...marker,
-              [key]: typeof value === 'number' ? event.target.valueAsNumber : event.target.value,
-            })}
-          />
-        </label>
-      ))}
+      {Object.entries(marker).filter(([key]) => key !== 'position').map(([key, value]) => {
+        const inputType = getMarkerFieldInputType(value);
+        const isBoolean = inputType === 'checkbox';
+        return (
+          <label key={key}>
+            {key}
+            <input
+              checked={isBoolean ? Boolean(value) : undefined}
+              value={isBoolean ? undefined : String(value)}
+              type={inputType}
+              onChange={(event) => onChange({
+                ...marker,
+                [key]: parseMarkerFieldInputValue(value, event.target.value, event.target.valueAsNumber, event.target.checked),
+              })}
+            />
+          </label>
+        );
+      })}
       <PointEditor label="position" value={position} onChange={(nextPosition) => onChange({ ...marker, position: nextPosition })} />
       <button type="button" onClick={onRemove}>Remove marker</button>
     </div>

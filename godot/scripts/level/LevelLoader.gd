@@ -351,6 +351,8 @@ func add_generated_enemy_marker(root: Node2D, payload: Dictionary) -> void:
     enemy.set("attack_radius", float(payload.get("attack_radius", 120.0)))
     enemy.set("attack_cooldown_ms", int(payload.get("attack_cooldown_ms", 1200)))
     enemy.set("patrol_radius", float(payload.get("patrol_radius", 0.0)))
+    enemy.set("enemy_group_id", String(payload.get("enemy_group_id", "")))
+    enemy.set("boss_id", String(payload.get("boss_id", "")))
     root.add_child(enemy)
 
 
