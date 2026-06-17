@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "level_terrain_fire_branch",
-  "content_hash": "89da74acc946bd4f7cbd02225dabee0a0961f38bd9d1ca6f611ddfa7b2738e78",
+  "content_hash": "47a081d94ee6059aad7f523c19c47fc2a0f94d3dc5f12fedb94c6533df825427",
   "replay_path": "godot/tests/replays/fire_area_ability_gate_trace.json",
   "frame": 20,
   "viewport": {
@@ -17,6 +17,8 @@
     "godot/scripts/level/LevelVisualAssets.gd"
   ],
   "required_resource_paths": [
+    "godot/resources/assets/images/ui/ability-gate-fire.webp",
+    "godot/resources/assets/images/ui/hub-return-door.webp",
     "godot/resources/assets/images/world/fire-background.webp",
     "godot/resources/assets/images/world/fire-tile.webp",
     "godot/resources/assets/images/world/wall-texture.webp"

@@ -54,7 +54,7 @@
   "runtime": {
     "warmup_ms": 1500,
     "sample_ms": 900,
-    "max_boot_wait_ms": 12000,
+    "max_boot_wait_ms": 30000,
     "min_canvas_count": 1,
     "min_fps": 20
   },

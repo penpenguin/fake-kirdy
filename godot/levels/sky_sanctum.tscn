@@ -54,6 +54,19 @@ trigger_radius = 48.0
 required_defeated_enemy_group_id = "sky_guard"
 required_boss_id = "sky_guard_boss"
 
+[node name="DoorToCentralHub" type="Node2D" parent="."]
+position = Vector2(340, 368)
+script = ExtResource("2_door")
+door_id = "sky_sanctum_return_to_central_hub"
+door_role = "return"
+door_label = "Central Hub"
+door_visual_style = "hub_locked"
+target_level_id = "central_hub"
+target_spawn_id = "default"
+trigger_radius = 48.0
+required_item_id = "sky-orb"
+required_boss_id = "sky_guard_boss"
+
 [node name="DoorToSkyExpanse" type="Node2D" parent="."]
 position = Vector2(800, 368)
 script = ExtResource("2_door")
@@ -69,10 +82,13 @@ required_keystone_item_id = "cave-keystone"
 position = Vector2(420, 400)
 script = ExtResource("3_enemy")
 spawn_id = "sky_sanctum_enemy"
-enemy_type = "simple_ground"
-ability_type = "ice"
+enemy_type = "spark_wisp"
+ability_type = "spark"
 enemy_group_id = "sky_guard"
+enemy_rank = "boss"
+max_hp = 2
 boss_id = "sky_guard_boss"
+orb_reward_item_id = "sky-orb"
 contact_damage = 1
 
 [node name="SparkDeviceGate" type="Node2D" parent="."]
@@ -84,7 +100,7 @@ gate_effect = "power_device"
 trigger_radius = 96.0
 
 [node name="CameraBoundsMarker" type="Node2D" parent="."]
-position = Vector2(420, 270)
+position = Vector2(420, 178)
 script = ExtResource("4_camera_bounds")
 size = Vector2(920, 540)
 

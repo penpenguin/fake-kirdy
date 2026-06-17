@@ -159,10 +159,10 @@ describe('Godot enemy AI arena', () => {
       failed_checks: unknown[];
       cases: { id: string; applied_profile?: Record<string, unknown>; events: { event_type: string }[] }[];
     };
-    expect(report.case_count).toBeGreaterThanOrEqual(4);
+    expect(report.case_count).toBeGreaterThanOrEqual(5);
     expect(report.failed_checks).toEqual([]);
     expect(report.cases.map((testCase) => testCase.id)).toEqual(
-      expect.arrayContaining(['spark_ground_patrol_chase_attack', 'frost_flying_hover_profile', 'fire_ground_rush_profile', 'stone_sentry_return_profile']),
+      expect.arrayContaining(['spark_ground_patrol_chase_attack', 'frost_flying_hover_profile', 'fire_ground_rush_profile', 'stone_sentry_return_profile', 'leaf_sprite_drift_profile']),
     );
     expect(report.cases.find((testCase) => testCase.id === 'frost_flying_hover_profile')?.applied_profile).toMatchObject({
       ai_behavior: 'frost_hover',

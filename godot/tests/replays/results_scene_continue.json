@@ -4,7 +4,7 @@
   "level_id": "labyrinth_132",
   "fps": 60,
   "max_frames": 80,
-  "continue_after_finished": true,
+  "continue_after_finished": false,
   "frames": [
     {
       "frame": 0,
@@ -17,12 +17,6 @@
       "frame": 50,
       "actions": {
         "move_right": false,
-        "result_continue": true
-      }
-    },
-    {
-      "frame": 51,
-      "actions": {
         "result_continue": false
       }
     }

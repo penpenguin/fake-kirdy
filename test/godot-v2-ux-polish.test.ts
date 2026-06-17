@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -12,6 +12,30 @@ const readGodotFile = (relativePath: string): string =>
 
 const readRepoFile = (relativePath: string): string =>
   readFileSync(join(repoRoot, relativePath), 'utf8');
+
+const readLevelScenes = (): Array<{ fileName: string; source: string }> =>
+  readdirSync(join(godotRoot, 'levels'))
+    .filter((fileName) => fileName.endsWith('.tscn'))
+    .sort()
+    .map((fileName) => ({
+      fileName,
+      source: readGodotFile(`levels/${fileName}`),
+    }));
+
+const extractDoorBlocks = (source: string): Array<{ nodeName: string; block: string }> => {
+  const doorResourceIds = [...source.matchAll(/path="res:\/\/scripts\/level\/markers\/DoorMarker\.gd" id="([^"]+)"/g)]
+    .map((match) => match[1]);
+  const nodeBlocks = [...source.matchAll(/\[node name="([^"]+)"[^\]]*\][\s\S]*?(?=\n\[node |$)/g)];
+
+  return nodeBlocks
+    .map((match) => ({ nodeName: match[1], block: match[0] }))
+    .filter(({ block }) => doorResourceIds.some((resourceId) => block.includes(`script = ExtResource("${resourceId}")`)));
+};
+
+const readSceneStringProp = (block: string, propName: string): string => {
+  const match = block.match(new RegExp(`^${propName} = "([^"]*)"`, 'm'));
+  return match?.[1] ?? '';
+};
 
 const readNodePosition = (scene: string, nodeName: string): { x: number; y: number } => {
   const nodeStart = scene.indexOf(`[node name="${nodeName}"`);
@@ -66,7 +90,7 @@ describe('Godot v2 UX polish vertical slice', () => {
     expect(resultScene).toContain('ContinueLabel');
     expect(resultScene).toContain('mouse_filter = 1');
     expect(docs).toContain('popup');
-    expect(docs).toContain('continue');
+    expect(docs).toContain('restart');
   });
 
   it('removes debug-like tutorial and Hub copy from representative player-facing scenes', () => {
@@ -138,45 +162,172 @@ describe('Godot v2 UX polish vertical slice', () => {
     const lintContract = readGodotFile('tests/scene_lint_contract.json');
     const docs = readRepoFile('docs/godot-v2/door-transition-flow.md');
 
-    expect(hub).toContain('door_visual_style = "trial"');
-    expect(hub).toContain('door_visual_style = "region"');
-    expect(hub).toContain('door_visual_style = "locked"');
+    expect(hub).toContain('door_visual_style = "hub_trial"');
+    expect(hub).toContain('door_visual_style = "hub_region"');
+    expect(hub).toContain('door_visual_style = "hub_locked"');
+    expect(hub).toContain('door_visual_style = "hub_support"');
     expect(hub).toContain('door_label = "Ember Gate"');
     expect(hub).toContain('door_label = "Trial Door"');
     expect(lintScript).toContain('lintNearbyDoorAmbiguity');
     expect(lintContract).toContain('"nearby_door_ambiguity"');
     expect(lintContract).toContain('"central_hub"');
     expect(docs).toContain('door_visual_style');
+    expect(docs).toContain('hub_');
     expect(docs).toContain('nearby_door_ambiguity');
   });
 
-  it('lays out CentralHub as a symmetric cathedral hub with nave, altar, and side aisles', () => {
-    const hub = readGodotFile('levels/central_hub.tscn');
-    const docs = readRepoFile('docs/map-structure.md');
-    const centerX = 420;
+  it('marks every Central Hub connected door with a distinct hub visual style', () => {
+    const scenes = readLevelScenes();
+    const hubConnectedDoors = scenes.flatMap(({ fileName, source }) =>
+      extractDoorBlocks(source)
+        .filter(({ block }) => fileName === 'central_hub.tscn' || readSceneStringProp(block, 'target_level_id') === 'central_hub')
+        .map(({ nodeName, block }) => ({
+          fileName,
+          nodeName,
+          doorId: readSceneStringProp(block, 'door_id'),
+          targetLevelId: readSceneStringProp(block, 'target_level_id'),
+          visualStyle: readSceneStringProp(block, 'door_visual_style'),
+        })),
+    );
+    const nonHubDoors = scenes.flatMap(({ fileName, source }) =>
+      extractDoorBlocks(source)
+        .filter(({ block }) => fileName !== 'central_hub.tscn' && readSceneStringProp(block, 'target_level_id') !== 'central_hub')
+        .map(({ nodeName, block }) => ({
+          fileName,
+          nodeName,
+          visualStyle: readSceneStringProp(block, 'door_visual_style'),
+        })),
+    );
 
-    expect(hub).toContain('[node name="CathedralNave"');
+    expect(hubConnectedDoors.length).toBeGreaterThanOrEqual(16);
+    for (const door of hubConnectedDoors) {
+      expect(door.visualStyle, `${door.fileName}:${door.nodeName}:${door.doorId}`).toMatch(/^hub_/);
+    }
+    expect(nonHubDoors.some((door) => door.visualStyle !== '' && !door.visualStyle.startsWith('hub_'))).toBe(true);
+    expect(nonHubDoors.every((door) => !door.visualStyle.startsWith('hub_'))).toBe(true);
+  });
+
+  it('renders Central Hub return doors with a dedicated runtime texture instead of the ordinary room door', () => {
+    const scenes = readLevelScenes();
+    const doorMarker = readGodotFile('scripts/level/markers/DoorMarker.gd');
+    const docs = readRepoFile('docs/godot-v2/door-transition-flow.md');
+    const centralReturnDoors = scenes.flatMap(({ fileName, source }) =>
+      extractDoorBlocks(source)
+        .filter(({ block }) => readSceneStringProp(block, 'target_level_id') === 'central_hub')
+        .map(({ nodeName, block }) => ({
+          fileName,
+          nodeName,
+          doorId: readSceneStringProp(block, 'door_id'),
+          role: readSceneStringProp(block, 'door_role'),
+          visualStyle: readSceneStringProp(block, 'door_visual_style'),
+          requiredItemId: readSceneStringProp(block, 'required_item_id'),
+          requiredBossId: readSceneStringProp(block, 'required_boss_id'),
+        })),
+    );
+    const unlockedHubReturns = centralReturnDoors.filter((door) => door.visualStyle === 'hub_return');
+
+    expect(centralReturnDoors.map((door) => `${door.fileName}:${door.doorId}`)).toEqual(expect.arrayContaining([
+      'fire_area.tscn:fire_area_to_central_hub',
+      'forest_area.tscn:forest_area_to_central_hub',
+    ]));
+    expect(unlockedHubReturns.length).toBeGreaterThanOrEqual(4);
+    for (const door of unlockedHubReturns) {
+      const expectedRole = door.fileName === 'tutorial_room.tscn' ? 'progress' : 'return';
+      expect(door.role, `${door.fileName}:${door.nodeName}`).toBe(expectedRole);
+      expect(door.requiredItemId, `${door.fileName}:${door.nodeName}`).toBe('');
+      expect(door.requiredBossId, `${door.fileName}:${door.nodeName}`).toBe('');
+    }
+
+    const hubReturnTextureBranch = doorMarker.match(/if door_visual_style == "hub_return":\n\s+return ([A-Za-z0-9_]+)/)?.[1];
+    expect(doorMarker).toContain('const HubReturnDoorTexture = preload("res://resources/assets/images/ui/hub-return-door.webp")');
+    expect(hubReturnTextureBranch).toBe('HubReturnDoorTexture');
+    expect(docs).toContain('hub-return-door.webp');
+  });
+
+  it('shows the Hub to Mirror Corridor gate as a locked hub connection instead of a plain region door', () => {
+    const hub = readGodotFile('levels/central_hub.tscn');
+    const doorMarker = readGodotFile('scripts/level/markers/DoorMarker.gd');
+    const docs = readRepoFile('docs/godot-v2/door-transition-flow.md');
+    const mirrorDoor = extractDoorBlocks(hub).find(({ block }) =>
+      block.includes('door_id = "hub_to_mirror_corridor"'),
+    );
+
+    expect(mirrorDoor?.block).toContain('door_role = "locked_gate"');
+    expect(mirrorDoor?.block).toContain('door_visual_style = "hub_locked"');
+    expect(mirrorDoor?.block).not.toContain('door_visual_style = "region"');
+    expect(doorMarker).toContain('func is_hub_visual() -> bool:');
+    expect(doorMarker).toContain('func is_locked_visual() -> bool:');
+    expect(doorMarker).toContain('door_visual_style == "hub_locked"');
+    expect(docs).toContain('hub_locked');
+  });
+
+  it('keeps enemy contact damage inside the visible enemy contact radius and records contact evidence', () => {
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const simpleEnemyScript = readGodotFile('scripts/enemies/SimpleEnemy.gd');
+    const simpleEnemyScene = readGodotFile('scenes/enemies/SimpleEnemy.tscn');
+    const flyingEnemyScene = readGodotFile('scenes/enemies/FlyingEnemy.tscn');
+    const docs = readRepoFile('docs/godot-v2/combat-slice.md');
+    const fallbackRadius = Number(session.match(/@export var contact_damage_radius: float = ([0-9.]+)/)?.[1]);
+    const simpleBoxSize = Number(simpleEnemyScene.match(/size = Vector2\(([0-9.]+), ([0-9.]+)\)/)?.[1]);
+    const flyingRadius = Number(flyingEnemyScene.match(/radius = ([0-9.]+)/)?.[1]);
+
+    expect(fallbackRadius).toBeLessThanOrEqual(28);
+    expect(simpleBoxSize).toBe(24);
+    expect(flyingRadius).toBe(14);
+    expect(simpleEnemyScript).toContain('@export var contact_damage_radius: float = 18.0');
+    expect(session).toContain('func get_enemy_contact_damage_radius(enemy: Node) -> float:');
+    expect(session).toContain('var contact_distance: float = player.global_position.distance_to(enemy.global_position)');
+    expect(session).toContain('"contact_distance": contact_distance');
+    expect(session).toContain('"contact_radius": contact_radius');
+    expect(session).not.toContain('player.global_position.distance_to(enemy.global_position) > contact_damage_radius');
+    expect(docs).toContain('contact_radius');
+  });
+
+  it('lays out CentralHub as a wide cathedral hub with supported door landings', () => {
+    const hub = readGodotFile('levels/central_hub.tscn');
+    const visualAssets = readGodotFile('scripts/level/LevelVisualAssets.gd');
+    const docs = readRepoFile('docs/map-structure.md');
+    const centerX = 464;
+
+    expect(hub).not.toContain('[node name="CathedralNave" type="Polygon2D"');
     expect(hub).toContain('[node name="AltarPlatform"');
     expect(hub).toContain('[node name="LeftAislePlatform"');
     expect(hub).toContain('[node name="RightAislePlatform"');
+    expect(hub).toContain('[node name="BuilderPlatform1"');
+    expect(hub).toContain('[node name="BuilderPlatform4"');
     expect(hub).toContain('RectangleShape2D_side_aisle');
     expect(hub).toContain('RectangleShape2D_altar');
+    expect(visualAssets).toContain('if normalized_level_id == "central_hub":');
+    expect(visualAssets).toContain('return RoyalBackgroundTexture');
 
+    const camera = readNodePosition(hub, 'CameraBoundsMarker');
+    const floor = readNodePosition(hub, 'Floor');
     const mirror = readNodePosition(hub, 'DoorToMirrorCorridor');
     const forest = readNodePosition(hub, 'DoorToForestArea');
-    const tutorialFire = readNodePosition(hub, 'DoorToTutorialFireArea');
     const ice = readNodePosition(hub, 'DoorToIceArea');
+    const tutorialFire = readNodePosition(hub, 'DoorToTutorialFireArea');
     const cave = readNodePosition(hub, 'DoorToCaveArea');
     const leftAisle = readNodePosition(hub, 'LeftAislePlatform');
     const rightAisle = readNodePosition(hub, 'RightAislePlatform');
+    const mirrorSupport = readNodePosition(hub, 'BuilderPlatform1');
+    const caveSupport = readNodePosition(hub, 'BuilderPlatform2');
+    const fireSupport = readNodePosition(hub, 'BuilderPlatform3');
+    const routeSupport = readNodePosition(hub, 'BuilderPlatform4');
 
-    expect(mirror.x).toBe(centerX);
-    expect(forest.x + tutorialFire.x).toBe(centerX * 2);
-    expect(forest.y).toBe(tutorialFire.y);
-    expect(ice.x + cave.x).toBe(centerX * 2);
-    expect(ice.y).toBe(cave.y);
+    expect(camera.x).toBe(centerX);
+    expect(floor.x).toBe(centerX);
+    expect(forest.x).toBeLessThan(centerX);
+    expect(tutorialFire.x).toBeGreaterThan(centerX);
     expect(leftAisle.x + rightAisle.x).toBe(centerX * 2);
     expect(leftAisle.y).toBe(rightAisle.y);
+    expect(Math.abs(mirror.x - mirrorSupport.x)).toBeLessThanOrEqual(24);
+    expect(cave.x).toBe(caveSupport.x);
+    expect(Math.abs(readNodePosition(hub, 'DoorToFireArea').x - fireSupport.x)).toBeLessThanOrEqual(16);
+    expect(Math.abs(readNodePosition(hub, 'PlayerSpawn').x - routeSupport.x)).toBeLessThanOrEqual(8);
+    expect(Math.abs(readNodePosition(hub, 'PlayerSpawnIceGateCheck').x - ice.x)).toBeLessThanOrEqual(8);
+    expect(Math.abs(readNodePosition(hub, 'PlayerSpawnTutorialFireRoute').x - tutorialFire.x)).toBeLessThanOrEqual(40);
     expect(docs).toContain('nave/altar/side aisle');
+    expect(docs).toContain('wide cathedral hub');
+    expect(docs).toContain('royal cathedral background');
   });
 });

@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "snapshot_id": "labyrinth_011_hazard_gate_bounds",
+  "content_hash": "bfb4b8b9d4c8f813d5fcbc2f4b450cfaff058cbca70083c9ba17789109803241",
+  "replay_path": "godot/tests/replays/labyrinth_011_gate_bounds_trace.json",
+  "frame": 80,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "visual_tags": [
+    "ability_gate",
+    "boundary",
+    "hazard",
+    "level_terrain",
+    "stage_background"
+  ],
+  "required_scene_paths": [
+    "godot/levels/generated/procedural_levels.json",
+    "godot/scripts/level/LevelLoader.gd",
+    "godot/scripts/level/markers/AbilityGateMarker.gd",
+    "godot/scripts/level/markers/HazardMarker.gd"
+  ],
+  "required_resource_paths": [
+    "godot/resources/assets/images/hazards/lava-hazard.webp",
+    "godot/resources/assets/images/ui/ability-gate-fire.webp",
+    "godot/resources/assets/images/world/generated-labyrinth-background.webp"
+  ]
+}

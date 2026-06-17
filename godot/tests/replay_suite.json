@@ -23,9 +23,9 @@
     {
       "id": "combat_capture_swallow_goal",
       "replay_path": "res://tests/replays/combat_capture_swallow_goal.json",
-      "expected_outcome": "complete",
+      "expected_outcome": "replay.max_frames_reached",
       "expected_events": ["enemy.captured", "inhale.effect.fallback"],
-      "tags": ["combat", "ability", "goal"]
+      "tags": ["combat", "ability", "practice"]
     },
     {
       "id": "combat_ability_damage_enemy",
@@ -58,7 +58,7 @@
     {
       "id": "combat_ability_unlocks_door",
       "replay_path": "res://tests/replays/combat_ability_unlocks_door.json",
-      "expected_outcome": "complete",
+      "expected_outcome": "replay.max_frames_reached",
       "expected_events": ["door.entered", "level.loaded"],
       "tags": ["combat", "door", "ability-gate", "transition", "trace"]
     },
@@ -96,8 +96,8 @@
     {
       "id": "flying_enemy_release_swallow_goal",
       "replay_path": "res://tests/replays/flying_enemy_release_swallow_goal.json",
-      "expected_outcome": "complete",
-      "tags": ["combat", "flying_enemy", "release", "ability", "goal"]
+      "expected_outcome": "replay.max_frames_reached",
+      "tags": ["combat", "flying_enemy", "release", "ability", "practice"]
     },
     {
       "id": "frost_enemy_ai_profile",
@@ -116,8 +116,8 @@
     {
       "id": "central_hub_to_heal_goal",
       "replay_path": "res://tests/replays/central_hub_to_heal_goal.json",
-      "expected_outcome": "complete",
-      "tags": ["hub", "heal", "goal"]
+      "expected_outcome": "replay.max_frames_reached",
+      "tags": ["hub", "heal", "practice"]
     },
     {
       "id": "central_hub_dead_end_max_health",
@@ -162,6 +162,31 @@
       "expected_outcome": "replay.max_frames_reached",
       "expected_events": ["hidden.discovered", "collectible.collected", "door.entered"],
       "tags": ["exploration", "hidden", "collectible", "door", "trace"]
+    },
+    {
+      "id": "labyrinth_001_return_forest",
+      "replay_path": "res://tests/replays/labyrinth_001_return_forest.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["door.entered", "level.loaded"],
+      "expected_event_sequence": [
+        {
+          "event_type": "door.entered",
+          "payload": {
+            "door_id": "labyrinth_001_to_forest_area",
+            "door_label": "Forest Area",
+            "target_level_id": "forest_area",
+            "target_level_display_name": "Forest Area"
+          }
+        },
+        {
+          "event_type": "level.loaded",
+          "payload": {
+            "level_id": "forest_area",
+            "level_display_name": "Forest Area"
+          }
+        }
+      ],
+      "tags": ["forest", "labyrinth", "door", "labels", "trace"]
     },
     {
       "id": "pause_toggle_menu",
@@ -209,17 +234,25 @@
       "tags": ["failure", "game-over", "restart", "ui", "trace"]
     },
     {
+      "id": "game_over_no_auto_results",
+      "replay_path": "res://tests/replays/game_over_no_auto_results.json",
+      "expected_outcome": "game_over",
+      "expected_events": ["game.over", "result.overlay.shown"],
+      "forbidden_events": ["results.scene.shown", "results.continue.selected"],
+      "tags": ["failure", "game-over", "results", "ui", "trace"]
+    },
+    {
       "id": "results_scene_continue",
       "replay_path": "res://tests/replays/results_scene_continue.json",
       "expected_outcome": "complete",
-      "expected_events": ["result.actors.paused", "result.overlay.shown", "results.scene.shown"],
+      "expected_events": ["result.actors.paused", "results.scene.shown"],
       "tags": ["results", "ui", "input", "trace"]
     },
     {
       "id": "results_scene_restart",
       "replay_path": "res://tests/replays/results_scene_restart.json",
       "expected_outcome": "replay.max_frames_reached",
-      "expected_events": ["result.actors.paused", "result.overlay.shown", "results.scene.shown", "results.scene.hidden", "result.actors.restored", "run.restart.selected"],
+      "expected_events": ["result.actors.paused", "results.scene.shown", "results.scene.hidden", "result.actors.restored", "run.restart.selected"],
       "expected_last_hud": {
         "outcome": "running"
       },
@@ -229,7 +262,7 @@
       "id": "results_scene_continue_to_hub",
       "replay_path": "res://tests/replays/results_scene_continue_to_hub.json",
       "expected_outcome": "replay.max_frames_reached",
-      "expected_events": ["result.actors.paused", "result.overlay.shown", "results.scene.shown", "results.continue.selected", "result.actors.restored", "player.jump.started", "door.entered"],
+      "expected_events": ["result.actors.paused", "results.scene.shown", "results.continue.selected", "result.actors.restored", "player.jump.started", "door.entered"],
       "expected_last_hud": {
         "outcome": "running"
       },
@@ -248,6 +281,14 @@
       "expected_outcome": "replay.max_frames_reached",
       "expected_events": ["ability.used", "ability_gate.opened"],
       "tags": ["ability", "ability-gate", "fire", "terrain", "trace"]
+    },
+    {
+      "id": "labyrinth_011_gate_bounds_trace",
+      "replay_path": "res://tests/replays/labyrinth_011_gate_bounds_trace.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["ability.used", "ability_gate.opened", "player.boundary.clamped"],
+      "forbidden_events": ["game.over", "player.defeated", "replay.error"],
+      "tags": ["procedural", "fire", "labyrinth_011", "ability-gate", "boundary", "trace"]
     },
     {
       "id": "golden_fire_path",
@@ -319,7 +360,11 @@
       "id": "tutorial_no_edge_fall_path",
       "replay_path": "res://tests/replays/tutorial_no_edge_fall_path.json",
       "expected_outcome": "replay.max_frames_reached",
-      "expected_events": ["player.boundary.clamped"],
+      "expected_events": ["player.boundary.clamped", "player.jump.started"],
+      "expected_event_sequence": [
+        { "event_type": "player.boundary.clamped", "payload": { "blocked_axis": "x", "recovery_mode": "stop_velocity" } },
+        { "event_type": "player.jump.started" }
+      ],
       "forbidden_events": ["game.over", "player.defeated", "replay.error", "goal.door.entered", "result.overlay.shown"],
       "forbidden_event_payloads": [
         { "event_type": "run.finished", "payload": { "result_label": "complete" } },
@@ -331,7 +376,11 @@
       "id": "tutorial_right_edge_recovery_path",
       "replay_path": "res://tests/replays/tutorial_right_edge_recovery_path.json",
       "expected_outcome": "replay.max_frames_reached",
-      "expected_events": ["player.boundary.clamped"],
+      "expected_events": ["player.boundary.clamped", "player.jump.started"],
+      "expected_event_sequence": [
+        { "event_type": "player.boundary.clamped", "payload": { "blocked_axis": "x", "recovery_mode": "stop_velocity" } },
+        { "event_type": "player.jump.started" }
+      ],
       "forbidden_events": ["game.over", "player.defeated", "replay.error", "goal.door.entered", "result.overlay.shown"],
       "forbidden_event_payloads": [
         { "event_type": "run.finished", "payload": { "result_label": "complete" } },
@@ -415,6 +464,36 @@
       "tags": ["progression", "item", "collectible", "door", "trace"]
     },
     {
+      "id": "forest_reliquary_boss_orb_return",
+      "replay_path": "res://tests/replays/forest_reliquary_boss_orb_return.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["enemy.defeated", "boss.defeated", "item.acquired", "inventory.updated", "hud.updated", "door.entered"],
+      "expected_event_sequence": [
+        { "event_type": "boss.defeated", "payload": { "boss_id": "forest_guard_boss", "orb_reward_item_id": "forest-orb" } },
+        { "event_type": "item.acquired", "payload": { "item_id": "forest-orb" } },
+        { "event_type": "door.entered", "payload": { "door_id": "forest_reliquary_return_to_central_hub", "target_level_id": "central_hub" } }
+      ],
+      "expected_last_hud": {
+        "acquired_orb_ids": ["forest-orb"]
+      },
+      "tags": ["progression", "boss", "orb", "door", "trace"]
+    },
+    {
+      "id": "ice_reliquary_boss_orb_return",
+      "replay_path": "res://tests/replays/ice_reliquary_boss_orb_return.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["enemy.defeated", "boss.defeated", "item.acquired", "inventory.updated", "hud.updated", "door.entered"],
+      "expected_event_sequence": [
+        { "event_type": "boss.defeated", "payload": { "boss_id": "ice_guard_boss", "orb_reward_item_id": "ice-orb" } },
+        { "event_type": "item.acquired", "payload": { "item_id": "ice-orb" } },
+        { "event_type": "door.entered", "payload": { "door_id": "ice_reliquary_return_to_central_hub", "target_level_id": "central_hub" } }
+      ],
+      "expected_last_hud": {
+        "acquired_orb_ids": ["ice-orb"]
+      },
+      "tags": ["progression", "boss", "orb", "door", "trace"]
+    },
+    {
       "id": "forest_reliquary_lock_then_key_unlocks_door",
       "replay_path": "res://tests/replays/forest_reliquary_lock_then_key_unlocks_door.json",
       "expected_outcome": "replay.max_frames_reached",
@@ -458,7 +537,7 @@
       "id": "sky_generated_goal_path",
       "replay_path": "res://tests/replays/sky_sanctum_to_goal_finish.json",
       "expected_outcome": "complete",
-      "expected_events": ["door.entered", "goal.door.entered", "run.finished", "result.overlay.shown"],
+      "expected_events": ["door.entered", "goal.door.entered", "run.finished", "results.scene.shown"],
       "tags": ["procedural", "sky", "door-chain", "goal"]
     },
     {

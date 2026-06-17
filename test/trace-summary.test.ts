@@ -106,6 +106,8 @@ describe('trace summary metrics', () => {
             revive_count: 1,
             ability_type: 'spark',
             items_collected: ['forest-keystone', 'ice-keystone'],
+            orb_item_ids: ['forest-orb', 'ice-orb', 'fire-orb'],
+            acquired_orb_ids: ['forest-orb'],
             score: 2600,
             remaining_life_bonus: 700,
             outcome: 'running',
@@ -258,6 +260,8 @@ describe('trace summary metrics', () => {
         revive_count: number;
         ability_type: string;
         items_collected: string[];
+        orb_item_ids: string[];
+        acquired_orb_ids: string[];
         score: number;
         remaining_life_bonus: number;
         outcome: string;
@@ -350,6 +354,8 @@ describe('trace summary metrics', () => {
       revive_count: 1,
       ability_type: 'spark',
       items_collected: ['forest-keystone', 'ice-keystone'],
+      orb_item_ids: ['fire-orb', 'forest-orb', 'ice-orb'],
+      acquired_orb_ids: ['forest-orb'],
       score: 2600,
       remaining_life_bonus: 700,
       outcome: 'running',

@@ -1,205 +1,249 @@
 # Goal
 
 ## Objective
-Godot mainlineで、HUD/ポーズ/リザルトが読めて操作でき、停止中にゲームが進まず、Spark・鍵・扉・バイオーム進行で詰まらず、CentralHubが対称的な聖堂ハブとして機能する状態にする。
+Godot mainline のドア表示、敵接触判定、生成ハザード、Ability Gate、画面端境界、HUD オーブ表示を、プレイヤーに見える意味と実際の挙動が一致し、再発防止 contract と replay / visual evidence で検証できる状態にする。
 
 ## Context
-Fake KirdyはGodot 4がcanonical runtime。現在、以下のユーザー報告がある。
+分類: Bug fix + UI / behavior / accessibility check + asset/content adjustment.
 
-- HUDの`AREA`、`ABILITY`、`ITEMS`などで名前と値が同じラインに詰まり、文字が見切れている。文字サイズも少し小さくしてよい。
-- `Paused`、Pause操作説明、Pause Results、Results操作説明などがマップオブジェクトより後ろに出たり、マスク/背景処理が弱く読みづらい。
-- Pause中、Result中、Results中にゲーム進行が停止せず、敵だけが動いてプレイヤーが倒される。
-- Pause中に詰み位置から現在レベルの安全地点へ戻す位置リセット機能がない。
-- チュートリアルでSparkを獲得せず、Xなどで放出した場合、壁を突破できず詰む。
-- 鍵付き扉を開けられず、鍵も取得できない。
-- 少なくとも8種類あるはずのバイオームへ到達できず、森にしかアクセスできない。
-- CentralHubの扉位置が不自然で、より聖堂らしく対称的な配置にしたい。
+このリポジトリは Godot 4 が canonical runtime で、TypeScript + Vitest の static contract、Godot headless replay、visual snapshot、asset fallback audit で mainline を検証している。`package.json` には `npm run test`、`npm run test:canonical`、`npm run build`、`npm run godot:visual-snapshot`、`npm run godot:replay-suite` がある。
 
-既存ドキュメントでは、HUD/Pause/Result/Session outcome/Procedural level/Map topologyがGodot-owned docsとtestsで管理されている。`package.json`には`npm run test`、`npm run check:godot`、`npm run godot:replay-suite`、`npm run godot:visual-snapshot`、`npm run godot:progression-solver`などの検証コマンドがある。
+現在の確認事項:
+- `fire_area.tscn` の `fire_area_to_central_hub` と `forest_area.tscn` の `forest_area_to_central_hub` は `door_visual_style = "hub_return"` を持つが、見た目が通常移動ドアと同じに見える症状がある。既存の `hub_` 文字列 contract だけでは、実際の texture / silhouette / visual state の差分を十分に保証できない。
+- 敵接触ダメージは `GameSession.gd` の `contact_damage_radius = 48.0` と中心距離判定で発生しており、`SimpleEnemy.tscn` の見た目 / collision shape より広く感じられる可能性がある。
+- `labyrinth_011` は generated schema room で、`labyrinth_011_lava_hazard` が生成される。謎の赤い三角形は generated hazard / marker fallback visual 由来と推定する。
+- `AbilityGateMarker.gd` は solid `Polygon2D` の青い壁を作り、`required_ability_type` と collision open は持つが、専用 texture とプレイヤーに伝わる意味の contract が弱い。
+- HUD の orb row は `HudOverlay.gd` の `ColorRect` slot で表示されており、ユーザー期待は実際のオーブ icon 表示。
+- 画面端の見えない壁を抜けてスタックする症状がある。authored scene と generated schema room の両方で再発防止が必要。
 
-[Assumption] 「8種類のバイオーム」は、プレイヤーがゲーム内導線で到達できる8つ以上のdistinct biome/area/cluster destinationを指す。既存specに8種類の正確な名称がない場合は、まず既存stage/cluster/tag/level labelを調査して8種類の定義を復元し、根拠が見つからない場合はStop rulesに従う。
+[Assumption] fire / forest だけでなく、`target_level_id = "central_hub"` の帰還扉はすべて通常移動ドアと視覚的に区別できるべき対象に含める。
 
-[Assumption] 「Pause Results」は、通常のPause overlay、run-endの`ResultOverlay`、専用`ResultsScene`のいずれにも適用する。
+[Assumption] `labyrinth011` は `labyrinth_011` を指す。対象は generated schema の `labyrinth_011_lava_hazard` またはそれに対応する runtime visual。
 
-[Assumption] 「位置リセット」はセーブ/収集状態を巻き戻さず、現在レベルの直近安全spawn/checkpointまたはactive spawnにプレイヤー位置と速度だけを戻す機能とする。
+[Assumption] 「青い壁」は `AbilityGateMarker` と generated `ability_gates` を指す。青い壁は、必要能力を示す gate として意味を持ち、能力使用で開くことが replay / trace で証明されるべきものとする。
+
+[Assumption] ImageGen の使用は許可済み。必要なら door / hazard / ability gate / orb icon 用の小さな raster asset を生成してよい。
 
 ## Scope
 変更してよい範囲:
-
-- `GOAL.md`、必要に応じた作業メモ`ATTEMPTS.md`、`STATUS.md`
-- `docs/godot-v2/**`、`docs/map-structure.md`
-- `godot/project.godot`
-- `godot/scenes/**`
-- `godot/scripts/**`
-- `godot/levels/**`
-- `godot/resources/**`
-- `godot/tests/**`
+- `godot/levels/**/*.tscn`
+- `godot/levels/*.json`
+- `godot/levels/generated/*.json`
+- `scripts/generate-godot-procedural-levels.mjs`
 - `scripts/check-godot-*.mjs`
-- `scripts/generate-godot-*.mjs`
-- `scripts/run-godot-*.mjs`
-- `test/godot*.test.ts`
-- `test/trace-summary.test.ts`
-- `package.json`の既存Godot検証scriptへの最小変更
-
-調査してよい範囲:
-
-- repo内のREADME、docs、tests、Godot scenes/scripts/resources、Serena memories/resources、既存git履歴のread-only参照
-
-## Non-goals
-- Phaser runtime、Phaser依存、旧runtimeコマンドを追加しない。
-- Godot以外の新runtimeや大きな新UI frameworkを導入しない。
-- セーブデータ形式、公開API、入力体系、ステージ生成体系を全面再設計しない。
-- 8バイオーム対応のために、根拠なしに大量の新規ステージや大容量binary assetを作らない。
-- CentralHubを全面的な新アート制作タスクにしない。今回の対象は扉導線、対称性、聖堂らしい構造の読み取りやすさまで。
-- テストを通すために既存replay、snapshot、contract、audit、typecheck、Godot checkを削除、skip、弱体化しない。
-- 認証、外部API、課金、production data、credentials、deploy/publish automationに触れない。
-- 依頼と無関係なリファクタやデザイン全面刷新をしない。
-
-## Constraints and anti-gaming rules
-- 必ずt-wada TDDで進める。Red -> Green -> Refactorを最小ステップで回し、各バグ修正/仕様追加の前に失敗するVitest、replay、trace assertion、visual snapshot contract、またはstatic auditを追加する。
-- Godot mainlineをcanonicalとして扱う。新しいPhaser runtime behaviorや依存を入れない。
-- Player controllerは引き続き`CharacterBody2D`を使う。`RigidBody2D`へ置き換えない。
-- HUDの見切れ対策は、単に項目を消す、値を省略する、常に短い固定文字列にする形で満たさない。`AREA`、`ABILITY`、`ITEMS`などの意味と値が読めるレイアウトにする。
-- Pause/Result/Resultsの視認性は、テキストを前面にするだけでなく、マップオブジェクトに負けないbackdrop、mask、modal panel、CanvasLayer/z-index、focus orderを検証する。
-- Pause/Result/Results中の停止は、敵だけを非表示にして成功扱いしない。敵、hazard、damage、player physics、session timer/trace progressionの扱いを明示し、停止中にプレイヤーが被ダメージしないことをreplay/traceで証明する。
-- 位置リセットは、収集済みアイテム、鍵、completed/visited level、score、save stateを不必要に巻き戻さない。リセット対象は現在レベル内のプレイヤー位置/速度/危険接触状態に限定する。
-- Sparkチュートリアル修正は、壁やgateを削除して進行不能を隠すだけにしない。Spark未獲得/放出後にも再取得、別導線、または明確なgate解除条件があり、プレイヤーが詰まないことをreplayで証明する。
-- 鍵付き扉修正は、door lockを無条件解除して成功扱いしない。鍵取得、inventory/HUD反映、locked-before-key、unlocked-after-key、door.enteredまでをtraceまたはreplayで証明する。
-- 8バイオーム対応は、level graphやprogression solverの期待値だけを書き換えて成功扱いしない。実際に到達可能なDoorMarker/topology/catalog/replay evidenceを揃える。
-- CentralHubの聖堂化は、door markerを見た目だけ中央に寄せて遷移やspawn安全性を壊さない。主要扉は対称性、足場、安全spawn、door label/role、camera boundsを保つ。
-- 新規dependency、license exposure、外部サービスが必要な場合は事前に止まる。
-- 完了宣言には、実行した検証コマンドのexit codeと重要出力、手動確認した場合のスクリーンショット/手順、未解決リスクを含める。
-
-## Risk tier and review depth
-High。
-
-UI、pause state、game simulation、progression topology、collectibles、doors、generated/authored levels、visual snapshotsにまたがるため高リスク。完了前に少なくとも2回のreview passを行う。
-
-- Pass 1: TDD/contract review。各報告に対応するRed testが先に存在し、テストを弱めていないことを確認する。
-- Pass 2: Gameplay/adversarial review。停止中の被ダメージ、Spark softlock、鍵扉、8バイオーム到達、CentralHub spawn/door安全性を反例目線で確認する。
-
-## Required first reads
-編集前に以下を読む。
-
-- ユーザー提供の`AGENTS.md` instructions
-- Serena initial instructions、Serena memories/resourcesのうちGodot mainline/current statusに関係するもの
-- `package.json`
-- `docs/godot-v2/hud-overlay.md`
-- `docs/godot-v2/pause-overlay.md`
-- `docs/godot-v2/result-overlay.md`
-- `docs/godot-v2/session-outcomes.md`
-- `docs/godot-v2/usability-accessibility-testing.md`
-- `docs/godot-v2/procedural-level-generation.md`
-- `docs/map-structure.md`
+- `godot/scripts/level/markers/*.gd`
+- `godot/scripts/level/LevelLoader.gd`
+- `godot/scripts/level/LevelVisualAssets.gd`
+- `godot/scripts/session/GameSession.gd`
+- `godot/scripts/player/PlayerController.gd`
+- `godot/scripts/enemies/*.gd`
+- `godot/scenes/enemies/*.tscn`
 - `godot/scenes/ui/HudOverlay.tscn`
 - `godot/scripts/ui/HudOverlay.gd`
-- `godot/scenes/ui/PauseScene.tscn`
-- `godot/scripts/ui/PauseOverlay.gd`
-- `godot/scenes/ui/ResultOverlay.tscn`
-- `godot/scripts/ui/ResultOverlay.gd`
-- `godot/scenes/ui/ResultsScene.tscn`
-- `godot/scripts/ui/ResultsScene.gd`
-- `godot/scripts/session/GameSession.gd`
-- `godot/scripts/level/LevelLoader.gd`
-- `godot/scripts/level/markers/DoorMarker.gd`
-- `godot/scripts/level/markers/CollectibleMarker.gd`
-- `godot/levels/central_hub.tscn`
-- `godot/levels/level_catalog.source.json`
-- `godot/levels/stage_manifest.json`
+- `godot/resources/assets/images/**`
+- `godot/resources/assets/asset_manifest.json`
+- `godot/tests/replays/**`
 - `godot/tests/replay_suite.json`
-- 関連する既存テスト: `test/godot-v2-hud-overlay.test.ts`、`test/godot-v2-pause-overlay.test.ts`、`test/godot-v2-results-overlay.test.ts`、`test/godot-v2-results-scene.test.ts`、`test/godot-v2-usability-accessibility.test.ts`、`test/godot-v2-level-graph.test.ts`、`test/godot-v2-progression-solver.test.ts`、`test/godot-v2-door-transition.test.ts`、`test/godot-v2-collectible-progression.test.ts`
+- `godot/tests/visual_snapshots/**`
+- `godot/tests/*_contract.json`
+- `test/godot*.test.ts`
+- `test/trace-summary.test.ts`
+- `docs/map-structure.md`
+- `docs/godot-v2/*.md`
+
+## Non-goals
+- Phaser runtime、Phaser dependency、legacy runtime command を追加しない。
+- Godot mainline 以外の runtime を復活させない。
+- 今回の目的と無関係な map topology、progression、save schema、combat ability balance、difficulty tuning を作り替えない。
+- 敵、ハザード、Ability Gate、扉、HUD 要素を削除して症状を隠さない。
+- 画面端スタック対策として、境界抜けを放置したまま単純な teleport / position reset だけで完了扱いにしない。
+- HUD オーブをテキスト、単色 `ColorRect`、または説明ラベルだけで代替しない。
+- 既存の未コミット変更を巻き戻さない。対象ファイル内の既存変更は読んで上乗せし、無関係な差分は触らない。
+- 外部 asset pack や新規 production dependency を導入しない。ただし ImageGen で生成した project-owned raster asset は許可範囲内。
+
+## Constraints and anti-gaming rules
+- t-wada TDD を守る。各症状は最小の failing test / contract / replay expectation から始め、Red -> Green -> Refactor を小さく進める。
+- テストを削除、skip、弱体化して成功扱いにしない。
+- `npm run test`、`npm run test:canonical`、`npm run build` の failure を隠すために build path、typecheck、scene lint、visual snapshot、replay checks を無効化しない。
+- Door visual の再発防止は `door_visual_style` 文字列だけでなく、runtime visual が通常 `door-marker.webp` と区別できる texture / silhouette / explicit visual function / snapshot contract のいずれかで証明する。
+- `hub_return` は fire / forest だけの一時修正にしない。`target_level_id = "central_hub"` の帰還扉全体に適用される contract を追加する。
+- 敵接触判定は「見た目上当たっていない距離でも damage を受ける」ケースを replay または deterministic unit contract で Red にしてから修正する。ダメージを 0 にする、敵を spawn しない、invulnerability を伸ばすだけの修正は禁止。
+- 敵接触判定は enemy visual / collision shape / configured contact bounds と整合させ、trace payload か test helper で接触距離・判定半径を確認できるようにする。
+- `labyrinth_011` の赤い三角形対策は、ハザードを削除せず、lava/spike 等の意味を持つ texture / marker visual として実装する。generated schema と runtime loader の両方が stale にならないようにする。
+- Ability Gate は単なる青い壁ではなく、必要能力、閉鎖状態、開放状態、collision disabled、hint / trace が一致する contract を持つこと。見た目は texture asset を使い、solid polygon だけで完了扱いにしない。
+- 画面端の invisible wall は authored scene と generated schema room の両方で、player が camera / level bounds 外へ抜けないことを replay / trace / static geometry contract で証明する。
+- HUD オーブは `TextureRect` など icon asset を表示できる UI node で表現する。取得済み / 未取得の状態差は icon、modulate、opacity、tooltip、trace payload のいずれかで判別できる必要がある。
+- ImageGen を使う場合、生成 asset は project-owned raster file とし、Godot importer / asset manifest / fallback audit に接続する。参照画像の貼り付けや crop による見せかけは禁止。
+- 新規 asset は Godot Web export に含まれることを検証する。
+
+## Risk tier and review depth
+High.
+
+理由: runtime collision、generated level data、visual assets、HUD、replay suite、Godot export にまたがる広めの変更であり、見た目と gameplay contract の不一致を再発させやすい。
+
+完了前に少なくとも次を行う:
+- focused verification 後に1回の adversarial self-review。
+- final gate 後にもう1回、テスト弱体化・症状隠し・asset 未接続・replay 不足を中心に clean review pass。
+
+## Required first reads
+編集前に以下を読む:
+- `AGENTS.md` またはこのセッションの AGENTS 指示
+- `README.md`
+- `package.json`
+- `docs/map-structure.md`
+- `docs/godot-v2/door-transition-flow.md`
+- `docs/godot-v2/session-outcomes.md`
+- `docs/godot-v2/hud-overlay.md`
+- `docs/godot-v2/procedural-level-generation.md`
+- `docs/godot-v2/combat-slice.md`
+- `godot/levels/fire_area.tscn`
+- `godot/levels/forest_area.tscn`
+- `godot/levels/central_hub.tscn`
+- `godot/scripts/level/markers/DoorMarker.gd`
+- `godot/scripts/level/markers/AbilityGateMarker.gd`
+- `godot/scripts/level/markers/HazardMarker.gd`
+- `godot/scripts/level/LevelLoader.gd`
+- `godot/scripts/level/LevelVisualAssets.gd`
+- `godot/scripts/session/GameSession.gd`
+- `godot/scripts/enemies/SimpleEnemy.gd`
+- `godot/scripts/enemies/FlyingEnemy.gd`
+- `godot/scenes/enemies/SimpleEnemy.tscn`
+- `godot/scenes/enemies/FlyingEnemy.tscn`
+- `godot/scripts/ui/HudOverlay.gd`
+- `godot/scenes/ui/HudOverlay.tscn`
+- `scripts/generate-godot-procedural-levels.mjs`
+- `godot/levels/generated/procedural_levels.json` の `labyrinth_011` 周辺
+- `test/godot-v2-ux-polish.test.ts`
+- `test/godot-v2-assets.test.ts`
+- `test/godot-v2-hud-overlay.test.ts`
+- `test/godot-v2-procedural-level-generator.test.ts`
+- `test/godot-v2-replay-suite.test.ts`
+- `scripts/check-godot-visual-snapshot.mjs`
+- `scripts/check-godot-scene-lint.mjs`
 
 ## Work loop
-1. `STATUS.md`に現在のcheckpoint、次のRed、最後に通った検証を短く記録する。
-2. 報告を「HUD」「Pause/Result視認性」「停止中simulation freeze」「Pause位置リセット」「Spark tutorial softlock」「鍵/鍵扉」「8 biome到達性」「CentralHub聖堂配置」に分ける。
-3. 各カテゴリで最小のRed testまたはreplayを先に追加し、失敗理由を確認する。
-4. GreenはそのRedを通す最小実装に留める。既存contractを壊した場合は原因を`ATTEMPTS.md`に記録する。
-5. Green後にだけRefactorする。UI/sceneの重複整理はテストが緑の状態で行う。
-6. カテゴリごとにfast feedbackを実行し、結果を`STATUS.md`へ更新する。
-7. 3回連続で同じカテゴリの検証に失敗したら、失敗コマンド、仮説、次の選択肢を`ATTEMPTS.md`へ残す。
-8. 全checkpoint後にfinal gateと2回のreview passを実施する。
+1. `git status --short` で既存の未コミット変更を把握し、対象ファイル内の既存差分を読んでから編集する。
+2. 6つの症状を checkpoint に分け、各 checkpoint で最小の failing test / replay / visual contract を先に追加する。
+3. 失敗を確認したら、production code / scene / generated data / asset / docs の最小変更で green にする。
+4. Green 後に重複や命名だけを小さく整理する。checkpoint 間の unrelated refactor は避ける。
+5. 新規または変更 asset がある checkpoint では、manifest / import / fallback audit / visual snapshot まで接続する。
+6. 1時間以上または compaction をまたぐ場合は、`GOAL.md` 末尾に `## Progress notes` を追加し、現在 checkpoint、直近の失敗コマンド、次の最小 action を3行以内で残す。
 
 ## Implementation checkpoints
-- Checkpoint 1: HUDの`AREA`、`ABILITY`、`ITEMS`、HP/score/status/objective類を、名前と値が見切れない2段/分離/縮小レイアウトにする。
-- Checkpoint 2: Pause、Pause操作説明、ResultOverlay、ResultsSceneに、マップオブジェクトより前面のbackdrop/modal/mask/focusable control helpを与える。
-- Checkpoint 3: Pause/Result/Results中はゲームsimulationが停止し、敵/hazard/damageでプレイヤーが倒されないようにする。
-- Checkpoint 4: Pause menuに現在レベルの安全地点へ戻す位置リセット操作を追加し、traceできるようにする。
-- Checkpoint 5: SparkチュートリアルでSparkを未獲得または放出した後も、再取得または別導線で壁/gateを突破できるようにする。
-- Checkpoint 6: 鍵取得、HUD/inventory反映、鍵付き扉のlocked/unlocked遷移、door entryを直す。
-- Checkpoint 7: 8種類以上のbiome/area/cluster destinationがlevel graph上も実プレイ導線上も到達可能であることを復元/追加する。
-- Checkpoint 8: `central_hub`の主要扉を聖堂らしい左右対称/中央軸ベースの配置にし、足場、spawn安全性、door labels、camera boundsを保つ。
-- Checkpoint 9: docs、replay suite、trace summary expectations、visual snapshot/audit contractsを実装に合わせて更新する。
+1. Return door visual regression
+   - `fire_area_to_central_hub`、`forest_area_to_central_hub`、および全 `target_level_id = "central_hub"` door を列挙する test を追加する。
+   - `hub_return` が通常移動ドアと同じ texture / silhouette / visual path に落ちないことを Red で固定する。
+   - `DoorMarker.gd` と scene metadata / assets を最小変更し、Central return door 専用 visual を実装する。
+2. Enemy contact hitbox regression
+   - 見た目上当たっていない距離で `player.damaged` が出る replay または deterministic contract を追加して Red にする。
+   - enemy visual/collision shape と contact damage 判定を整合させる。
+   - `enemy_contact` trace に接触距離 / 判定半径 / enemy id など review 可能な evidence を含めるか、同等の unit contract を追加する。
+3. `labyrinth_011` hazard visual
+   - generated `labyrinth_011_lava_hazard` が fallback polygon / 赤い三角形に見える状態を asset contract / visual snapshot で Red にする。
+   - lava / hazard 用 texture asset を追加または生成し、`HazardMarker.gd` / `LevelLoader.gd` / generator data に接続する。
+   - `labyrinth_011` を含む focused snapshot または replay evidence を追加する。
+4. Ability Gate meaning and texture
+   - tutorial / authored / generated ability gate が required ability、hint、closed/open visual、collision disabled を持つ contract を追加する。
+   - 青い壁を専用 texture 表示に変更し、必要能力が player に読める visual state にする。
+   - 既存 `tutorial_spark_gate` と generated `labyrinth_011_fire_gate` の両方で replay / snapshot evidence を取る。
+5. Screen edge boundary
+   - authored scene と generated schema room で、画面端 / camera bounds を抜けてスタックしないことを検証する replay / trace / static geometry contract を追加する。
+   - 境界 collider または level bounds clamp を実装する場合は、通常移動・ジャンプ・door transition・fall recovery を壊さない。
+6. HUD orb icons
+   - HUD orb row が `ColorRect` slot だけで成立している現状を Red にし、icon asset / `TextureRect` / acquired-missing state を contract 化する。
+   - 5種類の orb id (`forest-orb`, `ice-orb`, `fire-orb`, `cave-orb`, `sky-orb`) が HUD payload と icon表示に対応するようにする。
+   - acquired / missing の visual difference を visual snapshot と static test で固定する。
+7. Docs, snapshots, and final audit
+   - `docs/godot-v2/*.md` と `docs/map-structure.md` を実装後の contract に合わせる。
+   - visual snapshot baseline と replay suite を更新する。ただし failure 隠しは禁止。
+   - final gate 後に再発防止 contract を adversarial review する。
 
 ## Done when
-- `npm run check:test -- test/godot-v2-hud-overlay.test.ts test/godot-v2-usability-accessibility.test.ts test/godot-v2-visual-snapshot.test.ts`または同等の対象実行で、`AREA`、`ABILITY`、`ITEMS`などのHUD項目が名前/値とも読め、見切れや重なりがないことを検証している。
-- `godot:visual-snapshot`または対応Vitestのsnapshot/contractで、Pause、Pause操作説明、ResultOverlay、ResultsSceneがマップオブジェクトより前面に表示され、backdrop/modal/maskにより読めることを検証している。
-- `npm run godot:replay-suite -- --filter <pause-freeze-fixture>`または追加replayで、Pause中に敵/hazard/player damage/session outcomeが進まず、resume後だけ進行することをtraceで確認できる。
-- `npm run godot:replay-suite -- --filter <result-freeze-fixture>`または追加replayで、ResultOverlay/ResultsScene表示中に敵だけが動いてプレイヤーが倒されないことをtraceで確認できる。
-- Pause menuに位置リセット操作があり、`npm run godot:replay-suite -- --filter <pause-position-reset-fixture>`または追加replayで、詰み位置から現在レベルの安全spawn/checkpointへ戻り、収集状態や鍵状態を失わないことを確認できる。
-- `npm run godot:replay-suite -- --filter <spark-tutorial-softlock-fixture>`または追加replayで、チュートリアル中にSparkを未獲得または放出した後でも、再取得/代替導線/解除条件により壁やgateで詰まないことを確認できる。
-- `npm run godot:replay-suite -- --filter <key-door-fixture>`または追加replayで、鍵取得時に`item.acquired`または同等のtraceが出てHUD/inventoryへ反映され、鍵なしでは`door.locked`、鍵ありでは`door.entered`になることを確認できる。
-- `npm run godot:level-graph`と`npm run godot:progression-solver`が、forest以外を含む8種類以上のbiome/area/cluster destinationへ到達可能なcanonical pathを報告する。
-- 8種類以上のbiome/area/cluster destinationについて、少なくとも各入口または代表到達replay/trace/solver evidenceが`godot/tests/replay_suite.json`、`stage_manifest.json`、`level_catalog.source.json`、またはdocsに記録されている。
-- `godot/levels/central_hub.tscn`が更新され、主要扉が左右対称または中央軸ベースに配置され、聖堂らしいnave/altar/side aisle相当の構造が読み取れることをvisual snapshotまたはscene/static testで検証している。
-- CentralHubの各主要扉について、近傍に安全な足場/spawn/camera boundsがあり、`npm run godot:scene-lint`、`npm run godot:content-check`、または専用Vitestで検証している。
-- 関連docs、contracts、replay fixtures、visual baselines、trace expectationsが実装後の挙動に合わせて更新されている。
-- `npm run test`が成功する。
-- Godot runtimeが利用可能な環境では、`npm run check:godot`と`npm run godot:replay-suite`が成功する。環境都合でskipされた場合は、skip理由と出力をCompletion receiptに明記する。
+- `npx vitest run test/godot-v2-ux-polish.test.ts test/godot-v2-assets.test.ts test/godot-v2-hud-overlay.test.ts test/godot-v2-procedural-level-generator.test.ts test/godot-v2-replay-suite.test.ts` が成功し、追加テストが次を明示的に検証している:
+  - fire / forest を含む Central Hub return door は通常移動ドアと runtime visual が区別できる。
+  - `hub_return` の再発防止が全 `target_level_id = "central_hub"` door に効く。
+  - 敵接触ダメージは見た目 / collision shape と整合し、遠すぎる距離では発生しない。
+  - `labyrinth_011` の lava / hazard は赤い三角形 fallback ではなく texture asset で表示される。
+  - Ability Gate は意味、必要能力、texture、open/closed state、collision state を持つ。
+  - HUD orb row は ColorRect だけでなく orb icon asset で表示される。
+- `npm run godot:scene-lint` と `npm run godot:visual-snapshot` が成功し、return door、enemy contact evidence、`labyrinth_011` hazard、Ability Gate、screen edge、HUD orb icon の visual contract が破綻していない。
+- `npm run godot:replay-suite -- --filter tutorial_to_real_stage_path` が成功し、tutorial ability gate が意味を持ったまま hub route を壊していない。
+- `npm run godot:replay-suite -- --filter fire_area_ability_gate_trace` が成功し、fire_area の Ability Gate と Central return visual / transition 周辺が壊れていない。
+- `npm run godot:replay-suite -- --filter labyrinth_011` または新設した `labyrinth_011` focused replay が成功し、generated hazard / gate / enemy contact の少なくとも1つを trace で確認できる。
+- 画面端抜けの再発防止 replay または contract が追加され、`player` が authored / generated level bounds 外に出ないことを検証している。
+- `npm run test` が成功する。
+- `npm run test:canonical` が成功するか、Godot 不在による graceful skip を正確に記録している。
+- `npm run build` が成功するか、Godot/export templates 不在による graceful skip を正確に記録している。
+- Docs に、Central return door visual、enemy contact hitbox、generated hazard visual、Ability Gate texture/meaning、screen edge bounds、HUD orb icon contract が反映されている。
 
 ## Verification
-
 ### Fast feedback loop
-- `npm run check:typecheck`
-- `npm run check:test -- test/godot-v2-hud-overlay.test.ts test/godot-v2-usability-accessibility.test.ts`
-- `npm run check:test -- test/godot-v2-pause-overlay.test.ts test/godot-v2-results-overlay.test.ts test/godot-v2-results-scene.test.ts`
-- `npm run check:test -- test/godot-v2-door-transition.test.ts test/godot-v2-collectible-progression.test.ts`
-- `npm run check:test -- test/godot-v2-level-graph.test.ts test/godot-v2-progression-solver.test.ts`
-- `npm run godot:visual-snapshot -- --json`
-- `npm run godot:level-graph`
-- `npm run godot:progression-solver`
-- 追加/変更したreplay単体: `npm run godot:replay-suite -- --filter <fixture-id>`
+反復中に必要な範囲で実行する:
+
+```bash
+npx vitest run test/godot-v2-ux-polish.test.ts test/godot-v2-assets.test.ts test/godot-v2-hud-overlay.test.ts test/godot-v2-procedural-level-generator.test.ts test/godot-v2-replay-suite.test.ts
+npm run godot:scene-lint
+npm run godot:visual-snapshot
+```
+
+必要に応じて focused replay を追加し、追加後は以下を個別に回す:
+
+```bash
+npm run godot:replay-suite -- --filter tutorial_to_real_stage_path
+npm run godot:replay-suite -- --filter fire_area_ability_gate_trace
+npm run godot:replay-suite -- --filter labyrinth_011
+```
 
 ### Final gate
-- `npm run test`
-- `npm run check:godot`
-- `npm run godot:replay-suite`
-- `npm run godot:visual-snapshot -- --json`
-- `npm run godot:level-graph`
-- `npm run godot:progression-solver`
-- 可能なら`npm run dev`で手動確認し、HUD、Pause、Pause reset、Result/Results、Spark tutorial、鍵扉、8 biome導線、CentralHub配置のスクリーンショットまたは確認手順をCompletion receiptに記録する。
+完了宣言前に実行する:
+
+```bash
+npm run test
+npm run godot:replay-suite -- --filter tutorial_to_real_stage_path
+npm run godot:replay-suite -- --filter fire_area_ability_gate_trace
+npm run godot:replay-suite -- --filter labyrinth_011
+npm run test:canonical
+npm run build
+```
+
+可能なら `npm run godot:run` で手動確認し、以下のスクリーンショットまたは明確な観察結果を completion receipt に残す:
+- `fire_area` と `forest_area` の Central return door が通常移動ドアと違う見た目になっていること。
+- 敵に近いが接触していない位置では damage を受けず、実際に重なった位置で damage を受けること。
+- `labyrinth_011` の hazard が赤い三角形ではなく意味のある lava / hazard texture で見えること。
+- tutorial / stage の青い壁が ability gate として読める texture になっていること。
+- 画面端で抜けず、スタックしないこと。
+- HUD の orb row が orb icon として表示され、取得済み / 未取得が判別できること。
 
 ## Working memory
-このgoalは長期化しやすいため、作業中は以下を維持する。
+基本は `GOAL.md` だけでよい。
 
-- `STATUS.md`: 現在のcheckpoint、最後に通ったRed/Green、次に実行する検証、残るリスク。
-- `ATTEMPTS.md`: 失敗したコマンドとexit code、失敗理由、試した仮説、採用しなかった案。
-
-完了時にこれらが不要な一時メモになった場合も、削除せずCompletion receiptで扱いを説明する。
+1セッションで終わらない場合のみ、`GOAL.md` の末尾に `## Progress notes` を追加し、現在の checkpoint、直近の失敗コマンド、次の最小 action を3行以内で残す。
 
 ## Completion receipt
-完了宣言には以下を含める。
-
+完了時に以下を報告する:
 - 変更ファイル一覧。
-- 8つの報告カテゴリそれぞれについて、追加したRed test/replay、Green実装、Refactor有無。
-- 実行した検証コマンド、exit code、重要な出力要約。
-- 追加/更新したreplay fixture、visual snapshot/contract、stage/catalog/topology data、docs。
-- Pause/Result中に被ダメージしない証拠、Spark softlockが解消された証拠、鍵取得/鍵扉遷移の証拠、8 biome到達性の証拠。
-- CentralHubのbefore/after確認方法またはスクリーンショットpath。
-- 2回のreview passの結果。
-- 残るリスク、未解決事項、環境都合でskipされた検証。
+- Red として追加した test / contract / replay と、最初に失敗した内容の要約。
+- 各 verification command の exact command、exit code、成功 / skip / failure。
+- Godot runtime や export templates が不在だった場合の skip 理由。
+- 生成または変更した asset のパス、ImageGen 使用有無、Godot import / asset manifest 更新有無。
+- fire / forest を含む Central return door の対象リストと、各 door の final visual style / texture / lock metadata。
+- 敵接触判定の証拠: contact radius、enemy visual/collision size、damage が発生しない距離、damage が発生する距離、関連 trace payload。
+- `labyrinth_011` の赤い三角形が何だったか、最終 asset と visual snapshot / replay evidence。
+- Ability Gate の意味付け証拠: required ability、closed/open visual、collision disabled、trace events。
+- 画面端抜け対策の証拠: authored/generated の対象レベル、bounds、replay/contract 結果。
+- HUD orb icon の証拠: icon asset、HUD node type、acquired/missing 表示、snapshot evidence。
+- adversarial self-review 2回分の結果。
+- 残るリスクまたは follow-up。
 
 ## Stop rules
-- 既存spec/docs/data/git履歴を調査しても、8種類のbiome/area/clusterの根拠が見つからず、新規に8種類を設計する必要がある。
-- 8 biome対応が大量の新規ステージ、生成アルゴリズム全面変更、大容量asset追加を要求する。
-- Pause/Result中のsimulation freezeが、既存replay determinism、trace schema、save/outcome仕様と衝突し、仕様判断が必要になる。
-- 位置リセットがセーブ巻き戻し、checkpoint仕様、死亡/復活仕様と衝突し、どの状態を保持するか判断できない。
-- Spark softlock解消に、チュートリアルの壁/gate仕様そのものを削除する以外の選択肢が見つからない。
-- 鍵扉修正にsave data migration、外部データ、破壊的なprogression rewriteが必要になる。
-- CentralHubの聖堂化により既存door target、spawn id、replay、camera boundsを大幅に作り替える必要がある。
-- Godot runtimeまたはexport templates不在によりfinal gateのruntime部分が実行不能で、既存scriptもgraceful skipしない。
-- `npm run test`の既存失敗が今回の変更と無関係で、修正にscope外のproduct behavior変更またはテスト弱体化が必要。
-- 新規dependency、公開API変更、production credential、破壊的操作が必要になる。
+- `fire_area_to_central_hub` / `forest_area_to_central_hub` が本当に Central return door ではない、または topology source と矛盾する場合は、該当ファイルと矛盾内容を示してユーザー確認を待つ。
+- 敵接触判定の修正に PlayerController の大規模 rewrite、physics layer 全面再設計、または combat balance 全体変更が必要になった場合は、最小再現と影響範囲を示してユーザー確認を待つ。
+- `labyrinth_011` の赤い三角形の正体が hazard / ability gate / generated marker のいずれでもなく、source of truth が特定できない場合は、調査結果を示してユーザー確認を待つ。
+- Ability Gate の「意味」を実装するために新しい progression rule、save schema migration、または公開 input semantics 変更が必要になった場合は、変更前にユーザー確認を待つ。
+- 画面端抜け対策が既存 replay / movement contract を破壊し、修正するには本 goal の範囲を超える controller redesign が必要な場合は、失敗ログを添えて停止する。
+- ImageGen 以外の外部 asset、外部 dependency、未確認 license、paid service、ネットワーク取得が必要になった場合は、導入前にユーザー確認を待つ。
+- 既存の未コミット変更が対象ファイル内で同じ行・同じ contract を変更しており、安全に上乗せできない場合は、差分を示してユーザー確認を待つ。
+- Final gate の失敗が今回の変更と無関係な既存不具合で、修正するには product behavior 変更やテスト弱体化が必要な場合は、失敗ログを添えて停止する。
 
 ## Open questions
-- 8種類のbiome/area/clusterの正式名称が既に決まっている場合は、その名称を優先する。
-- 位置リセット先を「現在レベル入口」「最後に触れた安全地点」「直近door spawn」のどれに固定したいかは、既存実装/仕様が見つからなければ実装者が最小リスクで選ぶ。
+なし。上記 assumptions が誤っている場合は、実装開始前にこの `GOAL.md` を更新する。

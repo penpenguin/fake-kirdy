@@ -20,7 +20,7 @@ try {
     ...checkRequiredMetrics(contract, levels),
     ...checkProfiles(contract, levels),
   ];
-  const includeLevelDetails = detailedOutput || levels.length <= 50 || failedChecks.length > 0;
+  const includeLevelDetails = detailedOutput || levels.length <= 50;
   const report = {
     contract_path: contractPath,
     source_paths: {

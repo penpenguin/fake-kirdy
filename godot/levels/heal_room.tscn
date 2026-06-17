@@ -1,9 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://healroomlevel01"]
+[gd_scene load_steps=8 format=3 uid="uid://healroomlevel01"]
 
 [ext_resource type="Script" path="res://scripts/level/markers/PlayerSpawn.gd" id="1_spawn"]
 [ext_resource type="Script" path="res://scripts/level/markers/EnemySpawnMarker.gd" id="2_enemy"]
 [ext_resource type="Script" path="res://scripts/level/markers/HealMarker.gd" id="3_heal"]
-[ext_resource type="Script" path="res://scripts/level/markers/GoalMarker.gd" id="4_goal"]
 [ext_resource type="Script" path="res://scripts/level/markers/CameraBoundsMarker.gd" id="5_camera_bounds"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
@@ -29,11 +28,6 @@ position = Vector2(260, 368)
 script = ExtResource("3_heal")
 heal_id = "heal_room_recovery"
 amount = 1
-
-[node name="GoalMarker" type="Node2D" parent="."]
-position = Vector2(520, 368)
-script = ExtResource("4_goal")
-goal_id = "heal_room_goal"
 
 [node name="CameraBoundsMarker" type="Node2D" parent="."]
 position = Vector2(380, 270)

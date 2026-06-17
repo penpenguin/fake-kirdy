@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "tutorial_real_stage_cue",
-  "content_hash": "b422b1b43d88c9e0bf53b8393beb31960c4fc653c600988fd20394ff73f4f110",
+  "content_hash": "092b6610094f5bfec13fba2ba7b408986be6e0abfc1074224d2a41e7ac1a5ebb",
   "replay_path": "godot/tests/replays/tutorial_to_real_stage_path.json",
   "frame": 188,
   "viewport": {
@@ -21,6 +21,7 @@
   ],
   "required_resource_paths": [
     "godot/resources/assets/images/ui/door-marker.webp",
+    "godot/resources/assets/images/ui/hub-return-door.webp",
     "godot/resources/assets/images/world/brick-tile.webp",
     "godot/resources/assets/images/world/wall-texture.webp"
   ]

@@ -62,6 +62,8 @@ describe('Godot v2 procedural runtime loading', () => {
     expect(source).toContain('add_generated_enemy_marker');
     expect(source).toContain('attack_damage');
     expect(source).toContain('attack_cooldown_ms');
+    expect(source).toContain('enemy.set("enemy_group_id", String(payload.get("enemy_group_id", "")))');
+    expect(source).toContain('enemy.set("boss_id", String(payload.get("boss_id", "")))');
     expect(source).toContain('add_generated_heal_marker');
     expect(source).toContain('add_generated_collectible_marker');
     expect(source).toContain('add_generated_hazard_marker');

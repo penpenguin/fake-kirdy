@@ -17,7 +17,7 @@ These documents describe the canonical Godot 4 project under `godot/`. Current w
 ## Content and gameplay
 
 - `content.md`: hand-authored scenes, generated schema data, level catalog, and replay coverage.
-- `procedural-level-generation.md`: `labyrinth_001` through `labyrinth_132`, branch density, generated markers, and terminal goals.
+- `procedural-level-generation.md`: `labyrinth_001` through `labyrinth_132`, map builder source overrides, branch density, generated markers, and terminal goals.
 - `combat-slice.md`: capture, release, swallow, ability acquisition/use, spit projectile, enemy damage, and replay evidence.
 
 ## UI, save, and Web export

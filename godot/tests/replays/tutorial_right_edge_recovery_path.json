@@ -16,6 +16,25 @@
       "actions": {
         "move_right": false
       }
+    },
+    {
+      "frame": 74,
+      "actions": {
+        "move_left": true,
+        "jump": true
+      }
+    },
+    {
+      "frame": 84,
+      "actions": {
+        "jump": false
+      }
+    },
+    {
+      "frame": 88,
+      "actions": {
+        "move_left": false
+      }
     }
   ]
 }

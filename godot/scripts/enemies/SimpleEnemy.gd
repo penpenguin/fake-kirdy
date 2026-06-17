@@ -2,8 +2,10 @@ extends CharacterBody2D
 class_name SimpleEnemy
 
 @export var enemy_id: String = "simple_enemy"
+@export var enemy_type: String = "simple_ground"
 @export var ability_type: String = "spark"
 @export var contact_damage: int = 1
+@export var contact_damage_radius: float = 18.0
 @export var follow_offset: Vector2 = Vector2(42, -20)
 @export var max_hp: int = 1
 @export var hurt_invulnerability_ms: int = 180
@@ -17,6 +19,7 @@ class_name SimpleEnemy
 @export var attack_cooldown_ms: int = 1200
 @export var enemy_group_id: String = ""
 @export var boss_id: String = ""
+@export var orb_reward_item_id: String = ""
 @export var hit_flash_ms: int = 140
 @export var defeat_flash_ms: int = 220
 @export var hit_flash_color: Color = Color(1.0, 0.32, 0.28, 1.0)
@@ -264,6 +267,7 @@ func build_damage_result(damage: int, source: Dictionary = {}) -> Dictionary:
         "defeated": state == "enemy.defeated",
         "enemy_group_id": enemy_group_id,
         "boss_id": boss_id,
+        "orb_reward_item_id": orb_reward_item_id,
         "feedback_type": "hit_flash",
         "feedback_flash_ms": defeat_flash_ms if state == "enemy.defeated" else hit_flash_ms,
         "source": source,

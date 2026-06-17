@@ -35,6 +35,8 @@ spawn_id = "north"
 position = Vector2(620, 368)
 script = ExtResource("2_door")
 door_id = "cave_area_to_central_hub"
+door_role = "return"
+door_visual_style = "hub_return"
 target_level_id = "central_hub"
 target_spawn_id = "default"
 trigger_radius = 48.0
@@ -51,7 +53,7 @@ trigger_radius = 44.0
 position = Vector2(320, 400)
 script = ExtResource("3_enemy")
 spawn_id = "cave_area_enemy"
-enemy_type = "simple_ground"
+enemy_type = "stone_sentry"
 ability_type = "stone"
 patrol_radius = 72.0
 contact_damage = 1
@@ -65,7 +67,7 @@ gate_effect = "press_switch"
 trigger_radius = 96.0
 
 [node name="CameraBoundsMarker" type="Node2D" parent="."]
-position = Vector2(380, 270)
+position = Vector2(380, 178)
 script = ExtResource("4_camera_bounds")
 size = Vector2(840, 540)
 

@@ -183,10 +183,12 @@ describe('Godot v2 pause overlay', () => {
       frames?: Array<{ actions?: Record<string, boolean> }>;
     };
     const suiteEntry = suite.replays?.find((entry) => entry.id === 'pause_settings_flow');
+    const pauseSettingsPresses = replay.frames?.filter((frame) => frame.actions?.pause_settings).length ?? 0;
 
     expect(replay.frames?.some((frame) => frame.actions?.pause_toggle)).toBe(true);
     expect(replay.frames?.some((frame) => frame.actions?.pause_settings)).toBe(true);
-    expect(replay.frames?.some((frame) => frame.actions?.settings_volume_up)).toBe(true);
+    expect(pauseSettingsPresses).toBeGreaterThanOrEqual(2);
+    expect(replay.frames?.some((frame) => frame.actions?.settings_volume_up)).toBe(false);
     expect(suiteEntry?.replay_path).toBe('res://tests/replays/pause_settings_flow.json');
     expect(suiteEntry?.expected_events).toEqual(expect.arrayContaining([
       'pause.settings.opened',

@@ -8,9 +8,9 @@ The current mainline has both hand-authored scenes and generated schema rooms. T
 
 The first test levels live in `godot/levels/`:
 
-- `flat_room.tscn`: simple floor, player spawn, goal, and camera bounds.
-- `jump_room.tscn`: floor, platforms, player spawn, heal marker, metadata-only enemy spawn marker, goal, and camera bounds.
-- `door_room.tscn`: simple floor, player spawn, door marker, goal, and camera bounds.
+- `flat_room.tscn`: simple floor, player spawn, and camera bounds.
+- `jump_room.tscn`: floor, platforms, player spawn, heal marker, metadata-only enemy spawn marker, and camera bounds.
+- `door_room.tscn`: simple floor, player spawn, door marker, and camera bounds.
 
 ## Marker Nodes
 
@@ -21,7 +21,7 @@ Create marker nodes as `Node2D` children in a level scene and attach the matchin
 - `EnemySpawnMarker`: records metadata for a future enemy spawn.
 - `HealMarker`: records metadata for a future heal pickup.
 - `CollectibleMarker`: records collectible or relic metadata, including a stable collectible id and item id.
-- `GoalMarker`: marks a level completion or test objective point.
+- `GoalMarker`: marks a generated terminal completion point or the single authored completion goal in `goal_sanctum`.
 - `CameraBoundsMarker`: records the intended camera bounds center and size.
 
 Each marker implements `to_level_marker()`. `LevelLoader.gd` scans the scene tree and builds a `LevelDefinition` from those marker nodes.
@@ -47,7 +47,7 @@ Use `LevelTileMap` on TileMap nodes that represent the room grid. It exposes:
 7. Edit exported TileMap and marker fields in the inspector.
 8. Save the scene and run a static test or headless smoke before review.
 
-Do not put spawn, door, or goal coordinates into `PlayerController.gd`. Do not add topology or generated-room policy directly in this lab; keep that data in the catalog, manifest, generated schema, or marker-authored scenes.
+Do not put spawn, door, or goal coordinates into `PlayerController.gd`. Do not add topology or generated-room policy directly in this lab; keep that data in the catalog, manifest, generated schema, or the single marker-authored goal scene.
 
 ## Loader Contract
 

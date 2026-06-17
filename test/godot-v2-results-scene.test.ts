@@ -55,28 +55,26 @@ describe('Godot v2 ResultsScene', () => {
     expect(script).toContain('Press R to restart');
   });
 
-  it('wires ResultsScene transition through GameSession with key and delay paths', () => {
+  it('wires completed goals directly to ResultsScene without stacking the run-complete overlay', () => {
     const session = readGodotFile('scripts/session/GameSession.gd');
     const project = readGodotFile('project.godot');
 
     expect(session).toContain('ResultsSceneScene');
     expect(session).toContain('@export var result_continue_action');
     expect(session).toContain('@export var result_restart_action');
-    expect(session).toContain('@export var result_auto_results_delay_ms');
-    expect(session).toContain('result_elapsed_ms');
     expect(session).toContain('check_result_actions');
+    expect(session).toContain('show_completion_results');
     expect(session).toContain('show_results_scene');
+    expect(session).toContain('show_completion_results("run.finished")');
+    expect(session).not.toContain('show_result_overlay("run.finished")');
     expect(session).toContain('hide_results_scene("result.restart.selected")');
     expect(session).toContain('restart_current_run(true)');
     expect(session).toContain('results.scene.shown');
-    expect(session).toContain('result_elapsed_ms');
-    expect(session).toContain('results_payload["result_elapsed_ms"] = result_elapsed_ms');
-    expect(session).toContain('results_payload["auto_delay_ms"] = result_auto_results_delay_ms');
     expect(project).toContain('result_continue');
     expect(project).toContain('result_restart');
   });
 
-  it('adds replay coverage for continuing from result overlay into ResultsScene', () => {
+  it('adds replay coverage for showing the direct ResultsScene', () => {
     const replayPath = join(godotRoot, 'tests', 'replays', 'results_scene_continue.json');
     const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
       replays?: Array<{
@@ -94,10 +92,11 @@ describe('Godot v2 ResultsScene', () => {
     };
     const suiteEntry = suite.replays?.find((entry) => entry.id === 'results_scene_continue');
 
-    expect(replay.continue_after_finished).toBe(true);
-    expect(replay.frames?.some((frame) => frame.actions?.result_continue)).toBe(true);
+    expect(replay.continue_after_finished).toBe(false);
+    expect(replay.frames?.some((frame) => frame.actions?.result_continue)).toBe(false);
     expect(suiteEntry?.replay_path).toBe('res://tests/replays/results_scene_continue.json');
     expect(suiteEntry?.expected_events).toContain('results.scene.shown');
+    expect(suiteEntry?.expected_events).not.toContain('result.overlay.shown');
   });
 
   it('keeps result menu controls live after the full ResultsScene is visible', () => {
@@ -122,7 +121,7 @@ describe('Godot v2 ResultsScene', () => {
     const suiteEntry = suite.replays?.find((entry) => entry.id === 'results_scene_restart');
 
     expect(replay.continue_after_finished).toBe(true);
-    expect(replay.frames?.some((frame) => frame.actions?.result_continue)).toBe(true);
+    expect(replay.frames?.some((frame) => frame.actions?.result_continue)).toBe(false);
     expect(replay.frames?.some((frame) => frame.actions?.result_restart)).toBe(true);
     expect(suiteEntry?.expected_events).toEqual(
       expect.arrayContaining(['results.scene.shown', 'results.scene.hidden', 'run.restart.selected']),
@@ -159,5 +158,40 @@ describe('Godot v2 ResultsScene', () => {
     expect(suiteEntry?.expected_events).toEqual(
       expect.arrayContaining(['results.scene.shown', 'results.continue.selected', 'door.entered', 'player.jump.started']),
     );
+    expect(suiteEntry?.expected_events).not.toContain('result.overlay.shown');
+  });
+
+  it('does not auto-cover game-over with the full ResultsScene', () => {
+    const replayPath = join(godotRoot, 'tests', 'replays', 'game_over_no_auto_results.json');
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const showResultsBody = session.slice(
+      session.indexOf('func show_results_scene'),
+      session.indexOf('func show_error_overlay'),
+    );
+    const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
+      replays?: Array<{
+        id?: string;
+        replay_path?: string;
+        expected_events?: string[];
+        forbidden_events?: string[];
+      }>;
+    };
+
+    expect(existsSync(replayPath)).toBe(true);
+    expect(session).toContain('func can_show_results_scene() -> bool:');
+    expect(session).toContain('return ["completed", "complete"].has(outcome)');
+    expect(showResultsBody).toContain('if not can_show_results_scene():');
+
+    const replay = JSON.parse(readFileSync(replayPath, 'utf8')) as {
+      continue_after_finished?: boolean;
+      frames?: Array<{ actions?: Record<string, boolean> }>;
+    };
+    const suiteEntry = suite.replays?.find((entry) => entry.id === 'game_over_no_auto_results');
+
+    expect(replay.continue_after_finished).toBe(true);
+    expect(replay.frames?.some((frame) => frame.actions?.result_continue)).toBe(false);
+    expect(suiteEntry?.replay_path).toBe('res://tests/replays/game_over_no_auto_results.json');
+    expect(suiteEntry?.expected_events).toEqual(expect.arrayContaining(['game.over', 'result.overlay.shown']));
+    expect(suiteEntry?.forbidden_events).toContain('results.scene.shown');
   });
 });

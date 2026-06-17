@@ -77,7 +77,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -127,7 +127,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -204,7 +206,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_001_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "leaf_sprite",
               "ability_type": "leaf",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -268,6 +270,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_001_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -281,7 +285,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_001_sword_gate",
               "required_ability_type": "sword",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "cut_vines",
+              "hint_text": "Sword Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -334,7 +341,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -384,7 +391,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -466,7 +475,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_002_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "leaf_sprite",
               "ability_type": "leaf",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -530,6 +539,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_002_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -543,7 +554,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_002_sword_gate",
               "required_ability_type": "sword",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "cut_vines",
+              "hint_text": "Sword Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -596,7 +610,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -646,7 +660,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -728,7 +744,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_003_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "leaf_sprite",
               "ability_type": "leaf",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -792,6 +808,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_003_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -805,7 +823,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_003_sword_gate",
               "required_ability_type": "sword",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "cut_vines",
+              "hint_text": "Sword Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -858,7 +879,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -908,7 +929,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -990,7 +1013,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_004_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "leaf_sprite",
               "ability_type": "leaf",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -1054,6 +1077,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_004_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -1067,7 +1092,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_004_sword_gate",
               "required_ability_type": "sword",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "cut_vines",
+              "hint_text": "Sword Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -1120,7 +1148,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -1170,7 +1198,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -1243,7 +1273,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_005_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "leaf_sprite",
               "ability_type": "leaf",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -1318,6 +1348,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_005_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -1331,7 +1363,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_005_sword_gate",
               "required_ability_type": "sword",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "cut_vines",
+              "hint_text": "Sword Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -1384,7 +1419,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -1434,7 +1469,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -1528,7 +1565,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_006_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "frost_flyer",
               "ability_type": "frost",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -1543,7 +1580,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_006_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "frost_flyer",
               "ability_type": "frost",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -1607,6 +1644,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_006_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -1620,7 +1659,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_006_ice_gate",
               "required_ability_type": "ice",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "freeze_water",
+              "hint_text": "Ice Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -1673,7 +1715,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -1723,7 +1765,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -1816,7 +1860,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_007_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "frost_flyer",
               "ability_type": "frost",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -1831,7 +1875,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_007_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "frost_flyer",
               "ability_type": "frost",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -1895,6 +1939,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_007_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -1908,7 +1954,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_007_ice_gate",
               "required_ability_type": "ice",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "freeze_water",
+              "hint_text": "Ice Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -1961,7 +2010,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -2011,7 +2060,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -2104,7 +2155,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_008_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "frost_flyer",
               "ability_type": "frost",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -2119,7 +2170,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_008_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "frost_flyer",
               "ability_type": "frost",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -2183,6 +2234,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_008_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -2196,7 +2249,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_008_ice_gate",
               "required_ability_type": "ice",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "freeze_water",
+              "hint_text": "Ice Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -2249,7 +2305,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -2299,7 +2355,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -2392,7 +2450,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_009_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "frost_flyer",
               "ability_type": "frost",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -2407,7 +2465,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_009_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "frost_flyer",
               "ability_type": "frost",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -2471,6 +2529,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_009_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -2484,7 +2544,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_009_ice_gate",
               "required_ability_type": "ice",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "freeze_water",
+              "hint_text": "Ice Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -2537,7 +2600,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -2587,7 +2650,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -2671,7 +2736,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_010_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "frost_flyer",
               "ability_type": "frost",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -2686,7 +2751,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_010_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "frost_flyer",
               "ability_type": "frost",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -2761,6 +2826,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_010_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -2774,7 +2841,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_010_ice_gate",
               "required_ability_type": "ice",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "freeze_water",
+              "hint_text": "Ice Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -2827,7 +2897,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -2878,6 +2948,8 @@
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
           "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0,
           "vertical_transition": {
             "enabled": true,
             "max_spawn_drop_distance": 96,
@@ -2965,7 +3037,7 @@
             "id": "GeneratedPlatformVerticalStep",
             "position": {
               "x": 380,
-              "y": 304
+              "y": 284
             },
             "size": {
               "x": 120,
@@ -2995,7 +3067,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_011_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -3010,7 +3082,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_011_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -3085,6 +3157,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_011_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -3098,7 +3172,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_011_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -3151,7 +3228,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -3201,7 +3278,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -3294,7 +3373,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_012_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -3309,7 +3388,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_012_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -3373,6 +3452,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_012_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -3386,7 +3467,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_012_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -3439,7 +3523,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -3489,7 +3573,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -3582,7 +3668,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_013_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -3597,7 +3683,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_013_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -3661,6 +3747,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_013_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -3674,7 +3762,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_013_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -3727,7 +3818,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -3777,7 +3868,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -3870,7 +3963,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_014_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -3885,7 +3978,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_014_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -3949,6 +4042,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_014_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -3962,7 +4057,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_014_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -4015,7 +4113,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -4065,7 +4163,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -4158,7 +4258,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_015_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -4173,7 +4273,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_015_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -4237,6 +4337,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_015_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -4250,7 +4352,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_015_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -4303,7 +4408,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -4353,7 +4458,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -4446,7 +4553,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_016_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -4461,7 +4568,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_016_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -4525,6 +4632,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_016_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -4538,7 +4647,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_016_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -4591,7 +4703,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -4641,7 +4753,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -4734,7 +4848,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_017_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -4749,7 +4863,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_017_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -4813,6 +4927,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_017_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -4826,7 +4942,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_017_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -4879,7 +4998,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -4929,7 +5048,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -5022,7 +5143,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_018_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -5037,7 +5158,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_018_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -5101,6 +5222,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_018_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -5114,7 +5237,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_018_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -5167,7 +5293,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -5217,7 +5343,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -5310,7 +5438,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_019_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -5325,7 +5453,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_019_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -5389,6 +5517,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_019_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -5402,7 +5532,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_019_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -5455,7 +5588,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -5505,7 +5638,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -5598,7 +5733,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_020_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -5613,7 +5748,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_020_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -5677,6 +5812,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_020_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -5690,7 +5827,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_020_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -5743,7 +5883,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -5793,7 +5933,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -5886,7 +6028,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_021_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -5901,7 +6043,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_021_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -5965,6 +6107,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_021_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -5978,7 +6122,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_021_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -6031,7 +6178,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -6081,7 +6228,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -6174,7 +6323,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_022_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -6189,7 +6338,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_022_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -6253,6 +6402,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_022_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -6266,7 +6417,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_022_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -6319,7 +6473,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -6369,7 +6523,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -6462,7 +6618,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_023_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -6477,7 +6633,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_023_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -6541,6 +6697,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_023_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -6554,7 +6712,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_023_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -6607,7 +6768,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -6657,7 +6818,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -6750,7 +6913,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_024_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -6765,7 +6928,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_024_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -6829,6 +6992,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_024_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -6842,7 +7007,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_024_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -6895,7 +7063,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -6945,7 +7113,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -7038,7 +7208,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_025_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -7053,7 +7223,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_025_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -7117,6 +7287,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_025_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -7130,7 +7302,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_025_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -7183,7 +7358,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -7233,7 +7408,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -7326,7 +7503,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_026_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -7341,7 +7518,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_026_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -7405,6 +7582,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_026_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -7418,7 +7597,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_026_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -7471,7 +7653,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -7521,7 +7703,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -7614,7 +7798,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_027_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -7629,7 +7813,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_027_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -7693,6 +7877,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_027_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -7706,7 +7892,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_027_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -7759,7 +7948,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -7809,7 +7998,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -7902,7 +8093,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_028_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -7917,7 +8108,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_028_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -7981,6 +8172,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_028_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -7994,7 +8187,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_028_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -8047,7 +8243,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -8097,7 +8293,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -8190,7 +8388,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_029_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -8205,7 +8403,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_029_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -8269,6 +8467,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_029_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -8282,7 +8482,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_029_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -8335,7 +8538,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -8385,7 +8588,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -8478,7 +8683,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_030_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -8493,7 +8698,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_030_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -8557,6 +8762,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_030_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -8570,7 +8777,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_030_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -8623,7 +8833,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -8673,7 +8883,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -8766,7 +8978,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_031_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -8781,7 +8993,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_031_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -8845,6 +9057,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_031_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -8858,7 +9072,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_031_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -8911,7 +9128,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -8961,7 +9178,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -9045,7 +9264,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_032_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -9060,7 +9279,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_032_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "fire_imp",
               "ability_type": "flame",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -9135,6 +9354,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_032_lava_hazard",
               "hazard_type": "lava",
+              "hazard_visual_style": "lava_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/lava-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -9148,7 +9369,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_032_fire_gate",
               "required_ability_type": "fire",
+              "gate_visual_style": "fire_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-fire.webp",
               "gate_effect": "melt_ice",
+              "hint_text": "Fire Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -9201,7 +9425,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -9252,6 +9476,8 @@
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
           "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0,
           "vertical_transition": {
             "enabled": true,
             "max_spawn_drop_distance": 96,
@@ -9328,7 +9554,7 @@
             "id": "GeneratedPlatformVerticalStep",
             "position": {
               "x": 380,
-              "y": 304
+              "y": 284
             },
             "size": {
               "x": 120,
@@ -9358,7 +9584,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_033_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -9422,6 +9648,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_033_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -9435,7 +9663,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_033_stone_gate",
               "required_ability_type": "stone",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "press_switch",
+              "hint_text": "Stone Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -9488,7 +9719,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -9538,7 +9769,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -9620,7 +9853,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_034_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -9684,6 +9917,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_034_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -9697,7 +9932,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_034_stone_gate",
               "required_ability_type": "stone",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "press_switch",
+              "hint_text": "Stone Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -9750,7 +9988,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -9800,7 +10038,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -9882,7 +10122,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_035_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -9946,6 +10186,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_035_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -9959,7 +10201,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_035_stone_gate",
               "required_ability_type": "stone",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "press_switch",
+              "hint_text": "Stone Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -10012,7 +10257,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -10062,7 +10307,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -10144,7 +10391,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_036_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -10208,6 +10455,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_036_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -10221,7 +10470,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_036_stone_gate",
               "required_ability_type": "stone",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "press_switch",
+              "hint_text": "Stone Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -10274,7 +10526,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -10324,7 +10576,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -10406,7 +10660,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_037_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -10470,6 +10724,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_037_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -10483,7 +10739,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_037_stone_gate",
               "required_ability_type": "stone",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "press_switch",
+              "hint_text": "Stone Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -10536,7 +10795,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -10586,7 +10845,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -10668,7 +10929,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_038_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -10732,6 +10993,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_038_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -10745,7 +11008,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_038_stone_gate",
               "required_ability_type": "stone",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "press_switch",
+              "hint_text": "Stone Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -10798,7 +11064,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -10848,7 +11114,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -10930,7 +11198,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_039_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -10994,6 +11262,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_039_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -11007,7 +11277,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_039_stone_gate",
               "required_ability_type": "stone",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "press_switch",
+              "hint_text": "Stone Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -11060,7 +11333,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -11110,7 +11383,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -11192,7 +11467,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_040_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -11256,6 +11531,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_040_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -11269,7 +11546,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_040_stone_gate",
               "required_ability_type": "stone",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "press_switch",
+              "hint_text": "Stone Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -11322,7 +11602,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -11372,7 +11652,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -11454,7 +11736,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_041_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -11518,6 +11800,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_041_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -11531,7 +11815,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_041_stone_gate",
               "required_ability_type": "stone",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "press_switch",
+              "hint_text": "Stone Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -11584,7 +11871,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -11634,7 +11921,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -11716,7 +12005,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_042_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -11780,6 +12069,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_042_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -11793,7 +12084,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_042_stone_gate",
               "required_ability_type": "stone",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "press_switch",
+              "hint_text": "Stone Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -11846,7 +12140,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -11896,7 +12190,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -11978,7 +12274,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_043_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -12042,6 +12338,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_043_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -12055,7 +12353,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_043_stone_gate",
               "required_ability_type": "stone",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "press_switch",
+              "hint_text": "Stone Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -12108,7 +12409,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -12158,7 +12459,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -12240,7 +12543,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_044_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -12304,6 +12607,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_044_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -12317,7 +12622,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_044_stone_gate",
               "required_ability_type": "stone",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "press_switch",
+              "hint_text": "Stone Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -12370,7 +12678,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -12420,7 +12728,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -12502,7 +12812,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_045_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -12566,6 +12876,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_045_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -12579,7 +12891,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_045_stone_gate",
               "required_ability_type": "stone",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "press_switch",
+              "hint_text": "Stone Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -12632,7 +12947,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -12682,7 +12997,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -12764,7 +13081,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_046_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -12828,6 +13145,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_046_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -12841,7 +13160,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_046_stone_gate",
               "required_ability_type": "stone",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "press_switch",
+              "hint_text": "Stone Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -12894,7 +13216,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -12944,7 +13266,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -13026,7 +13350,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_047_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -13090,6 +13414,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_047_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -13103,7 +13429,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_047_stone_gate",
               "required_ability_type": "stone",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "press_switch",
+              "hint_text": "Stone Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -13156,7 +13485,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -13206,7 +13535,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -13288,7 +13619,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_048_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -13352,6 +13683,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_048_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -13365,7 +13698,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_048_stone_gate",
               "required_ability_type": "stone",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "press_switch",
+              "hint_text": "Stone Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -13418,7 +13754,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -13468,7 +13804,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -13550,7 +13888,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_049_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -13614,6 +13952,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_049_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -13627,7 +13967,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_049_stone_gate",
               "required_ability_type": "stone",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "press_switch",
+              "hint_text": "Stone Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -13680,7 +14023,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -13730,7 +14073,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -13803,7 +14148,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_050_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "stone_sentry",
               "ability_type": "stone",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -13878,6 +14223,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_050_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -13891,7 +14238,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_050_stone_gate",
               "required_ability_type": "stone",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "press_switch",
+              "hint_text": "Stone Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -13944,7 +14294,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -13995,6 +14345,8 @@
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
           "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0,
           "vertical_transition": {
             "enabled": true,
             "max_spawn_drop_distance": 96,
@@ -14082,7 +14434,7 @@
             "id": "GeneratedPlatformVerticalStep",
             "position": {
               "x": 380,
-              "y": 304
+              "y": 284
             },
             "size": {
               "x": 120,
@@ -14112,7 +14464,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_051_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -14127,7 +14479,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_051_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -14142,7 +14494,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_051_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -14206,6 +14558,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_051_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -14219,7 +14573,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_051_spark_gate",
               "required_ability_type": "spark",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "power_device",
+              "hint_text": "Spark Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -14272,7 +14629,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -14322,7 +14679,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -14415,7 +14774,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_052_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -14430,7 +14789,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_052_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -14445,7 +14804,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_052_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -14509,6 +14868,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_052_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -14522,7 +14883,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_052_spark_gate",
               "required_ability_type": "spark",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "power_device",
+              "hint_text": "Spark Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -14575,7 +14939,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -14625,7 +14989,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -14718,7 +15084,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_053_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -14733,7 +15099,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_053_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -14748,7 +15114,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_053_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -14812,6 +15178,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_053_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -14825,7 +15193,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_053_spark_gate",
               "required_ability_type": "spark",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "power_device",
+              "hint_text": "Spark Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -14878,7 +15249,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -14928,7 +15299,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -15021,7 +15394,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_054_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15036,7 +15409,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_054_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15051,7 +15424,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_054_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15115,6 +15488,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_054_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -15128,7 +15503,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_054_spark_gate",
               "required_ability_type": "spark",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "power_device",
+              "hint_text": "Spark Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -15181,7 +15559,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -15231,7 +15609,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -15324,7 +15704,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_055_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15339,7 +15719,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_055_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15354,7 +15734,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_055_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15418,6 +15798,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_055_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -15431,7 +15813,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_055_spark_gate",
               "required_ability_type": "spark",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "power_device",
+              "hint_text": "Spark Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -15484,7 +15869,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -15534,7 +15919,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -15627,7 +16014,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_056_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15642,7 +16029,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_056_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15657,7 +16044,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_056_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15721,6 +16108,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_056_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -15734,7 +16123,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_056_spark_gate",
               "required_ability_type": "spark",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "power_device",
+              "hint_text": "Spark Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -15787,7 +16179,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -15837,7 +16229,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -15930,7 +16324,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_057_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15945,7 +16339,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_057_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -15960,7 +16354,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_057_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -16024,6 +16418,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_057_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -16037,7 +16433,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_057_spark_gate",
               "required_ability_type": "spark",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "power_device",
+              "hint_text": "Spark Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -16090,7 +16489,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -16140,7 +16539,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -16233,7 +16634,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_058_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -16248,7 +16649,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_058_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -16263,7 +16664,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_058_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -16327,6 +16728,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_058_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -16340,7 +16743,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_058_spark_gate",
               "required_ability_type": "spark",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "power_device",
+              "hint_text": "Spark Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -16393,7 +16799,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -16443,7 +16849,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -16536,7 +16944,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_059_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -16551,7 +16959,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_059_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -16566,7 +16974,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_059_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -16630,6 +17038,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_059_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -16643,7 +17053,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_059_spark_gate",
               "required_ability_type": "spark",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "power_device",
+              "hint_text": "Spark Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -16696,7 +17109,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -16746,7 +17159,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -16839,7 +17254,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_060_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -16854,7 +17269,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_060_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -16869,7 +17284,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_060_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -16933,6 +17348,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_060_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -16946,7 +17363,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_060_spark_gate",
               "required_ability_type": "spark",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "power_device",
+              "hint_text": "Spark Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -16999,7 +17419,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -17049,7 +17469,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -17142,7 +17564,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_061_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -17157,7 +17579,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_061_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -17172,7 +17594,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_061_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -17236,6 +17658,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_061_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -17249,7 +17673,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_061_spark_gate",
               "required_ability_type": "spark",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "power_device",
+              "hint_text": "Spark Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -17302,7 +17729,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -17352,7 +17779,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -17445,7 +17874,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_062_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -17460,7 +17889,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_062_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -17475,7 +17904,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_062_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -17539,6 +17968,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_062_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -17552,7 +17983,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_062_spark_gate",
               "required_ability_type": "spark",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "power_device",
+              "hint_text": "Spark Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -17605,7 +18039,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -17655,7 +18089,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -17748,7 +18184,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_063_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -17763,7 +18199,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_063_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -17778,7 +18214,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_063_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -17842,6 +18278,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_063_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -17855,7 +18293,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_063_spark_gate",
               "required_ability_type": "spark",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "power_device",
+              "hint_text": "Spark Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -17908,7 +18349,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -17958,7 +18399,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -18051,7 +18494,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_064_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18066,7 +18509,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_064_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18081,7 +18524,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_064_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18145,6 +18588,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_064_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -18158,7 +18603,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_064_spark_gate",
               "required_ability_type": "spark",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "power_device",
+              "hint_text": "Spark Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -18211,7 +18659,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -18261,7 +18709,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -18354,7 +18804,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_065_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18369,7 +18819,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_065_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18384,7 +18834,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_065_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18448,6 +18898,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_065_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -18461,7 +18913,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_065_spark_gate",
               "required_ability_type": "spark",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "power_device",
+              "hint_text": "Spark Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -18514,7 +18969,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -18564,7 +19019,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -18657,7 +19114,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_066_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18672,7 +19129,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_066_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18687,7 +19144,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_066_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18751,6 +19208,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_066_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -18764,7 +19223,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_066_spark_gate",
               "required_ability_type": "spark",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "power_device",
+              "hint_text": "Spark Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -18817,7 +19279,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -18867,7 +19329,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -18960,7 +19424,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_067_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18975,7 +19439,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_067_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -18990,7 +19454,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_067_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -19054,6 +19518,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_067_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -19067,7 +19533,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_067_spark_gate",
               "required_ability_type": "spark",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "power_device",
+              "hint_text": "Spark Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -19120,7 +19589,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -19171,6 +19640,8 @@
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
           "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0,
           "vertical_transition": {
             "enabled": true,
             "max_spawn_drop_distance": 96,
@@ -19258,7 +19729,7 @@
             "id": "GeneratedPlatformVerticalStep",
             "position": {
               "x": 380,
-              "y": 304
+              "y": 284
             },
             "size": {
               "x": 120,
@@ -19287,7 +19758,7 @@
             {
               "id": "GeneratedEnemySpawn",
               "spawn_id": "labyrinth_068_generated_enemy",
-              "enemy_type": "generated_ground",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -19302,7 +19773,7 @@
             {
               "id": "GeneratedFlyingEnemySpawn",
               "spawn_id": "labyrinth_068_generated_flying",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -19317,7 +19788,7 @@
             {
               "id": "GeneratedEliteEnemySpawn",
               "spawn_id": "labyrinth_068_generated_elite",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "contact_damage": 1,
               "attack_damage": 1,
@@ -19381,6 +19852,8 @@
               "id": "GeneratedHazardMarker",
               "hazard_id": "labyrinth_068_spike_hazard",
               "hazard_type": "spike",
+              "hazard_visual_style": "spike_texture",
+              "hazard_texture_path": "res://resources/assets/images/hazards/spike-hazard.webp",
               "damage": 1,
               "trigger_radius": 40,
               "position": {
@@ -19394,7 +19867,10 @@
               "id": "GeneratedAbilityGateMarker",
               "gate_id": "labyrinth_068_spark_gate",
               "required_ability_type": "spark",
+              "gate_visual_style": "spark_gate",
+              "gate_texture_path": "res://resources/assets/images/ui/ability-gate-spark.webp",
               "gate_effect": "power_device",
+              "hint_text": "Spark Gate",
               "trigger_radius": 96,
               "position": {
                 "x": 500,
@@ -19447,7 +19923,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -19498,6 +19974,8 @@
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
           "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0,
           "vertical_transition": {
             "enabled": true,
             "max_spawn_drop_distance": 96,
@@ -19563,7 +20041,7 @@
             "id": "GeneratedPlatformVerticalStep",
             "position": {
               "x": 380,
-              "y": 304
+              "y": 284
             },
             "size": {
               "x": 120,
@@ -19638,7 +20116,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -19688,7 +20166,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -19804,7 +20284,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -19854,7 +20334,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -19970,7 +20452,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -20020,7 +20502,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -20136,7 +20620,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -20186,7 +20670,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -20302,7 +20788,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -20352,7 +20838,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -20468,7 +20956,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -20518,7 +21006,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -20634,7 +21124,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -20684,7 +21174,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -20800,7 +21292,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -20850,7 +21342,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -20966,7 +21460,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -21016,7 +21510,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -21132,7 +21628,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -21182,7 +21678,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -21298,7 +21796,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -21348,7 +21846,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -21464,7 +21964,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -21514,7 +22014,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -21630,7 +22132,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -21680,7 +22182,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -21796,7 +22300,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -21846,7 +22350,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -21962,7 +22468,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -22012,7 +22518,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -22128,7 +22636,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -22178,7 +22686,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -22294,7 +22804,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -22344,7 +22854,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -22460,7 +22972,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -22510,7 +23022,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -22626,7 +23140,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -22676,7 +23190,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -22792,7 +23308,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -22842,7 +23358,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -22958,7 +23476,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -23008,7 +23526,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -23124,7 +23644,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -23174,7 +23694,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -23290,7 +23812,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -23340,7 +23862,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -23456,7 +23980,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -23506,7 +24030,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -23622,7 +24148,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -23672,7 +24198,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -23788,7 +24316,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -23838,7 +24366,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -23954,7 +24484,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -24004,7 +24534,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -24120,7 +24652,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -24170,7 +24702,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -24286,7 +24820,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -24336,7 +24870,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -24452,7 +24988,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -24502,7 +25038,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -24618,7 +25156,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -24668,7 +25206,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -24784,7 +25324,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -24834,7 +25374,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -24950,7 +25492,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -25000,7 +25542,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -25116,7 +25660,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -25166,7 +25710,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -25282,7 +25828,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -25332,7 +25878,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -25448,7 +25996,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -25498,7 +26046,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -25614,7 +26164,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -25664,7 +26214,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -25780,7 +26332,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -25830,7 +26382,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -25946,7 +26500,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -25996,7 +26550,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -26112,7 +26668,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -26162,7 +26718,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -26278,7 +26836,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -26328,7 +26886,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -26444,7 +27004,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -26494,7 +27054,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -26610,7 +27172,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -26660,7 +27222,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -26776,7 +27340,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -26826,7 +27390,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -26942,7 +27508,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -26992,7 +27558,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -27108,7 +27676,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -27158,7 +27726,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -27274,7 +27844,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -27324,7 +27894,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -27440,7 +28012,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -27490,7 +28062,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -27606,7 +28180,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -27656,7 +28230,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -27772,7 +28348,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -27822,7 +28398,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -27938,7 +28516,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -27988,7 +28566,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -28104,7 +28684,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -28154,7 +28734,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -28270,7 +28852,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -28320,7 +28902,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -28436,7 +29020,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -28486,7 +29070,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -28602,7 +29188,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -28652,7 +29238,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -28768,7 +29356,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -28818,7 +29406,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -28934,7 +29524,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -28984,7 +29574,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -29100,7 +29692,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -29150,7 +29742,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -29266,7 +29860,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -29316,7 +29910,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -29432,7 +30028,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -29482,7 +30078,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -29598,7 +30196,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -29648,7 +30246,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -29764,7 +30364,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -29814,7 +30414,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -29930,7 +30532,7 @@
         "camera_bounds": {
           "position": {
             "x": 380,
-            "y": 270
+            "y": 178
           },
           "size": {
             "x": 840,
@@ -29980,7 +30582,9 @@
         "safety": {
           "door_trigger_radius": 48,
           "min_spawn_door_distance": 64,
-          "door_safe_radius": 96
+          "door_safe_radius": 96,
+          "min_platform_clearance_px": 36,
+          "max_bottom_floor_gap_px": 0
         },
         "floor": {
           "id": "Floor",
@@ -30034,7 +30638,7 @@
             {
               "id": "GeneratedFinalBossSpawn",
               "spawn_id": "labyrinth_132_final_boss",
-              "enemy_type": "generated_flying",
+              "enemy_type": "spark_wisp",
               "ability_type": "spark",
               "enemy_group_id": "labyrinth_132_final_guard",
               "boss_id": "labyrinth_132_final_boss",

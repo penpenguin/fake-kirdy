@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "hud_controller_lab_jump",
-  "content_hash": "e9dd0eb5f67bd010096b390d3e5c5eceda72b2cf6def799800a0cde44cc9d6d8",
+  "content_hash": "93725b7bf60f34aba84e4e577f773dd8abf9872996d3cd25ef050b59e321227d",
   "replay_path": "godot/tests/replays/controller_lab_jump.json",
   "frame": 30,
   "viewport": {
@@ -16,6 +16,11 @@
     "godot/scenes/ui/HudOverlay.tscn"
   ],
   "required_resource_paths": [
-    "godot/resources/assets/images/characters/kirdy/kirdy-jump.webp"
+    "godot/resources/assets/images/characters/kirdy/kirdy-jump.webp",
+    "godot/resources/assets/images/items/cave-orb.webp",
+    "godot/resources/assets/images/items/fire-orb.webp",
+    "godot/resources/assets/images/items/forest-orb.webp",
+    "godot/resources/assets/images/items/ice-orb.webp",
+    "godot/resources/assets/images/items/sky-orb.webp"
   ]
 }

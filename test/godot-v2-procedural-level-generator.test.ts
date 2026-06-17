@@ -1,5 +1,6 @@
-import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -42,6 +43,8 @@ type ProceduralLevelExport = {
         door_trigger_radius?: number;
         min_spawn_door_distance?: number;
         door_safe_radius?: number;
+        min_platform_clearance_px?: number;
+        max_bottom_floor_gap_px?: number;
         vertical_transition?: {
           enabled?: boolean;
           max_spawn_drop_distance?: number;
@@ -103,6 +106,8 @@ type ProceduralLevelExport = {
           id?: string;
           hazard_id?: string;
           hazard_type?: string;
+          hazard_visual_style?: string;
+          hazard_texture_path?: string;
           damage?: number;
           trigger_radius?: number;
           position?: { x?: number; y?: number };
@@ -111,6 +116,9 @@ type ProceduralLevelExport = {
           id?: string;
           gate_id?: string;
           required_ability_type?: string;
+          gate_visual_style?: string;
+          gate_texture_path?: string;
+          hint_text?: string;
           gate_effect?: string;
           trigger_radius?: number;
           position?: { x?: number; y?: number };
@@ -189,7 +197,7 @@ describe('Godot v2 procedural level schema generation', () => {
       grid: { columns: 18, rows: 12 },
       room: { width: 760, height: 432 },
       camera_bounds: {
-        position: { x: 380, y: 270 },
+        position: { x: 380, y: 178 },
         size: { x: 840, y: 540 },
       },
       spawns: {
@@ -205,6 +213,8 @@ describe('Godot v2 procedural level schema generation', () => {
         door_trigger_radius: 48,
         min_spawn_door_distance: 64,
         door_safe_radius: 96,
+        min_platform_clearance_px: 36,
+        max_bottom_floor_gap_px: 0,
       },
     });
     expect(iceRoom?.runtime_layout?.platforms?.map((platform) => platform.id)).toEqual([
@@ -212,6 +222,112 @@ describe('Godot v2 procedural level schema generation', () => {
       'GeneratedPlatformHigh',
     ]);
     expect(terminalRoom?.runtime_layout?.platforms?.map((platform) => platform.id)).toEqual([]);
+  });
+
+  it('merges map builder runtime layout overrides into generated schema output without changing topology metadata', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'fake-kirdy-procedural-'));
+    const outputPath = join(tempDir, 'procedural_levels.json');
+    const overridesPath = join(tempDir, 'procedural_level_overrides.source.json');
+    writeFileSync(overridesPath, `${JSON.stringify({
+      version: 1,
+      levels: {
+        'labyrinth-010': {
+          runtime_layout: {
+            camera_bounds: {
+              position: { x: 384, y: 188 },
+              size: { x: 880, y: 560 },
+            },
+            platforms: [
+              {
+                id: 'BuilderPlatformLow',
+                position: { x: 360, y: 340 },
+                size: { x: 160, y: 24 },
+              },
+            ],
+            visuals: {
+              profile_id: 'ice_default',
+            },
+          },
+        },
+      },
+    }, null, 2)}\n`);
+
+    execFileSync('node', [
+      'scripts/generate-godot-procedural-levels.mjs',
+      '--out',
+      outputPath,
+      '--overrides',
+      overridesPath,
+    ], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+    });
+
+    const generated = JSON.parse(readFileSync(outputPath, 'utf8')) as ProceduralLevelExport;
+    const levels = new Map(generated.levels?.map((level) => [level.id, level]));
+    const iceRoom = levels.get('labyrinth_010');
+
+    expect(iceRoom).toMatchObject({
+      id: 'labyrinth_010',
+      stage_id: 'labyrinth-010',
+      scene_strategy: 'generated_schema',
+      metadata: {
+        cluster: 'ice',
+        difficulty: 3,
+      },
+      neighbors: {
+        east: 'ice_reliquary',
+      },
+    });
+    expect(iceRoom?.runtime_layout?.camera_bounds).toEqual({
+      position: { x: 384, y: 188 },
+      size: { x: 880, y: 560 },
+    });
+    expect(iceRoom?.runtime_layout?.platforms).toEqual([
+      {
+        id: 'BuilderPlatformLow',
+        position: { x: 360, y: 340 },
+        size: { x: 160, y: 24 },
+      },
+    ]);
+    expect(iceRoom?.runtime_layout).toMatchObject({
+      visuals: {
+        profile_id: 'ice_default',
+      },
+    });
+  });
+
+  it('rejects map builder overrides that try to change generated topology or unsafe runtime sections', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'fake-kirdy-procedural-'));
+    const outputPath = join(tempDir, 'procedural_levels.json');
+    const overridesPath = join(tempDir, 'procedural_level_overrides.source.json');
+    writeFileSync(overridesPath, `${JSON.stringify({
+      version: 1,
+      levels: {
+        'labyrinth-010': {
+          neighbors: {
+            east: 'goal_sanctum',
+          },
+          runtime_layout: {
+            branch_exit_rules: [],
+          },
+        },
+      },
+    }, null, 2)}\n`);
+
+    const result = spawnSync('node', [
+      'scripts/generate-godot-procedural-levels.mjs',
+      '--out',
+      outputPath,
+      '--overrides',
+      overridesPath,
+    ], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+    });
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain('cannot be overridden by map builder');
   });
 
   it('exports multi-shape generated room geometry as schema-owned floor segments', () => {
@@ -260,7 +376,7 @@ describe('Godot v2 procedural level schema generation', () => {
         {
           id: 'GeneratedEnemySpawn',
           spawn_id: 'labyrinth_010_generated_enemy',
-          enemy_type: 'generated_ground',
+          enemy_type: 'frost_flyer',
           ability_type: 'frost',
           contact_damage: 1,
           attack_damage: 1,
@@ -271,7 +387,7 @@ describe('Godot v2 procedural level schema generation', () => {
         {
           id: 'GeneratedFlyingEnemySpawn',
           spawn_id: 'labyrinth_010_generated_flying',
-          enemy_type: 'generated_flying',
+          enemy_type: 'frost_flyer',
           ability_type: 'frost',
           contact_damage: 1,
           attack_damage: 1,
@@ -385,6 +501,59 @@ describe('Godot v2 procedural level schema generation', () => {
     });
   });
 
+  it('exports texture-backed hazard and ability gate metadata for labyrinth_011 instead of fallback markers', () => {
+    const generated = JSON.parse(readFileSync(proceduralLevelsPath, 'utf8')) as ProceduralLevelExport;
+    const levels = new Map(generated.levels?.map((level) => [level.id, level]));
+    const labyrinth011 = levels.get('labyrinth_011');
+    const loader = readFileSync(join(repoRoot, 'godot', 'scripts', 'level', 'LevelLoader.gd'), 'utf8');
+    const generator = readFileSync(join(repoRoot, 'scripts', 'generate-godot-procedural-levels.mjs'), 'utf8');
+
+    expect(labyrinth011?.metadata?.cluster).toBe('fire');
+    expect(labyrinth011?.runtime_layout?.content?.hazards).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        hazard_id: 'labyrinth_011_lava_hazard',
+        hazard_type: 'lava',
+        hazard_visual_style: 'lava_texture',
+        hazard_texture_path: 'res://resources/assets/images/hazards/lava-hazard.webp',
+      }),
+    ]));
+    expect(labyrinth011?.runtime_layout?.content?.ability_gates).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        gate_id: 'labyrinth_011_fire_gate',
+        required_ability_type: 'fire',
+        gate_visual_style: 'fire_gate',
+        gate_texture_path: 'res://resources/assets/images/ui/ability-gate-fire.webp',
+        hint_text: 'Fire Gate',
+      }),
+    ]));
+    expect(loader).toContain('hazard.set("hazard_visual_style"');
+    expect(loader).toContain('hazard.set("hazard_texture_path"');
+    expect(loader).toContain('gate.set("gate_visual_style"');
+    expect(loader).toContain('gate.set("gate_texture_path"');
+    expect(generator).toContain('hazard_texture_path');
+    expect(generator).toContain('gate_texture_path');
+  });
+
+  it('keeps authored and generated levels protected by camera bounds clamps at screen edges', () => {
+    const generated = JSON.parse(readFileSync(proceduralLevelsPath, 'utf8')) as ProceduralLevelExport;
+    const session = readFileSync(join(repoRoot, 'godot', 'scripts', 'session', 'GameSession.gd'), 'utf8');
+    const tutorial = readFileSync(join(repoRoot, 'godot', 'levels', 'tutorial_room.tscn'), 'utf8');
+    const labyrinth011 = generated.levels?.find((level) => level.id === 'labyrinth_011');
+
+    expect(tutorial).toContain('spawn_id = "left_edge_check"');
+    expect(tutorial).toContain('spawn_id = "right_edge_check"');
+    expect(labyrinth011?.runtime_layout?.camera_bounds).toMatchObject({
+      position: { x: 380, y: 178 },
+      size: { x: 840, y: 540 },
+    });
+    expect(session).toContain('func constrain_player_to_camera_bounds() -> void:');
+    expect(session).toContain('var min_position := center - bounds_size * 0.5 + Vector2(player_boundary_padding, player_boundary_padding)');
+    expect(session).toContain('var max_position := center + bounds_size * 0.5 - Vector2(player_boundary_padding, player_boundary_padding)');
+    expect(session).toContain('player.boundary.clamped');
+    expect(session).toContain('"recovery_mode": "stop_velocity"');
+    expect(session).not.toContain('player.global_position = recovery_position\n    player.velocity = Vector2.ZERO\n    trace_recorder.call("record_player_event", "player.boundary.clamped"');
+  });
+
   it('publishes branch-exit rules and locks generated reliquary exits behind local route shards', () => {
     const generated = JSON.parse(readFileSync(proceduralLevelsPath, 'utf8')) as ProceduralLevelExport;
     const levels = new Map(generated.levels?.map((level) => [level.id, level]));
@@ -426,14 +595,14 @@ describe('Godot v2 procedural level schema generation', () => {
     expect(iceReliquaryRoute?.runtime_layout?.content?.enemies).toEqual(expect.arrayContaining([
       expect.objectContaining({
         spawn_id: 'labyrinth_010_generated_enemy',
-        enemy_type: 'generated_ground',
+        enemy_type: 'frost_flyer',
         attack_damage: 1,
         attack_radius: 112,
         attack_cooldown_ms: 4000,
       }),
       expect.objectContaining({
         spawn_id: 'labyrinth_010_generated_flying',
-        enemy_type: 'generated_flying',
+        enemy_type: 'frost_flyer',
         attack_radius: 148,
       }),
     ]));
@@ -441,7 +610,7 @@ describe('Godot v2 procedural level schema generation', () => {
     expect(skyRoute?.runtime_layout?.content?.enemies).toEqual(expect.arrayContaining([
       expect.objectContaining({
         spawn_id: 'labyrinth_051_generated_elite',
-        enemy_type: 'generated_flying',
+        enemy_type: 'spark_wisp',
         contact_damage: 1,
         attack_damage: 1,
         attack_cooldown_ms: 4000,
@@ -450,7 +619,7 @@ describe('Godot v2 procedural level schema generation', () => {
     expect(terminalRoom?.runtime_layout?.content?.enemies).toEqual([
       expect.objectContaining({
         spawn_id: 'labyrinth_132_final_boss',
-        enemy_type: 'generated_flying',
+        enemy_type: 'spark_wisp',
         ability_type: 'spark',
         enemy_group_id: 'labyrinth_132_final_guard',
         boss_id: 'labyrinth_132_final_boss',
@@ -551,6 +720,62 @@ describe('Godot v2 procedural level schema generation', () => {
         expect(distance, `${level.id} ${targetSpawnId} spawn too close to door`).toBeGreaterThanOrEqual(
           minSpawnDoorDistance,
         );
+      }
+    }
+  });
+
+  it('bottom-aligns generated floors and keeps platform gaps traversable', () => {
+    const generated = JSON.parse(readFileSync(proceduralLevelsPath, 'utf8')) as ProceduralLevelExport;
+
+    for (const level of generated.levels ?? []) {
+      const layout = level.runtime_layout;
+      const safety = layout?.safety;
+      const minClearance = Number(safety?.min_platform_clearance_px);
+      const maxBottomGap = Number(safety?.max_bottom_floor_gap_px);
+
+      expect(minClearance, `${level.id} missing platform clearance`).toBe(36);
+      expect(maxBottomGap, `${level.id} missing bottom floor gap limit`).toBe(0);
+
+      const cameraBottom = Number(layout?.camera_bounds?.position?.y) + Number(layout?.camera_bounds?.size?.y) / 2;
+      const floorSurfaces = [
+        layout?.floor,
+        ...(layout?.floor_segments ?? []),
+      ].filter((surface): surface is NonNullable<typeof surface> => surface !== undefined);
+      const allSurfaces = [
+        ...floorSurfaces,
+        ...(layout?.platforms ?? []),
+      ];
+      const bottomFloor = floorSurfaces.reduce((bottom, surface) => {
+        return Math.max(bottom, Number(surface.position?.y) + Number(surface.size?.y) / 2);
+      }, Number.NEGATIVE_INFINITY);
+
+      expect(cameraBottom - bottomFloor, `${level.id} bottom floor floats above camera bottom`).toBeLessThanOrEqual(maxBottomGap);
+
+      for (let lowerIndex = 0; lowerIndex < allSurfaces.length; lowerIndex += 1) {
+        for (let upperIndex = 0; upperIndex < allSurfaces.length; upperIndex += 1) {
+          if (lowerIndex === upperIndex) {
+            continue;
+          }
+          const lower = allSurfaces[lowerIndex];
+          const upper = allSurfaces[upperIndex];
+          const lowerTop = Number(lower.position?.y) - Number(lower.size?.y) / 2;
+          const upperBottom = Number(upper.position?.y) + Number(upper.size?.y) / 2;
+          const verticalGap = lowerTop - upperBottom;
+          if (verticalGap <= 0) {
+            continue;
+          }
+          const horizontalOverlap = Math.min(
+            Number(lower.position?.x) + Number(lower.size?.x) / 2,
+            Number(upper.position?.x) + Number(upper.size?.x) / 2,
+          ) - Math.max(
+            Number(lower.position?.x) - Number(lower.size?.x) / 2,
+            Number(upper.position?.x) - Number(upper.size?.x) / 2,
+          );
+          if (horizontalOverlap <= 0) {
+            continue;
+          }
+          expect(verticalGap, `${level.id} ${upper.id} -> ${lower.id} gap is not traversable`).toBeGreaterThanOrEqual(minClearance);
+        }
       }
     }
   });

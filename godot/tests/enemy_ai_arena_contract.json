@@ -36,7 +36,7 @@
     },
     {
       "id": "frost_flying_hover_profile",
-      "enemy_type": "flying_enemy",
+      "enemy_type": "frost_flyer",
       "ability_type": "frost",
       "patrol_radius": 36,
       "expected_profile": {
@@ -60,7 +60,7 @@
     },
     {
       "id": "fire_ground_rush_profile",
-      "enemy_type": "simple_ground",
+      "enemy_type": "fire_imp",
       "ability_type": "fire",
       "patrol_radius": 40,
       "expected_profile": {
@@ -83,7 +83,7 @@
     },
     {
       "id": "stone_sentry_return_profile",
-      "enemy_type": "simple_ground",
+      "enemy_type": "stone_sentry",
       "ability_type": "stone",
       "patrol_radius": 24,
       "player_far_distance": 240,
@@ -103,6 +103,29 @@
       ],
       "movement_bounds": {
         "max_patrol_distance": 24
+      }
+    },
+    {
+      "id": "leaf_sprite_drift_profile",
+      "enemy_type": "leaf_sprite",
+      "ability_type": "leaf",
+      "patrol_radius": 40,
+      "expected_profile": {
+        "ai_behavior": "leaf_drift",
+        "chase_speed": 66
+      },
+      "expected_events": [
+        "enemy.ai.profile.applied",
+        "enemy.ai.patrol",
+        "enemy.ai.detected",
+        "enemy.ai.chase",
+        "enemy.attack.started",
+        "enemy.attack.cooldown",
+        "enemy.ai.return",
+        "enemy.defeated"
+      ],
+      "movement_bounds": {
+        "max_patrol_distance": 40
       }
     }
   ],

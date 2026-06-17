@@ -20,6 +20,7 @@ spawn_id = "default"
 position = Vector2(620, 368)
 script = ExtResource("2_door")
 door_id = "labyrinth_001_to_forest_area"
+door_label = "Forest Area"
 target_level_id = "forest_area"
 target_spawn_id = "default"
 trigger_radius = 48.0
@@ -28,7 +29,7 @@ trigger_radius = 48.0
 position = Vector2(320, 400)
 script = ExtResource("3_enemy")
 spawn_id = "labyrinth_001_enemy"
-enemy_type = "simple_ground"
+enemy_type = "leaf_sprite"
 ability_type = "leaf"
 contact_damage = 1
 
@@ -39,7 +40,7 @@ heal_id = "labyrinth_001_dead_end_heal"
 amount = 1
 
 [node name="CameraBoundsMarker" type="Node2D" parent="."]
-position = Vector2(380, 270)
+position = Vector2(380, 178)
 script = ExtResource("5_camera_bounds")
 size = Vector2(840, 540)
 

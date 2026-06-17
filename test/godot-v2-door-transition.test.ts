@@ -27,6 +27,32 @@ describe('Godot v2 door transition and run outcome', () => {
     expect(source).not.toContain('visual.scale = Vector2(0.34, 0.34)');
   });
 
+  it('uses readable branch door labels and trace display names for forest and labyrinth transitions', () => {
+    const forestArea = readGodotFile('levels/forest_area.tscn');
+    const labyrinth001 = readGodotFile('levels/labyrinth_001.tscn');
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const loader = readGodotFile('scripts/level/LevelLoader.gd');
+    const docs = readFileSync(join(repoRoot, 'docs', 'godot-v2', 'door-transition-flow.md'), 'utf8');
+
+    expect(forestArea).toContain('door_label = "Central Hub"');
+    expect(forestArea).toContain('door_label = "Labyrinth 001"');
+    expect(labyrinth001).toContain('door_label = "Forest Area"');
+
+    expect(session).toContain('func get_level_display_name(level_id: String) -> String:');
+    expect(session).toContain('"level_display_name": get_level_display_name(current_level_id)');
+    expect(session).toContain('"target_level_display_name": get_level_display_name(target_level_id)');
+    expect(session).toContain('"door_label": get_door_label(payload, target_level_id)');
+
+    expect(loader).toContain('func format_generated_level_display_name(level_id: String) -> String:');
+    expect(loader).toContain('return format_generated_level_display_name(target_level_id)');
+    expect(loader).not.toContain('return String(target_level_id).replace("_", " ").to_pascal_case()');
+
+    expect(docs).toContain('Central Hub');
+    expect(docs).toContain('Labyrinth 001');
+    expect(docs).not.toContain('CentralHub');
+    expect(docs).not.toContain('labyrinth001');
+  });
+
   it('loads target levels by id through LevelLoader', () => {
     const source = readGodotFile('scripts/level/LevelLoader.gd');
     const catalog = readFileSync(join(godotRoot, 'levels', 'level_catalog.json'), 'utf8');

@@ -351,6 +351,8 @@ func add_generated_enemy_marker(root: Node2D, payload: Dictionary) -> void:
     enemy.set("attack_radius", float(payload.get("attack_radius", 120.0)))
     enemy.set("attack_cooldown_ms", int(payload.get("attack_cooldown_ms", 1200)))
     enemy.set("patrol_radius", float(payload.get("patrol_radius", 0.0)))
+    enemy.set("enemy_group_id", String(payload.get("enemy_group_id", "")))
+    enemy.set("boss_id", String(payload.get("boss_id", "")))
     root.add_child(enemy)
 
 
@@ -384,6 +386,8 @@ func add_generated_hazard_marker(root: Node2D, payload: Dictionary) -> void:
     hazard.set_script(HazardMarkerScript)
     hazard.set("hazard_id", String(payload.get("hazard_id", "generated_hazard")))
     hazard.set("hazard_type", String(payload.get("hazard_type", "spike")))
+    hazard.set("hazard_visual_style", String(payload.get("hazard_visual_style", "")))
+    hazard.set("hazard_texture_path", String(payload.get("hazard_texture_path", "")))
     hazard.set("damage", int(payload.get("damage", 1)))
     hazard.set("trigger_radius", float(payload.get("trigger_radius", 40.0)))
     root.add_child(hazard)
@@ -396,9 +400,12 @@ func add_generated_ability_gate_marker(root: Node2D, payload: Dictionary) -> voi
     gate.set_script(AbilityGateMarkerScript)
     gate.set("gate_id", String(payload.get("gate_id", "generated_ability_gate")))
     gate.set("required_ability_type", String(payload.get("required_ability_type", "spark")))
+    gate.set("gate_visual_style", String(payload.get("gate_visual_style", "")))
+    gate.set("gate_texture_path", String(payload.get("gate_texture_path", "")))
     gate.set("gate_effect", String(payload.get("gate_effect", "power_device")))
     gate.set("trigger_radius", float(payload.get("trigger_radius", 96.0)))
     gate.set("grants_item_id", String(payload.get("grants_item_id", "")))
+    gate.set("hint_text", String(payload.get("hint_text", "")))
     root.add_child(gate)
 
 
@@ -468,7 +475,25 @@ func get_generated_door_role(direction: String, runtime_layout: Dictionary) -> S
 
 
 func get_generated_door_label(target_level_id: String) -> String:
-    return String(target_level_id).replace("_", " ").to_pascal_case()
+    return format_generated_level_display_name(target_level_id)
+
+
+func format_generated_level_display_name(level_id: String) -> String:
+    var display_parts := []
+    var raw_parts := String(level_id).replace("-", "_").split("_")
+    for raw_part in raw_parts:
+        var part := String(raw_part).strip_edges()
+        if part == "":
+            continue
+        if part.is_valid_int():
+            display_parts.append(part)
+        else:
+            display_parts.append(part.substr(0, 1).to_upper() + part.substr(1).to_lower())
+
+    if display_parts.is_empty():
+        return "Unknown"
+
+    return " ".join(display_parts)
 
 
 func get_generated_branch_exit_rule(runtime_layout: Dictionary, direction: String) -> Dictionary:

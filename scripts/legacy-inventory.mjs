@@ -8,9 +8,17 @@ const dependencies = packageJson.dependencies ?? {};
 const devDependencies = packageJson.devDependencies ?? {};
 
 const legacyCommands = [];
-const legacyDependencies = ['matter-js', 'phaser', 'vite'].filter(
-  (dependencyName) => dependencies[dependencyName] || devDependencies[dependencyName],
-);
+const mapBuilderUsesVite = typeof scripts['map:builder'] === 'string'
+  && scripts['map:builder'].includes('tools/map-builder')
+  && typeof scripts['map:builder:build'] === 'string'
+  && scripts['map:builder:build'].includes('tools/map-builder');
+const legacyDependencies = ['matter-js', 'phaser', 'vite'].filter((dependencyName) => {
+  if (dependencyName === 'vite' && mapBuilderUsesVite) {
+    return false;
+  }
+
+  return dependencies[dependencyName] || devDependencies[dependencyName];
+});
 const legacySourceDirs = ['legacy/phaser-reference/src', 'legacy/phaser-reference/public'].filter((directoryName) =>
   existsSync(join(repoRoot, directoryName)),
 );
@@ -34,7 +42,7 @@ const inventory = {
     'Godot export or export-template skip is documented',
     'legacy removal decision recorded',
     'Phaser reference behavior is ported or explicitly deprecated',
-    'root Phaser/Vite dependencies removed',
+    'root Phaser dependencies removed; Vite is allowed only for tools/map-builder',
   ],
 };
 

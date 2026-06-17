@@ -179,6 +179,7 @@ describe('Godot combat matrix', () => {
     expect(enemyMarker).toContain('@export var enemy_rank');
     expect(session).toContain('func resolve_enemy_max_hp(enemy_type: String, marker_payload: Dictionary) -> int:');
     expect(session).toContain('enemy.max_hp = resolve_enemy_max_hp(enemy_type, marker_payload)');
+    expect(session).toMatch(/normalized_enemy_type == "sentry"[\s\S]{0,80}normalized_enemy_type == "stone_sentry"/);
     expect(contract.rules?.basic_enemy_hp?.severity).toBe('error');
 
     const archetypes = contract.enemy_archetypes ?? [];

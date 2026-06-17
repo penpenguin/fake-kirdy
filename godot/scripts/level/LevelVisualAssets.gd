@@ -49,6 +49,8 @@ func get_texture_for_level(level_id: String) -> Texture2D:
 func get_background_texture_for_level(level_id: String) -> Texture2D:
     var normalized_level_id := level_id.to_lower()
 
+    if normalized_level_id == "central_hub":
+        return RoyalBackgroundTexture
     if normalized_level_id.contains("cluster:forest") or normalized_level_id.contains("forest"):
         return ForestBackgroundTexture
     if normalized_level_id.contains("cluster:fire") or normalized_level_id.contains("fire"):

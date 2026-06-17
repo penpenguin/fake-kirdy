@@ -31,6 +31,7 @@ script = ExtResource("2_door")
 door_id = "mirror_corridor_to_central_hub"
 door_role = "return"
 door_label = "Return"
+door_visual_style = "hub_return"
 target_level_id = "central_hub"
 target_spawn_id = "default"
 trigger_radius = 48.0
@@ -41,6 +42,7 @@ script = ExtResource("2_door")
 door_id = "mirror_corridor_to_goal_sanctum"
 door_role = "locked_gate"
 door_label = "Final Gate"
+door_visual_style = "locked"
 target_level_id = "goal_sanctum"
 target_spawn_id = "default"
 trigger_radius = 48.0
@@ -55,7 +57,7 @@ ability_type = "spark"
 contact_damage = 1
 
 [node name="CameraBoundsMarker" type="Node2D" parent="."]
-position = Vector2(380, 270)
+position = Vector2(380, 178)
 script = ExtResource("4_camera_bounds")
 size = Vector2(840, 540)
 

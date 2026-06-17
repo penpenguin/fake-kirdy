@@ -61,9 +61,9 @@ describe('Godot v2 replay suite workflow', () => {
 
     const byId = new Map(suite.replays?.map((replay) => [replay.id, replay]));
     expect(byId.get('controller_lab_jump')?.expected_outcome).toBe('finished');
-    expect(byId.get('combat_capture_swallow_goal')?.expected_outcome).toBe('complete');
-    expect(byId.get('flying_enemy_release_swallow_goal')?.expected_outcome).toBe('complete');
-    expect(byId.get('central_hub_to_heal_goal')?.expected_outcome).toBe('complete');
+    expect(byId.get('combat_capture_swallow_goal')?.expected_outcome).toBe('replay.max_frames_reached');
+    expect(byId.get('flying_enemy_release_swallow_goal')?.expected_outcome).toBe('replay.max_frames_reached');
+    expect(byId.get('central_hub_to_heal_goal')?.expected_outcome).toBe('replay.max_frames_reached');
     expect(byId.get('central_hub_dead_end_max_health')?.expected_outcome).toBe('replay.max_frames_reached');
     expect(byId.get('central_hub_dead_end_max_health')?.expected_last_hud).toMatchObject({
       score: 400,
@@ -98,9 +98,9 @@ describe('Godot v2 replay suite workflow', () => {
     });
     expect(byId.get('results_scene_continue')?.expected_outcome).toBe('complete');
     expect(byId.get('results_scene_continue')?.expected_events).toEqual(expect.arrayContaining([
-      'result.overlay.shown',
       'results.scene.shown',
     ]));
+    expect(byId.get('results_scene_continue')?.expected_events).not.toContain('result.overlay.shown');
     expect(byId.get('forest_generated_reliquary_chain')?.replay_path).toBe('res://tests/replays/labyrinth_002_to_forest_reliquary_generated_chain.json');
     expect(byId.get('ice_generated_reliquary_chain')?.replay_path).toBe('res://tests/replays/labyrinth_006_to_ice_reliquary_generated_chain.json');
     expect(byId.get('fire_generated_reliquary_chain')?.replay_path).toBe('res://tests/replays/labyrinth_029_to_fire_reliquary_generated_chain.json');
@@ -169,6 +169,19 @@ describe('Godot v2 replay suite workflow', () => {
     ]));
     expect(readReplay('fire_area_ability_gate_trace.json').initial_ability_type).toBe('fire');
 
+    expect(byId.get('labyrinth_011_gate_bounds_trace')).toMatchObject({
+      replay_path: 'res://tests/replays/labyrinth_011_gate_bounds_trace.json',
+      expected_outcome: 'replay.max_frames_reached',
+      expected_events: ['ability.used', 'ability_gate.opened', 'player.boundary.clamped'],
+      forbidden_events: ['game.over', 'player.defeated', 'replay.error'],
+      tags: expect.arrayContaining(['procedural', 'fire', 'labyrinth_011', 'ability-gate', 'boundary', 'trace']),
+    });
+    expect(readReplay('labyrinth_011_gate_bounds_trace.json').start_level_id).toBe('labyrinth_011');
+    expect(readReplay('labyrinth_011_gate_bounds_trace.json').start_spawn_id).toBe('east');
+    expect(readReplay('labyrinth_011_gate_bounds_trace.json').initial_ability_type).toBe('fire');
+    expect(readReplay('labyrinth_011_gate_bounds_trace.json').frames?.some((frame) => frame.actions?.move_left)).toBe(true);
+    expect(readReplay('labyrinth_011_gate_bounds_trace.json').frames?.some((frame) => frame.actions?.use_ability)).toBe(true);
+
     const goldenFirePath = byId.get('golden_fire_path');
     expect(goldenFirePath?.replay_path).toBe('res://tests/replays/golden_fire_path.json');
     expect(goldenFirePath?.expected_outcome).toBe('replay.max_frames_reached');
@@ -210,6 +223,35 @@ describe('Godot v2 replay suite workflow', () => {
       'door.entered',
     ]));
     expect(readReplay('forest_reliquary_key_unlocks_door.json').start_level_id).toBe('forest_reliquary');
+    expect(byId.get('forest_reliquary_boss_orb_return')?.expected_events).toEqual(expect.arrayContaining([
+      'enemy.defeated',
+      'boss.defeated',
+      'item.acquired',
+      'hud.updated',
+      'door.entered',
+    ]));
+    expect(byId.get('forest_reliquary_boss_orb_return')?.expected_last_hud).toMatchObject({
+      acquired_orb_ids: ['forest-orb'],
+    });
+    expect(readReplay('forest_reliquary_boss_orb_return.json').initial_ability_type).toBe('fire');
+    expect(byId.get('labyrinth_001_return_forest')?.expected_event_sequence).toEqual([
+      {
+        event_type: 'door.entered',
+        payload: {
+          door_id: 'labyrinth_001_to_forest_area',
+          door_label: 'Forest Area',
+          target_level_id: 'forest_area',
+          target_level_display_name: 'Forest Area',
+        },
+      },
+      {
+        event_type: 'level.loaded',
+        payload: {
+          level_id: 'forest_area',
+          level_display_name: 'Forest Area',
+        },
+      },
+    ]);
     expect(byId.get('sky_generated_goal_path')?.expected_events).toEqual(expect.arrayContaining([
       'door.entered',
       'goal.door.entered',
@@ -233,8 +275,8 @@ describe('Godot v2 replay suite workflow', () => {
 
     expect(readReplay('game_over_restart_option.json').continue_after_finished).toBe(true);
     expect(readReplay('game_over_restart_option.json').frames?.some((frame) => frame.actions?.result_restart)).toBe(true);
-    expect(readReplay('results_scene_continue.json').continue_after_finished).toBe(true);
-    expect(readReplay('results_scene_continue.json').frames?.some((frame) => frame.actions?.result_continue)).toBe(true);
+    expect(readReplay('results_scene_continue.json').continue_after_finished).toBe(false);
+    expect(readReplay('results_scene_continue.json').frames?.some((frame) => frame.actions?.result_continue)).toBe(false);
   });
 
   it('adds tutorial onboarding replay fixtures that forbid death and prove the real-stage route', () => {
@@ -269,20 +311,30 @@ describe('Godot v2 replay suite workflow', () => {
     expect(byId.get('tutorial_no_edge_fall_path')).toMatchObject({
       replay_path: 'res://tests/replays/tutorial_no_edge_fall_path.json',
       expected_outcome: 'replay.max_frames_reached',
-      expected_events: ['player.boundary.clamped'],
+      expected_events: ['player.boundary.clamped', 'player.jump.started'],
+      expected_event_sequence: [
+        { event_type: 'player.boundary.clamped', payload: { blocked_axis: 'x', recovery_mode: 'stop_velocity' } },
+        { event_type: 'player.jump.started' },
+      ],
       forbidden_events: tutorialForbiddenEvents,
       forbidden_event_payloads: tutorialForbiddenEventPayloads,
     });
     expect(readReplay('tutorial_no_edge_fall_path.json').frames?.some((frame) => frame.actions?.move_left)).toBe(true);
+    expect(readReplay('tutorial_no_edge_fall_path.json').frames?.some((frame) => frame.actions?.move_right && frame.actions?.jump)).toBe(true);
 
     expect(byId.get('tutorial_right_edge_recovery_path')).toMatchObject({
       replay_path: 'res://tests/replays/tutorial_right_edge_recovery_path.json',
       expected_outcome: 'replay.max_frames_reached',
-      expected_events: ['player.boundary.clamped'],
+      expected_events: ['player.boundary.clamped', 'player.jump.started'],
+      expected_event_sequence: [
+        { event_type: 'player.boundary.clamped', payload: { blocked_axis: 'x', recovery_mode: 'stop_velocity' } },
+        { event_type: 'player.jump.started' },
+      ],
       forbidden_events: tutorialForbiddenEvents,
       forbidden_event_payloads: tutorialForbiddenEventPayloads,
     });
     expect(readReplay('tutorial_right_edge_recovery_path.json').frames?.some((frame) => frame.actions?.move_right)).toBe(true);
+    expect(readReplay('tutorial_right_edge_recovery_path.json').frames?.some((frame) => frame.actions?.move_left && frame.actions?.jump)).toBe(true);
 
     expect(byId.get('flat_room_fall_recovery')).toMatchObject({
       replay_path: 'res://tests/replays/flat_room_fall_recovery.json',

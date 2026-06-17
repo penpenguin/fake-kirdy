@@ -1,0 +1,37 @@
+{
+  "start_level_id": "ice_reliquary",
+  "start_spawn_id": "default",
+  "initial_ability_type": "fire",
+  "level_id": "ice_reliquary",
+  "fps": 60,
+  "max_frames": 150,
+  "frames": [
+    {
+      "frame": 0,
+      "actions": {
+        "move_right": true,
+        "inhale": false,
+        "swallow": false,
+        "use_ability": false
+      }
+    },
+    {
+      "frame": 50,
+      "actions": {
+        "use_ability": true
+      }
+    },
+    {
+      "frame": 51,
+      "actions": {
+        "use_ability": false
+      }
+    },
+    {
+      "frame": 118,
+      "actions": {
+        "move_right": false
+      }
+    }
+  ]
+}

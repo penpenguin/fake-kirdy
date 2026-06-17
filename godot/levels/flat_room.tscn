@@ -1,7 +1,6 @@
-[gd_scene load_steps=6 format=3 uid="uid://flatroomlevel01"]
+[gd_scene load_steps=5 format=3 uid="uid://flatroomlevel01"]
 
 [ext_resource type="Script" path="res://scripts/level/markers/PlayerSpawn.gd" id="1_spawn"]
-[ext_resource type="Script" path="res://scripts/level/markers/GoalMarker.gd" id="2_goal"]
 [ext_resource type="Script" path="res://scripts/level/markers/CameraBoundsMarker.gd" id="3_camera_bounds"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
@@ -18,11 +17,6 @@ spawn_id = "default"
 position = Vector2(700, 368)
 script = ExtResource("1_spawn")
 spawn_id = "fall_check"
-
-[node name="GoalMarker" type="Node2D" parent="."]
-position = Vector2(560, 368)
-script = ExtResource("2_goal")
-goal_id = "flat_goal"
 
 [node name="CameraBoundsMarker" type="Node2D" parent="."]
 position = Vector2(360, 270)

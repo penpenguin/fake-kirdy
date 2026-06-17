@@ -30,13 +30,13 @@
       "neighbors": {
         "northeast": "central-hub"
       },
+      "dynamic_neighbors": {
+        "north": "getRuinsExpanseEntryId()"
+      },
       "metadata": {
         "cluster": "ruins",
         "index": 4,
         "difficulty": 2
-      },
-      "dynamic_neighbors": {
-        "north": "getRuinsExpanseEntryId()"
       },
       "origin": "authored"
     },
@@ -87,13 +87,13 @@
       "neighbors": {
         "southwest": "central-hub"
       },
+      "dynamic_neighbors": {
+        "south": "getFireExpanseEntryId()"
+      },
       "metadata": {
         "cluster": "fire",
         "index": 5,
         "difficulty": 3
-      },
-      "dynamic_neighbors": {
-        "south": "getFireExpanseEntryId()"
       },
       "origin": "authored"
     },
@@ -106,6 +106,9 @@
         "tile_size": 32
       },
       "neighbors": {},
+      "dynamic_neighbors": {
+        "west": "getFireExpanseExitId()"
+      },
       "metadata": {
         "cluster": "fire",
         "index": 240,
@@ -119,9 +122,6 @@
           "row": 3
         }
       ],
-      "dynamic_neighbors": {
-        "west": "getFireExpanseExitId()"
-      },
       "origin": "authored"
     },
     {
@@ -152,6 +152,9 @@
         "tile_size": 32
       },
       "neighbors": {},
+      "dynamic_neighbors": {
+        "west": "getForestExpanseExitId()"
+      },
       "metadata": {
         "cluster": "forest",
         "index": 205,
@@ -165,9 +168,6 @@
           "row": 3
         }
       ],
-      "dynamic_neighbors": {
-        "west": "getForestExpanseExitId()"
-      },
       "origin": "authored"
     },
     {
@@ -200,13 +200,13 @@
       "neighbors": {
         "southeast": "central-hub"
       },
+      "dynamic_neighbors": {
+        "east": "getIceExpanseEntryId()"
+      },
       "metadata": {
         "cluster": "ice",
         "index": 2,
         "difficulty": 2
-      },
-      "dynamic_neighbors": {
-        "east": "getIceExpanseEntryId()"
       },
       "origin": "authored"
     },
@@ -219,6 +219,9 @@
         "tile_size": 32
       },
       "neighbors": {},
+      "dynamic_neighbors": {
+        "west": "getIceExpanseExitId()"
+      },
       "metadata": {
         "cluster": "ice",
         "index": 210,
@@ -232,9 +235,6 @@
           "row": 3
         }
       ],
-      "dynamic_neighbors": {
-        "west": "getIceExpanseExitId()"
-      },
       "origin": "authored"
     },
     {
@@ -5412,6 +5412,9 @@
         "tile_size": 32
       },
       "neighbors": {},
+      "dynamic_neighbors": {
+        "west": "getRuinsExpanseExitId()"
+      },
       "metadata": {
         "cluster": "ruins",
         "index": 260,
@@ -5425,9 +5428,6 @@
           "row": 3
         }
       ],
-      "dynamic_neighbors": {
-        "west": "getRuinsExpanseExitId()"
-      },
       "origin": "authored"
     },
     {
@@ -5443,13 +5443,13 @@
         "east": "aurora-spire",
         "west": "starlit-keep"
       },
+      "dynamic_neighbors": {
+        "north": "getSkyExpanseEntryId()"
+      },
       "metadata": {
         "cluster": "sky",
         "index": 7,
         "difficulty": 4
-      },
-      "dynamic_neighbors": {
-        "north": "getSkyExpanseEntryId()"
       },
       "origin": "authored"
     },

@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -12,6 +12,11 @@ const readGodotFile = (relativePath: string): string =>
 
 const readRepoFile = (relativePath: string): string =>
   readFileSync(join(repoRoot, relativePath), 'utf8');
+
+const readLevelSceneNames = (): string[] =>
+  readdirSync(join(godotRoot, 'levels'))
+    .filter((fileName) => fileName.endsWith('.tscn'))
+    .sort();
 
 const readWebpDimensions = (relativePath: string): { width: number; height: number } => {
   const buffer = readFileSync(join(repoRoot, relativePath));
@@ -166,7 +171,7 @@ describe('Godot v2 gameplay completion backlog', () => {
     const flyingScale = extractNodeScale(flyingEnemyScene, 'Body');
     const playerTexture = readWebpDimensions('godot/resources/assets/images/characters/kirdy/kirdy-idle.webp');
     const simpleEnemyTexture = readWebpDimensions('godot/resources/assets/images/enemies/wabble-bee.webp');
-    const flyingEnemyTexture = readWebpDimensions('godot/resources/assets/images/enemies/dronto-durt.webp');
+    const flyingEnemyTexture = readWebpDimensions('godot/resources/assets/images/enemies/frost-flutter.webp');
     const playerVisibleHeight = playerTexture.height * playerScale.y;
 
     expect(simpleEnemyTexture.height * simpleScale.y).toBeGreaterThanOrEqual(playerVisibleHeight * 0.7);
@@ -180,6 +185,8 @@ describe('Godot v2 gameplay completion backlog', () => {
 
     expect(goalMarker).toContain('visual.scale = Vector2(1.0, 1.0)');
     expect(goalMarker).toContain('visual.centered = true');
+    expect(goalMarker).toContain('goal-marker.webp');
+    expect(goalMarker).not.toContain('star-bullet.webp');
     expect(goalSanctum).toContain('GoalDoorController.gd');
     expect(goalPosition.x).toBeGreaterThan(0);
     expect(goalPosition.y).toBeGreaterThan(0);
@@ -227,12 +234,18 @@ describe('Godot v2 gameplay completion backlog', () => {
     expect(readGodotFile('scripts/session/GameSession.gd')).toContain('payload.get("bypass_cluster_lock", false)');
   });
 
-  it('keeps the combat room door reachable before any local completion goal can finish the run', () => {
-    const level = readGodotFile('levels/combat_room.tscn');
-    const doorX = extractNodePositionX(level, 'DoorMarker');
-    const goalX = extractNodePositionX(level, 'GoalMarker');
+  it('keeps authored completion goals limited to the canonical goal sanctum', () => {
+    const goalScenes = readLevelSceneNames().filter((fileName) =>
+      readGodotFile(`levels/${fileName}`).includes('GoalDoorController.gd'),
+    );
+    const plainGoalScenes = readLevelSceneNames().filter((fileName) => {
+      const scene = readGodotFile(`levels/${fileName}`);
+      return scene.includes('GoalMarker.gd') && !scene.includes('GoalDoorController.gd');
+    });
 
-    expect(goalX).toBeGreaterThan(doorX + 64);
+    expect(goalScenes).toEqual(['goal_sanctum.tscn']);
+    expect(plainGoalScenes).toEqual([]);
+    expect(readGodotFile('levels/combat_room.tscn')).toContain('DoorMarker.gd');
   });
 
   it('models enemies as damageable combat targets with defeat traces', () => {
@@ -449,7 +462,7 @@ describe('Godot v2 gameplay completion backlog', () => {
 
     expect(goalDoorController).toContain('class_name GoalDoorController');
     expect(goalDoorController).toContain('extends GoalMarker');
-    expect(goalDoorController).toContain('goal-door.webp');
+    expect(goalDoorController).toContain('goal-marker.webp');
     expect(goalDoorController).toContain('@export var collect_score_metrics: bool = true');
     expect(goalDoorController).toContain('@export var collect_time_metrics: bool = true');
     expect(level).toContain('GoalDoorController.gd');
@@ -457,8 +470,27 @@ describe('Godot v2 gameplay completion backlog', () => {
     expect(session).toContain('"score": calculate_total_score()');
     expect(session).toContain('"remaining_life_bonus": calculate_remaining_life_bonus()');
     expect(suite.replays?.find((entry) => entry.id === 'sky_generated_goal_path')?.expected_events).toEqual(
-      expect.arrayContaining(['goal.door.entered', 'run.finished', 'result.overlay.shown']),
+      expect.arrayContaining(['goal.door.entered', 'run.finished', 'results.scene.shown']),
     );
+    expect(suite.replays?.find((entry) => entry.id === 'sky_generated_goal_path')?.expected_events).not.toContain(
+      'result.overlay.shown',
+    );
+  });
+
+  it('uses dedicated goal art without borrowing projectile effects', () => {
+    const goalMarker = readGodotFile('scripts/level/markers/GoalMarker.gd');
+    const goalDoorController = readGodotFile('scripts/level/markers/GoalDoorController.gd');
+    const docs = readRepoFile('docs/godot-v2/session-outcomes.md');
+    const controllerScenes = readLevelSceneNames().filter((fileName) =>
+      readGodotFile(`levels/${fileName}`).includes('GoalDoorController.gd'),
+    );
+
+    expect(goalMarker).toContain('goal-marker.webp');
+    expect(goalMarker).not.toContain('star-bullet.webp');
+    expect(goalDoorController).toContain('goal-marker.webp');
+    expect(goalDoorController).toContain('func ensure_visual() -> void:');
+    expect(controllerScenes).toEqual(['goal_sanctum.tscn']);
+    expect(docs).toContain('single authored completion goal');
   });
 
   it('supports item, ability, level, enemy-group, and boss door gates', () => {
@@ -474,6 +506,126 @@ describe('Godot v2 gameplay completion backlog', () => {
     expect(session).toContain('door.locked');
     expect(session).toContain('defeated_enemy_group_ids');
     expect(session).toContain('defeated_boss_ids');
+  });
+
+  it('grants orb rewards from boss defeats and provides a Central return door', () => {
+    const enemyMarker = readGodotFile('scripts/level/markers/EnemySpawnMarker.gd');
+    const enemy = readGodotFile('scripts/enemies/SimpleEnemy.gd');
+    const session = readGodotFile('scripts/session/GameSession.gd');
+    const forestReliquary = readGodotFile('levels/forest_reliquary.tscn');
+    const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
+      replays?: Array<{
+        id?: string;
+        expected_events?: string[];
+        expected_event_sequence?: Array<{ event_type?: string; payload?: Record<string, unknown> }>;
+        expected_last_hud?: Record<string, unknown>;
+      }>;
+    };
+    const replayEntry = suite.replays?.find((entry) => entry.id === 'forest_reliquary_boss_orb_return');
+
+    expect(enemyMarker).toContain('@export var orb_reward_item_id: String = ""');
+    expect(enemyMarker).toContain('"orb_reward_item_id": orb_reward_item_id');
+    expect(enemy).toContain('@export var orb_reward_item_id: String = ""');
+    expect(enemy).toContain('"orb_reward_item_id": orb_reward_item_id');
+    expect(session).toContain('func grant_boss_orb_reward(result: Dictionary) -> void:');
+    expect(session).toContain('boss.defeated');
+    expect(session).toContain('acquire_item(orb_reward_item_id, boss_id)');
+    expect(forestReliquary).toContain('enemy_rank = "boss"');
+    expect(forestReliquary).toContain('boss_id = "forest_guard_boss"');
+    expect(forestReliquary).toContain('orb_reward_item_id = "forest-orb"');
+    expect(forestReliquary).toContain('door_id = "forest_reliquary_return_to_central_hub"');
+    expect(forestReliquary).toContain('target_level_id = "central_hub"');
+    expect(forestReliquary).toContain('required_boss_id = "forest_guard_boss"');
+    expect(forestReliquary).toContain('required_item_id = "forest-orb"');
+    expect(replayEntry?.expected_events).toEqual(expect.arrayContaining([
+      'enemy.defeated',
+      'boss.defeated',
+      'item.acquired',
+      'hud.updated',
+      'door.entered',
+    ]));
+    expect(replayEntry?.expected_event_sequence).toEqual(expect.arrayContaining([
+      { event_type: 'boss.defeated', payload: { boss_id: 'forest_guard_boss', orb_reward_item_id: 'forest-orb' } },
+      { event_type: 'item.acquired', payload: { item_id: 'forest-orb' } },
+      { event_type: 'door.entered', payload: { door_id: 'forest_reliquary_return_to_central_hub', target_level_id: 'central_hub' } },
+    ]));
+    expect(replayEntry?.expected_last_hud).toMatchObject({
+      acquired_orb_ids: ['forest-orb'],
+    });
+  });
+
+  it('routes every mainline biome boss through an orb reward and Central return door', () => {
+    const routes = [
+      {
+        levelPath: 'levels/forest_reliquary.tscn',
+        bossId: 'forest_guard_boss',
+        orbItemId: 'forest-orb',
+        returnDoorId: 'forest_reliquary_return_to_central_hub',
+      },
+      {
+        levelPath: 'levels/ice_reliquary.tscn',
+        bossId: 'ice_guard_boss',
+        orbItemId: 'ice-orb',
+        returnDoorId: 'ice_reliquary_return_to_central_hub',
+      },
+      {
+        levelPath: 'levels/fire_reliquary.tscn',
+        bossId: 'fire_guard_boss',
+        orbItemId: 'fire-orb',
+        returnDoorId: 'fire_reliquary_return_to_central_hub',
+      },
+      {
+        levelPath: 'levels/ruins_reliquary.tscn',
+        bossId: 'ruins_guard_boss',
+        orbItemId: 'cave-orb',
+        returnDoorId: 'ruins_reliquary_return_to_central_hub',
+      },
+      {
+        levelPath: 'levels/sky_sanctum.tscn',
+        bossId: 'sky_guard_boss',
+        orbItemId: 'sky-orb',
+        returnDoorId: 'sky_sanctum_return_to_central_hub',
+      },
+    ];
+
+    for (const route of routes) {
+      const level = readGodotFile(route.levelPath);
+
+      expect(level, `${route.levelPath} should mark its guard as a boss`).toContain('enemy_rank = "boss"');
+      expect(level, `${route.levelPath} should expose boss id ${route.bossId}`).toContain(`boss_id = "${route.bossId}"`);
+      expect(level, `${route.levelPath} should reward ${route.orbItemId}`).toContain(`orb_reward_item_id = "${route.orbItemId}"`);
+      expect(level, `${route.levelPath} should provide a Central return door`).toContain(`door_id = "${route.returnDoorId}"`);
+      expect(level, `${route.levelPath} should return to Central Hub`).toContain('target_level_id = "central_hub"');
+      expect(level, `${route.levelPath} should gate Central return by boss defeat`).toContain(`required_boss_id = "${route.bossId}"`);
+      expect(level, `${route.levelPath} should gate Central return by orb possession`).toContain(`required_item_id = "${route.orbItemId}"`);
+    }
+  });
+
+  it('adds a non-forest replay for boss orb return progression', () => {
+    const suite = JSON.parse(readGodotFile('tests/replay_suite.json')) as {
+      replays?: Array<{
+        id?: string;
+        expected_events?: string[];
+        expected_event_sequence?: Array<{ event_type?: string; payload?: Record<string, unknown> }>;
+        expected_last_hud?: Record<string, unknown>;
+      }>;
+    };
+    const replay = suite.replays?.find((entry) => entry.id === 'ice_reliquary_boss_orb_return');
+
+    expect(replay?.expected_events).toEqual(expect.arrayContaining([
+      'enemy.defeated',
+      'boss.defeated',
+      'item.acquired',
+      'door.entered',
+    ]));
+    expect(replay?.expected_event_sequence).toEqual(expect.arrayContaining([
+      { event_type: 'boss.defeated', payload: { boss_id: 'ice_guard_boss', orb_reward_item_id: 'ice-orb' } },
+      { event_type: 'item.acquired', payload: { item_id: 'ice-orb' } },
+      { event_type: 'door.entered', payload: { door_id: 'ice_reliquary_return_to_central_hub', target_level_id: 'central_hub' } },
+    ]));
+    expect(replay?.expected_last_hud).toMatchObject({
+      acquired_orb_ids: ['ice-orb'],
+    });
   });
 
   it('uses progression gates in authored playable levels', () => {

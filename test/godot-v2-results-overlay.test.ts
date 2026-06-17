@@ -11,7 +11,7 @@ const readGodotFile = (relativePath: string): string =>
   readFileSync(join(godotRoot, relativePath), 'utf8');
 
 describe('Godot v2 result overlay', () => {
-  it('adds a minimal result overlay scene for completed and game-over runs', () => {
+  it('adds a minimal result overlay scene for game-over runs', () => {
     const scriptPath = join(godotRoot, 'scripts', 'ui', 'ResultOverlay.gd');
     const scenePath = join(godotRoot, 'scenes', 'ui', 'ResultOverlay.tscn');
 
@@ -45,7 +45,7 @@ describe('Godot v2 result overlay', () => {
 
     expect(script).toContain('has_finished_result');
     expect(script).toContain('visible = has_finished_result(result_state)');
-    expect(script).toContain('"completed", "complete", "game_over"');
+    expect(script).toContain('String(state.get("outcome", "")) == "game_over"');
     expect(script).not.toContain('visible = true');
   });
 

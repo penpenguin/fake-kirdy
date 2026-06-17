@@ -1,8 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://flyingcombatroom01"]
+[gd_scene load_steps=7 format=3 uid="uid://flyingcombatroom01"]
 
 [ext_resource type="Script" path="res://scripts/level/markers/PlayerSpawn.gd" id="1_spawn"]
 [ext_resource type="Script" path="res://scripts/level/markers/EnemySpawnMarker.gd" id="2_enemy"]
-[ext_resource type="Script" path="res://scripts/level/markers/GoalMarker.gd" id="3_goal"]
 [ext_resource type="Script" path="res://scripts/level/markers/CameraBoundsMarker.gd" id="4_camera_bounds"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
@@ -35,11 +34,6 @@ enemy_type = "simple_ground"
 ability_type = "spark"
 contact_damage = 0
 attack_radius = 1.0
-
-[node name="GoalMarker" type="Node2D" parent="."]
-position = Vector2(640, 368)
-script = ExtResource("3_goal")
-goal_id = "flying_combat_goal"
 
 [node name="CameraBoundsMarker" type="Node2D" parent="."]
 position = Vector2(410, 270)

@@ -149,7 +149,7 @@ describe('Godot v2 usability and accessibility checks', () => {
       expect.arrayContaining([
         expect.objectContaining({
           id: 'hud_runtime_values_have_captions',
-          required_labels: expect.arrayContaining(['HEALTH', 'ABILITY', 'ITEMS', 'SCORE', 'OBJECTIVE', 'ATTACK', 'STATUS']),
+          required_labels: expect.arrayContaining(['HEALTH', 'ABILITY', 'ITEMS', 'SCORE', 'OBJECTIVE', 'ATTACK', 'ORBS']),
         }),
       ]),
     );

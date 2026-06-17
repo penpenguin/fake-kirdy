@@ -1,7 +1,7 @@
 extends Node2D
 class_name GoalMarker
 
-const GoalTexture = preload("res://resources/assets/images/ui/goal-door.webp")
+const GoalTexture = preload("res://resources/assets/images/ui/goal-marker.webp")
 
 @export var goal_id: String = "goal"
 @export var result_label: String = "complete"

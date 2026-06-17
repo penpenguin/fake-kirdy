@@ -40,8 +40,8 @@ trigger_radius = 40.0
 position = Vector2(360, 400)
 script = ExtResource("3_enemy")
 spawn_id = "goal_sanctum_guard"
-enemy_type = "simple_ground"
-ability_type = "ice"
+enemy_type = "frost_flyer"
+ability_type = "frost"
 contact_damage = 1
 
 [node name="GoalMarker" type="Node2D" parent="."]
@@ -51,7 +51,7 @@ goal_id = "goal_sanctum_clear"
 trigger_radius = 48.0
 
 [node name="CameraBoundsMarker" type="Node2D" parent="."]
-position = Vector2(380, 270)
+position = Vector2(380, 178)
 script = ExtResource("5_camera_bounds")
 size = Vector2(840, 540)
 

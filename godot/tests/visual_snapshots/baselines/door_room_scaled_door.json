@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "door_room_scaled_door",
-  "content_hash": "1e049c30b78209d6c1142c6200aa6e9236d11d371dc6c3b4fc9739fc667bff30",
+  "content_hash": "1555d8d6be5bfcde00365b6eaaa1b4dcaa7734d3f1568d21aba3ab9c4006c7d1",
   "replay_path": "godot/tests/replays/door_to_goal.json",
   "frame": 10,
   "viewport": {

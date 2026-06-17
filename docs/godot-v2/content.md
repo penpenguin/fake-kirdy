@@ -6,11 +6,11 @@ This document summarizes the current playable Godot content surface. Runtime tru
 
 - `central_hub`: starting hub with branch doors, support/test room doors, dead-end rewards, camera bounds, and `LevelTileMap` metadata.
 - `ice_area`, `mirror_corridor`, `fire_area`, `forest_area`, and `cave_area`: branch rooms with marker-authored spawns, doors, enemies, camera bounds, and route intent.
-- `goal_sanctum`: goal-door clear room with score/result traces.
+- `goal_sanctum`: the single canonical final goal-door clear room with score/result traces.
 - `sky_sanctum`, `starlit_keep`, and `aurora_spire`: late-route sky hub and side rooms.
 - `labyrinth_001`: hand-authored representative procedural room that connects back to `forest_area`.
 - `forest_reliquary`, `ice_reliquary`, `fire_reliquary`, and `ruins_reliquary`: keystone rooms using `CollectibleMarker` ids.
-- `heal_room`, `revive_room`, `combat_room`, `flying_combat_room`, `jump_room`, `danger_room`, `enemy_spawn_limit_room`, `enemy_crowd_spacing_room`, and `hidden_discovery_room`: focused replay and contract rooms for pickups, combat, controller behavior, hazards, crowding, hidden discovery, and run outcomes.
+- `heal_room`, `revive_room`, `combat_room`, `flying_combat_room`, `jump_room`, `danger_room`, `enemy_spawn_limit_room`, `enemy_crowd_spacing_room`, and `hidden_discovery_room`: focused replay and contract rooms for pickups, combat, controller behavior, hazards, crowding, hidden discovery, and run outcomes. They do not carry local authored completion goals.
 
 ## Replay Coverage
 

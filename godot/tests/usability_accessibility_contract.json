@@ -107,7 +107,7 @@
     {
       "id": "hud_runtime_values_have_captions",
       "subject_file": "godot/scripts/ui/HudOverlay.gd",
-      "required_labels": ["HEALTH", "ABILITY", "ITEMS", "SCORE", "OBJECTIVE", "ATTACK", "STATUS"]
+      "required_labels": ["HEALTH", "ABILITY", "ITEMS", "SCORE", "OBJECTIVE", "ATTACK", "ORBS"]
     }
   ],
   "one_block_visual_size_checks": [

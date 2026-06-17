@@ -14,6 +14,41 @@ npm run godot:procedural-levels -- --check
 
 `npm run check:godot` runs the `--check` form, so stale generated schema fails validation before Godot-specific checks run.
 
+## Map builder overrides
+
+`tools/map-builder/` can edit generated room placement without hand-editing `procedural_levels.json`. The source file is:
+
+```txt
+godot/levels/generated/procedural_level_overrides.source.json
+```
+
+The file is optional for the generator and uses stage ids as keys:
+
+```json
+{
+  "version": 1,
+  "levels": {
+    "labyrinth-010": {
+      "runtime_layout": {
+        "camera_bounds": {
+          "position": { "x": 384, "y": 188 },
+          "size": { "x": 880, "y": 560 }
+        },
+        "platforms": []
+      }
+    }
+  }
+}
+```
+
+Overrides are deliberately narrow. The generator only accepts `runtime_layout.camera_bounds`, `spawns`, `doors`, `safety`, `floor`, `floor_segments`, `platforms`, `content`, and `visuals`. Attempts to override topology or progression-owned fields such as `neighbors`, `stage_neighbors`, `metadata`, `scene_strategy`, or `runtime_layout.branch_exit_rules` fail with a map builder error.
+
+For isolated checks, the generator also accepts temp paths:
+
+```sh
+node scripts/generate-godot-procedural-levels.mjs --out /tmp/procedural_levels.json --overrides /tmp/procedural_level_overrides.source.json
+```
+
 ## Stage authoring workflow
 
 Use the repository-owned data and validation loop when adding or changing playable stages. The goal is to make stage production reviewable from text files before relying on a manual Godot editor pass.
@@ -43,6 +78,10 @@ Each generated level entry contains:
 - `neighbors`: Godot id equivalents for the same topology.
 - `scene_strategy`: currently `generated_schema`, meaning the level exists as canonical data but is not necessarily hand-authored as a `.tscn` scene.
 
+Generated hazards carry `hazard_visual_style` and `hazard_texture_path`, so fire rooms such as `labyrinth_011` render lava with `images/hazards/lava-hazard.webp` instead of falling back to a red triangle marker. Generated ability gates carry `gate_visual_style`, `gate_texture_path`, and `hint_text`; fire gates use `images/ui/ability-gate-fire.webp`, while non-fire generated gates use the spark gate texture as the shared energy-gate fallback. `LevelLoader.gd` copies these fields into `HazardMarker` and `AbilityGateMarker`, keeping generated JSON and runtime visuals in sync.
+
+All generated rooms retain camera bounds metadata. `GameSession.gd` clamps the player inside those bounds with `player_boundary_padding`, emits `player.boundary.clamped`, and the `labyrinth_011_gate_bounds_trace` replay verifies a generated fire room cannot be escaped at the screen edge.
+
 ## Current Boundary
 
 Only `labyrinth_001` is currently scene-authored in Godot. The remaining generated levels are not hand-authored scenes, but `LevelLoader.gd` can now load them through a `generated_schema://<level_id>` fallback. That fallback creates a `Node2D` room with:
@@ -56,6 +95,8 @@ Only `labyrinth_001` is currently scene-authored in Godot. The remaining generat
 - generated enemy, heal, collectible, and goal markers from `runtime_layout.content`
 
 `runtime_layout.safety` records the generated door trigger radius, the minimum required distance between a target spawn and its corresponding door, and the gameplay marker safe radius around active doors. This prevents a player who just entered a generated room from immediately re-triggering the door they arrived through, and keeps generated enemies, heals, collectibles, hazards, ability gates, and goals out of the door 3x3 safety ring. The generator currently writes `door_trigger_radius: 48`, `min_spawn_door_distance: 64`, and `door_safe_radius: 96`, and Vitest checks every generated neighbor and gameplay marker against those rules.
+
+Generated rooms also carry traversal and identity constraints in text data. `runtime_layout.safety.min_platform_clearance_px` and `runtime_layout.safety.max_bottom_floor_gap_px` are validated by Vitest so platform gaps stay traversable and the bottom floor does not float above the visible camera bottom. Generated enemy markers use cluster-specific `enemy_type` values so copy ability rewards match the visible sprite: forest rooms use `leaf_sprite`, ice rooms use `frost_flyer`, fire rooms use `fire_imp`, ruins rooms use `stone_sentry`, and sky rooms use `spark_wisp`.
 
 `validation.branch_density_by_cluster` records how many generated levels in each biome contain dead-end branch metadata. The generator enforces `branch_density_minimum: 0.2`, so `npm run godot:procedural-levels -- --check` fails if any generated biome falls below 20% dead-end coverage.
 
