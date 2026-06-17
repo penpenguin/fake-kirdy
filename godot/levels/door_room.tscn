@@ -1,8 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://doorroomlevel01"]
+[gd_scene load_steps=6 format=3 uid="uid://doorroomlevel01"]
 
 [ext_resource type="Script" path="res://scripts/level/markers/PlayerSpawn.gd" id="1_spawn"]
 [ext_resource type="Script" path="res://scripts/level/markers/DoorMarker.gd" id="2_door"]
-[ext_resource type="Script" path="res://scripts/level/markers/GoalMarker.gd" id="3_goal"]
 [ext_resource type="Script" path="res://scripts/level/markers/CameraBoundsMarker.gd" id="4_camera_bounds"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
@@ -21,11 +20,6 @@ script = ExtResource("2_door")
 door_id = "door_to_flat"
 target_level_id = "flat_room"
 target_spawn_id = "default"
-
-[node name="GoalMarker" type="Node2D" parent="."]
-position = Vector2(660, 368)
-script = ExtResource("3_goal")
-goal_id = "door_room_goal"
 
 [node name="CameraBoundsMarker" type="Node2D" parent="."]
 position = Vector2(320, 270)

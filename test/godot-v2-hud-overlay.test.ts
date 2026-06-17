@@ -143,6 +143,28 @@ describe('Godot v2 HUD overlay', () => {
     expect(scene).not.toContain('CLEAR');
   });
 
+  it('renders HUD orb slots as TextureRect icons with acquired and missing visual states', () => {
+    const script = readGodotFile('scripts/ui/HudOverlay.gd');
+    const orbIconPaths = [
+      'res://resources/assets/images/items/forest-orb.webp',
+      'res://resources/assets/images/items/ice-orb.webp',
+      'res://resources/assets/images/items/fire-orb.webp',
+      'res://resources/assets/images/items/cave-orb.webp',
+      'res://resources/assets/images/items/sky-orb.webp',
+    ];
+
+    expect(script).toContain('const ORB_ICON_TEXTURES');
+    for (const iconPath of orbIconPaths) {
+      expect(script).toContain(iconPath);
+    }
+    expect(script).toContain('TextureRect.new()');
+    expect(script).toContain('get_orb_texture');
+    expect(script).toContain('TextureRect.STRETCH_KEEP_ASPECT_CENTERED');
+    expect(script).toContain('acquired_orb_icon_modulate');
+    expect(script).toContain('missing_orb_icon_modulate');
+    expect(script).not.toContain('var slot := ColorRect.new()');
+  });
+
   it('documents the upgraded HUD visual contract', () => {
     const docsPath = join(repoRoot, 'docs', 'godot-v2', 'hud-overlay.md');
     const docs = readFileSync(docsPath, 'utf8');

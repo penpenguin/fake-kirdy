@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "level_background_ice",
-  "content_hash": "4f1aac9e1b9e395fb280859e37657d566b2dcbc8749f9e5efd139601ec5715a8",
+  "content_hash": "44e0d9d2aa16c5630a26694ec09d769b862e3c119226f3a970464875d01a5445",
   "replay_path": "godot/tests/replays/ice_reliquary_collectible.json",
   "frame": 30,
   "viewport": {

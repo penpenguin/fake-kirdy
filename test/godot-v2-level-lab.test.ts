@@ -101,12 +101,12 @@ describe('Godot v2 level lab', () => {
     expect(docs).toContain('TileMap');
   });
 
-  it('adds three marker-authored test levels', () => {
+  it('adds three marker-authored test levels without local completion goals', () => {
     ['flat_room', 'jump_room', 'door_room'].forEach((levelName) => {
       const scene = readGodotFile(`levels/${levelName}.tscn`);
 
       expect(scene).toContain('PlayerSpawn.gd');
-      expect(scene).toContain('GoalMarker.gd');
+      expect(scene).not.toContain('GoalMarker.gd');
       expect(scene).toContain('CameraBoundsMarker.gd');
       expect(scene).toContain('StaticBody2D');
       expect(scene).not.toContain('RigidBody2D');
@@ -117,7 +117,7 @@ describe('Godot v2 level lab', () => {
     expect(readGodotFile('levels/jump_room.tscn')).toContain('EnemySpawnMarker.gd');
   });
 
-  it('keeps spawn, door, and goal placement in marker nodes instead of controller code', () => {
+  it('keeps spawn and door placement in marker nodes instead of controller code', () => {
     const controller = readGodotFile('scripts/player/PlayerController.gd');
     const flatRoom = readGodotFile('levels/flat_room.tscn');
     const doorRoom = readGodotFile('levels/door_room.tscn');
@@ -127,7 +127,7 @@ describe('Godot v2 level lab', () => {
     expect(controller).not.toContain('GoalMarker');
     expect(flatRoom).toContain('type="Node2D"');
     expect(flatRoom).toContain('PlayerSpawn');
-    expect(flatRoom).toContain('GoalMarker');
+    expect(flatRoom).not.toContain('GoalMarker');
     expect(doorRoom).toContain('DoorMarker');
   });
 

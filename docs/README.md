@@ -12,7 +12,7 @@ Fake Kirdy の現行仕様は Godot 4 mainline を前提にしています。run
 ## 現行仕様
 
 - Controller and replay: `godot-v2/controller-lab.md`, `godot-v2/replay-and-trace.md`
-- Levels and content: `godot-v2/level-lab.md`, `godot-v2/content.md`, `godot-v2/procedural-level-generation.md`
+- Levels and content: `map-structure.md`, `godot-v2/level-lab.md`, `godot-v2/content.md`, `godot-v2/procedural-level-generation.md`
 - Gameplay loop: `godot-v2/combat-slice.md`, `godot-v2/session-outcomes.md`
 - UI/save/performance: `godot-v2/hud-overlay.md`, `godot-v2/save-persistence.md`, `godot-v2/performance-testing.md`, `godot-v2/web-fallback.md`
 

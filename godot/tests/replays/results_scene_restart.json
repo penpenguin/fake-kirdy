@@ -18,7 +18,7 @@
       "frame": 50,
       "actions": {
         "move_right": false,
-        "result_continue": true,
+        "result_continue": false,
         "result_restart": false
       }
     },

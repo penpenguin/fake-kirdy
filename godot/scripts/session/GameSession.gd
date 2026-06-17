@@ -132,7 +132,7 @@ var error_retry_fps: int = 60
 @export var max_active_enemy_count: int = 3
 @export var enemy_crowd_player_radius: float = 112.0
 @export var enemy_crowd_min_player_distance: float = 72.0
-@export var contact_damage_radius: float = 48.0
+@export var contact_damage_radius: float = 24.0
 @export var heal_pickup_radius: float = 48.0
 @export var player_invulnerability_ms: int = 2000
 @export var setting_volume: float = 0.4
@@ -513,6 +513,7 @@ func load_level(level_id: String, spawn_id: String = "default") -> bool:
     spawn_enemies()
     reapply_discovered_hidden_marker_visuals()
     reapply_collected_collectible_visuals()
+    reapply_consumed_heal_visuals()
     trace_recorder.call("configure", current_level_id, replay_fps)
     trace_recorder.call("record_event", "level.loaded", {
         "level_id": current_level_id,
@@ -1644,14 +1645,27 @@ func check_enemy_contact_damage() -> void:
         if not is_instance_valid(enemy) or not can_target_enemy(enemy):
             continue
 
-        if player.global_position.distance_to(enemy.global_position) > contact_damage_radius:
+        var contact_distance: float = player.global_position.distance_to(enemy.global_position)
+        var contact_radius: float = get_enemy_contact_damage_radius(enemy)
+        if contact_distance > contact_radius:
             continue
 
         damage_player(int(enemy.contact_damage), {
             "source_type": "enemy_contact",
             "enemy": get_enemy_payload(enemy),
+            "contact_distance": contact_distance,
+            "contact_radius": contact_radius,
         })
         return
+
+
+func get_enemy_contact_damage_radius(enemy: Node) -> float:
+    if enemy != null:
+        var configured_radius = enemy.get("contact_damage_radius")
+        if typeof(configured_radius) == TYPE_FLOAT or typeof(configured_radius) == TYPE_INT:
+            return max(float(configured_radius), 0.0)
+
+    return max(contact_damage_radius, 0.0)
 
 
 func check_hidden_discoveries() -> void:
@@ -1911,6 +1925,7 @@ func check_heal_pickups() -> void:
             continue
 
         consumed_heal_ids[heal_id] = true
+        remove_consumed_heal_visual(heal_id)
         var amount := int(payload.get("amount", 1))
         var reward_type := String(payload.get("reward_type", "health"))
         var dead_end_id := String(payload.get("dead_end_id", ""))
@@ -1926,6 +1941,27 @@ func check_heal_pickups() -> void:
         })
         apply_heal_reward(amount, heal_id, reward_type)
         complete_dead_end(dead_end_id, heal_id)
+        return
+
+
+func reapply_consumed_heal_visuals() -> void:
+    for heal_id in consumed_heal_ids.keys():
+        remove_consumed_heal_visual(String(heal_id))
+
+
+func remove_consumed_heal_visual(heal_id: String) -> void:
+    if current_level == null or heal_id == "":
+        return
+
+    for marker in current_level.get_tree().get_nodes_in_group("heal_marker"):
+        if not current_level.is_ancestor_of(marker):
+            continue
+        if String(marker.get("heal_id")) != heal_id:
+            continue
+
+        marker.visible = false
+        if marker.has_node("Visual"):
+            marker.get_node("Visual").visible = false
         return
 
 
@@ -3165,19 +3201,10 @@ func check_result_actions() -> void:
     if outcome != "running" and is_session_action_just_pressed(result_continue_action):
         if results_scene_shown:
             continue_results_to_hub()
-        else:
-            show_results_scene("result.continued")
         return
 
     if results_scene_shown:
         return
-
-    if is_session_action_just_pressed(result_continue_action):
-        show_results_scene("result.continued")
-        return
-
-    if result_auto_results_delay_ms > 0 and result_elapsed_ms >= result_auto_results_delay_ms:
-        show_results_scene("result.auto_timeout")
 
 
 func restart_current_run(allow_completed: bool = false) -> void:
@@ -3296,6 +3323,15 @@ func show_result_overlay(reason: String = "") -> void:
     trace_recorder.call("record_event", "result.overlay.shown", result_payload)
 
 
+func show_completion_results(reason: String = "") -> void:
+    result_elapsed_ms = 0
+    results_scene_shown = false
+    pause_result_actors(reason)
+    if result_overlay != null and is_instance_valid(result_overlay):
+        result_overlay.call("set_result_state", {})
+    show_results_scene(reason)
+
+
 func pause_result_actors(reason: String = "") -> void:
     apply_actor_pause_state(true)
     if trace_recorder == null:
@@ -3332,8 +3368,6 @@ func show_results_scene(reason: String = "") -> void:
 
     results_scene_shown = true
     var results_payload := build_result_payload()
-    results_payload["result_elapsed_ms"] = result_elapsed_ms
-    results_payload["auto_delay_ms"] = result_auto_results_delay_ms
     if results_scene != null and is_instance_valid(results_scene):
         results_scene.call("set_results_state", results_payload)
 
@@ -3864,7 +3898,7 @@ func check_goal_reached() -> void:
             "payload": finish_payload,
         })
         sync_hud_overlay("run.finished", true)
-        show_result_overlay("run.finished")
+        show_completion_results("run.finished")
         return
 
 

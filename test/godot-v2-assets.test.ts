@@ -79,6 +79,55 @@ const countMatchingPixels = (
   return count;
 };
 
+const countUniqueVisibleColors = (image: { pixels: Buffer }): number => {
+  const colors = new Set<string>();
+  for (let index = 0; index < image.pixels.length; index += 4) {
+    const alpha = image.pixels[index + 3] ?? 0;
+    if (alpha < 24) {
+      continue;
+    }
+
+    colors.add(
+      [
+        image.pixels[index] ?? 0,
+        image.pixels[index + 1] ?? 0,
+        image.pixels[index + 2] ?? 0,
+        Math.round(alpha / 16) * 16,
+      ].join(','),
+    );
+  }
+  return colors.size;
+};
+
+const visibleBounds = (image: { width: number; height: number; pixels: Buffer }): {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+} => {
+  let minX = image.width;
+  let minY = image.height;
+  let maxX = -1;
+  let maxY = -1;
+
+  for (let index = 0; index < image.pixels.length; index += 4) {
+    const alpha = image.pixels[index + 3] ?? 0;
+    if (alpha < 24) {
+      continue;
+    }
+
+    const pixelIndex = index / 4;
+    const x = pixelIndex % image.width;
+    const y = Math.floor(pixelIndex / image.width);
+    minX = Math.min(minX, x);
+    minY = Math.min(minY, y);
+    maxX = Math.max(maxX, x);
+    maxY = Math.max(maxY, y);
+  }
+
+  return { minX, minY, maxX, maxY };
+};
+
 describe('Godot v2 assets', () => {
   it('tracks canonical assets from a Godot-owned manifest', () => {
     const manifest = JSON.parse(readFileSync(join(godotAssetRoot, 'asset_manifest.json'), 'utf8')) as {
@@ -102,7 +151,7 @@ describe('Godot v2 assets', () => {
         'images/enemies/leaf-sprout.webp',
         'images/items/heal-orb.webp',
         'images/ui/door-marker.webp',
-        'images/ui/goal-door.webp',
+        'images/ui/goal-marker.webp',
         'images/world/forest-tile.webp',
       ]),
     );
@@ -190,6 +239,7 @@ describe('Godot v2 assets', () => {
     const healMarker = readGodotFile('scripts/level/markers/HealMarker.gd');
     const collectibleMarker = readGodotFile('scripts/level/markers/CollectibleMarker.gd');
     const goalMarker = readGodotFile('scripts/level/markers/GoalMarker.gd');
+    const goalDoorController = readGodotFile('scripts/level/markers/GoalDoorController.gd');
 
     expect(simpleEnemyScene).toContain('wabble-bee.webp');
     expect(simpleEnemyScene).toContain('[node name="Body" type="Sprite2D" parent="."]');
@@ -205,8 +255,88 @@ describe('Godot v2 assets', () => {
     expect(collectibleMarker).toContain('leaf-artifact.webp');
     expect(collectibleMarker).toContain('ruin-artifact.webp');
     expect(collectibleMarker).toContain('ensure_visual');
-    expect(goalMarker).toContain('goal-door.webp');
+    expect(goalMarker).toContain('goal-marker.webp');
+    expect(goalMarker).not.toContain('star-bullet.webp');
     expect(goalMarker).toContain('ensure_visual');
+    expect(goalDoorController).toContain('goal-marker.webp');
+    expect(goalDoorController).toContain('ensure_visual');
+  });
+
+  it('tracks semantic marker and HUD icon assets in the Godot asset manifest', () => {
+    const manifest = JSON.parse(readFileSync(join(godotAssetRoot, 'asset_manifest.json'), 'utf8')) as {
+      assets?: string[];
+    };
+    const requiredAssetPaths = [
+      'images/ui/hub-return-door.webp',
+      'images/ui/goal-marker.webp',
+      'images/ui/ability-gate-fire.webp',
+      'images/ui/ability-gate-spark.webp',
+      'images/hazards/lava-hazard.webp',
+      'images/hazards/spike-hazard.webp',
+      'images/items/forest-orb.webp',
+      'images/items/ice-orb.webp',
+      'images/items/fire-orb.webp',
+      'images/items/cave-orb.webp',
+      'images/items/sky-orb.webp',
+    ];
+
+    expect(manifest.assets).toEqual(expect.arrayContaining(requiredAssetPaths));
+    for (const assetPath of requiredAssetPaths) {
+      expect(existsSync(join(godotAssetRoot, assetPath)), assetPath).toBe(true);
+      expect(existsSync(join(godotAssetRoot, `${assetPath}.import`)), `${assetPath}.import`).toBe(true);
+    }
+  });
+
+  it('keeps generated semantic assets polished enough to match neighboring sprite folders', () => {
+    const specs = [
+      { path: 'images/ui/hub-return-door.webp', width: 96, height: 96, minColors: 90, minPadding: 4 },
+      { path: 'images/ui/goal-marker.webp', width: 96, height: 96, minColors: 90, minPadding: 4 },
+      { path: 'images/ui/ability-gate-fire.webp', width: 96, height: 128, minColors: 90, minPadding: 4 },
+      { path: 'images/ui/ability-gate-spark.webp', width: 96, height: 128, minColors: 90, minPadding: 4 },
+      { path: 'images/hazards/lava-hazard.webp', width: 96, height: 64, minColors: 70, minPadding: 3 },
+      { path: 'images/hazards/spike-hazard.webp', width: 96, height: 64, minColors: 70, minPadding: 3 },
+      { path: 'images/items/forest-orb.webp', width: 64, height: 64, minColors: 80, minPadding: 4 },
+      { path: 'images/items/ice-orb.webp', width: 64, height: 64, minColors: 80, minPadding: 4 },
+      { path: 'images/items/fire-orb.webp', width: 64, height: 64, minColors: 80, minPadding: 4 },
+      { path: 'images/items/cave-orb.webp', width: 64, height: 64, minColors: 80, minPadding: 4 },
+      { path: 'images/items/sky-orb.webp', width: 64, height: 64, minColors: 80, minPadding: 4 },
+    ];
+
+    for (const spec of specs) {
+      const image = readWebpPixels(spec.path);
+      const bounds = visibleBounds(image);
+
+      expect(image.width, spec.path).toBe(spec.width);
+      expect(image.height, spec.path).toBe(spec.height);
+      expect(countUniqueVisibleColors(image), `${spec.path} visible color depth`).toBeGreaterThanOrEqual(spec.minColors);
+      expect(bounds.minX, `${spec.path} left transparent padding`).toBeGreaterThanOrEqual(spec.minPadding);
+      expect(bounds.minY, `${spec.path} top transparent padding`).toBeGreaterThanOrEqual(spec.minPadding);
+      expect(spec.width - 1 - bounds.maxX, `${spec.path} right transparent padding`).toBeGreaterThanOrEqual(spec.minPadding);
+      expect(spec.height - 1 - bounds.maxY, `${spec.path} bottom transparent padding`).toBeGreaterThanOrEqual(
+        spec.minPadding,
+      );
+    }
+  });
+
+  it('uses texture-backed marker visuals instead of fallback polygons for return doors, hazards, and gates', () => {
+    const doorMarker = readGodotFile('scripts/level/markers/DoorMarker.gd');
+    const hazardMarker = readGodotFile('scripts/level/markers/HazardMarker.gd');
+    const abilityGateMarker = readGodotFile('scripts/level/markers/AbilityGateMarker.gd');
+
+    expect(doorMarker).toContain('hub-return-door.webp');
+    expect(doorMarker).toMatch(/door_visual_style == "hub_return"[\s\S]{0,160}HubReturnDoorTexture/);
+
+    expect(hazardMarker).toContain('lava-hazard.webp');
+    expect(hazardMarker).toContain('spike-hazard.webp');
+    expect(hazardMarker).toContain('Sprite2D.new()');
+    expect(hazardMarker).toContain('hazard_visual_style');
+    expect(hazardMarker).not.toContain('Polygon2D.new()');
+
+    expect(abilityGateMarker).toContain('ability-gate-fire.webp');
+    expect(abilityGateMarker).toContain('ability-gate-spark.webp');
+    expect(abilityGateMarker).toContain('Sprite2D.new()');
+    expect(abilityGateMarker).toContain('gate_visual_style');
+    expect(abilityGateMarker).not.toContain('Polygon2D.new()');
   });
 
   it('applies migrated world textures and audio from the Godot runtime', () => {

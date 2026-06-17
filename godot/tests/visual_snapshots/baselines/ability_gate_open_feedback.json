@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "ability_gate_open_feedback",
-  "content_hash": "37b08368f0cd36a6f8f76ff09f097ab78c4eb5c732ef37587aaa3008ab0e0a7e",
+  "content_hash": "0388a47d2438cf305522c1d200594d71812a1b8dc7e27df861b630c1a4bc31cf",
   "replay_path": "godot/tests/replays/fire_area_ability_gate_trace.json",
   "frame": 25,
   "viewport": {
@@ -17,6 +17,7 @@
     "godot/scenes/ui/HudOverlay.tscn"
   ],
   "required_resource_paths": [
-    "godot/resources/assets/images/effects/fire-attack.webp"
+    "godot/resources/assets/images/effects/fire-attack.webp",
+    "godot/resources/assets/images/ui/ability-gate-fire.webp"
   ]
 }

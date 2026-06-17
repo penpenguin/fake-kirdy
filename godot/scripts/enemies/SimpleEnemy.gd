@@ -5,6 +5,7 @@ class_name SimpleEnemy
 @export var enemy_type: String = "simple_ground"
 @export var ability_type: String = "spark"
 @export var contact_damage: int = 1
+@export var contact_damage_radius: float = 18.0
 @export var follow_offset: Vector2 = Vector2(42, -20)
 @export var max_hp: int = 1
 @export var hurt_invulnerability_ms: int = 180

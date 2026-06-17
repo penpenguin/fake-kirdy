@@ -447,10 +447,9 @@
       "scene_path": "res://levels/heal_room.tscn",
       "tags": [
         "heal",
-        "representative",
-        "goal"
+        "test_room"
       ],
-      "coverage_status": "representative",
+      "coverage_status": "test",
       "source_ref": "docs/godot-v2/session-outcomes.md"
     }
   ]

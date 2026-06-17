@@ -77,7 +77,7 @@ describe('Godot v2 minimal combat slice', () => {
     expect(marker).toContain('"ability_type"');
     expect(level).toContain('EnemySpawnMarker.gd');
     expect(level).toContain('DoorMarker.gd');
-    expect(level).toContain('GoalMarker.gd');
+    expect(level).not.toContain('GoalMarker.gd');
     expect(level).toContain('ability_type');
     expect(catalog).toContain('"combat_room"');
   });

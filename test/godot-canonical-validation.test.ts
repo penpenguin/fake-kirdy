@@ -19,7 +19,8 @@ describe('Godot canonical validation and legacy boundary', () => {
     expect(packageJson.scripts?.['test:canonical']).toContain('godot:replay-suite');
     expect(packageJson.dependencies?.phaser).toBeUndefined();
     expect(packageJson.dependencies?.['matter-js']).toBeUndefined();
-    expect(packageJson.devDependencies?.vite).toBeUndefined();
+    expect(packageJson.scripts?.['map:builder']).toContain('tools/map-builder');
+    expect(packageJson.devDependencies?.vite).toBeDefined();
   });
 
   it('reports that the legacy reference copy has been removed from the canonical repository', () => {
@@ -54,7 +55,10 @@ describe('Godot canonical validation and legacy boundary', () => {
     expect(inventory.legacy_runtime?.dependencies).toEqual([]);
     expect(existsSync(join(repoRoot, 'legacy'))).toBe(false);
     expect(inventory.retirement_gates).toEqual(
-      expect.arrayContaining(['canonical replay suite passes', 'root Phaser/Vite dependencies removed']),
+      expect.arrayContaining([
+        'canonical replay suite passes',
+        'root Phaser dependencies removed; Vite is allowed only for tools/map-builder',
+      ]),
     );
   });
 

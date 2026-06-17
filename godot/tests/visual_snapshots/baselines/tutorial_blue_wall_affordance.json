@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "tutorial_blue_wall_affordance",
-  "content_hash": "18c7e3d92a0658f9a0ca590135fa84f3903fc996ccee0d5938cbee4f612f8175",
+  "content_hash": "f0741bcf3d3d946d512dff0de7dc76acdda20a42b4803c3c28523816c3261743",
   "replay_path": "godot/tests/replays/tutorial_to_real_stage_path.json",
   "frame": 110,
   "viewport": {
@@ -20,6 +20,7 @@
   ],
   "required_resource_paths": [
     "godot/resources/assets/images/characters/kirdy/kirdy-idle.webp",
-    "godot/resources/assets/images/enemies/wabble-bee.webp"
+    "godot/resources/assets/images/enemies/wabble-bee.webp",
+    "godot/resources/assets/images/ui/ability-gate-spark.webp"
   ]
 }

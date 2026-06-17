@@ -1,14 +1,20 @@
 extends Node2D
 class_name AbilityGateMarker
 
+const FireGateTexture = preload("res://resources/assets/images/ui/ability-gate-fire.webp")
+const SparkGateTexture = preload("res://resources/assets/images/ui/ability-gate-spark.webp")
+
 @export var gate_id: String = "ability_gate"
 @export var required_ability_type: String = "fire"
+@export var gate_visual_style: String = ""
+@export var gate_texture_path: String = ""
 @export var gate_effect: String = "open"
 @export var trigger_radius: float = 72.0
 @export var grants_item_id: String = ""
 @export var hint_text: String = ""
 @export var opened: bool = false
 @export var blocker_size: Vector2 = Vector2(64, 128)
+@export var visual_target_size: Vector2 = Vector2(64, 128)
 @export var closed_color: Color = Color(0.46, 0.82, 1.0, 0.86)
 @export var opened_color: Color = Color(0.46, 0.82, 1.0, 0.18)
 
@@ -50,6 +56,8 @@ func to_level_marker() -> Dictionary:
         },
         "payload": {
             "required_ability_type": required_ability_type,
+            "gate_visual_style": gate_visual_style,
+            "gate_texture_path": gate_texture_path,
             "gate_effect": gate_effect,
             "trigger_radius": trigger_radius,
             "grants_item_id": grants_item_id,
@@ -60,16 +68,21 @@ func to_level_marker() -> Dictionary:
 
 
 func ensure_blocker_nodes() -> void:
-    if get_visual_node() == null:
-        var visual := Polygon2D.new()
+    var existing_visual := get_node_or_null("Visual")
+    if existing_visual != null and not (existing_visual is Sprite2D):
+        remove_child(existing_visual)
+        existing_visual.queue_free()
+
+    var visual := get_node_or_null("Visual") as Sprite2D
+    if visual == null:
+        visual = Sprite2D.new()
         visual.name = "Visual"
-        visual.polygon = PackedVector2Array([
-            Vector2(-blocker_size.x * 0.5, -blocker_size.y),
-            Vector2(blocker_size.x * 0.5, -blocker_size.y),
-            Vector2(blocker_size.x * 0.5, 48.0),
-            Vector2(-blocker_size.x * 0.5, 48.0),
-        ])
         add_child(visual)
+
+    visual.texture = get_gate_texture()
+    visual.position = Vector2(0.0, -16.0)
+    visual.z_index = 2
+    fit_visual_to_target_size(visual)
 
     var collision_body := get_node_or_null("CollisionBody") as StaticBody2D
     if collision_body == null:
@@ -104,3 +117,27 @@ func get_visual_node() -> CanvasItem:
 
 func get_collision_shape() -> CollisionShape2D:
     return get_node_or_null("CollisionBody/CollisionShape2D") as CollisionShape2D
+
+
+func get_gate_texture() -> Texture2D:
+    if gate_texture_path != "":
+        var loaded_texture := load(gate_texture_path) as Texture2D
+        if loaded_texture != null:
+            return loaded_texture
+
+    if gate_visual_style == "fire_gate" or required_ability_type == "fire":
+        return FireGateTexture
+
+    return SparkGateTexture
+
+
+func fit_visual_to_target_size(visual: Sprite2D) -> void:
+    if visual == null or visual.texture == null:
+        return
+
+    var texture_size := visual.texture.get_size()
+    if texture_size.x <= 0.0 or texture_size.y <= 0.0:
+        return
+
+    var scale_factor: float = minf(visual_target_size.x / texture_size.x, visual_target_size.y / texture_size.y)
+    visual.scale = Vector2(scale_factor, scale_factor)

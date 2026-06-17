@@ -1,6 +1,6 @@
 # Godot v2 Combat Slice
 
-The Combat Slice adds the smallest Kirdy-like loop: inhale an enemy, optionally release it, swallow it, acquire its ability type, use that ability once, and finish the room.
+The Combat Slice adds the smallest Kirdy-like loop: inhale an enemy, optionally release it, swallow it, acquire its ability type, use that ability once, and keep the practice room running without a local completion goal.
 
 This is not a full enemy roster. It has `SimpleEnemy`, a small `FlyingEnemy` variant, and lightweight early-route archetype profiles selected by `EnemySpawnMarker.enemy_type`. Enemy identity is intentionally tied to copy ability and visible sprite:
 
@@ -63,9 +63,9 @@ Expected flow:
 2. Hold right and inhale to capture the simple enemy.
 3. Press swallow to acquire `spark`.
 4. Press use ability once.
-5. Reach the goal and emit `run.finished`.
+5. Continue until the replay reaches `replay.max_frames_reached` and emits `run.finished`.
 
-The flying replay starts in `flying_combat_room`, captures `FlyingEnemy`, releases it to emit `enemy.released`, captures it again, swallows it to acquire `frost`, uses the ability once, and reaches the goal.
+The flying replay starts in `flying_combat_room`, captures `FlyingEnemy`, releases it to emit `enemy.released`, captures it again, swallows it to acquire `frost`, uses the ability once, and then runs to the replay frame limit.
 
 The detach replay starts with `spark`, presses `swallow` without a captured enemy, emits `ability.detached`, and updates HUD/inventory state with an empty ability.
 
@@ -82,3 +82,5 @@ The capture-clear replay captures a ground enemy, applies replay-scoped external
 The inhale pull visual has a safe fallback plus the migrated `images/effects/inhale-sparkle.webp` sprite. On capture, `PlayerController.show_inhale_effect_fallback()` creates or reuses a local `Line2D` named `InhaleEffectFallback` from Kirdy to the target enemy and places `InhaleEffectSparkle` at the target, and `GameSession` emits `inhale.effect.fallback`. Release, swallow, or capture-clear hides the fallback visual.
 
 Enemy damage now also triggers visible feedback on `SimpleEnemy.Body`: hits flash the sprite with `hit_flash_color`, and defeated enemies remain visible for `defeat_flash_ms` before hiding. `GameSession` emits `enemy.feedback.shown` with the damage, HP, defeated flag, feedback type, and flash duration so headless replays can verify the effect without image inspection.
+
+Enemy contact damage uses the enemy's `contact_damage_radius` instead of the wider attack radius. The default small enemy radius is 18px, with a 24px session fallback for enemies that do not expose the field. `player.damaged` payloads from `enemy_contact` include `contact_distance` and `contact_radius`, so replay review can confirm that damage only fires when the player is visibly within the contact bounds.

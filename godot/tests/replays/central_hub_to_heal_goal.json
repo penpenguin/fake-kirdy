@@ -1,6 +1,6 @@
 {
   "start_level_id": "central_hub",
-  "start_spawn_id": "default",
+  "start_spawn_id": "heal_route",
   "level_id": "central_hub",
   "fps": 60,
   "max_frames": 320,
@@ -8,10 +8,18 @@
     {
       "frame": 0,
       "actions": {
-        "move_right": true,
+        "move_left": true,
+        "move_right": false,
         "inhale": false,
         "swallow": false,
         "use_ability": false
+      }
+    },
+    {
+      "frame": 40,
+      "actions": {
+        "move_left": false,
+        "move_right": true
       }
     },
     {

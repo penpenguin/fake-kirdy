@@ -28,7 +28,14 @@
       "baseline_path": "godot/tests/visual_snapshots/baselines/hud_controller_lab_jump.json",
       "visual_tags": ["hud", "hud_meaning"],
       "required_scene_paths": ["godot/scenes/ui/HudOverlay.tscn"],
-      "required_resource_paths": ["godot/resources/assets/images/characters/kirdy/kirdy-jump.webp"]
+      "required_resource_paths": [
+        "godot/resources/assets/images/characters/kirdy/kirdy-jump.webp",
+        "godot/resources/assets/images/items/forest-orb.webp",
+        "godot/resources/assets/images/items/ice-orb.webp",
+        "godot/resources/assets/images/items/fire-orb.webp",
+        "godot/resources/assets/images/items/cave-orb.webp",
+        "godot/resources/assets/images/items/sky-orb.webp"
+      ]
     },
     {
       "id": "ability_feedback_fire_projectile",
@@ -87,7 +94,7 @@
       "baseline_path": "godot/tests/visual_snapshots/baselines/map_overlay_visibility.json",
       "visual_tags": ["map_overlay"],
       "required_scene_paths": ["godot/scenes/ui/MapOverlay.tscn"],
-      "required_resource_paths": ["godot/resources/assets/images/ui/door-marker.webp", "godot/resources/assets/images/ui/goal-door.webp"]
+      "required_resource_paths": ["godot/resources/assets/images/ui/door-marker.webp", "godot/resources/assets/images/ui/goal-marker.webp"]
     },
     {
       "id": "pause_overlay_menu",
@@ -141,7 +148,10 @@
       "baseline_path": "godot/tests/visual_snapshots/baselines/ability_gate_open_feedback.json",
       "visual_tags": ["ability_gate", "ability_feedback", "hud"],
       "required_scene_paths": ["godot/scenes/ui/HudOverlay.tscn"],
-      "required_resource_paths": ["godot/resources/assets/images/effects/fire-attack.webp"]
+      "required_resource_paths": [
+        "godot/resources/assets/images/effects/fire-attack.webp",
+        "godot/resources/assets/images/ui/ability-gate-fire.webp"
+      ]
     },
     {
       "id": "tutorial_blue_wall_affordance",
@@ -156,7 +166,8 @@
       ],
       "required_resource_paths": [
         "godot/resources/assets/images/characters/kirdy/kirdy-idle.webp",
-        "godot/resources/assets/images/enemies/wabble-bee.webp"
+        "godot/resources/assets/images/enemies/wabble-bee.webp",
+        "godot/resources/assets/images/ui/ability-gate-spark.webp"
       ]
     },
     {
@@ -173,6 +184,7 @@
       ],
       "required_resource_paths": [
         "godot/resources/assets/images/ui/door-marker.webp",
+        "godot/resources/assets/images/ui/hub-return-door.webp",
         "godot/resources/assets/images/world/brick-tile.webp",
         "godot/resources/assets/images/world/wall-texture.webp"
       ]
@@ -200,7 +212,27 @@
       "required_resource_paths": [
         "godot/resources/assets/images/world/fire-background.webp",
         "godot/resources/assets/images/world/fire-tile.webp",
+        "godot/resources/assets/images/ui/hub-return-door.webp",
+        "godot/resources/assets/images/ui/ability-gate-fire.webp",
         "godot/resources/assets/images/world/wall-texture.webp"
+      ]
+    },
+    {
+      "id": "labyrinth_011_hazard_gate_bounds",
+      "replay_path": "godot/tests/replays/labyrinth_011_gate_bounds_trace.json",
+      "frame": 80,
+      "baseline_path": "godot/tests/visual_snapshots/baselines/labyrinth_011_hazard_gate_bounds.json",
+      "visual_tags": ["level_terrain", "stage_background", "hazard", "ability_gate", "boundary"],
+      "required_scene_paths": [
+        "godot/levels/generated/procedural_levels.json",
+        "godot/scripts/level/LevelLoader.gd",
+        "godot/scripts/level/markers/HazardMarker.gd",
+        "godot/scripts/level/markers/AbilityGateMarker.gd"
+      ],
+      "required_resource_paths": [
+        "godot/resources/assets/images/world/generated-labyrinth-background.webp",
+        "godot/resources/assets/images/hazards/lava-hazard.webp",
+        "godot/resources/assets/images/ui/ability-gate-fire.webp"
       ]
     },
     {

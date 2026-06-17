@@ -3,6 +3,10 @@ class_name DoorMarker
 
 const DoorTexture = preload("res://resources/assets/images/ui/door-marker.webp")
 const LockedDoorTexture = preload("res://resources/assets/images/ui/locked-door.webp")
+const HubReturnDoorTexture = preload("res://resources/assets/images/ui/hub-return-door.webp")
+const HUB_DOOR_MODULATE := Color(1.0, 0.88, 0.42, 1.0)
+const HUB_LOCKED_DOOR_MODULATE := Color(0.84, 0.94, 1.0, 1.0)
+const DEFAULT_DOOR_MODULATE := Color(1.0, 1.0, 1.0, 1.0)
 
 @export var door_id: String = "door"
 @export var door_role: String = "progress"
@@ -35,6 +39,7 @@ func ensure_visual() -> void:
     if has_node("Visual"):
         var existing_visual := $Visual as Sprite2D
         existing_visual.texture = get_door_texture()
+        existing_visual.modulate = get_door_modulate()
         existing_visual.visible = not hidden_until_discovered
         fit_visual_to_target_size(existing_visual)
         return
@@ -42,6 +47,7 @@ func ensure_visual() -> void:
     var visual := Sprite2D.new()
     visual.name = "Visual"
     visual.texture = get_door_texture()
+    visual.modulate = get_door_modulate()
     visual.z_index = 2
     visual.visible = not hidden_until_discovered
     visual.scale = Vector2(0.36, 0.36)
@@ -63,12 +69,27 @@ func fit_visual_to_target_size(visual: Sprite2D) -> void:
 func get_door_texture() -> Texture2D:
     if is_locked_visual():
         return LockedDoorTexture
+    if door_visual_style == "hub_return":
+        return HubReturnDoorTexture
 
     return DoorTexture
 
 
+func get_door_modulate() -> Color:
+    if door_visual_style == "hub_locked":
+        return HUB_LOCKED_DOOR_MODULATE
+    if is_hub_visual():
+        return HUB_DOOR_MODULATE
+
+    return DEFAULT_DOOR_MODULATE
+
+
+func is_hub_visual() -> bool:
+    return door_visual_style.begins_with("hub_")
+
+
 func is_locked_visual() -> bool:
-    return door_visual_style == "locked" or door_role == "locked_gate" or required_item_id != "" or required_keystone_item_id != "" or required_ability_type != "" or required_completed_level_id != "" or required_defeated_enemy_group_id != "" or required_boss_id != ""
+    return door_visual_style == "locked" or door_visual_style == "hub_locked" or door_role == "locked_gate" or required_item_id != "" or required_keystone_item_id != "" or required_ability_type != "" or required_completed_level_id != "" or required_defeated_enemy_group_id != "" or required_boss_id != ""
 
 
 func to_level_marker() -> Dictionary:

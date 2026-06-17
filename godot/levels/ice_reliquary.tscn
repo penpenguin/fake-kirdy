@@ -66,6 +66,7 @@ script = ExtResource("2_door")
 door_id = "ice_reliquary_return_to_central_hub"
 door_role = "return"
 door_label = "Central Hub"
+door_visual_style = "hub_locked"
 target_level_id = "central_hub"
 target_spawn_id = "default"
 trigger_radius = 44.0

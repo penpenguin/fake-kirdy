@@ -23,9 +23,9 @@
     {
       "id": "combat_capture_swallow_goal",
       "replay_path": "res://tests/replays/combat_capture_swallow_goal.json",
-      "expected_outcome": "complete",
+      "expected_outcome": "replay.max_frames_reached",
       "expected_events": ["enemy.captured", "inhale.effect.fallback"],
-      "tags": ["combat", "ability", "goal"]
+      "tags": ["combat", "ability", "practice"]
     },
     {
       "id": "combat_ability_damage_enemy",
@@ -58,7 +58,7 @@
     {
       "id": "combat_ability_unlocks_door",
       "replay_path": "res://tests/replays/combat_ability_unlocks_door.json",
-      "expected_outcome": "complete",
+      "expected_outcome": "replay.max_frames_reached",
       "expected_events": ["door.entered", "level.loaded"],
       "tags": ["combat", "door", "ability-gate", "transition", "trace"]
     },
@@ -96,8 +96,8 @@
     {
       "id": "flying_enemy_release_swallow_goal",
       "replay_path": "res://tests/replays/flying_enemy_release_swallow_goal.json",
-      "expected_outcome": "complete",
-      "tags": ["combat", "flying_enemy", "release", "ability", "goal"]
+      "expected_outcome": "replay.max_frames_reached",
+      "tags": ["combat", "flying_enemy", "release", "ability", "practice"]
     },
     {
       "id": "frost_enemy_ai_profile",
@@ -116,8 +116,8 @@
     {
       "id": "central_hub_to_heal_goal",
       "replay_path": "res://tests/replays/central_hub_to_heal_goal.json",
-      "expected_outcome": "complete",
-      "tags": ["hub", "heal", "goal"]
+      "expected_outcome": "replay.max_frames_reached",
+      "tags": ["hub", "heal", "practice"]
     },
     {
       "id": "central_hub_dead_end_max_health",
@@ -245,14 +245,14 @@
       "id": "results_scene_continue",
       "replay_path": "res://tests/replays/results_scene_continue.json",
       "expected_outcome": "complete",
-      "expected_events": ["result.actors.paused", "result.overlay.shown", "results.scene.shown"],
+      "expected_events": ["result.actors.paused", "results.scene.shown"],
       "tags": ["results", "ui", "input", "trace"]
     },
     {
       "id": "results_scene_restart",
       "replay_path": "res://tests/replays/results_scene_restart.json",
       "expected_outcome": "replay.max_frames_reached",
-      "expected_events": ["result.actors.paused", "result.overlay.shown", "results.scene.shown", "results.scene.hidden", "result.actors.restored", "run.restart.selected"],
+      "expected_events": ["result.actors.paused", "results.scene.shown", "results.scene.hidden", "result.actors.restored", "run.restart.selected"],
       "expected_last_hud": {
         "outcome": "running"
       },
@@ -262,7 +262,7 @@
       "id": "results_scene_continue_to_hub",
       "replay_path": "res://tests/replays/results_scene_continue_to_hub.json",
       "expected_outcome": "replay.max_frames_reached",
-      "expected_events": ["result.actors.paused", "result.overlay.shown", "results.scene.shown", "results.continue.selected", "result.actors.restored", "player.jump.started", "door.entered"],
+      "expected_events": ["result.actors.paused", "results.scene.shown", "results.continue.selected", "result.actors.restored", "player.jump.started", "door.entered"],
       "expected_last_hud": {
         "outcome": "running"
       },
@@ -281,6 +281,14 @@
       "expected_outcome": "replay.max_frames_reached",
       "expected_events": ["ability.used", "ability_gate.opened"],
       "tags": ["ability", "ability-gate", "fire", "terrain", "trace"]
+    },
+    {
+      "id": "labyrinth_011_gate_bounds_trace",
+      "replay_path": "res://tests/replays/labyrinth_011_gate_bounds_trace.json",
+      "expected_outcome": "replay.max_frames_reached",
+      "expected_events": ["ability.used", "ability_gate.opened", "player.boundary.clamped"],
+      "forbidden_events": ["game.over", "player.defeated", "replay.error"],
+      "tags": ["procedural", "fire", "labyrinth_011", "ability-gate", "boundary", "trace"]
     },
     {
       "id": "golden_fire_path",
@@ -529,7 +537,7 @@
       "id": "sky_generated_goal_path",
       "replay_path": "res://tests/replays/sky_sanctum_to_goal_finish.json",
       "expected_outcome": "complete",
-      "expected_events": ["door.entered", "goal.door.entered", "run.finished", "result.overlay.shown"],
+      "expected_events": ["door.entered", "goal.door.entered", "run.finished", "results.scene.shown"],
       "tags": ["procedural", "sky", "door-chain", "goal"]
     },
     {

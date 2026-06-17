@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -12,6 +12,11 @@ const readGodotFile = (relativePath: string): string =>
 
 const readRepoFile = (relativePath: string): string =>
   readFileSync(join(repoRoot, relativePath), 'utf8');
+
+const readLevelSceneNames = (): string[] =>
+  readdirSync(join(godotRoot, 'levels'))
+    .filter((fileName) => fileName.endsWith('.tscn'))
+    .sort();
 
 const readWebpDimensions = (relativePath: string): { width: number; height: number } => {
   const buffer = readFileSync(join(repoRoot, relativePath));
@@ -180,6 +185,8 @@ describe('Godot v2 gameplay completion backlog', () => {
 
     expect(goalMarker).toContain('visual.scale = Vector2(1.0, 1.0)');
     expect(goalMarker).toContain('visual.centered = true');
+    expect(goalMarker).toContain('goal-marker.webp');
+    expect(goalMarker).not.toContain('star-bullet.webp');
     expect(goalSanctum).toContain('GoalDoorController.gd');
     expect(goalPosition.x).toBeGreaterThan(0);
     expect(goalPosition.y).toBeGreaterThan(0);
@@ -227,12 +234,18 @@ describe('Godot v2 gameplay completion backlog', () => {
     expect(readGodotFile('scripts/session/GameSession.gd')).toContain('payload.get("bypass_cluster_lock", false)');
   });
 
-  it('keeps the combat room door reachable before any local completion goal can finish the run', () => {
-    const level = readGodotFile('levels/combat_room.tscn');
-    const doorX = extractNodePositionX(level, 'DoorMarker');
-    const goalX = extractNodePositionX(level, 'GoalMarker');
+  it('keeps authored completion goals limited to the canonical goal sanctum', () => {
+    const goalScenes = readLevelSceneNames().filter((fileName) =>
+      readGodotFile(`levels/${fileName}`).includes('GoalDoorController.gd'),
+    );
+    const plainGoalScenes = readLevelSceneNames().filter((fileName) => {
+      const scene = readGodotFile(`levels/${fileName}`);
+      return scene.includes('GoalMarker.gd') && !scene.includes('GoalDoorController.gd');
+    });
 
-    expect(goalX).toBeGreaterThan(doorX + 64);
+    expect(goalScenes).toEqual(['goal_sanctum.tscn']);
+    expect(plainGoalScenes).toEqual([]);
+    expect(readGodotFile('levels/combat_room.tscn')).toContain('DoorMarker.gd');
   });
 
   it('models enemies as damageable combat targets with defeat traces', () => {
@@ -449,7 +462,7 @@ describe('Godot v2 gameplay completion backlog', () => {
 
     expect(goalDoorController).toContain('class_name GoalDoorController');
     expect(goalDoorController).toContain('extends GoalMarker');
-    expect(goalDoorController).toContain('goal-door.webp');
+    expect(goalDoorController).toContain('goal-marker.webp');
     expect(goalDoorController).toContain('@export var collect_score_metrics: bool = true');
     expect(goalDoorController).toContain('@export var collect_time_metrics: bool = true');
     expect(level).toContain('GoalDoorController.gd');
@@ -457,8 +470,27 @@ describe('Godot v2 gameplay completion backlog', () => {
     expect(session).toContain('"score": calculate_total_score()');
     expect(session).toContain('"remaining_life_bonus": calculate_remaining_life_bonus()');
     expect(suite.replays?.find((entry) => entry.id === 'sky_generated_goal_path')?.expected_events).toEqual(
-      expect.arrayContaining(['goal.door.entered', 'run.finished', 'result.overlay.shown']),
+      expect.arrayContaining(['goal.door.entered', 'run.finished', 'results.scene.shown']),
     );
+    expect(suite.replays?.find((entry) => entry.id === 'sky_generated_goal_path')?.expected_events).not.toContain(
+      'result.overlay.shown',
+    );
+  });
+
+  it('uses dedicated goal art without borrowing projectile effects', () => {
+    const goalMarker = readGodotFile('scripts/level/markers/GoalMarker.gd');
+    const goalDoorController = readGodotFile('scripts/level/markers/GoalDoorController.gd');
+    const docs = readRepoFile('docs/godot-v2/session-outcomes.md');
+    const controllerScenes = readLevelSceneNames().filter((fileName) =>
+      readGodotFile(`levels/${fileName}`).includes('GoalDoorController.gd'),
+    );
+
+    expect(goalMarker).toContain('goal-marker.webp');
+    expect(goalMarker).not.toContain('star-bullet.webp');
+    expect(goalDoorController).toContain('goal-marker.webp');
+    expect(goalDoorController).toContain('func ensure_visual() -> void:');
+    expect(controllerScenes).toEqual(['goal_sanctum.tscn']);
+    expect(docs).toContain('single authored completion goal');
   });
 
   it('supports item, ability, level, enemy-group, and boss door gates', () => {

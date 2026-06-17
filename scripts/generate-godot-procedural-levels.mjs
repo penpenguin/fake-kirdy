@@ -4,7 +4,9 @@ import { dirname, join } from 'node:path';
 const repoRoot = process.cwd();
 const manifestPath = join(repoRoot, 'godot', 'levels', 'stage_manifest.json');
 const catalogSourcePath = join(repoRoot, 'godot', 'levels', 'level_catalog.source.json');
-const outputPath = join(repoRoot, 'godot', 'levels', 'generated', 'procedural_levels.json');
+const outputPath = readArgValue('--out') ?? join(repoRoot, 'godot', 'levels', 'generated', 'procedural_levels.json');
+const overridesPath = readArgValue('--overrides')
+  ?? join(repoRoot, 'godot', 'levels', 'generated', 'procedural_level_overrides.source.json');
 const checkOnly = process.argv.includes('--check');
 const doorTriggerRadius = 48;
 const minSpawnDoorDistance = 64;
@@ -17,8 +19,9 @@ const branchDensityMinimum = 0.2;
 
 const manifest = loadJson(manifestPath, 'stage manifest');
 const catalogSource = loadJson(catalogSourcePath, 'Godot level catalog source');
+const proceduralLevelOverrides = loadOptionalOverrides(overridesPath);
 const stageIdToGodotId = buildStageIdMap(catalogSource);
-const exportData = buildProceduralLevelExport(manifest, stageIdToGodotId);
+const exportData = buildProceduralLevelExport(manifest, stageIdToGodotId, proceduralLevelOverrides);
 const nextOutputText = `${JSON.stringify(exportData, null, 2)}\n`;
 
 if (checkOnly) {
@@ -44,6 +47,38 @@ function loadJson(filePath, label) {
   return JSON.parse(readFileSync(filePath, 'utf8'));
 }
 
+function loadOptionalOverrides(filePath) {
+  if (!existsSync(filePath)) {
+    return { version: 1, levels: {} };
+  }
+
+  const overrides = loadJson(filePath, 'procedural level overrides');
+  if (overrides?.version !== 1 || typeof overrides.levels !== 'object' || overrides.levels === null || Array.isArray(overrides.levels)) {
+    throw new Error('Procedural level overrides must have version 1 and a levels object');
+  }
+
+  return overrides;
+}
+
+function readArgValue(flagName) {
+  const equalsArg = process.argv.find((arg) => arg.startsWith(`${flagName}=`));
+  if (equalsArg !== undefined) {
+    return equalsArg.slice(flagName.length + 1);
+  }
+
+  const flagIndex = process.argv.indexOf(flagName);
+  if (flagIndex === -1) {
+    return undefined;
+  }
+
+  const value = process.argv[flagIndex + 1];
+  if (value === undefined || value.startsWith('--')) {
+    throw new Error(`Missing value for ${flagName}`);
+  }
+
+  return value;
+}
+
 function buildStageIdMap(source) {
   if (source?.version !== 1 || !Array.isArray(source.levels)) {
     throw new Error('Godot level catalog source must have version 1 and a levels array');
@@ -58,7 +93,7 @@ function buildStageIdMap(source) {
   return idMap;
 }
 
-function buildProceduralLevelExport(stageManifest, idMap) {
+function buildProceduralLevelExport(stageManifest, idMap, overrides) {
   if (stageManifest?.version !== 1 || !Array.isArray(stageManifest.stages)) {
     throw new Error('Stage manifest must have version 1 and a stages array');
   }
@@ -67,7 +102,7 @@ function buildProceduralLevelExport(stageManifest, idMap) {
     .filter((stage) => stage.origin === 'generated_schema')
     .sort((left, right) => requireString(left.id, 'stage.id').localeCompare(requireString(right.id, 'stage.id')));
 
-  const levels = proceduralStages.map((stage) => buildProceduralLevel(stage, idMap));
+  const levels = proceduralStages.map((stage) => buildProceduralLevel(stage, idMap, overrides));
 
   return {
     version: 1,
@@ -111,7 +146,7 @@ function buildBranchDensityByCluster(stages) {
   return densityByCluster;
 }
 
-function buildProceduralLevel(stage, idMap) {
+function buildProceduralLevel(stage, idMap, overrides) {
   const stageId = requireString(stage.id, 'stage.id');
   const stageNeighbors = normalizeNeighbors(stage.neighbors ?? {});
   const godotNeighbors = Object.fromEntries(
@@ -121,7 +156,7 @@ function buildProceduralLevel(stage, idMap) {
     ]),
   );
 
-  return {
+  const baseLevel = {
     id: mapStageIdToGodotId(stageId, idMap),
     stage_id: stageId,
     name: requireString(stage.name, `${stageId}.name`),
@@ -131,6 +166,55 @@ function buildProceduralLevel(stage, idMap) {
     stage_neighbors: stageNeighbors,
     neighbors: godotNeighbors,
     scene_strategy: 'generated_schema',
+  };
+
+  return applyRuntimeLayoutOverride(baseLevel, overrides.levels[stageId]);
+}
+
+function applyRuntimeLayoutOverride(level, override) {
+  if (override === undefined) {
+    return level;
+  }
+
+  if (typeof override !== 'object' || override === null || Array.isArray(override)) {
+    throw new Error(`${level.stage_id} override must be an object`);
+  }
+
+  for (const key of Object.keys(override)) {
+    if (key !== 'runtime_layout') {
+      throw new Error(`${level.stage_id}.${key} cannot be overridden by map builder`);
+    }
+  }
+
+  const runtimeOverride = override.runtime_layout ?? {};
+  if (typeof runtimeOverride !== 'object' || runtimeOverride === null || Array.isArray(runtimeOverride)) {
+    throw new Error(`${level.stage_id}.runtime_layout override must be an object`);
+  }
+
+  const allowedRuntimeKeys = new Set([
+    'camera_bounds',
+    'spawns',
+    'doors',
+    'safety',
+    'floor',
+    'floor_segments',
+    'platforms',
+    'content',
+    'visuals',
+  ]);
+  const nextRuntimeLayout = { ...level.runtime_layout };
+
+  for (const [key, value] of Object.entries(runtimeOverride)) {
+    if (!allowedRuntimeKeys.has(key)) {
+      throw new Error(`${level.stage_id}.runtime_layout.${key} cannot be overridden by map builder`);
+    }
+
+    nextRuntimeLayout[key] = value;
+  }
+
+  return {
+    ...level,
+    runtime_layout: nextRuntimeLayout,
   };
 }
 
@@ -554,11 +638,14 @@ function buildRuntimeHazards(levelId, cluster, difficulty) {
   }
 
   const isFire = cluster === 'fire';
+  const hazardType = isFire ? 'lava' : 'spike';
   return [
     {
       id: 'GeneratedHazardMarker',
-      hazard_id: `${levelId}_${isFire ? 'lava' : 'spike'}_hazard`,
-      hazard_type: isFire ? 'lava' : 'spike',
+      hazard_id: `${levelId}_${hazardType}_hazard`,
+      hazard_type: hazardType,
+      hazard_visual_style: `${hazardType}_texture`,
+      hazard_texture_path: `res://resources/assets/images/hazards/${hazardType}-hazard.webp`,
       damage: 1,
       trigger_radius: 40,
       position: { x: 252, y: 288 },
@@ -577,7 +664,10 @@ function buildRuntimeAbilityGates(levelId, cluster, difficulty) {
       id: 'GeneratedAbilityGateMarker',
       gate_id: `${levelId}_${gateSpec.id}_gate`,
       required_ability_type: gateSpec.requiredAbilityType,
+      gate_visual_style: getGeneratedGateVisualStyle(gateSpec.requiredAbilityType),
+      gate_texture_path: getGeneratedGateTexturePath(gateSpec.requiredAbilityType),
       gate_effect: gateSpec.gateEffect,
+      hint_text: `${formatAbilityName(gateSpec.requiredAbilityType)} Gate`,
       trigger_radius: 96,
       position: { x: 500, y: 368 },
     },
@@ -701,6 +791,25 @@ function getGeneratedGateSpec(cluster) {
     default:
       return undefined;
   }
+}
+
+function getGeneratedGateVisualStyle(requiredAbilityType) {
+  return requiredAbilityType === 'fire' ? 'fire_gate' : 'spark_gate';
+}
+
+function getGeneratedGateTexturePath(requiredAbilityType) {
+  return requiredAbilityType === 'fire'
+    ? 'res://resources/assets/images/ui/ability-gate-fire.webp'
+    : 'res://resources/assets/images/ui/ability-gate-spark.webp';
+}
+
+function formatAbilityName(requiredAbilityType) {
+  const normalized = String(requiredAbilityType ?? '').trim();
+  if (normalized.length === 0) {
+    return 'Ability';
+  }
+
+  return `${normalized.slice(0, 1).toUpperCase()}${normalized.slice(1).toLowerCase()}`;
 }
 
 function shouldAddGeneratedCollectible(neighbors) {

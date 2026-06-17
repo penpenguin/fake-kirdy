@@ -14,6 +14,41 @@ npm run godot:procedural-levels -- --check
 
 `npm run check:godot` runs the `--check` form, so stale generated schema fails validation before Godot-specific checks run.
 
+## Map builder overrides
+
+`tools/map-builder/` can edit generated room placement without hand-editing `procedural_levels.json`. The source file is:
+
+```txt
+godot/levels/generated/procedural_level_overrides.source.json
+```
+
+The file is optional for the generator and uses stage ids as keys:
+
+```json
+{
+  "version": 1,
+  "levels": {
+    "labyrinth-010": {
+      "runtime_layout": {
+        "camera_bounds": {
+          "position": { "x": 384, "y": 188 },
+          "size": { "x": 880, "y": 560 }
+        },
+        "platforms": []
+      }
+    }
+  }
+}
+```
+
+Overrides are deliberately narrow. The generator only accepts `runtime_layout.camera_bounds`, `spawns`, `doors`, `safety`, `floor`, `floor_segments`, `platforms`, `content`, and `visuals`. Attempts to override topology or progression-owned fields such as `neighbors`, `stage_neighbors`, `metadata`, `scene_strategy`, or `runtime_layout.branch_exit_rules` fail with a map builder error.
+
+For isolated checks, the generator also accepts temp paths:
+
+```sh
+node scripts/generate-godot-procedural-levels.mjs --out /tmp/procedural_levels.json --overrides /tmp/procedural_level_overrides.source.json
+```
+
 ## Stage authoring workflow
 
 Use the repository-owned data and validation loop when adding or changing playable stages. The goal is to make stage production reviewable from text files before relying on a manual Godot editor pass.
@@ -42,6 +77,10 @@ Each generated level entry contains:
 - `stage_neighbors`: canonical neighbor stage ids.
 - `neighbors`: Godot id equivalents for the same topology.
 - `scene_strategy`: currently `generated_schema`, meaning the level exists as canonical data but is not necessarily hand-authored as a `.tscn` scene.
+
+Generated hazards carry `hazard_visual_style` and `hazard_texture_path`, so fire rooms such as `labyrinth_011` render lava with `images/hazards/lava-hazard.webp` instead of falling back to a red triangle marker. Generated ability gates carry `gate_visual_style`, `gate_texture_path`, and `hint_text`; fire gates use `images/ui/ability-gate-fire.webp`, while non-fire generated gates use the spark gate texture as the shared energy-gate fallback. `LevelLoader.gd` copies these fields into `HazardMarker` and `AbilityGateMarker`, keeping generated JSON and runtime visuals in sync.
+
+All generated rooms retain camera bounds metadata. `GameSession.gd` clamps the player inside those bounds with `player_boundary_padding`, emits `player.boundary.clamped`, and the `labyrinth_011_gate_bounds_trace` replay verifies a generated fire room cannot be escaped at the screen edge.
 
 ## Current Boundary
 

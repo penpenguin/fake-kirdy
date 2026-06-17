@@ -1,7 +1,7 @@
 {
   "version": 1,
   "snapshot_id": "level_background_ruins",
-  "content_hash": "56920f889aa8bfca1cc6c924c50497d1acbdd2cb251181233625821e296ebf7f",
+  "content_hash": "e50928a4becf892dda01a7d849179bc72ef2a73ee6d6a4a1711dfa44c9c6c42d",
   "replay_path": "godot/tests/replays/ruins_reliquary_collectible.json",
   "frame": 30,
   "viewport": {

@@ -1,5 +1,6 @@
-import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -105,6 +106,8 @@ type ProceduralLevelExport = {
           id?: string;
           hazard_id?: string;
           hazard_type?: string;
+          hazard_visual_style?: string;
+          hazard_texture_path?: string;
           damage?: number;
           trigger_radius?: number;
           position?: { x?: number; y?: number };
@@ -113,6 +116,9 @@ type ProceduralLevelExport = {
           id?: string;
           gate_id?: string;
           required_ability_type?: string;
+          gate_visual_style?: string;
+          gate_texture_path?: string;
+          hint_text?: string;
           gate_effect?: string;
           trigger_radius?: number;
           position?: { x?: number; y?: number };
@@ -216,6 +222,112 @@ describe('Godot v2 procedural level schema generation', () => {
       'GeneratedPlatformHigh',
     ]);
     expect(terminalRoom?.runtime_layout?.platforms?.map((platform) => platform.id)).toEqual([]);
+  });
+
+  it('merges map builder runtime layout overrides into generated schema output without changing topology metadata', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'fake-kirdy-procedural-'));
+    const outputPath = join(tempDir, 'procedural_levels.json');
+    const overridesPath = join(tempDir, 'procedural_level_overrides.source.json');
+    writeFileSync(overridesPath, `${JSON.stringify({
+      version: 1,
+      levels: {
+        'labyrinth-010': {
+          runtime_layout: {
+            camera_bounds: {
+              position: { x: 384, y: 188 },
+              size: { x: 880, y: 560 },
+            },
+            platforms: [
+              {
+                id: 'BuilderPlatformLow',
+                position: { x: 360, y: 340 },
+                size: { x: 160, y: 24 },
+              },
+            ],
+            visuals: {
+              profile_id: 'ice_default',
+            },
+          },
+        },
+      },
+    }, null, 2)}\n`);
+
+    execFileSync('node', [
+      'scripts/generate-godot-procedural-levels.mjs',
+      '--out',
+      outputPath,
+      '--overrides',
+      overridesPath,
+    ], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+    });
+
+    const generated = JSON.parse(readFileSync(outputPath, 'utf8')) as ProceduralLevelExport;
+    const levels = new Map(generated.levels?.map((level) => [level.id, level]));
+    const iceRoom = levels.get('labyrinth_010');
+
+    expect(iceRoom).toMatchObject({
+      id: 'labyrinth_010',
+      stage_id: 'labyrinth-010',
+      scene_strategy: 'generated_schema',
+      metadata: {
+        cluster: 'ice',
+        difficulty: 3,
+      },
+      neighbors: {
+        east: 'ice_reliquary',
+      },
+    });
+    expect(iceRoom?.runtime_layout?.camera_bounds).toEqual({
+      position: { x: 384, y: 188 },
+      size: { x: 880, y: 560 },
+    });
+    expect(iceRoom?.runtime_layout?.platforms).toEqual([
+      {
+        id: 'BuilderPlatformLow',
+        position: { x: 360, y: 340 },
+        size: { x: 160, y: 24 },
+      },
+    ]);
+    expect(iceRoom?.runtime_layout).toMatchObject({
+      visuals: {
+        profile_id: 'ice_default',
+      },
+    });
+  });
+
+  it('rejects map builder overrides that try to change generated topology or unsafe runtime sections', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'fake-kirdy-procedural-'));
+    const outputPath = join(tempDir, 'procedural_levels.json');
+    const overridesPath = join(tempDir, 'procedural_level_overrides.source.json');
+    writeFileSync(overridesPath, `${JSON.stringify({
+      version: 1,
+      levels: {
+        'labyrinth-010': {
+          neighbors: {
+            east: 'goal_sanctum',
+          },
+          runtime_layout: {
+            branch_exit_rules: [],
+          },
+        },
+      },
+    }, null, 2)}\n`);
+
+    const result = spawnSync('node', [
+      'scripts/generate-godot-procedural-levels.mjs',
+      '--out',
+      outputPath,
+      '--overrides',
+      overridesPath,
+    ], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+    });
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain('cannot be overridden by map builder');
   });
 
   it('exports multi-shape generated room geometry as schema-owned floor segments', () => {
@@ -387,6 +499,59 @@ describe('Godot v2 procedural level schema generation', () => {
       objective_type: 'goal',
       objective_id: 'labyrinth_132_goal',
     });
+  });
+
+  it('exports texture-backed hazard and ability gate metadata for labyrinth_011 instead of fallback markers', () => {
+    const generated = JSON.parse(readFileSync(proceduralLevelsPath, 'utf8')) as ProceduralLevelExport;
+    const levels = new Map(generated.levels?.map((level) => [level.id, level]));
+    const labyrinth011 = levels.get('labyrinth_011');
+    const loader = readFileSync(join(repoRoot, 'godot', 'scripts', 'level', 'LevelLoader.gd'), 'utf8');
+    const generator = readFileSync(join(repoRoot, 'scripts', 'generate-godot-procedural-levels.mjs'), 'utf8');
+
+    expect(labyrinth011?.metadata?.cluster).toBe('fire');
+    expect(labyrinth011?.runtime_layout?.content?.hazards).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        hazard_id: 'labyrinth_011_lava_hazard',
+        hazard_type: 'lava',
+        hazard_visual_style: 'lava_texture',
+        hazard_texture_path: 'res://resources/assets/images/hazards/lava-hazard.webp',
+      }),
+    ]));
+    expect(labyrinth011?.runtime_layout?.content?.ability_gates).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        gate_id: 'labyrinth_011_fire_gate',
+        required_ability_type: 'fire',
+        gate_visual_style: 'fire_gate',
+        gate_texture_path: 'res://resources/assets/images/ui/ability-gate-fire.webp',
+        hint_text: 'Fire Gate',
+      }),
+    ]));
+    expect(loader).toContain('hazard.set("hazard_visual_style"');
+    expect(loader).toContain('hazard.set("hazard_texture_path"');
+    expect(loader).toContain('gate.set("gate_visual_style"');
+    expect(loader).toContain('gate.set("gate_texture_path"');
+    expect(generator).toContain('hazard_texture_path');
+    expect(generator).toContain('gate_texture_path');
+  });
+
+  it('keeps authored and generated levels protected by camera bounds clamps at screen edges', () => {
+    const generated = JSON.parse(readFileSync(proceduralLevelsPath, 'utf8')) as ProceduralLevelExport;
+    const session = readFileSync(join(repoRoot, 'godot', 'scripts', 'session', 'GameSession.gd'), 'utf8');
+    const tutorial = readFileSync(join(repoRoot, 'godot', 'levels', 'tutorial_room.tscn'), 'utf8');
+    const labyrinth011 = generated.levels?.find((level) => level.id === 'labyrinth_011');
+
+    expect(tutorial).toContain('spawn_id = "left_edge_check"');
+    expect(tutorial).toContain('spawn_id = "right_edge_check"');
+    expect(labyrinth011?.runtime_layout?.camera_bounds).toMatchObject({
+      position: { x: 380, y: 178 },
+      size: { x: 840, y: 540 },
+    });
+    expect(session).toContain('func constrain_player_to_camera_bounds() -> void:');
+    expect(session).toContain('var min_position := center - bounds_size * 0.5 + Vector2(player_boundary_padding, player_boundary_padding)');
+    expect(session).toContain('var max_position := center + bounds_size * 0.5 - Vector2(player_boundary_padding, player_boundary_padding)');
+    expect(session).toContain('player.boundary.clamped');
+    expect(session).toContain('"recovery_mode": "stop_velocity"');
+    expect(session).not.toContain('player.global_position = recovery_position\n    player.velocity = Vector2.ZERO\n    trace_recorder.call("record_player_event", "player.boundary.clamped"');
   });
 
   it('publishes branch-exit rules and locks generated reliquary exits behind local route shards', () => {

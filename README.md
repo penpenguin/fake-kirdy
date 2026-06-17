@@ -22,6 +22,8 @@ Fake Kirdy uses Godot 4 as the canonical runtime. Gameplay behavior, topology, a
 - Validate the repository: `npm test`
 - Run the Godot static/content/export validation directly: `npm run check:godot`
 - Validate canonical Godot behavior, including the replay suite when available: `npm run test:canonical`
+- Open the local Godot data map builder: `npm run map:builder`
+- Validate the map builder source: `npm run map:builder:check`
 
 The canonical Godot project lives in `godot/`. The default export preset is `Web` and writes the public artifact to `dist/index.html`; the `Linux Headless` preset remains available through `npm run godot:export -- --preset="Linux Headless"`. The regular export wrapper skips gracefully if Godot or export templates are unavailable, while `npm run build:public` requires a complete Godot Web export for deployment.
 

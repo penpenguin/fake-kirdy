@@ -49,7 +49,7 @@ func refresh_labels() -> void:
         return
 
     var normalized_outcome := String(result_state.get("outcome", ""))
-    title_label.text = "Run Complete" if normalized_outcome == "completed" or normalized_outcome == "complete" else "Run Ended"
+    title_label.text = "Run Ended"
     outcome_label.text = "Outcome  %s" % normalized_outcome
     time_label.text = "Time  %s" % format_time_ms(int(result_state.get("time_ms", 0)))
     score_label.text = "Score  %d" % displayed_score
@@ -71,10 +71,6 @@ func get_summary_text() -> String:
 
 
 func get_continue_text(outcome: String = "") -> String:
-    if outcome == "completed" or outcome == "complete":
-        return "Press Enter to continue"
-    if outcome == "game_over":
-        return "Press Enter for results"
     return ""
 
 
@@ -93,7 +89,7 @@ func normalize_result_state(source: Dictionary) -> Dictionary:
 
 
 func has_finished_result(state: Dictionary) -> bool:
-    return ["completed", "complete", "game_over"].has(String(state.get("outcome", "")))
+    return String(state.get("outcome", "")) == "game_over"
 
 
 func normalize_items(items) -> Array:

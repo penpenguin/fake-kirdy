@@ -384,6 +384,8 @@ func add_generated_hazard_marker(root: Node2D, payload: Dictionary) -> void:
     hazard.set_script(HazardMarkerScript)
     hazard.set("hazard_id", String(payload.get("hazard_id", "generated_hazard")))
     hazard.set("hazard_type", String(payload.get("hazard_type", "spike")))
+    hazard.set("hazard_visual_style", String(payload.get("hazard_visual_style", "")))
+    hazard.set("hazard_texture_path", String(payload.get("hazard_texture_path", "")))
     hazard.set("damage", int(payload.get("damage", 1)))
     hazard.set("trigger_radius", float(payload.get("trigger_radius", 40.0)))
     root.add_child(hazard)
@@ -396,9 +398,12 @@ func add_generated_ability_gate_marker(root: Node2D, payload: Dictionary) -> voi
     gate.set_script(AbilityGateMarkerScript)
     gate.set("gate_id", String(payload.get("gate_id", "generated_ability_gate")))
     gate.set("required_ability_type", String(payload.get("required_ability_type", "spark")))
+    gate.set("gate_visual_style", String(payload.get("gate_visual_style", "")))
+    gate.set("gate_texture_path", String(payload.get("gate_texture_path", "")))
     gate.set("gate_effect", String(payload.get("gate_effect", "power_device")))
     gate.set("trigger_radius", float(payload.get("trigger_radius", 96.0)))
     gate.set("grants_item_id", String(payload.get("grants_item_id", "")))
+    gate.set("hint_text", String(payload.get("hint_text", "")))
     root.add_child(gate)
 
 

@@ -2,6 +2,13 @@ extends Control
 class_name HudOverlay
 
 const HUD_SEMANTIC_LABELS := ["HEALTH", "ABILITY", "ITEMS", "SCORE", "OBJECTIVE", "ATTACK", "ORBS"]
+const ORB_ICON_TEXTURES := {
+    "forest-orb": preload("res://resources/assets/images/items/forest-orb.webp"),
+    "ice-orb": preload("res://resources/assets/images/items/ice-orb.webp"),
+    "fire-orb": preload("res://resources/assets/images/items/fire-orb.webp"),
+    "cave-orb": preload("res://resources/assets/images/items/cave-orb.webp"),
+    "sky-orb": preload("res://resources/assets/images/items/sky-orb.webp"),
+}
 
 @onready var panel: Panel = $Panel
 @onready var top_bar_row: HBoxContainer = $Panel/TopBarRow
@@ -34,6 +41,8 @@ const HUD_SEMANTIC_LABELS := ["HEALTH", "ABILITY", "ITEMS", "SCORE", "OBJECTIVE"
 var hud_state: Dictionary = {}
 var acquired_orb_color: Color = Color(0.6, 0.92, 1.0, 1.0)
 var missing_orb_silhouette_color: Color = Color(0.25, 0.32, 0.38, 0.72)
+var acquired_orb_icon_modulate: Color = Color(1.0, 1.0, 1.0, 1.0)
+var missing_orb_icon_modulate: Color = Color(0.28, 0.34, 0.42, 0.66)
 
 
 func _ready() -> void:
@@ -186,14 +195,21 @@ func build_orb_slots() -> void:
 
     var slot_index := 0
     for orb_id in get_orb_item_ids():
-        var slot := ColorRect.new()
+        var slot := TextureRect.new()
         slot.name = "OrbSlot%d" % slot_index
-        slot.custom_minimum_size = Vector2(12.0, 12.0)
+        slot.custom_minimum_size = Vector2(14.0, 14.0)
+        slot.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+        slot.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+        slot.texture = get_orb_texture(String(orb_id))
         slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
         slot.tooltip_text = String(orb_id)
-        slot.color = acquired_orb_color if acquired_orb_lookup.has(String(orb_id)) else missing_orb_silhouette_color
+        slot.modulate = acquired_orb_icon_modulate if acquired_orb_lookup.has(String(orb_id)) else missing_orb_icon_modulate
         orb_slots.add_child(slot)
         slot_index += 1
+
+
+func get_orb_texture(orb_id: String) -> Texture2D:
+    return ORB_ICON_TEXTURES.get(orb_id, ORB_ICON_TEXTURES.get("forest-orb")) as Texture2D
 
 
 func format_level_value(level_id: String) -> String:
@@ -220,4 +236,3 @@ func get_cooldown_label() -> String:
         return "ready"
 
     return "%d ms" % cooldown_ms
-

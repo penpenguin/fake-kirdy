@@ -25,6 +25,9 @@ describe('Godot v2 heal pickup flow', () => {
     expect(source).toContain('player.revive_acquired');
     expect(source).toContain('player.revived');
     expect(source).toContain('player_invulnerability_ms');
+    expect(source).toContain('reapply_consumed_heal_visuals()');
+    expect(source).toContain('func remove_consumed_heal_visual(heal_id: String) -> void:');
+    expect(source).toMatch(/consumed_heal_ids\[heal_id\] = true\s+remove_consumed_heal_visual\(heal_id\)/);
     expect(readGodotFile('scripts/level/markers/HealMarker.gd')).toContain('@export var reward_type');
     expect(readGodotFile('scripts/save/SaveState.gd')).toContain('var player_revive_count');
     expect(enemyScene).toContain('collision_layer = 0');
@@ -43,14 +46,15 @@ describe('Godot v2 heal pickup flow', () => {
     expect(existsSync(replayPath)).toBe(true);
   });
 
-  it('adds a replayable heal_room with enemy damage, heal marker, and goal', () => {
+  it('adds a replayable heal_room with enemy damage and a heal marker without a local completion goal', () => {
     const level = readGodotFile('levels/heal_room.tscn');
     const catalog = readGodotFile('levels/level_catalog.json');
     const replayPath = join(godotRoot, 'tests', 'replays', 'heal_room_recover_and_goal.json');
 
     expect(level).toContain('EnemySpawnMarker.gd');
     expect(level).toContain('HealMarker.gd');
-    expect(level).toContain('GoalMarker.gd');
+    expect(level).not.toContain('GoalMarker.gd');
+    expect(level).not.toContain('[node name="GoalMarker"');
     expect(catalog).toContain('"heal_room"');
     expect(existsSync(replayPath)).toBe(true);
 
