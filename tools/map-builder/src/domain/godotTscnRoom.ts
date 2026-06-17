@@ -135,6 +135,7 @@ export function patchAuthoredSceneRoom(sceneText: string, room: AuthoredSceneRoo
     if (markerCollection !== undefined) {
       const marker = (room.runtime_layout.content?.[markerCollection] ?? [])
         .find((candidate) => String(candidate.id) === node.name || markerIdFromProps(node.markerType, node.props) === markerIdFromProps(node.markerType, candidate));
+      patchNodeName(lines, node, marker?.id);
       patchNodeFromMarker(lines, existingNodes, node, marker as JsonObject | undefined);
       continue;
     }
@@ -584,6 +585,14 @@ function patchNodeFromMarker(lines: string[], nodes: ParsedNode[], node: ParsedN
   }
 }
 
+function patchNodeName(lines: string[], node: ParsedNode, name: unknown): void {
+  if (typeof name !== 'string' || name.length === 0 || name === node.name) {
+    return;
+  }
+  lines[node.startLine] = lines[node.startLine].replace(/name="[^"]*"/, `name=${formatGodotString(name)}`);
+  node.name = name;
+}
+
 function patchNodeProperty(lines: string[], nodes: ParsedNode[], node: ParsedNode, key: string, value: unknown): void {
   if (value === undefined) {
     return;
@@ -823,7 +832,11 @@ function formatGodotValue(value: unknown): string {
   if (typeof value === 'boolean') {
     return value ? 'true' : 'false';
   }
-  return `"${String(value).replace(/"/g, '\\"')}"`;
+  return formatGodotString(String(value));
+}
+
+function formatGodotString(value: string): string {
+  return `"${value.replace(/"/g, '\\"')}"`;
 }
 
 function formatVector(value: Vector2): string {

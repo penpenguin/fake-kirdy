@@ -438,7 +438,7 @@ describe('Godot map builder local tool boundary', () => {
     expect(secondHazardBlock).not.toContain('hazard_type = "spike"');
   });
 
-  it('reuses authored .tscn content markers by semantic id when the room editor id changes', () => {
+  it('renames authored .tscn content markers by semantic id when the room editor id changes', () => {
     const sceneText = [
       '[gd_scene load_steps=2 format=3]',
       '',
@@ -475,8 +475,8 @@ describe('Godot map builder local tool boundary', () => {
       },
     });
 
-    expect(patched).toContain('[node name="OldHazardNode" type="Node2D" parent="."]');
-    expect(patched).not.toContain('[node name="RenamedHazardNode" type="Node2D" parent="."]');
+    expect(patched).not.toContain('[node name="OldHazardNode" type="Node2D" parent="."]');
+    expect(patched).toContain('[node name="RenamedHazardNode" type="Node2D" parent="."]');
     expect(patched.match(/hazard_id = "hazard_b"/g)).toHaveLength(1);
     expect(patched).toContain('position = Vector2(320, 210)');
     expect(patched).toContain('hazard_type = "lava"');
