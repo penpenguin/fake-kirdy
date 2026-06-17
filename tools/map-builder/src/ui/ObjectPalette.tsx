@@ -1,3 +1,4 @@
+import { markerKinds, nextBuilderMarkerId, type MarkerKind } from '../domain/builderMarkerIds';
 import type { RuntimeContent } from '../domain/project';
 
 type Props = {
@@ -5,12 +6,10 @@ type Props = {
   onChange: (content: RuntimeContent) => void;
 };
 
-const markerKinds = ['enemies', 'heals', 'collectibles', 'hazards', 'ability_gates', 'goals'] as const;
-
 export function ObjectPalette({ content, onChange }: Props): JSX.Element {
-  const addMarker = (kind: typeof markerKinds[number]): void => {
+  const addMarker = (kind: MarkerKind): void => {
     const collection = content[kind] ?? [];
-    const id = `Builder${toPascal(kind)}${collection.length + 1}`;
+    const id = nextBuilderMarkerId(kind, collection);
     onChange({
       ...content,
       [kind]: [
@@ -35,7 +34,7 @@ export function ObjectPalette({ content, onChange }: Props): JSX.Element {
   );
 }
 
-function defaultPayload(kind: typeof markerKinds[number], id: string): Record<string, string | number> {
+function defaultPayload(kind: MarkerKind, id: string): Record<string, string | number> {
   switch (kind) {
     case 'enemies':
       return {
@@ -81,11 +80,4 @@ function defaultPayload(kind: typeof markerKinds[number], id: string): Record<st
         trigger_radius: 48,
       };
   }
-}
-
-function toPascal(value: string): string {
-  return value
-    .split('_')
-    .map((part) => `${part.slice(0, 1).toUpperCase()}${part.slice(1)}`)
-    .join('');
 }

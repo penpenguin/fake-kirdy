@@ -643,10 +643,11 @@ function buildMarkerNode({
 function buildSurfaceNode(surface: RectPayload, existingNodeNames: Set<string>, subResourceIds: Set<string>): { resourceLines: string[]; nodeLines: string[] } {
   const nodeName = uniqueNodeName(String(surface.id), existingNodeNames);
   const shapeId = uniqueSubResourceId(`RectangleShape2D_${nodeName}`, subResourceIds);
+  const size = surface.size ?? { x: 128, y: 24 };
   return {
     resourceLines: [
       `[sub_resource type="RectangleShape2D" id="${shapeId}"]`,
-      `size = ${formatVector(surface.size ?? { x: 128, y: 24 })}`,
+      `size = ${formatVector(size)}`,
       '',
     ],
     nodeLines: [
@@ -658,10 +659,16 @@ function buildSurfaceNode(surface: RectPayload, existingNodeNames: Set<string>, 
       '',
       `[node name="PlatformVisual" type="Polygon2D" parent="${nodeName}"]`,
       'color = Color(0.30, 0.36, 0.42, 1)',
-      'polygon = PackedVector2Array(-64, -12, 64, -12, 64, 12, -64, 12)',
+      `polygon = ${formatRectPolygon(size)}`,
       '',
     ],
   };
+}
+
+function formatRectPolygon(size: Vector2): string {
+  const halfWidth = size.x / 2;
+  const halfHeight = size.y / 2;
+  return `PackedVector2Array(${formatNumber(-halfWidth)}, ${formatNumber(-halfHeight)}, ${formatNumber(halfWidth)}, ${formatNumber(-halfHeight)}, ${formatNumber(halfWidth)}, ${formatNumber(halfHeight)}, ${formatNumber(-halfWidth)}, ${formatNumber(halfHeight)})`;
 }
 
 function insertSubResourcesBeforeFirstNode(sceneText: string, resourceLines: string[]): string {

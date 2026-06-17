@@ -3,13 +3,14 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { updateRuntimeContent, updateRuntimeLayoutSection } from '../tools/map-builder/src/domain/applyRoomEdits';
 import { applyNodePosition, applyStagePatch, applyViewport, upsertNeighbor } from '../tools/map-builder/src/domain/applyWorldGraphEdits';
+import { nextBuilderMarkerId } from '../tools/map-builder/src/domain/builderMarkerIds';
 import { buildWorldGraph } from '../tools/map-builder/src/domain/buildWorldGraph';
 import { parseAuthoredSceneRoom, patchAuthoredSceneRoom } from '../tools/map-builder/src/domain/godotTscnRoom';
 import { layoutWorldGraph, worldGraphLayoutNodeSize } from '../tools/map-builder/src/domain/layoutWorldGraph';
 import { normalizeBuilderProject } from '../tools/map-builder/src/domain/loadGodotProject';
 import { dragRoomObjectPosition, resizeRoomObject } from '../tools/map-builder/src/domain/roomCanvasInteraction';
 import { buildRoomOptions } from '../tools/map-builder/src/domain/roomIndex';
-import type { BuilderProject, CatalogLevel, StageDefinition } from '../tools/map-builder/src/domain/project';
+import type { BuilderProject, CatalogLevel, RuntimeContent, StageDefinition } from '../tools/map-builder/src/domain/project';
 import { validateBuilderProject } from '../tools/map-builder/src/domain/validateBuilderProject';
 
 const repoRoot = join(__dirname, '..');
@@ -49,6 +50,7 @@ describe('Godot map builder local tool boundary', () => {
       'tools/map-builder/src/App.tsx',
       'tools/map-builder/src/main.tsx',
       'tools/map-builder/src/domain/project.ts',
+      'tools/map-builder/src/domain/builderMarkerIds.ts',
       'tools/map-builder/src/domain/loadGodotProject.ts',
       'tools/map-builder/src/domain/buildWorldGraph.ts',
       'tools/map-builder/src/domain/layoutWorldGraph.ts',
@@ -71,6 +73,26 @@ describe('Godot map builder local tool boundary', () => {
     for (const relativePath of expectedFiles) {
       expect(existsSync(join(repoRoot, relativePath)), `${relativePath} should exist`).toBe(true);
     }
+  });
+
+  it('generates new object marker ids after the highest existing builder suffix', () => {
+    const content: RuntimeContent = {
+      enemies: [
+        {
+          id: 'BuilderEnemies2',
+          spawn_id: 'BuilderEnemies2_spawn',
+          enemy_type: 'generated_ground',
+          position: { x: 120, y: 240 },
+        },
+      ],
+    };
+
+    expect(nextBuilderMarkerId('enemies', content.enemies)).toBe('BuilderEnemies3');
+    expect(nextBuilderMarkerId('hazards', [
+      { id: 'BuilderHazards1' },
+      { id: 'CustomHazard' },
+      { id: 'BuilderHazards4' },
+    ])).toBe('BuilderHazards5');
   });
 
   it('loads Godot level data into a React Flow world graph with authored, generated, and dynamic topology markers', () => {
@@ -329,6 +351,7 @@ describe('Godot map builder local tool boundary', () => {
     expect(patched).toContain('position = Vector2(640, 360)');
     expect(patched).toContain('size = Vector2(860, 520)');
     expect(patched).toContain('[node name="BuilderPlatform1" type="StaticBody2D" parent="."]');
+    expect(patched).toContain('polygon = PackedVector2Array(-80, -12, 80, -12, 80, 12, -80, 12)');
     expect(patched).toContain('[node name="BuilderEnemySpawn1" type="Node2D" parent="."]');
     expect(patched.indexOf('[sub_resource type="RectangleShape2D" id="RectangleShape2D_BuilderPlatform1"]')).toBeLessThan(patched.indexOf('[node name='));
     expect(project.proceduralLevelOverrides.levels).toEqual({});

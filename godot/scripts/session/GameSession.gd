@@ -726,7 +726,7 @@ func resolve_enemy_max_hp(enemy_type: String, marker_payload: Dictionary) -> int
         return 230
     if enemy_rank == "midboss" or enemy_rank == "elite" or normalized_enemy_type == "elite" or spawn_id.contains("elite"):
         return 45
-    if normalized_enemy_type == "sentry":
+    if normalized_enemy_type == "sentry" or normalized_enemy_type == "stone_sentry":
         return 5
 
     return 1
