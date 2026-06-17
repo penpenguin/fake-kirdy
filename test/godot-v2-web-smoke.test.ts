@@ -199,6 +199,11 @@ describe('Godot Web smoke', () => {
       expect.arrayContaining(['load', 'canvas', 'input', 'pause', 'map', 'console']),
     );
 
+    const contract = JSON.parse(readFileSync(join(repoRoot, 'godot', 'tests', 'web_smoke_contract.json'), 'utf8')) as {
+      runtime?: { max_boot_wait_ms?: number };
+    };
+    expect(contract.runtime?.max_boot_wait_ms).toBeGreaterThanOrEqual(30000);
+
     const workflow = readFileSync(join(repoRoot, '.github', 'workflows', 'test.yml'), 'utf8');
     expect(workflow).toContain('npm run godot:web-smoke -- --require-export --require-browser');
   });
