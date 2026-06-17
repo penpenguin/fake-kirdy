@@ -1,9 +1,12 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
+const require = createRequire(import.meta.url);
+const ffmpegBinary = (require('ffmpeg-static') as string | null) ?? 'ffmpeg';
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(currentDir, '..');
 const godotAssetRoot = join(repoRoot, 'godot', 'resources', 'assets');
@@ -14,7 +17,7 @@ const readGodotFile = (relativePath: string): string =>
 
 const readWebpPixels = (relativePath: string): { width: number; height: number; pixels: Buffer } => {
   const assetPath = join(godotAssetRoot, relativePath);
-  const probe = execFileSync('ffmpeg', [
+  const probe = execFileSync(ffmpegBinary, [
     '-v',
     'error',
     '-i',

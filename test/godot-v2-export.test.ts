@@ -94,6 +94,9 @@ describe('Godot v2 export workflow', () => {
   });
 
   it('configures GitHub Pages deployment to publish the Godot Web export', () => {
+    const packageJson = JSON.parse(readText('package.json')) as {
+      devDependencies?: Record<string, string>;
+    };
     const workflow = readText('.github/workflows/test.yml');
 
     expect(workflow).toContain('GODOT_VERSION: 4.6.3');
@@ -103,7 +106,9 @@ describe('Godot v2 export workflow', () => {
     expect(workflow.match(/curl --fail --location --show-error --retry 3 --retry-delay 2 --retry-all-errors/g)).toHaveLength(2);
     expect(workflow).toContain('unzip -t /tmp/godot/godot.zip');
     expect(workflow).toContain('unzip -t /tmp/godot/export_templates.tpz');
-    expect(workflow).toContain('sudo apt-get install -y ffmpeg');
+    expect(packageJson.devDependencies?.['ffmpeg-static']).toBeDefined();
+    expect(workflow).not.toContain('name: Install image test tooling');
+    expect(workflow).not.toContain('sudo apt-get install -y ffmpeg');
     expect(workflow).toContain('npm run build:public');
     expect(workflow).toContain('path: dist');
     expect(workflow).not.toContain('build:legacy:web');
