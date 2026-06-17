@@ -103,6 +103,7 @@ describe('Godot v2 export workflow', () => {
     expect(workflow.match(/curl --fail --location --show-error --retry 3 --retry-delay 2 --retry-all-errors/g)).toHaveLength(2);
     expect(workflow).toContain('unzip -t /tmp/godot/godot.zip');
     expect(workflow).toContain('unzip -t /tmp/godot/export_templates.tpz');
+    expect(workflow).toContain('sudo apt-get install -y ffmpeg');
     expect(workflow).toContain('npm run build:public');
     expect(workflow).toContain('path: dist');
     expect(workflow).not.toContain('build:legacy:web');

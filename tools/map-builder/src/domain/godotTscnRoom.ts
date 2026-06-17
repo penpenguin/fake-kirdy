@@ -115,19 +115,19 @@ export function patchAuthoredSceneRoom(sceneText: string, room: AuthoredSceneRoo
   for (const node of existingNodes) {
     if (node.markerType === 'player_spawn') {
       const spawnId = stringProp(node.props.spawn_id, 'default');
-      patchNodePosition(lines, node, room.runtime_layout.spawns?.[spawnId]);
+      patchNodePosition(lines, existingNodes, node, room.runtime_layout.spawns?.[spawnId]);
       continue;
     }
 
     if (node.markerType === 'door') {
       const doorId = stringProp(node.props.door_id, node.name);
-      patchNodePosition(lines, node, room.runtime_layout.doors?.[doorId]);
+      patchNodePosition(lines, existingNodes, node, room.runtime_layout.doors?.[doorId]);
       continue;
     }
 
     if (node.markerType === 'camera_bounds') {
-      patchNodePosition(lines, node, room.runtime_layout.camera_bounds?.position);
-      patchNodeProperty(lines, node, 'size', room.runtime_layout.camera_bounds?.size);
+      patchNodePosition(lines, existingNodes, node, room.runtime_layout.camera_bounds?.position);
+      patchNodeProperty(lines, existingNodes, node, 'size', room.runtime_layout.camera_bounds?.size);
       continue;
     }
 
@@ -135,13 +135,13 @@ export function patchAuthoredSceneRoom(sceneText: string, room: AuthoredSceneRoo
     if (markerCollection !== undefined) {
       const marker = (room.runtime_layout.content?.[markerCollection] ?? [])
         .find((candidate) => String(candidate.id) === node.name || markerIdFromProps(node.markerType, node.props) === markerIdFromProps(node.markerType, candidate));
-      patchNodeFromMarker(lines, node, marker as JsonObject | undefined);
+      patchNodeFromMarker(lines, existingNodes, node, marker as JsonObject | undefined);
       continue;
     }
 
     if (node.type === 'StaticBody2D' && node.parent === '.' && surfaceTargets.has(node.name)) {
       const surface = surfaceTargets.get(node.name);
-      patchNodePosition(lines, node, surface?.position);
+      patchNodePosition(lines, existingNodes, node, surface?.position);
       const shapeResourceId = findCollisionShapeResourceId(node.name, existingNodes);
       if (shapeResourceId !== null && surface?.size !== undefined) {
         rectangleSizeUpdates.set(shapeResourceId, surface.size);
@@ -548,27 +548,27 @@ function markerTypeFromMarkerPayload(marker: JsonObject): MarkerType {
   return 'goal';
 }
 
-function patchNodePosition(lines: string[], node: ParsedNode, position: Vector2 | undefined): void {
+function patchNodePosition(lines: string[], nodes: ParsedNode[], node: ParsedNode, position: Vector2 | undefined): void {
   if (position === undefined) {
     return;
   }
-  patchNodeProperty(lines, node, 'position', position);
+  patchNodeProperty(lines, nodes, node, 'position', position);
 }
 
-function patchNodeFromMarker(lines: string[], node: ParsedNode, marker: JsonObject | undefined): void {
+function patchNodeFromMarker(lines: string[], nodes: ParsedNode[], node: ParsedNode, marker: JsonObject | undefined): void {
   if (marker === undefined) {
     return;
   }
-  patchNodePosition(lines, node, vectorProp(marker.position));
+  patchNodePosition(lines, nodes, node, vectorProp(marker.position));
   for (const [key, value] of Object.entries(marker)) {
     if (key === 'id' || key === 'position') {
       continue;
     }
-    patchNodeProperty(lines, node, key, value);
+    patchNodeProperty(lines, nodes, node, key, value);
   }
 }
 
-function patchNodeProperty(lines: string[], node: ParsedNode, key: string, value: unknown): void {
+function patchNodeProperty(lines: string[], nodes: ParsedNode[], node: ParsedNode, key: string, value: unknown): void {
   if (value === undefined) {
     return;
   }
@@ -580,6 +580,20 @@ function patchNodeProperty(lines: string[], node: ParsedNode, key: string, value
     }
   }
   lines.splice(node.endLine, 0, `${key} = ${formatted}`);
+  shiftNodeLineRangesAfterInsert(nodes, node.endLine, 1);
+}
+
+function shiftNodeLineRangesAfterInsert(nodes: ParsedNode[], insertLine: number, insertedLineCount: number): void {
+  for (const node of nodes) {
+    if (node.startLine >= insertLine) {
+      node.startLine += insertedLineCount;
+      node.endLine += insertedLineCount;
+      continue;
+    }
+    if (node.endLine >= insertLine) {
+      node.endLine += insertedLineCount;
+    }
+  }
 }
 
 function patchRectangleShapeSize(sceneText: string, resourceId: string, size: Vector2): string {

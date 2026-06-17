@@ -334,6 +334,74 @@ describe('Godot map builder local tool boundary', () => {
     expect(project.proceduralLevelOverrides.levels).toEqual({});
   });
 
+  it('keeps later authored .tscn node edits inside their own node after inserting missing marker properties', () => {
+    const sceneText = [
+      '[gd_scene load_steps=3 format=3]',
+      '',
+      '[ext_resource type="Script" path="res://scripts/level/markers/AbilityGateMarker.gd" id="1_gate"]',
+      '[ext_resource type="Script" path="res://scripts/level/markers/HazardMarker.gd" id="2_hazard"]',
+      '',
+      '[node name="FirstGate" type="Node2D" parent="."]',
+      'position = Vector2(100, 200)',
+      'script = ExtResource("1_gate")',
+      'gate_id = "gate_a"',
+      '',
+      '[node name="SecondHazard" type="Node2D" parent="."]',
+      'position = Vector2(300, 200)',
+      'script = ExtResource("2_hazard")',
+      'hazard_id = "hazard_b"',
+      'hazard_type = "spike"',
+      '',
+    ].join('\n');
+    const room = parseAuthoredSceneRoom({
+      catalogLevel: {
+        id: 'fixture_room',
+        scene_path: 'res://levels/fixture_room.tscn',
+        stage_id: 'fixture-room',
+      },
+      sceneText,
+    });
+    const patched = patchAuthoredSceneRoom(sceneText, {
+      ...room,
+      runtime_layout: {
+        ...room.runtime_layout,
+        content: {
+          ability_gates: [
+            {
+              id: 'FirstGate',
+              gate_id: 'gate_a',
+              required_ability_type: 'fire',
+              gate_effect: 'melt_ice',
+              gate_texture_path: 'res://resources/assets/images/ui/ability-gate-fire.webp',
+              position: { x: 100, y: 200 },
+            },
+          ],
+          hazards: [
+            {
+              id: 'SecondHazard',
+              hazard_id: 'hazard_b',
+              hazard_type: 'lava',
+              position: { x: 320, y: 210 },
+            },
+          ],
+        },
+      },
+    });
+
+    const firstGateBlock = patched.slice(
+      patched.indexOf('[node name="FirstGate"'),
+      patched.indexOf('[node name="SecondHazard"'),
+    );
+    const secondHazardBlock = patched.slice(patched.indexOf('[node name="SecondHazard"'));
+
+    expect(firstGateBlock).toContain('required_ability_type = "fire"');
+    expect(firstGateBlock).toContain('gate_effect = "melt_ice"');
+    expect(firstGateBlock).not.toContain('hazard_type = "lava"');
+    expect(secondHazardBlock).toContain('position = Vector2(320, 210)');
+    expect(secondHazardBlock).toContain('hazard_type = "lava"');
+    expect(secondHazardBlock).not.toContain('hazard_type = "spike"');
+  });
+
   it('removes authored .tscn supported markers when they are removed from the room layout', () => {
     const project = loadCurrentBuilderProject();
     const catalogLevel = project.catalogSource.levels.find((level) => level.id === 'ice_area');
