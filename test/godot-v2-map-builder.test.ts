@@ -402,6 +402,51 @@ describe('Godot map builder local tool boundary', () => {
     expect(secondHazardBlock).not.toContain('hazard_type = "spike"');
   });
 
+  it('reuses authored .tscn content markers by semantic id when the room editor id changes', () => {
+    const sceneText = [
+      '[gd_scene load_steps=2 format=3]',
+      '',
+      '[ext_resource type="Script" path="res://scripts/level/markers/HazardMarker.gd" id="1_hazard"]',
+      '',
+      '[node name="OldHazardNode" type="Node2D" parent="."]',
+      'position = Vector2(300, 200)',
+      'script = ExtResource("1_hazard")',
+      'hazard_id = "hazard_b"',
+      'hazard_type = "spike"',
+      '',
+    ].join('\n');
+    const room = parseAuthoredSceneRoom({
+      catalogLevel: {
+        id: 'fixture_room',
+        scene_path: 'res://levels/fixture_room.tscn',
+      },
+      sceneText,
+    });
+    const patched = patchAuthoredSceneRoom(sceneText, {
+      ...room,
+      runtime_layout: {
+        ...room.runtime_layout,
+        content: {
+          hazards: [
+            {
+              id: 'RenamedHazardNode',
+              hazard_id: 'hazard_b',
+              hazard_type: 'lava',
+              position: { x: 320, y: 210 },
+            },
+          ],
+        },
+      },
+    });
+
+    expect(patched).toContain('[node name="OldHazardNode" type="Node2D" parent="."]');
+    expect(patched).not.toContain('[node name="RenamedHazardNode" type="Node2D" parent="."]');
+    expect(patched.match(/hazard_id = "hazard_b"/g)).toHaveLength(1);
+    expect(patched).toContain('position = Vector2(320, 210)');
+    expect(patched).toContain('hazard_type = "lava"');
+    expect(patched).not.toContain('hazard_type = "spike"');
+  });
+
   it('removes authored .tscn supported markers when they are removed from the room layout', () => {
     const project = loadCurrentBuilderProject();
     const catalogLevel = project.catalogSource.levels.find((level) => level.id === 'ice_area');

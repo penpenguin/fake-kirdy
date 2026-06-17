@@ -196,7 +196,7 @@ export function patchAuthoredSceneRoom(sceneText: string, room: AuthoredSceneRoo
   }
 
   for (const marker of flattenContent(room.runtime_layout.content ?? {})) {
-    if (existingNodes.some((node) => node.name === marker.id)) {
+    if (hasExistingContentMarker(existingNodes, marker)) {
       continue;
     }
     nodeAdditions.push(...buildMarkerNode({
@@ -546,6 +546,22 @@ function markerTypeFromMarkerPayload(marker: JsonObject): MarkerType {
   if ('hazard_id' in marker || 'hazard_type' in marker) return 'hazard';
   if ('gate_id' in marker || 'required_ability_type' in marker) return 'ability_gate';
   return 'goal';
+}
+
+function hasExistingContentMarker(
+  nodes: ParsedNode[],
+  marker: { id: string; markerType: MarkerType; props: JsonObject },
+): boolean {
+  const semanticId = markerIdFromProps(marker.markerType, marker.props);
+  return nodes.some((node) => {
+    if (node.name === marker.id) {
+      return true;
+    }
+    if (node.markerType !== marker.markerType || semanticId.length === 0) {
+      return false;
+    }
+    return markerIdFromProps(node.markerType, node.props) === semanticId;
+  });
 }
 
 function patchNodePosition(lines: string[], nodes: ParsedNode[], node: ParsedNode, position: Vector2 | undefined): void {
